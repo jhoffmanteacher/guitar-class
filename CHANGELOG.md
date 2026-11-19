@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-19 — A site update waits for a song that is still loading
+
+- **Play Along: a site update no longer restarts a song that is still loading.** While a card shows "Loading the
+  song…", an update waits until the song has arrived (5 minutes at most), the same way it already waits while a song
+  plays. Before, the page reloaded mid-download and the song had to load again from the start.
+
+
 ## 2026-11-18 — The mic games check the chord in every strum
 
 - **Power Chord Switch and Change Up: a strum only counts when its notes can be heard.** A tap on the desk, a muted

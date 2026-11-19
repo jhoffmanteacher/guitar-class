@@ -101,6 +101,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         // until pcStop): a reload cuts the song off mid-line and drops the
         // card's speed / Guitar / Metronome switches.
         if (pcState) return 'playing';
+        // A private song still downloading (app/songfiles.js, an earlier part): a card showing "Loading the song…
+        // 40%" (sfWait), or any private file in flight (sfInflight, a lyric sheet too). A reload throws the download
+        // away and the song counts against the month again: its "counted once" record lasts one page.
+        if ((typeof sfWait !== 'undefined' && sfWait) || (typeof sfInflight !== 'undefined' && sfInflight.size)) return 'song';
         return null;
       };
       /* While this tab waits, the new worker holds only the shell. Ask it for

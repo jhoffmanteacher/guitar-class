@@ -1267,7 +1267,7 @@ if(SW_UPDATE_BOOT) setAuthWallChecking('auth.updating');
    language switch keeps: snapshotLessonState), where the page was scrolled,
    and on the console the view, the picked activity or student, its tab and
    the board. What does not: anything the reload already waits for (a
-   drill, a recording, an exit check: see busyReason below), text typed
+   drill, a recording, an exit check, a private song downloading: see busyReason in app/start.js), text typed
    into a box but not yet saved, and the small states inside a card (a
    search, an In class card's open step or TAB page, the board's sort) and
    In class's two folds ("Completed activities" opens closed again; the

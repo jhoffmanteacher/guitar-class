@@ -76,11 +76,13 @@
    The cases that must NOT happen:
      - busy means wait: a Shuffle drill mid-round, a practice card playing, an
        exit check part-way, a recording (one case each), and in busy-others the
-       other eight things the wait reads, one after another, each held 3.2 s
+       other ten things the wait reads, one after another, each held 3.2 s
        (two of the page's 1.5 s checks): the Firestore boot after a sign-in,
        the Google sign-in popup, a live mic, a recording starting, a Deck drill,
-       an Ear drill, a Note Call round, a Call the chord round. All set through
-       the page's real state objects, as busyReason() reads them.
+       an Ear drill, a Note Call round, a Call the chord round, a card waiting
+       for its private song (sfWait) and a private file still downloading
+       (sfInflight; both 2026-11-19). All set through the page's real state
+       objects, as busyReason() reads them.
      - the 5-minute cap, from both sides, on a fake page clock (busy-cap): at
        4:50 after the takeover the page is still waiting (held 4 s), at 5:01 it
        reloads with the drill still mid-round. A cap anywhere from 4:54 to 5:01
@@ -154,7 +156,7 @@
    Only one headless-Chrome run at a time on the machine (CLAUDE.md). The
    network is blocked (--host-resolver-rules): nothing here needs it. Building
    version 2 runs checks.mjs once (2 to 5 minutes, slower when the machine is
-   busy); the cases 17 to 45 s each (busy-others 45 s, busy-card 40 s); a full
+   busy); the cases 17 to 52 s each (busy-others 52 s, busy-card 40 s); a full
    run of the 29 cases about 16 minutes (967 s on 2026-11-12, the build 256 s
    of it). Until 2026-11-12's fix it exited 1 on deep-link (see above); it
    now exits 0 on the site.
@@ -681,7 +683,12 @@ const CYCLE = [
   ['a Deck drill mid-round (deckDrills[k].phase = run)', `(deckDrills['gc-test'] = { phase: 'run' }, true)`, `(delete deckDrills['gc-test'], true)`],
   ['an Ear drill mid-round (earDrills[k].phase = run)', `(earDrills['gc-test'] = { phase: 'run' }, true)`, `(delete earDrills['gc-test'], true)`],
   ['a Note Call round (ncLive)', `(ncLive = 'gc-test', true)`, `(ncLive = null, true)`],
-  ['a Call the chord round (chcLive)', `(chcLive = 'gc-test', true)`, `(chcLive = null, true)`]
+  ['a Call the chord round (chcLive)', `(chcLive = 'gc-test', true)`, `(chcLive = null, true)`],
+  /* A private song still downloading (app/songfiles.js; 2026-11-19, Jonathan: "build it"): a reload lost the download
+     and counted the song against the month again. sfWait is the card showing "Loading the song… 40%"; sfInflight any
+     load in flight (a lyric sheet too). Each stands in for one; the page cannot load a real one here (no network). */
+  ['a card waiting for its private song (sfWait)', `(sfWait = { host: null, token: {}, ui: null, restart() {}, load: null }, true)`, `(sfWait = null, true)`],
+  ['a private file still downloading (sfInflight)', `(sfInflight.set('gc-test', { promise: new Promise(() => {}), listeners: new Set(), waiters: 0, direct: 1 }), true)`, `(sfInflight.delete('gc-test'), true)`]
 ];
 
 const CASES = [
