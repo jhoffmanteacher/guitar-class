@@ -141,7 +141,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, renameSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng, STUDENT_MODEL } from './student.mjs';
+import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng, STUDENT_MODEL, OPEN6 } from './student.mjs';
 import { applyRule, RULES, WINDOW_RULES } from './candidates.mjs';
 import { siteSource, siteText, readScriptArg } from '../site-src.mjs';
 
@@ -253,7 +253,14 @@ export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot, gridCap)
         return [e, d];
       },
       pitch(back, clarity){
-        const P = mic.sum.pitch[JSON.stringify(clarity)];
+        let P = mic.sum.pitch[JSON.stringify(clarity)];
+        /* A list of gates the summary does not hold (Power Chord Switch reads [0.22, 0.45, 0.55] since 2026-11-18, rule A; the summaries hold
+           [0.22, 0.45] and 0.55): coachDetectPitch walks a list strictest first and keeps the first gate that reads a pitch, so the list is
+           the list without its last gate, then the last gate alone where that read nothing. */
+        if (!P && Array.isArray(clarity) && clarity.length > 1){
+          const A = mic.sum.pitch[JSON.stringify(clarity.slice(0, -1))], B = mic.sum.pitch[JSON.stringify(clarity[clarity.length - 1])];
+          if (A && B){ P = new Float32Array(A.length); for (let k = 0; k < A.length; k++) P[k] = A[k] > 0 ? A[k] : B[k]; mic.sum.pitch[JSON.stringify(clarity)] = P; }
+        }
         if (!P) throw new Error('closed-loop: the take summaries hold no pitch for the gate ' + JSON.stringify(clarity) + ' (run the intake again)');
         const g = Math.round((Math.round((clock.now - mic.offsetMs) / 1000 * mic.sr) - back) / SUM_HOP);
         return g >= 0 && g < P.length ? P[g] : 0;
@@ -411,7 +418,7 @@ export function playGame(site, g){
     /* Change Up: whether the game may pass this mistake BY DESIGN (worked out here from the chord shapes, never by asking the game).
        wrong: wrongClass below ('none' / 'rule2' / 'design'); only 'design' (the played shape passes both of ccResolvePend's rules) is byDesign.
        held: old and new are one of the pairs ccResolvePend's comment says it cannot tell apart (E/Em, A/Am, C/Am, G/Em). */
-    if (hands && t.did === 'wrong'){ rec.wrongClass = wrongClass(hands.midis, c.from, c.to, t.played); rec.byDesign = rec.wrongClass === 'design'; }
+    if (hands && t.did === 'wrong'){ rec.wrongClass = wrongClass(t.played === 'open strings' ? Object.assign({ 'open strings': OPEN6 }, hands.midis) : hands.midis, c.from, c.to, t.played); rec.byDesign = rec.wrongClass === 'design'; }
     if (hands && t.did === 'held') rec.byDesign = lenientPair(c.from, c.to);
     return rec;
   });
