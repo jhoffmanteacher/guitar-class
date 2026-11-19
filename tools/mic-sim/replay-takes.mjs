@@ -188,9 +188,10 @@ export function replayTake(site, d, src, srcRate, mapMs){
 
 /* The fields of a take a summary keeps: the game's own numbers. No name, id, label, user agent or time of day. recClock / recClockShiftMs
    (coach-recordings.js micRecSaveNow, 2026-11-16): which start stamp the take's times rest on; absent = the older one. Nothing here needs them
-   (every replay takes its clock from the take's own mapMs), they only tell the takes apart. */
+   (every replay takes its clock from the take's own mapMs), they only tell the takes apart. changePick and toneRule (2026-11-18, rule A) say
+   which rule graded the take: ownRule replays it under that rule. */
 const KEEP = ['game', 'complete', 'progression', 'song', 'ladder', 'bpm', 'stageBpms', 'bpc', 'gridStepCapMs', 'countInBeats', 'onsetRatio', 'hfRatio', 'micLatencyMs',
-  'frameMeanMs', 'frameMaxMs', 'durationSec', 'tempoChanges', 'virtual', 'changePick', 'recClock', 'recClockShiftMs'];
+  'frameMeanMs', 'frameMaxMs', 'durationSec', 'tempoChanges', 'virtual', 'changePick', 'toneRule', 'recClock', 'recClockShiftMs'];
 export function summarize(tk){
   const site = siteFor('base', null, false);
   site.reset();
@@ -261,13 +262,15 @@ export function loadSummaries(dir){
       notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector, measured: s.measured || null,
       sum: { E: unb64(s.E), D: unb64(s.D), pitch: Object.fromEntries(Object.entries(s.pitch).map(([k, v]) => [k, unb64(v)])) } }));
 }
-/* The rule a take was graded with, for `base`: a take saved since 2026-11-14 says changePick 'span' (coach-chords.js ccRecMeta) and was graded
-   by the site's rule (base); one saved 2026-11-13 says 'nearest' (candidates.mjs `nearest`; on a site from before the whole-span rule that is
-   the site as it is); one without it was graded by the first-strum rule (candidates.mjs `first`). Other rules are replayed as they are. */
+/* The rule a take was graded with, for `base`: a take saved since 2026-11-18 says changePick 'span' and toneRule 'pitch' (coach-chords.js
+   ccRecMeta, rule A) and was graded by the site's rule (base); one saved 2026-11-14 to 2026-11-18 says 'span' alone (candidates.mjs
+   `spanTiming`: the whole span, the chord check before rule A); one saved 2026-11-13 says 'nearest' (candidates.mjs `nearest`; on a site from
+   before the whole-span rule that is the site as it is); one without it was graded by the first-strum rule (candidates.mjs `first`). Other
+   rules are replayed as they are. */
 export function ownRule(rule, tk){
   if (rule !== 'base') return rule;
-  const pick = tk.d && tk.d.changePick;
-  return pick === 'span' ? 'base' : pick === 'nearest' ? 'nearest' : 'first';
+  const pick = tk.d && tk.d.changePick, tone = tk.d && tk.d.toneRule;
+  return pick === 'span' ? (tone === 'pitch' ? 'base' : 'spanTiming') : pick === 'nearest' ? 'nearest' : 'first';
 }
 /* Runs every rule on every take; res[rule@own|now] = { expected index: { verdict, readings } }. */
 /* `cache` (closed-loop.mjs passes one; this tool's own command line does not): { key(site, tk), get(key), set(key, result) }, so a replay already

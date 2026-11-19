@@ -881,10 +881,11 @@ function coachMicLatencyMs(){ return nrOffset(); }
    spacing clock to t whether or not a pitch was found, as before.
    `clarity` is coachDetectPitch's gate — or an array of gates, strictest
    first, where a window the first finds no pitch in is read again at the
-   next (coachDetectPitch walks the list itself). Only Riff Runner's
-   power-chord listeners pass an array (RNW_POWER_CLARITY): Riff Runner's
-   Wait Mode, Note Call's power mode and Power Chord Switch; every other
-   caller passes a number or nothing. */
+   next (coachDetectPitch walks the list itself). Only the power-chord
+   listeners pass an array: Riff Runner's Wait Mode and Note Call's power
+   mode RNW_POWER_CLARITY, Power Chord Switch that list and then the 0.55
+   chord gate (2026-11-18, rule A: ccLoop); every other caller passes a
+   number or nothing. */
 function coachPitchReadings(sinceT, minEndT, clarity){
   const out = [];
   const buf = coachFrameBuf, L = buf.length, sr = coachCtx.sampleRate;
@@ -1613,6 +1614,27 @@ function coachToneShare(ev, slot){
   return cls.filter(c => slot.classes.indexOf(c) >= 0).length / cls.length;
 }
 
+/* NO PITCH IS NEVER THE CHORD; A FEW READINGS MUST HIT IT (rule A, 2026-11-18, Jonathan). The one rule for a strum that gave few pitch
+   readings, in every game that grades a strummed chord: Power Chord Switch and Change Up (ccToneOk, coach-chords.js), the Listening
+   Coach's chord mode (coachMatchEvent and coachScorePitch, here) and Note Runner's chords (nrFinalizeEvent).
+   `pcs`: the pitch class (0-11) of each reading the sound gave; `want`: the chord's pitch classes. Returns
+     false  no reading at all: a tap, a muted scratch, a bump, a click is never the chord (before, Power Chord Switch and Change Up passed
+            it "on timing alone", and the Coach scored a round of them as level 2);
+     true / false  1 or 2 readings: right only when at least half of them are the chord's notes;
+     null   3 readings or more: the game's own chord-tone vote decides, with its own thresholds.
+   Measured on Power Chord Switch at 30 BPM (2026-11-18, closed loop and the 41 real take summaries; WORKFLOW.md "Power Chord Switch: where
+   we stopped"): real takes right / wrong / no strum 322 / 49 / 45 -> 296 / 77 / 43 of 416; nothing played, 1080 changes in 72 games,
+   596 marked right and 31 games at 85% -> 196 and 2; desk taps and muted strums 479 -> 267 of 540; the right chord once a beat 253 -> 252
+   of 270. */
+const COACH_TONE_FEW = 3;
+function coachToneCredit(pcs, want){
+  const n = pcs.length;
+  if (n >= COACH_TONE_FEW) return null;
+  let hit = 0;
+  for (let k = 0; k < n; k++) if (want.indexOf(pcs[k]) >= 0) hit++;
+  return n > 0 && hit * 2 >= n;
+}
+
 /* Greedy time-window matcher: an event lands on the nearest unfilled slot
    within ±1 slot of where the grid says it should be, if it falls inside
    coachMatchWinMs() of that slot. The grid offset then eases toward the
@@ -1676,10 +1698,13 @@ function coachMatchEvent(ev){
        clean strum easily clears that, and a laptop mic hearing a full 6-string
        chord (where the detector locks onto whichever tone is loudest) rarely
        climbs higher. "Wrong" only on strong contrary evidence — the honest
-       default for a murky strum is dim, never an accusation. */
+       default for a murky strum is dim, never an accusation.
+       Under 3 readings the shared rule A decides (coachToneCredit): no reading is never the chord, 1 or 2 must be half chord tones;
+       either way such a sound is dim, never wrong (the same verdicts as the 20% vote gave them). */
     const share = coachToneShare(ev, s);
     const n = (ev.classes || []).length;
-    if (n < 1) s.state = 'dim';
+    const few = coachToneCredit(ev.classes || [], s.classes);
+    if (few !== null) s.state = few ? 'ok' : 'dim';
     else if (share >= 0.20) s.state = 'ok';
     else if (share <= 0.10 && n >= 3) s.state = 'wrong';
     else s.state = 'dim';
@@ -1924,8 +1949,12 @@ function coachScorePitch(){
   const octs = slots.filter(s => s.state === 'oct').length;
   const dim = slots.filter(s => s.state === 'dim').length;
 
+  /* Mostly unclear strums: "I heard the strums but not the notes clearly". Level 2 only when most slots are unclear on 3+ readings (the
+     vote's grey zone, between 10% and 20% chord tones): a sound with no pitch, or 1-2 readings off the chord, is never credited (rule A,
+     coachToneCredit), so a round of desk taps, muted strums or typing is level 1 with the same sentence (2026-11-18). */
   if (coach.mode === 'chords' && dim > slots.length * 0.6){
-    return { name, icon, level: 2, sentence: t('coach.crit.pitch.dimChords') };
+    const dimRead = slots.filter(s => s.state === 'dim' && s.hit && coachToneCredit(s.hit.classes || [], s.classes) === null).length;
+    return { name, icon, level: dimRead > slots.length * 0.6 ? 2 : 1, sentence: t('coach.crit.pitch.dimChords') };
   }
   const missed = slots.filter(s => s.state === 'miss').length;
   const denom = Math.max(1, judged.length + missed);

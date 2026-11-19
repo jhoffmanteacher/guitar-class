@@ -85,7 +85,8 @@
    SCRIPTED frames with no audio and no pitch, for the grid's step cap; this plays sound, so the strum detector and the chord check run too.
    The rules the answer key is written from (prose, not code):
      - right: the new chord strummed on the change is right (coach-chords.js header: "did a strum land on beat 1 of the new bar, and does it
-       ring like the new chord's notes"); a strum with fewer than 3 pitch readings counts on timing alone (ccLoop / ccResolvePend comments).
+       ring like the new chord's notes"); since rule A (2026-11-18, ccToneOk) a strum with no pitch reading is never right and one with 1 or
+       2 readings only when half are the new chord's notes (before, under 3 readings counted on timing alone).
      - wrong: another chord of the loop, neither the old nor the new one, is wrong ("a strum of something else entirely is 'off'"). A two-chord
        loop has no such chord, so the student plays one of CC_RANDOM_POOL ("the open chords students know"). ccResolvePend grades with TWO
        rules (its comment): rule 1, "some tone of the NEW chord has to be heard at all"; rule 2, the old chord's exclusive tones must not

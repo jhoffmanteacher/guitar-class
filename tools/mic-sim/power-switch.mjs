@@ -31,10 +31,11 @@ const src = readScriptArg(file);
 const constLine = n => { const m = src.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); return m ? `const ${n} = ${m[1]};` : ''; };
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ATTACK_SKIP', 'COACH_ONSET_REFRACT', 'COACH_EVENT_TAIL',
   'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_STANDOUT', 'COACH_PITCH_GATE',
-  'COACH_STANDOUT_TARGET', 'RNW_POWER_CLARITY', 'CC_POWER_ONSET_RATIO', 'CC_POWER_HF_RATIO'].map(constLine).join('\n');
+  'COACH_STANDOUT_TARGET', 'RNW_POWER_CLARITY', 'CC_POWER_ONSET_RATIO', 'CC_POWER_HF_RATIO', 'COACH_TONE_FEW'].map(constLine).join('\n');
 /* ccToneOk: the chord check ccResolvePend calls since 2026-11-14 (older coach.js files have it inline). This tool measures one strum per change, so
    the whole-span rule is off here (ccSpanRule false): the chord check is what it measures. */
-const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachSmooth', 'ccResolvePend', 'ccToneOk'].filter(n => n !== 'ccToneOk' || /\nfunction ccToneOk\(/.test(src)).map(n => extract(src, n)).join('\n') +
+/* coachToneCredit: rule A's few-readings check ccToneOk calls since 2026-11-18 (older files have none). */
+const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachSmooth', 'ccResolvePend', 'ccToneOk', 'coachToneCredit'].filter(n => (n !== 'ccToneOk' && n !== 'coachToneCredit') || new RegExp('\\nfunction ' + n + '\\(').test(src)).map(n => extract(src, n)).join('\n') +
   '\nfunction ccSpanRule(){ return false; }';
 const POWER_GATE = opt('clarity') ? JSON.parse(opt('clarity')) : null;
 const loopsJson = src.match(/const CC_POWER_PROGRESSIONS = (\[[\s\S]*?\n\]);/);

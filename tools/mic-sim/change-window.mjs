@@ -1,13 +1,15 @@
 /* Which strum decides a change in Power Chord Switch (and Change Up, same ccLoop): the window / pick candidates of candidates.mjs
    (WINDOW_RULES, PICK_RULES) replayed on the REAL take summaries (2026-11-13). Since 2026-11-14 `base` (the site) is Power Chord Switch's
    whole-span rule (coach-chords.js ccSpanRule: any strum in the chord's span that reads right); `nearest` is the rule of 2026-11-13 (the
-   strum nearest the change), `first` the one before it, `spanLate` the whole-span rule without the early allowance.
+   strum nearest the change), `first` the one before it, `spanLate` the whole-span rule without the early allowance. Since 2026-11-18 `base`
+   also has rule A (coach-core.js coachToneCredit: a strum with no pitch is never the chord, 1 or 2 readings must be half its notes) and
+   every other rule the chord check before it (candidates.mjs unTone); `spanTiming` is the whole-span rule with that older check.
 
      node tools/mic-sim/change-window.mjs [--rules=same,w250,…] [--json=out.json] [--take=<summary id>]
 
    Every rule is replayed at the site's strum ratios of today (replay-takes.mjs replayTake: the real ccLoop in a vm, coach.js rewritten in
-   memory by candidates.mjs). `base` is also replayed at each take's OWN ratios and pick (replay-takes.mjs ownRule: `span`, `nearest`, or
-   `first` for a take saved with no changePick), for the "reproduced" line (how often the replay gives the take's saved verdict). `same` is
+   memory by candidates.mjs). `base` is also replayed at each take's OWN ratios and pick (replay-takes.mjs ownRule: `span` with toneRule
+   `pitch` = base, `span` alone = `spanTiming`, `nearest`, or `first` for a take saved with no changePick), for the "reproduced" line (how often the replay gives the take's saved verdict). `same` is
    the window machinery with nothing changed (cap none, pick near): it must give `nearest`'s verdict on every change, or this exits 1. Every
    replay uses the grid step cap the take was graded with (replay-takes.mjs capOf: none saved = uncapped).
 
@@ -84,7 +86,9 @@ for (const g of ['same', 'nearg0', 'neargd'].filter(g => rules.includes(g))){
 }
 
 /* 3. The table. */
-const groups = [['ALL', r => true], ['<=30 BPM', r => r.bpm <= 30], ['>30 BPM', r => r.bpm > 30], ['2026-11-13', r => r.day === '2026-11-13'], ['earlier', r => r.day !== '2026-11-13']];
+/* The newest day's takes against the earlier ones (until 2026-11-18 the day was written here as 2026-11-13). */
+const NEWEST = rows.reduce((d, r) => String(r.day) > d ? String(r.day) : d, '');
+const groups = [['ALL', r => true], ['<=30 BPM', r => r.bpm <= 30], ['>30 BPM', r => r.bpm > 30], [NEWEST + ' (the newest day)', r => String(r.day) === NEWEST], ['earlier', r => String(r.day) !== NEWEST]];
 const report = {};
 console.log('\nPer rule, at today\'s strum ratios. right / wrong / miss over every judged change; no strum = the recording has no attack within today\'s window (so none in a narrower one): HEARD / marked RIGHT (fewer is better); strum = the recording has one: right / wrong / miss; LOST = strums today\'s rule heard and this one does not (with the game\'s nearest onset beyond the cap: by design); flips vs today\'s rule.');
 for (const [g, pick] of groups){
