@@ -35,12 +35,12 @@ guided "strum when the circle flashes" timing set-up (C8); one results-screen sh
 console's "who needs you" view, Undo and a Monday spot-check list (C10); a progress display during sign-in (C15);
 strict mode (C17). They come back only if he raises one himself.
 
-## Next week (the week of 2026-11-23): look at a re-design, visually
+## The visual re-design look (started 2026-11-19)
 
-Jonathan, 2026-11-17: "next week i want to look at re-design visually". Start with pictures only: two looks on three
-screens (a lesson, an In-Class Activity, the Songs page) at 1366x657, English and Spanish, no site change; he picks,
-changes or drops. The design-values tidy (W15, on hold) is built only if he picks a look. Do not start before he
-says so next week.
+Jonathan, 2026-11-17: "next week i want to look at re-design visually"; 2026-11-19: "start redesign". Pictures only:
+two looks on three screens (a lesson, an In-Class Activity, the Songs page) at 1366x657, English and Spanish, no site
+change, in `Claude outputs/redesign-2026-11/`; he picks, changes or drops. The design-values tidy (W15, on hold) is
+built only if he picks a look.
 
 ## Beat maps: make every Play Along song light the same amount before the beat
 

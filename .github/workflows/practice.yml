@@ -20,7 +20,11 @@
 # treat as the practice copy (its pages would then talk to the class project),
 # or whose address cannot be read, is deleted at once and the run turns red.
 # The rules step never turns the run red (a key that can publish pages but not
-# rules leaves a warning naming the role to add).
+# rules leaves a warning). It publishes through the Admin SDK's security-rules
+# call, not `firebase deploy`: the CLI first asks Service Usage whether the
+# Firestore API is on, and the key was refused that read even with the Service
+# Usage roles added (2026-11-19); the rules call needs only the firebaserules
+# rights the firebase-adminsdk account has.
 #
 # The key: the GitHub secret FIREBASE_PRACTICE_SA (a service-account key of the
 # practice project only; Jonathan's steps: "Claude outputs/practice-copy/
@@ -55,6 +59,7 @@ jobs:
     timeout-minutes: 20
     env:
       FIREBASE_TOOLS_VERSION: 15.36.0
+      FIREBASE_ADMIN_VERSION: 13.10.0
       HAS_KEY: ${{ secrets.FIREBASE_PRACTICE_SA != '' }}
       REF: ${{ github.ref }}
       REF_NAME: ${{ github.ref_name }}
@@ -97,7 +102,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/ft" && cd "$RUNNER_TEMP/ft"
           npm init -y > /dev/null
-          npm install --no-audit --no-fund --save-exact "firebase-tools@$FIREBASE_TOOLS_VERSION"
+          npm install --no-audit --no-fund --save-exact "firebase-tools@$FIREBASE_TOOLS_VERSION" "firebase-admin@$FIREBASE_ADMIN_VERSION"
           echo "$RUNNER_TEMP/ft/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: The key (written to a file outside the checkout, removed at the end)
@@ -141,12 +146,23 @@ jobs:
         if: always() && env.HAS_KEY == 'true' && steps.kind.outputs.kind == 'live' && steps.hosting.outcome == 'success'
         id: rules
         continue-on-error: true
-        run: firebase deploy --only firestore:rules --project guitar-class-practice --non-interactive
+        env:
+          NODE_PATH: ${{ runner.temp }}/ft/node_modules
+        # The project is named literally and checked against the key (the key step already refused any other).
+        run: |
+          node -e '
+            const admin = require("firebase-admin");
+            const src = require("fs").readFileSync("firestore.rules", "utf8");
+            admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: "guitar-class-practice" });
+            admin.securityRules().releaseFirestoreRulesetFromSource(src)
+              .then(r => console.log("published ruleset " + r.name + " to guitar-class-practice"))
+              .catch(e => { console.error("Error: " + ((e && (e.code ? e.code + " " : "") + e.message) || e)); process.exit(1); });
+          '
 
       - name: Rules not published?
         if: always() && steps.rules.outcome == 'failure'
         run: |
-          echo "::warning title=Practice copy::firestore.rules was NOT published to the practice database (the site itself is live). If the log above says permission or serviceusage, the key needs the role Service Usage Consumer: Google Cloud console, IAM, the firebase-adminsdk row of guitar-class-practice, Edit principal, Add another role, Service Usage Consumer, Save (JONATHAN-STEPS.md steps 8-11). Then re-run the newest Practice copy run."
+          echo "::warning title=Practice copy::firestore.rules was NOT published to the practice database (the site itself is live). The step above ends with a line starting Error: — paste that line to Claude."
 
       - name: Publish the site (preview channel, 7 days)
         if: env.HAS_KEY == 'true' && steps.kind.outputs.kind == 'preview'

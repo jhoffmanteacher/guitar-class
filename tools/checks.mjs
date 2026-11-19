@@ -7685,6 +7685,15 @@ function checkPracticeCopy() {
         if (/\bdeploy\b/.test(l) && fb && /\bfirestore\b|--only\s+(?!hosting\b)/.test(l) && !/--only (firestore:rules|hosting)\b/.test(l)) flag(`practice.yml step "${s.name}": "${l}" deploys more than hosting or the rules`);
         if (fb && /--only\s+hosting\b/.test(l) && !/steps\.kind\.outputs\.kind == 'live'/.test(String(s.if || ''))) flag(`practice.yml step "${s.name}" publishes the live site without the live (main only) gate`);
       }
+      // The rules go out through the Admin SDK since 2026-11-19 (the CLI's Service Usage pre-check was refused): the
+      // same guards as a firebase command: the project written literally, nothing else named, main only.
+      if (/require\(\s*["'`]firebase-admin|from\s+["'`]firebase-admin|securityRules\(|initializeApp\(/.test(run)) {
+        fbCmds++;
+        const pids = [...run.matchAll(/projectId\s*:\s*("[^"]*"|'[^']*'|[^\s,}]+)/g)].map(m => m[1].replace(/^["']|["']$/g, ''));
+        if (!pids.length || pids.some(p => p !== PRACTICE)) flag(`practice.yml step "${s.name}": the Admin SDK call must name projectId "${PRACTICE}" literally and nothing else (found ${J(pids)})`);
+        if ((run.match(/initializeApp\(/g) || []).length !== 1 || !/securityRules\(\)\.releaseFirestoreRulesetFromSource\(/.test(run) || /\.(firestore|auth|database|storage|messaging)\(\)|releaseStorage|setCustomUserClaims/.test(run)) flag(`practice.yml step "${s.name}": the Admin SDK step may only initialize one app and publish the Firestore rules`);
+        if (!/steps\.kind\.outputs\.kind == 'live'/.test(String(s.if || ''))) flag(`practice.yml step "${s.name}" publishes rules without the live (main only) gate in its if: ${J(s.if)}`);
+      }
     }
     if (fbCmds < 4) flag(`practice.yml has ${fbCmds} firebase commands, expected at least 4 (live, rules, preview, delete): this check went blind`);
     if (/guitar-class-2fd21/.test(yml)) flag('practice.yml names the class project');
