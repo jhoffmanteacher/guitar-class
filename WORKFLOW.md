@@ -85,8 +85,9 @@ Update this block whenever an item opens or closes.
   fixed) but carry no Review trailer by mistake: read them as Reviewed.
 
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
-- Friday 2026-11-20: which of this week's changes get a Fable review (the list under "This week only"), and whether
-  his weekly limit has reset.
+- Friday 2026-11-20: which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday
+  check of 2026-11-20 was cancelled and its routine (`trig_016m5HTbmhxb2oEqDaefQurB`) is DISABLED: re-enable it
+  when he says so (the next run then covers everything since `last-run.txt`).
 - The three Friday-check product calls are settled (Jonathan, 2026-11-19): the Games heading now says "Notes on the
   fretboard"; the practice-minutes keepalive's dead-link loss (up to about 60 s, `practice-minutes.js` ~1082) is
   ACCEPTED; no "goal reached" toast on a Journey page is LEFT as it is. Do not raise the last two again.
@@ -113,11 +114,10 @@ Update this block whenever an item opens or closes.
 - GitHub's browser tests: Chrome's install gets a second try since 2026-11-19 (`browser.yml` header); the
   activities smoke's other red is W25.
 
-**THIS WEEK ONLY: every agent runs on Opus, reviewers included** (Jonathan, 2026-11-16: "heavy fable use this
-morning ran up my total. we can run opusplan stuff"). The Mac, Windows and cloud routines pass `model: 'opus'` on
-every spawn (builders and reviewers at high). The Fable pins in the agent files and CLAUDE.md are NOT changed. No
-Fable review runs unless he names one. Delete this block when he says his weekly limit has reset. For his Friday
-pick (the Friday check reviews only `Review: Fast` commits, so these get no other review):
+**Opus reviews, for his Fable pick** (Jonathan, 2026-11-16: "heavy fable use this morning ran up my total. we can
+run opusplan stuff"; made the standing rule 2026-11-20: every spawn is Opus, reviewers included, and a Fable review
+runs only when he names one; CLAUDE.md "Opusplan", the agent files pin Opus). These were reviewed on Opus; he may
+name any of them for a Fable review:
 - Reviewed on Opus instead of Fable: no name on a mic take (`3792deb`, `e25f0d5`; a cloud review); Play Along
   highlight timing (W16); Look 1 Parts 4-5; W24 (the `app/cards.js` split); both `coach-core.js` splits; rule A.
 - Already reviewed on Fable: the sign-in load fix (round 1); the Chords / Tab switch (W23, both rounds, by mistake);

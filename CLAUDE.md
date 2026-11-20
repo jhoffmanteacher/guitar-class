@@ -368,7 +368,7 @@ fast-forward is what you'd recommend → push, say what landed, `checks.mjs --li
 
 **Delegate site review work to agents by default.** Standing permission (Jonathan, 2026-11-08): when a review is due, spawn the reviewers yourself and at once. Do not ask first and do not wait to be told to use agents. This overrides the Agent tool's "when in doubt, don't spawn" for review work only.
 A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan says "review this" / "Reviewed", it is the Friday check, or it is a sub-agent sweep. This does not change "Fast by default": a change that hits only an ordinary trigger still ships Fast with no reviewer, and a change with no trigger has no trailer.
-- **Parallel by area.** One reviewer per independent area (for example the coach stop path, the Tuning Simulator, small Fast commits), all spawned in a single message. Use `site-reviewer-deep` for a danger-zone file, 50+ strings or any sub-agent sweep, otherwise `site-reviewer`. Leave `model` and `effort` unset: the agent files pin Fable at medium (Jonathan, 2026-11-09). Only the Friday check overrides them (Opus, `xhigh`).
+- **Parallel by area.** One reviewer per independent area (for example the coach stop path, the Tuning Simulator, small Fast commits), all spawned in a single message. Use `site-reviewer-deep` for a danger-zone file, 50+ strings or any sub-agent sweep, otherwise `site-reviewer`. Reviewers are Opus (`high` for `site-reviewer`, `xhigh` for `site-reviewer-deep` and the Friday check): "Opusplan" below.
 - **Re-review every fix round with a fresh agent.** After fixes, spawn a new reviewer; never reuse the one that found the bug. On 2026-11-08 every `coach.js` round found a real major bug in the previous round's fixes. Stop after the first round with no BLOCKER or MAJOR finding (severity words as in `.claude/skills/site-sweep/reviewer.md`); fix its MINOR findings with a break-it proof and start no new round for them. At most 3 rounds: if round 3 still finds a BLOCKER or MAJOR, stop and ask Jonathan (AskUserQuestion) whether to ship, revert or keep going.
 - **Fixers.** Fix findings in one file family yourself. Spawn `site-fixer` only when they span two or more independent file families: create its worktree first, spawn it there, then cherry-pick its commits. Before spawning more than 3 agents, read skill `site-sweep`.
 - **Brief each agent with the limits.** Its own worktree only; no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while a smoke run is going (check with the `pgrep` command in step 3, because another session's run counts).
@@ -376,7 +376,7 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - **Smoke and reviews run at the same time**, smoke in its own detached worktree (step 3), so your checkout stays free for your own area.
 - **Treat agent output as claims.** Read every quoted line yourself. Make a fixer prove each new guard by breaking the code and pasting the red line. Send product choices found in a review to Jonathan with AskUserQuestion.
 
-**Agents for ordinary work too, at your discretion** (Jonathan, 2026-11-11: "agents and subagents are fine for normal changes too to speed things up"). The 2026-11-08 permission above covered review work only; this widens it. For any change, spawn agents (and let an agent use sub-agents) when that gets the work done sooner: independent parts built in parallel, a long search or audit, a test run while you keep editing. Do not ask first. This overrides the Agent tool's "when in doubt, don't spawn" for this repo. It does not change who reviews what: "Fast by default" still ships with no reviewer, and the reviewer models and effort above stay as pinned.
+**Agents for ordinary work too, at your discretion** (Jonathan, 2026-11-11: "agents and subagents are fine for normal changes too to speed things up"). The 2026-11-08 permission above covered review work only; this widens it. For any change, spawn agents (and let an agent use sub-agents) when that gets the work done sooner: independent parts built in parallel, a long search or audit, a test run while you keep editing. Do not ask first. This overrides the Agent tool's "when in doubt, don't spawn" for this repo. It does not change who reviews what: "Fast by default" still ships with no reviewer. Which model runs them: "Opusplan" below.
 - Read the load first and choose cloud, Windows or the Mac: "Keep the Mac's load just right" in "Start here".
 - Still your call each time: a few tool calls or one file family is faster done yourself.
 - Every brief states a size (how many agents or sub-agents, how many browser runs) and the limits in "Brief each agent with the limits".
@@ -400,26 +400,36 @@ kind of change to Always-Reviewed. A high review lets a real bug through → mov
 change to `site-reviewer-deep`.
 **Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last run (`last-run.txt` in the skill, or an older `friday-check-*` tag) (`Review: Reviewed` ones are skipped), fixes and pushes (skill `friday-check`).
 
-**Sonnet for the simple parts** (Jonathan, 2026-11-17: "for opus agents to use sonnet when they can if appropriate").
-An agent, or a lead handing out work, passes `model: 'sonnet'` for work that is mechanical, fully specified, and
-whose result a tool proves: running a tool or a proof and reporting its numbers, a search or an inventory with
-counts, copying or moving files, taking screenshots from a written list, a rebase or a re-pin, test cases written
-from a list someone else settled, one scripted wording change applied to many places. For these, spawn `site-runner`
-(Sonnet, low; `.claude/agents/site-runner.md`), not a `general-purpose` agent on Opus; a `general-purpose` spawn always
-names its `model` (Jonathan, 2026-11-18, after `/usage` showed general-purpose agents at 25%). Opus (or what the agent file
-pins) stays for: design and anything with a choice in it, the save path, `firestore.rules`, listening code, load order,
-`sw.js` code, a renderer a student sees, a fix whose cause is not yet known, and every review. Unsure → Opus. A Sonnet
-agent's report is a claim like any other: its proof is read before its work ships. An Opus builder may hand its own
-simple parts to ONE Sonnet sub-agent at a time on the Mac (the load rule); its brief still says "no sub-agents"
-when the lead wants none.
-**Opus runs at `high`, and at `xhigh` for the hard jobs** (Jonathan, 2026-11-17: "opus can run at xhigh too"): the save
-path, the rules, listening, a fix whose cause is not known, a design with real choices in it, a deep review. Never `max`.
-**Its effort is set on the spawn too** (`effort:` beside `model:`; Jonathan, 2026-11-17: "your wording about sonnet
-is good. it can also define effort level"): `low` for run-a-tool-and-report, a search or a file copy; `medium` for
-the rest of the Sonnet list (test cases from a settled list, a scripted change over many places). If a Sonnet job
-seems to need `high`, it is not a Sonnet job: give it to Opus.
+**Opusplan: Fable plans, Opus executes** (Jonathan, 2026-11-20: "use opusplan at medium to xhigh even if we are chatting
+using fable"; "if we are planning and chatting in fable, opusplan agents and subagents should be used to execute the
+plans"). The chat may run on Fable (talking, planning, deciding). Once a plan is settled, agents and sub-agents carry it
+out. **Every spawn names its `model` and `effort`**, whatever model the chat is on: builders, fixers and reviewers
+`model: 'opus'`; simple parts `model: 'sonnet'` (next paragraph). A spawn with no `model` inherits the chat's, which is
+what this prevents; `subagent_type: "fork"` always runs on the chat's model, so with a Fable chat use a named agent
+type or `general-purpose`, never a fork. A few tool calls are still faster in the chat itself. The reviewer agent files
+pin Opus too (2026-11-20), replacing the 2026-11-09 Fable-at-medium choice.
+**A Fable review runs only when Jonathan names one** ("i will specify fable review if i want it, and you can recommend
+it too"): `model: 'fable'` on that spawn; recommend one in a report (save path, listening, a sweep), never start it unasked.
+- **Opus effort**: `medium` routine; `high` most building and fixing, and `site-reviewer`; `xhigh` for the save path,
+  the rules, listening, a fix whose cause is not known, a design with real choices, `site-reviewer-deep` and the Friday
+  check (skill `friday-check`). Never `max`.
+- **Session effort** (the chat itself): `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and
+  sweeps; a tier above the session → ask for `/effort`. The chat's `/model` is Jonathan's to set.
 
-**Effort**: both reviewers are Fable at `medium` during the week (Jonathan, 2026-11-09, after the test in WORKFLOW); the Friday check's reviewers are Opus at `xhigh` (skill `friday-check`); other agents `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
+**Sonnet for the simple parts** (Jonathan, 2026-11-17: "for opus agents to use sonnet when they can if appropriate";
+"it can also define effort level"). Pass `model: 'sonnet'` for work that is mechanical, fully specified, and whose
+result a tool proves: running a tool or a proof and reporting its numbers, a search or an inventory with counts,
+copying or moving files, screenshots from a written list, a rebase or a re-pin, test cases from a list someone else
+settled, one scripted wording change in many places. Spawn `site-runner` (Sonnet, low; `.claude/agents/site-runner.md`),
+not a `general-purpose` agent on Opus (Jonathan, 2026-11-18, after `/usage` showed general-purpose agents at 25%). Effort
+`low` for run-a-tool-and-report, a search or a file copy; `medium` for the rest of the list; a Sonnet job that seems to
+need `high` is not a Sonnet job. Opus stays for: design and anything with a choice in it, the save path,
+`firestore.rules`, listening code, load order, `sw.js` code, a renderer a student sees, a fix whose cause is not yet
+known, and every review. Unsure → Opus. A Sonnet report is a claim like any other: its proof is read before its work
+ships. An Opus builder may hand its own simple parts to ONE Sonnet sub-agent at a time on the Mac (the load rule); its
+brief still says "no sub-agents" when the lead wants none.
+
+Report real numbers, not the premise; name the prior decision a request reverses.
 
 **"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first (the game is in `coach-chords.js`, its listening in `coach-core.js` and `coach-score.js`): what is live and binding (rule A, 2026-11-18: a strum with no pitch never counts, in four games; the whole-span rule; the strum ratio 1.8 / 2.19 for Power Chord Switch only), each one's roll-back, what was rejected on measurement and what is settled. Its full record (the strum what-if numbers on the real takes, the 2026-11-07 pitch-rule rejection that rule A replaced): `docs/workflow-history-to-2026-11-18.md`, section 5.
 

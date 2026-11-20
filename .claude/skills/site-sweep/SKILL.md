@@ -25,7 +25,7 @@ first; do not paste it into each prompt.
 
 Each pins its own model (Opus) and effort. A newly added agent file may need a
 restart or `/agents` before it is offered. If it isn't, fall back to a
-general-purpose agent with `model: opus` and `effort: high`; a reviewer gets `model: fable` and `effort: medium` (2026-11-09).
+general-purpose agent with `model: opus` and `effort: high`; a reviewer gets `model: opus` and `effort: high` (`xhigh` for the deep one; 2026-11-20), `model: fable` only when Jonathan names a Fable review.
 
 ### The flow
 0. **Baseline.** `git fetch origin`; fast-forward main; `git worktree list`;

@@ -11,10 +11,9 @@ Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
   request). Decide, act, and report.
 - **Every reviewer this check spawns is Opus at `xhigh`** (Jonathan,
   2026-11-09): pass `model: 'opus'` and `effort: 'xhigh'` on each Agent call,
-  `site-reviewer` and `site-reviewer-deep` alike. Their own files say Fable at
-  `medium`; that is for reviews during the week. A different model on Friday
-  is the point: in the 2026-11-09 test each model caught bugs the other
-  missed.
+  `site-reviewer` and `site-reviewer-deep` alike. Since 2026-11-20 their own files
+  are Opus too (`high` and `xhigh`); the Friday check keeps `xhigh` for both. A
+  Fable review runs only when Jonathan names one.
 
 ## 1. Find the range
 
