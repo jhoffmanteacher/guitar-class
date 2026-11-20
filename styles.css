@@ -5512,6 +5512,38 @@ body.lq-invite-open{overflow:hidden}
 .lq-invite-later:hover{color:var(--text);background:var(--bg3)}
 @keyframes lq-fade{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.lq-invite{animation:none}}
+/* ── "Arcade night", the Live In-Class Games colours (Jonathan, 2026-11-20: "the taupe of the site doesn't quite
+   fit it"; mock-up A of two). Deep indigo, neon pink / cyan / lime, glowing numbers. Scoped to the projector's
+   stage (.lq-stage) and the student's game screen (.lq-screen): the site's colour tokens are re-pointed inside
+   them, so every rule above reads the game's colours with no copy of it, and nothing outside changes (the
+   console's control strip, the invite, the banner keep the site's look). The same in light and dark mode. */
+.lq-stage,.lq-screen{
+  --bg:#1a1442;--bg2:#211a52;--bg3:#2b2366;--border:#3d3392;--text:#ffffff;--text2:#cfc8ff;--text3:#a49be0;
+  --purple-accent:#ff4fa3;--purple-text:#ff8cc6;--purple-bg:#3a2470;--blue-text:#5ee7ff;
+  --green-text:#7dff9b;--green-bg:rgba(125,255,155,.14);--red-text:#ff7b8f;--red-bg:rgba(255,123,143,.14);
+  --lq-glow-a:rgba(255,79,163,.28);--lq-glow-b:rgba(94,231,255,.25);color:var(--text)}
+.lq-stage,.lq-stage:fullscreen{background:radial-gradient(circle at 15% 20%,var(--lq-glow-a),transparent 40%),
+  radial-gradient(circle at 85% 80%,var(--lq-glow-b),transparent 45%),#140f38;border-color:#3d3392}
+.lq-stage .lq-st-title,.lq-screen .lq-quiz-title{background:linear-gradient(90deg,#5ee7ff,#ff4fa3 60%,#ffd23f);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lq-stage .lq-st-big{color:#ff4fa3;text-shadow:0 0 18px rgba(255,79,163,.75),0 0 42px rgba(255,79,163,.35)}
+.lq-stage .lq-st-qnum,.lq-screen .lq-qnum{color:#5ee7ff}
+.lq-stage .lq-chip{background:#2b2366;color:#fff;border:2px solid #5ee7ff;box-shadow:0 0 10px rgba(94,231,255,.35)}
+.lq-stage .lq-chip:nth-child(3n+2){border-color:#ff4fa3;box-shadow:0 0 10px rgba(255,79,163,.35)}
+.lq-stage .lq-chip:nth-child(3n){border-color:#b6ff5e;box-shadow:0 0 10px rgba(182,255,94,.3)}
+.lq-stage .lq-lb-stage li{border:2px solid #3d3392}
+.lq-stage .lq-lb-stage li:nth-child(1){border-color:#ffd23f;box-shadow:0 0 16px rgba(255,210,63,.45)}
+.lq-stage .lq-lb-stage li:nth-child(1) .lq-lb-rank{color:#ffd23f}
+.lq-stage .lq-lb-stage li:nth-child(2){border-color:#5ee7ff}
+.lq-stage .lq-lb-stage li:nth-child(3){border-color:#ff4fa3}
+.lq-stage .lq-cc-progress span{background:linear-gradient(90deg,#5ee7ff,#ff4fa3);box-shadow:0 0 12px rgba(255,79,163,.6)}
+.lq-screen{background:radial-gradient(circle at 10% 10%,rgba(255,79,163,.35),transparent 40%),
+  radial-gradient(circle at 90% 90%,rgba(94,231,255,.3),transparent 45%),#0f0b2e}
+.lq-screen .lq-body{border:2px solid #3d3392;box-shadow:0 0 40px rgba(255,79,163,.25),0 14px 44px rgba(0,0,0,.5)}
+.lq-screen .lq-cc-tap{background:linear-gradient(135deg,#ff4fa3,#ff8a3d);box-shadow:0 0 24px rgba(255,79,163,.55),0 4px 0 #8a1f57;
+  text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.lq-screen .lq-cc-n{color:#b6ff5e}
+.lq-screen .lq-verdict.lq-v-yes{border:2px solid #7dff9b;box-shadow:0 0 18px rgba(125,255,155,.3)}
 
 
 /* ══════════════════════════════════════════════════════════════════════
