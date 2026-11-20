@@ -23,6 +23,8 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   push ONE line under the item, "Windows: scheduled <routine link> for <local time>" (it counts as the item's
   "started" line), and go on to the next item. A routine cannot be deleted from Claude: Jonathan does that at
   https://claude.ai/code/routines.
+- **Song requests are the Mac's** (Jonathan, 2026-11-20: "song requests are being handled by mac"): the request page, its
+  YouTube links and any play-along made from them. Windows does not pick them up, even when asked in passing.
 
 - [ ] **W25 — the activities smoke on GitHub: a page where some app parts never ran (not urgent).** The Note Call
   walk (`noteCallWalk`, `tools/smoke.mjs`) reloads (`Page.navigate`, 3.5 s, `pageLoaded()`: `readyState` complete)
