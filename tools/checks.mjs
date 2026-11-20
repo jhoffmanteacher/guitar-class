@@ -16148,7 +16148,7 @@ function checkSiteMadeClick() {
    unnoticed. The audio checks (1ak, 1be, 1bk, the key versions, 1bu) take
    a private path through audioInfo() above.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_PIN = 18;   // entries on the SONG_FILES list (app/songfiles.js); none switched in Step 1; 0 -> 18 (2026-11-17, step 2a): the 18 practice-card files, all awaitingSwitch
+const SONG_FILES_PIN = 19;   // entries on the SONG_FILES list (app/songfiles.js); none switched in Step 1; 0 -> 18 (2026-11-17, step 2a): the 18 practice-card files, all awaitingSwitch
 function checkSongFiles() {
   head('1dz. Song files: the private list');
   let bad = 0;
@@ -16185,6 +16185,14 @@ function checkSongFiles() {
     for (const m of src.matchAll(/\bdata-(audio[a-z-]*)="([^"]*)"/g)) { usePath(m[2], `${page} data-${m[1]}`); notePublic(m[2], `${page} data-${m[1]}`); }
   }
   if (!pages) flag('read no tabs/*.html page — TAB_PAGES is empty, so the data-audio* paths were not checked');
+  /* The Live In-Class Games music (teacher-livemusic.js, 2026-11-20) plays one private song on the console: its
+     path is the LQM_SRC line. A file without that line fails, so this cannot go blind. */
+  try {
+    const m = /^const LQM_SRC = '([^']+)';/m.exec(readFileSync(join(ROOT, 'teacher-livemusic.js'), 'utf8'));
+    if (!m) flag('teacher-livemusic.js has no "const LQM_SRC = \'private:<id>\';" line — the games\' music must name its song file so this list check can see it');
+    else if (!m[1].startsWith(SONG_FILE_PREFIX)) flag(`teacher-livemusic.js LQM_SRC is "${m[1]}": the games' music is a full record, so it must be a private song file ('private:<id>'), never a public audio/ path`);
+    else usePath(m[1], 'teacher-livemusic.js LQM_SRC');
+  } catch (e) { flag('could not read teacher-livemusic.js — ' + e.message); }
   let audioNames = [];
   try { audioNames = readdirSync(join(ROOT, 'audio')); } catch { /* no audio/ */ }
   let swBlock = '';

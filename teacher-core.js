@@ -1264,6 +1264,7 @@ function setTeacherView(v){
   if(teacherView==='songbuilder' && v!=='songbuilder' && typeof teacherSbLeave==='function') teacherSbLeave();
   // Hear the Chord Change plays its song from Live In-Class Games; leaving that view stops it (live-changes.js).
   if(teacherView==='livequiz' && v!=='livequiz' && typeof lqCcStopAudio==='function') lqCcStopAudio();
+  if(teacherView==='livequiz' && v!=='livequiz' && typeof lqMusicStop==='function') lqMusicStop();   // the games' music (teacher-livemusic.js)
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
   // Songs always starts back at its list, nothing mid-rename. An activity

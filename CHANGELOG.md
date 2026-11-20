@@ -23,6 +23,8 @@ see `WORKFLOW.md` and the git commit log.
   its usual colours.
 - **Full screen on the teacher's screen now keeps the game's buttons**, so the game can go on without leaving full
   screen.
+- **Live games have music**: "Don't Stop Me Now" plays from the room speakers while you join, between questions and
+  during the games where you don't listen for anything. It goes quiet whenever a question asks you to listen.
 
 ## 2026-11-20 — New live game: Hear the chord change
 

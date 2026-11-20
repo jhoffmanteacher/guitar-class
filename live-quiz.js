@@ -127,6 +127,7 @@ const LIVE_QUIZZES = {
     promptKey: 'lq.prompt.stringId',
     teacherHint: 'Play one open string, then click which one it was to reveal.',
     speedBonus: false,
+    quiet: true,     // a listening question: the games' music fades out while it is open (teacher-livemusic.js)
     limitSec: 0,
     choices: [
       { id:'E6', key:'lq.string.lowE',  color:'#b3372a' },
@@ -193,7 +194,8 @@ const LIVE_QUIZZES = {
     titleKey:  'lq.title.changes',
     promptKey: 'lq.prompt.changes',
     teacherHint: 'Pick a song, then a section to play it on the room speakers. Students press the space bar at every chord change; the round is scored about 3 seconds after the song stops.',
-    speedBonus: false
+    speedBonus: false,
+    quiet: true      // its own song plays during a round: the games' music fades out (teacher-livemusic.js)
   }
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
@@ -1530,6 +1532,7 @@ function lqPaintStage(){
   if(!s || !s.state || s.state === 'off'){
     stage.innerHTML = `<div class="lq-st-idle">${lqBilingual('lq.stageIdleTitle', 'lq-st-idle-title')}`
       + `${lqBilingual('lq.stageIdleSub', 'lq-st-idle-sub')}</div>`;
+    if(typeof lqMusicSync === 'function') lqMusicSync();
     return;
   }
   const quiz = lqQuiz(s.quizId);
@@ -1542,6 +1545,7 @@ function lqPaintStage(){
   // the stage, so without this the projector flickered back to "20" on each
   // answer, and an answer landing after "Time's up" left it stuck on "20".
   lqStageSyncTick();
+  if(typeof lqMusicSync === 'function') lqMusicSync();   // the games' music (teacher-livemusic.js, console only)
 }
 
 // English only on the projector for now (2026-09-29, Jonathan's ask — English
@@ -1750,7 +1754,7 @@ function lqPaintControls(){
   if(document.activeElement && (document.activeElement.id === 'lq-limit' || document.activeElement.id === 'lq-total') && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
-  const full = lqHideNamesInputHtml() + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">${lqIsFullscreen() ? 'Exit full screen' : 'Full screen'}</button>`
+  const full = lqHideNamesInputHtml() + (typeof lqMusicInputHtml === 'function' ? lqMusicInputHtml() : '') + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">${lqIsFullscreen() ? 'Exit full screen' : 'Full screen'}</button>`
     + (lqTPreview ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherExitPreview()">Exit preview</button>` : '');
   const pv = lqTPreview ? `<div class="lq-ctl-hint"><b>Preview</b>: only this screen sees it. No student is invited and nothing is saved.</div>` : '';
   if(lqTPreview && s && s.state === 'ended'){
