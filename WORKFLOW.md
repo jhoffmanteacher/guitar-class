@@ -56,6 +56,7 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   `tools/console-layout-smoke.mjs` there; put both facts in the brief): a routine for 2026-12-01 at 7:00 AM Pacific, model `claude-opus-5-5`, pushing its work as `ci-try/w27` and
   never to main (the Always-Reviewed review and the merge stay with the Mac). If it cannot, or nobody has written
   down the answer by 2026-12-01: Windows does it as before.
+  Windows: scheduled https://claude.ai/code/routines/trig_01QaU4ym5Rto8GuhJG8MZacF for 2026-12-01 7:00 AM Pacific (Opus, pushes `ci-try/w27` only).
 - [ ] **W28 — when nothing else is open: the most misleading old-name comments.** `todo.md` → "Small things" →
   "Comments that still say `app.js` / `coach.js` / `teacher.js`": in `index.html`, `tuner.js`, `guitar-diagrams.js`,
   `config-main.js`, `tabs/journey.js`, `live-quiz.js` and `fab-tools.js`, make each comment name the part
