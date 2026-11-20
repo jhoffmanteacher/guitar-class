@@ -51,9 +51,9 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
   snapshot before and after (`--compare` identical), `node tools/slow-load.mjs`,
   `node tools/mic-sim/coach-take-save.mjs` and the full checks. Delete the todo.md item in the same push.
-  **Windows: SCHEDULE only if the cloud can run headless Chrome** (the golden snapshots and `slow-load.mjs` need it;
-  the Look A cloud run of 2026-11-19 is the first to find out: its report, under "Where things stand", says). If it
-  can: a routine for 2026-12-01 at 7:00 AM Pacific, model `claude-opus-5-5`, pushing its work as `ci-try/w27` and
+  **Windows: SCHEDULE** (the cloud CAN run headless Chrome: the Look A run of 2026-11-19 used
+  `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome` through a wrapper that adds `--no-sandbox`, and ran
+  `tools/console-layout-smoke.mjs` there; put both facts in the brief): a routine for 2026-12-01 at 7:00 AM Pacific, model `claude-opus-5-5`, pushing its work as `ci-try/w27` and
   never to main (the Always-Reviewed review and the merge stay with the Mac). If it cannot, or nobody has written
   down the answer by 2026-12-01: Windows does it as before.
 - [ ] **W28 — when nothing else is open: the most misleading old-name comments.** `todo.md` → "Small things" →
@@ -91,7 +91,12 @@ Update this block whenever an item opens or closes.
   ACCEPTED; no "goal reached" toast on a Journey page is LEFT as it is. Do not raise the last two again.
 - The old-page tool (W22) stays parked on `origin/win/w22` (round 4 found a MAJOR) until a part split needs it.
 - The visual re-design look STARTED 2026-11-19 (Jonathan: "start redesign"): pictures only, two looks on three screens,
-  in `Claude outputs/redesign-2026-11/`. He picked Look A, "Tidy plum" (2026-11-19); next: build it (with W15).
+  in `Claude outputs/redesign-2026-11/`. He picked Look A, "Tidy plum" (2026-11-19). A cloud routine BUILT it on `ci-try/look-a` (tip 09357bf, 2026-11-19:
+  full checks 0, 1s 807 pairs ≥ 4.5:1, 52 rules folded in, `--text3` a touch darker to pass 1s, a new dark
+  `--rail-active`); GitHub's browser tests, practice copy (7-day preview) and rules runs on it all passed. Next:
+  Jonathan looks at the preview (its address is on the "Practice copy" run for that branch), then the Mac rebases
+  it onto main, runs the full checks and pushes (`Review: Fast`). W15 follows. `look-a-spec` and `ci-try/look-a`
+  are his to delete after the merge.
 
 **Dated:**
 - 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new signatures
