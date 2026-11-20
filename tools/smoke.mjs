@@ -194,7 +194,7 @@ async function openPage(port) {
    checks that every app part ran (the first top-level name each `defer` script in index.html declares, for the
    scripts the page itself lists, so a baseline checkout with other parts is not misread); if some did not, it
    says so and reloads ONCE more. A part that never runs twice in a row is the site's bug and is left
-   for the next step to report. The count prints at the end ("Chrome cut N reload(s) short"). */
+   for the next step to report. The count prints at the end, with how many the second load fixed. */
 const PART_PROBES = (() => {
   const out = [];
   for (const m of readFileSync(join(ROOT, 'index.html'), 'utf8').matchAll(/<script defer src="([^"]+\.js)"><\/script>/g)) {
@@ -218,11 +218,12 @@ const pageLoaded = async (page, ms = 30000, retried = false) => {
         if (!missing.length || retried) return true;
         const url = await page.evalJs('location.href').catch(() => null);
         if (!url) return true;
-        RELOADS_CUT.push(missing.length);
-        console.log(`smoke: note: Chrome cut a reload short (${missing.length} part(s) never ran: ${missing.slice(0, 4).join(' ')}${missing.length > 4 ? ' …' : ''}); reloading once more`);
+        console.log(`smoke: note: a reload ended with ${missing.length} part(s) never run: ${missing.slice(0, 4).join(' ')}${missing.length > 4 ? ' …' : ''}; reloading once more`);
         await page.send('Page.navigate', { url });
         await sleep(3500);
-        return pageLoaded(page, ms, true);
+        const ok = await pageLoaded(page, ms, true);
+        RELOADS_CUT.push({ n: missing.length, still: ok ? await partsNeverRan(page) : missing });
+        return ok;
       }
     } catch { /* between two documents */ }
     await sleep(200);
@@ -3303,7 +3304,10 @@ try {
     for (const e of report.slice(0, 40)) console.error(`  - [${e.step}] ${e.kind}: ${(e.text || '').replace(/\s+/g, ' ').slice(0, 220)}`);
     if (report.length > 40) console.error(`  … and ${report.length - 40} more`);
   } else console.log(`smoke: ✓ no JavaScript errors${base ? ' beyond the baseline' : ''}`);
-  if (RELOADS_CUT.length) console.log(`smoke: ✓ Chrome cut ${RELOADS_CUT.length} reload(s) short (${RELOADS_CUT.join(', ')} part(s) never ran); each was reloaded once more (W25, pageLoaded)`);
+  if (RELOADS_CUT.length) {
+    const stuck = RELOADS_CUT.filter(r => r.still.length);
+    console.log(`smoke: ${stuck.length ? '✗' : '✓'} ${RELOADS_CUT.length} reload(s) ended with parts that never ran (${RELOADS_CUT.map(r => r.n).join(', ')}); reloaded once more: ${RELOADS_CUT.length - stuck.length} then ran every part${stuck.length ? `, ${stuck.length} still did not (${[...new Set(stuck.flatMap(r => r.still))].join(' ')}): the site's bug, not Chrome's` : ' (Chrome cut them short, W25)'}`);
+  }
 } catch (e) { console.error('smoke: could not run —', e && e.message); exitCode = 2; }
 finally { clearInterval(watchdog); await runCleanup(); }
 process.exit(exitCode);
