@@ -38,6 +38,15 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report the cause and N of M walks
   failing before and after.
   Windows: started 09:23 (2026-11-19).
+  Windows DONE (2026-11-20), ready to merge: `win/w25-fix` (a1020de, 3b19117, 1de76ab; Fast, harness only, `tools/smoke.mjs`).
+  Cause: on GitHub's runners Chrome itself cancels a reload's in-flight defer scripts (`net::ERR_ABORTED`, ~100-150 ms
+  after the commit); the worker, its cache and the server held the full files, no page code navigated or stopped, the
+  worker stayed running. 28 of ~600 reloads after a cold boot failed, 0 of ~700 in every other pattern, 0 on Windows
+  (bfcache on/off A/B inconclusive). Fix: `pageLoaded()` checks each app part's first top-level name; a reload with
+  parts missing is noted and reloaded once; still missing = a ✗ line naming them (the site's bug). Break-it: a planted
+  throw in `app/cards-loop.js` -> 15 of 15 reloads caught, retried once, "15 still did not", exit 1. GitHub on
+  `ci-try/w25-fix`: 5 of 5 smoke areas pass. Before: 4 of ~46 main activities walks failed. `win/w25` holds only the
+  diagnostic notes (do not merge); `ci-try/w25-diag` and `ci-try/w25-fix` can be deleted.
 - [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
   job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
