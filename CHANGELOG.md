@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-20 — "Master of Puppets" removed from the Module 3 songs
+
+- **"Master of Puppets" (Metallica) is no longer in the Module 3 Choice songs.** Its lesson video was gone, so the song is taken out.
+
 ## 2026-11-20 — Songs open full screen, at full speed
 
 - **A play-along now opens in full screen, at Normal speed (1×).** Tap a song on the Songs page or a play-along card

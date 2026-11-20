@@ -1132,8 +1132,6 @@ MODULE_SONGS[3] = [
       { name: '"Zombie" — The Cranberries', meta: 'Em C G D power chord version', meta_es: 'Versión con acordes de potencia Em C G D', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=6Ejga4kJUts',
         tutorialUrl: 'https://www.youtube.com/watch?v=uGMybMuDKAU' },
-      { name: '"Master of Puppets" — Metallica', meta: 'Simplified intro power chord riff', meta_es: 'Riff de intro simplificado con acordes de potencia', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=hx27NL_iqEM' },
       { name: '"Blitzkrieg Bop" — Ramones', meta: 'A5 D5 E5 — fast punk, three chords', meta_es: 'A5 D5 E5 — punk rápido, tres acordes', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=268C3N2dDYk',
         tutorialUrl: 'https://www.youtube.com/watch?v=9lFufklJ-nU' },
