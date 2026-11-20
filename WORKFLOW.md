@@ -154,7 +154,8 @@ presses Verify.
   (W26 counts them), then one `site-reviewer` round.
 - On or after 2026-12-01: remove the split bridges (W27).
 - About mid-December: Power Chord Switch leaves the class; aim listening work at the Listening Coach and the other
-  mic features.
+  mic features. Its takes and timing rules stay, as the base for a chord switch game ("Power Chord Switch: where we
+  stopped").
 
 **Watch:**
 - The first classes on rule A. On the recorded takes, Power Chord Switch "right" fell from 322 to 296 of 416 changes.
@@ -417,6 +418,13 @@ The full text: `docs/workflow-history-to-2026-11-18.md`, section 4.
 The game is in `coach-chords.js`; its listening is in `coach-core.js` and `coach-score.js` (older notes say
 `coach.js`). It leaves the class about mid-December 2026. The full record (every decision with its measurements and
 tables, 2026-11-03 to 2026-11-18): `docs/workflow-history-to-2026-11-18.md`, section 5.
+
+**After it leaves: the base for a chord switch game** (Jonathan, 2026-11-20: "power chord switch will eventually be used
+to develop a chord switch game"). Keep its takes (`tools/mic-sim/takes/`) and its timing rules (onset, rule A, the
+whole-span rule, `ccLoop()`): the new game starts from them and is tested on those takes from day one. Measure again on
+the new game's own takes: the strum ratio (1.8 / 2.19 is Power Chord Switch's only) and how a chord is named (open
+chords ring six strings and share notes). Keep recording after mid-December: takes of open-chord changes (the new game,
+or Change Up meanwhile) are what it needs.
 
 **Live, and binding:**
 - **Rule A (2026-11-18; Jonathan: "A: no pitch never counts", "Shared fix for all four").** One helper,
