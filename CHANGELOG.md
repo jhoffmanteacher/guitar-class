@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-20 — Live games get their own colours
+
+- **Live in-class games now have an "arcade night" look**: deep indigo with neon pink, cyan and lime, and glowing
+  scores, on the projector and on your Chromebook's game screen. Every live game gets it. The rest of the site keeps
+  its usual colours.
+
+
 ## 2026-11-20 — New live game: Hear the chord change
 
 - **A new live in-class game, "Hear the chord change".** Your teacher plays part of Sweet Child O' Mine, "the cure"
