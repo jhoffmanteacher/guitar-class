@@ -95,8 +95,9 @@ Update this block whenever an item opens or closes.
 
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
 - Friday 2026-11-20: which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday
-  check of 2026-11-20 was cancelled and its routine (`trig_016m5HTbmhxb2oEqDaefQurB`) is DISABLED: re-enable it
-  when he says so (the next run then covers everything since `last-run.txt`).
+  check of 2026-11-20 was cancelled and its routine (`trig_016m5HTbmhxb2oEqDaefQurB`) is DISABLED. A one-time routine
+  (`trig_016pjBWVDN5ychbioZJqmVEf`) re-enables it Friday 2026-11-27 at 9 AM Pacific so it runs that night; check on
+  2026-11-27 that `enabled` is true (the next run covers everything since `last-run.txt`).
 - The three Friday-check product calls are settled (Jonathan, 2026-11-19): the Games heading now says "Notes on the
   fretboard"; the practice-minutes keepalive's dead-link loss (up to about 60 s, `practice-minutes.js` ~1082) is
   ACCEPTED; no "goal reached" toast on a Journey page is LEFT as it is. Do not raise the last two again.
