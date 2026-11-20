@@ -93,6 +93,34 @@ Update this block whenever an item opens or closes.
   `f4233e8` and `e0dd0cd` were reviewed (`site-reviewer-deep` on Opus, 1 round, 0 BLOCKER / 0 MAJOR, both MINORs
   fixed) but carry no Review trailer by mistake: read them as Reviewed.
 
+**For the Mac: three new Play Along songs (handed off from Windows 2026-11-20; Jonathan asked).** Skill
+`new-playalong`, coded cards with `--private` (his pick, not built songs), level "open chords, power first" (`versions:
+both`, `chordStart: power`). He said "find charts and roll with it": the chords below come from Ultimate Guitar and
+need no read-back. Windows had no private folder, so nothing was built or committed. Get the records again on the Mac:
+`yt-dlp -x --audio-format mp3 --audio-quality 192K -o "%(title)s [%(id)s].%(ext)s" <url>` for `rSWj__OmHis`,
+`1lrFsXkT_rM` and `U2I4l4fC6j8`. Measured on Windows (`playalong-measure.py`; per-half-bar chord reading from a
+chroma script, a guide only: E and G#m share two notes and blur):
+- **"Sailor Song" - Gigi Perez** (`1lrFsXkT_rM`): +18.3 cents, so put `"cents": 18` in the spec. STEADY (12 ms). 4/4 on
+  the eighth pulse (`--pulses-per-bar 8 --meter 4/4`): feltBpm 94.9925, files 95 / 79, anchor 9.971 (beat 1 was
+  CLOSE: pulse 7 vs 6), 80 bars plus a near-silent end. Key G#m / B. UG chart (5363001, 10.5k ratings): capo 4,
+  C Em | G, which SOUNDS E G#m | B. Write the sounding chords: a two-bar loop "E G#m", "B". The chroma read B for
+  about 3 of every 4 half bars, so check the loop's phase (`--beat1`) before writing it. Song map: band 1-24, singing
+  from about 25, loudest 49-70 (chorus), quiet 71-80 (outro).
+- **"유성 (Falling Star)" - Madmans Esprit** (`U2I4l4fC6j8`): +2.4 cents. STEADY until about 280 s, then a free-time
+  ending: end the card before it. 4/4 on the eighth pulse: feltBpm 120.0010, files 120 / 100, anchor 4.250, 142 bars
+  (138 before the ending). Key G#m. UG chart (4131862, 0 votes, verses only): G#m C#m C#sus4 C#m, then D#m7 G#m and
+  C#m G#m. Fold C#sus4 into C#m and D#m7 into D#m. The chroma shows a 4-bar loop of about "B | D#m C#m | E C#m | E"
+  from bar 41 on (E and B are not in the chart, but the record has them), and a quiet break at bars 57-73. Decide the
+  sections from the strip and those laps.
+- **"Recuérdame (Arrullo)" - Gael García Bernal, Lucy Hernández (Coco)** (`rSWj__OmHis`): 1:11 long, and Jonathan said
+  "build it with the 1:11". In tune (-0.1). It DRIFTS (50 ms mid-song), so the skill says stop: it needs `barTimes`,
+  and a coded card has no beat map. Ask him (AskUserQuestion): a Moises click export, or a built song with a measured
+  beat map. 3/4 on 6 eighths: feltBpm 83.9445, files 84 / 70, anchor 1.656, 32 bars (29 played). Key C major, which
+  matches UG 6053291 (C), not 6468074 (D). The chart line by line: C | Fm G | C | Fm G | F G Em Am | F Em Dm G | C |
+  Fm G | C | Fm Em | F G Em Am | Fm Dm | Fm C. Fm has no open shape the class knows, so its power chord is F5.
+Then steps 4-6 of the skill. Before the push, Jonathan uploads each song's two files (Manage → Song files) and
+presses Verify.
+
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
 - Friday 2026-11-20: which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday
   check of 2026-11-20 was cancelled and its routine (`trig_016m5HTbmhxb2oEqDaefQurB`) is DISABLED. A one-time routine
