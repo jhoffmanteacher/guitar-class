@@ -95,44 +95,26 @@ Update this block whenever an item opens or closes.
   `f4233e8` and `e0dd0cd` were reviewed (`site-reviewer-deep` on Opus, 1 round, 0 BLOCKER / 0 MAJOR, both MINORs
   fixed) but carry no Review trailer by mistake: read them as Reviewed.
 
-**For the Mac: three new Play Along songs (handed off from Windows 2026-11-20; Jonathan asked).** Skill
-`new-playalong`, coded cards with `--private` (his pick, not built songs), level "open chords, power first" (`versions:
-both`, `chordStart: power`). He said "find charts and roll with it": the chords below come from Ultimate Guitar and
-need no read-back. Windows had no private folder, so nothing was built or committed. Get the records again on the Mac:
-`yt-dlp -x --audio-format mp3 --audio-quality 192K -o "%(title)s [%(id)s].%(ext)s" <url>` for `rSWj__OmHis`,
-`1lrFsXkT_rM` and `U2I4l4fC6j8`. Measured on Windows (`playalong-measure.py`; per-half-bar chord reading from a
-chroma script, a guide only: E and G#m share two notes and blur):
-- **"Sailor Song" - Gigi Perez** (`1lrFsXkT_rM`): +18.3 cents, so put `"cents": 18` in the spec. STEADY (12 ms). 4/4 on
-  the eighth pulse (`--pulses-per-bar 8 --meter 4/4`): feltBpm 94.9925, files 95 / 79, anchor 9.971 (beat 1 was
-  CLOSE: pulse 7 vs 6), 80 bars plus a near-silent end. Key G#m / B. UG chart (5363001, 10.5k ratings): capo 4,
-  C Em | G, which SOUNDS E G#m | B. Write the sounding chords: a two-bar loop "E G#m", "B". The chroma read B for
-  about 3 of every 4 half bars, so check the loop's phase (`--beat1`) before writing it. Song map: band 1-24, singing
-  from about 25, loudest 49-70 (chorus), quiet 71-80 (outro).
-- **"유성 (Falling Star)" - Madmans Esprit** (`U2I4l4fC6j8`): +2.4 cents. STEADY until about 280 s, then a free-time
-  ending: end the card before it. 4/4 on the eighth pulse: feltBpm 120.0010, files 120 / 100, anchor 4.250, 142 bars
-  (138 before the ending). Key G#m. UG chart (4131862, 0 votes, verses only): G#m C#m C#sus4 C#m, then D#m7 G#m and
-  C#m G#m. Fold C#sus4 into C#m and D#m7 into D#m. The chroma shows a 4-bar loop of about "B | D#m C#m | E C#m | E"
-  from bar 41 on (E and B are not in the chart, but the record has them), and a quiet break at bars 57-73. Decide the
-  sections from the strip and those laps.
-- **"Recuérdame (Arrullo)" - Gael García Bernal, Lucy Hernández (Coco)** (`rSWj__OmHis`): 1:11 long, and Jonathan said
-  "build it with the 1:11". In tune (-0.1). It DRIFTS, so it needs `barTimes`. He made the Moises pair (2026-11-20, in
-  `C:\Users\jhoffman\Downloads` on Windows, both named `...Recuérdame _Arrullo_..._rSWj__OmHis_-C major-79bpm-440hz`:
-  the plain name has the CLICK, the "(1)" copy has none and is the original record, unchanged). Both are on the
-  TEMPORARY branch `transfer/recuerdame-moises` (`bd360ae`; a branch with only these two files, named
-  `moises/recuerdame-arrullo-click.mp3` and `-noclick.mp3`). Copy them out with
-  `git fetch origin transfer/recuerdame-moises && git show FETCH_HEAD:moises/<name> > <outside the repo>`, never into
-  `audio/`. Then delete the branch: `git push origin --delete transfer/recuerdame-moises` (the repo is public; Jonathan
-  asked for it to be up only briefly, 2026-11-20). The click file starts 2.100 s earlier (a count-in): trim 2.100 s off it, then
-  `tools/beat-map.py <no-click> <click-trimmed> 84 <downbeat> 3`. That found 88 clicks, 0 missed or doubled, beat gaps
-  0.60-0.94 s (Moises follows the singer's rubato, about 79 bpm), bars 2.0-2.6 s. Which click is beat 1 (0, 1 or 2;
-  anchors 0.303 / 1.133 / 1.893) was NOT settled: chroma per bar was too rough to match the chart, so check by ear
-  or ask him. `new-playalong.mjs` reads `barTimes` only in `--built` mode, so a coded card needs them typed into its
-  SNIPPET_TRACKS entry (as Teen Spirit has), or offer him a built song. Steady-grid reading (ignore it now): 3/4,
-  84 / 70, anchor 1.656. Key C major, which
-  matches UG 6053291 (C), not 6468074 (D). The chart line by line: C | Fm G | C | Fm G | F G Em Am | F Em Dm G | C |
-  Fm G | C | Fm Em | F G Em Am | Fm Dm | Fm C. Fm has no open shape the class knows, so its power chord is F5.
-Then steps 4-6 of the skill. Before the push, Jonathan uploads each song's two files (Manage → Song files) and
-presses Verify.
+**Done 2026-11-20: three new Play Along songs, all BUILT songs, imported by Jonathan** (not the coded cards the
+handoff asked for: he chose built songs once Import was shown to work; the coded-card commits are kept on the local
+branch `local/coded-songs` of the Mac, never pushed). "Sailor Song" - Gigi Perez (`sb-sailorsong`, 4/4, 95 bpm,
+bar 1 at 9.023 s; the bass notes moved beat 1 from the tool's pick, 9.971 s), "유성 (Falling Star)" - Madmans Esprit
+(`sb-fallingstar`, 4/4, 120 bpm, bar 1 at 4.000 s: beat-audit found the first guess 253 ms late; the chords come from
+the record's bass line, not from the thin web chart, and are UNCHECKED BY EAR) and "Recuérdame (Arrullo)"
+(`sb-recuerdamearrullo`, 4/4, a beat map of 22 bar times from the Moises pair, bar 1 at 1.893 s = the first loud
+beat; the first build was 3/4 from 1.133 s, which was a fade-in). Things to know:
+- `new-playalong.mjs --built` refuses a `cents` shift that delays the audio 10 ms or more; rubberband's 18-cent shift
+  delays it 23.2 ms. Sailor Song was built from a pre-shifted, delay-corrected wav (`adelay` 1114 samples at 48 kHz,
+  measured 0.01 ms against the upload) with no `cents` in the spec. The tool itself still refuses such a shift.
+- A record's tuning can move through the song (Sailor Song: +22 cents early, +10 late), so the whole-file TUNING
+  reading of a shifted copy is not "original minus the shift" (it read +8.7 after an 18-cent shift).
+- Slow files outside +-1 LU were levelled with `--accept-spread` on the coded route (Jonathan said levels matter
+  mainly for whole-class songs); the built route has one file and no slow copy.
+- An imported song's Beat step in the Song builder has no meter buttons: to change the meter use "Clear this step"
+  (the imported bars are gone), or rebuild the Import file with `new-playalong.mjs --built` (same id replaces).
+- `scipy` is not installed on the Mac; `tools/beat-map.py` ran from a scratch venv (numpy and scipy).
+- Still Jonathan's: delete the temporary branches `transfer/recuerdame-moises` and `transfer/recuerdame-import`
+  (the repo is public; they hold the audio); check each song by ear as a student; Falling Star's chords above all.
 
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
 - Friday 2026-11-20: which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday
