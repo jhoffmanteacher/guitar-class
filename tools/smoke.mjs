@@ -185,11 +185,46 @@ async function openPage(port) {
 /* A reload inside a walk waits for the page itself after its fixed pause. The app's parts are `defer` scripts, so
    every one has run once the document is complete. The fixed 3.5 s alone was too short once on a GitHub runner
    (2026-11-14, main a0f4047: the Note Call walk called functions from two parts that had not run yet). It gives up
-   after 30 s and lets the next step report what is missing. */
-const pageLoaded = async (page, ms = 30000) => {
+   after 30 s and lets the next step report what is missing.
+   W25 (2026-11-19, Windows): on GitHub's runners Chrome sometimes CANCELS a reload's in-flight scripts
+   (`net::ERR_ABORTED`, about 100-150 ms after the commit) and ends the load with those parts never run: 21 of
+   1,120 reloads in a cold-boot-then-reload loop, 0 of ~700 in every other pattern and 0 on Windows and the Mac.
+   The service worker, its cache and the server held the full files each time, no page code navigated or stopped,
+   and the worker stayed running; so it is the headless browser, not the site. Once the document is complete this
+   checks that every app part ran (the first top-level name each `defer` script in index.html declares, for the
+   scripts the page itself lists, so a baseline checkout with other parts is not misread); if some did not, it
+   says so and reloads ONCE more. A part that never runs twice in a row is the site's bug and is left
+   for the next step to report. The count prints at the end ("Chrome cut N reload(s) short"). */
+const PART_PROBES = (() => {
+  const out = [];
+  for (const m of readFileSync(join(ROOT, 'index.html'), 'utf8').matchAll(/<script defer src="([^"]+\.js)"><\/script>/g)) {
+    if (/^https?:/.test(m[1])) continue;
+    const f = m[1].replace(/^\.?\//, '');
+    if (!existsSync(join(ROOT, f))) continue;
+    const fn = readFileSync(join(ROOT, f), 'utf8').match(/^(?:async function|function|const|let|var|class) ([A-Za-z_$][\w$]*)/m);
+    if (fn) out.push([f, fn[1]]);
+  }
+  return out;
+})();
+const RELOADS_CUT = [];
+// `typeof name` sees a top-level const/let too (not on window); a name still in its dead zone throws: never ran.
+const partsNeverRan = page => page.evalJs(`[${PART_PROBES.map(([p, f]) => `[${JSON.stringify(p)}, (() => { try { return typeof ${f} === 'undefined'; } catch { return true; } })()]`).join(',')}].filter(([p, gone]) => gone && [...document.scripts].some(s => s.getAttribute('src') === p || s.getAttribute('src') === './' + p)).map(([p]) => p)`).catch(() => []);
+const pageLoaded = async (page, ms = 30000, retried = false) => {
   const t0 = Date.now();
   while (Date.now() - t0 < ms) {
-    try { if (await page.evalJs(`document.readyState === 'complete' && typeof devBypass === 'function'`)) return true; } catch { /* between two documents */ }
+    try {
+      if (await page.evalJs(`document.readyState === 'complete' && typeof devBypass === 'function'`)) {
+        const missing = await partsNeverRan(page);
+        if (!missing.length || retried) return true;
+        const url = await page.evalJs('location.href').catch(() => null);
+        if (!url) return true;
+        RELOADS_CUT.push(missing.length);
+        console.log(`smoke: note: Chrome cut a reload short (${missing.length} part(s) never ran: ${missing.slice(0, 4).join(' ')}${missing.length > 4 ? ' …' : ''}); reloading once more`);
+        await page.send('Page.navigate', { url });
+        await sleep(3500);
+        return pageLoaded(page, ms, true);
+      }
+    } catch { /* between two documents */ }
     await sleep(200);
   }
   return false;
@@ -3268,6 +3303,7 @@ try {
     for (const e of report.slice(0, 40)) console.error(`  - [${e.step}] ${e.kind}: ${(e.text || '').replace(/\s+/g, ' ').slice(0, 220)}`);
     if (report.length > 40) console.error(`  … and ${report.length - 40} more`);
   } else console.log(`smoke: ✓ no JavaScript errors${base ? ' beyond the baseline' : ''}`);
+  if (RELOADS_CUT.length) console.log(`smoke: ✓ Chrome cut ${RELOADS_CUT.length} reload(s) short (${RELOADS_CUT.join(', ')} part(s) never ran); each was reloaded once more (W25, pageLoaded)`);
 } catch (e) { console.error('smoke: could not run —', e && e.message); exitCode = 2; }
 finally { clearInterval(watchdog); await runCleanup(); }
 process.exit(exitCode);
