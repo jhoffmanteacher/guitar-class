@@ -1548,6 +1548,11 @@
     // The song library (2026-10-20, caIsLibrarySong in app.js): every
     // `library: true` practice card, for the whole class.
     'hub.libraryTitle':      { en: 'More Play Along songs', es: 'Más canciones para tocar con la banda' },
+    'hub.sortBy':            { en: 'Sort by', es: 'Ordenar por' },
+    'hub.sort.default':      { en: 'Level', es: 'Nivel' },
+    'hub.sort.title':        { en: 'Title', es: 'Título' },
+    'hub.sort.artist':       { en: 'Artist', es: 'Artista' },
+    'hub.sort.added':        { en: 'Date added', es: 'Fecha de alta' },
     'hub.choiceTitle':       { en: 'Choice menu', es: 'Menú a elección' },
     'hub.groupRiffs':        { en: 'First riffs & single notes', es: 'Primeros riffs y notas individuales' },
     'hub.groupChords':       { en: 'Chord & strumming songs', es: 'Canciones con acordes y rasgueo' },

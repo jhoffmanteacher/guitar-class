@@ -238,6 +238,11 @@ function openSongsScreen(){
   if(exit) exit.focus();
   renderSongsHub();
 }
+let songsSortKey = 'default';
+function songsSetSort(k){
+  songsSortKey = k;
+  renderSongsHub();
+}
 async function renderSongsHub(){
   const p = document.getElementById('songs-screen-body');
   if(!p) return;
@@ -304,7 +309,24 @@ async function renderSongsHub(){
     { title: t('hub.groupChords'), sub: t('hub.groupStartAnd', {a: 4, b: '6–8'}), match: e => CHORD_MODS.includes(firstMod(e)) },
     { title: t('hub.groupAdv'),    sub: t('hub.groupStart', {a: 9, b: 12}),       match: e => firstMod(e) >= 9 },
   ].map(g => ({ ...g, entries: rest.filter(g.match) })).filter(g => g.entries.length);
-  const ordered = [...coreEntries, ...groups.flatMap(g => g.entries), ...requestEntries];
+  /* Sort bar for the Choice menu (Jonathan, 2026-11-20): Level keeps the
+     difficulty groups; Title, Artist and Date added show one flat list.
+     A song's date is its `added` ('YYYY-MM-DD'); a song without one counts
+     as SONG_ADDED_DEFAULT, so only a song added after that date needs it. */
+  const SONG_ADDED_DEFAULT = '2026-11-20';
+  const nameOf = e => tf(e.song, 'name');
+  const titleOf = e => { const n = nameOf(e), c = n.indexOf(' \u2014 '); return (c > 0 ? n.slice(0, c) : n).replace(/^["\u201c\u201d]+|["\u201c\u201d]+$/g, ''); };
+  const artistOf = e => { const n = nameOf(e), c = n.indexOf(' \u2014 '); return c > 0 ? n.slice(c + 3) : ''; };
+  const cmp = (a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' });
+  const byTitle = (a, b) => cmp(titleOf(a), titleOf(b));
+  const SORTS = {
+    title:  byTitle,
+    artist: (a, b) => (!artistOf(a) - !artistOf(b)) || cmp(artistOf(a), artistOf(b)) || byTitle(a, b),
+    added:  (a, b) => cmp(b.song.added || SONG_ADDED_DEFAULT, a.song.added || SONG_ADDED_DEFAULT) || byTitle(a, b),
+  };
+  const sortKey = SORTS[songsSortKey] ? songsSortKey : 'default';
+  const sortedRest = sortKey === 'default' ? null : [...rest].sort(SORTS[sortKey]);
+  const ordered = [...coreEntries, ...(sortedRest || groups.flatMap(g => g.entries)), ...requestEntries];
   songsHubList = ordered.map(e => e.song);
   let rowIdx = 0;
   const row = (e) => {
@@ -346,8 +368,12 @@ async function renderSongsHub(){
       + `<div class="sh-play-slot sh-tile-acts" data-slug="${escAttr(songJourneySlug(sg))}" data-idx="${idx}">${songsCoreActsHtml(sg, idx)}</div></div></div>`;
   };
   const coreHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.coreTitle')}</div><div class="sh-core-grid">${coreEntries.map(tile).join('')}</div>`;
-  const groupsHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
-    `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
+  const sortBtn = k => `<button type="button" class="sh-lib-btn sh-sort-btn" aria-pressed="${sortKey === k}" onclick="songsSetSort('${k}')">${t('hub.sort.' + k)}</button>`;
+  const sortBar = `<div class="sh-sort-row" role="group" aria-label="${escAttr(t('hub.sortBy'))}"><span class="sh-sort-label">${t('hub.sortBy')}</span>${['default', 'title', 'artist', 'added'].map(sortBtn).join('')}</div>`;
+  const groupsHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.choiceTitle')}</div>${sortBar}` + (sortedRest
+    ? `<div class="sh-group open"><div class="sh-group-body">${renderRows(sortedRest)}</div></div>`
+    : groups.map((g, gi) =>
+    `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join(''));
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
   // The Mood Chart row that sat here was removed 2026-10-02 (Jonathan). The
   // page itself, mood-chart.html, still ships — nothing on the site links it.

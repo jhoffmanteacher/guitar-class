@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-20 — Songs page: sort the Choice menu
+
+- **Sort the Choice songs.** A "Sort by" bar above the Choice menu lets you order the songs by Title, Artist or Date added. "Level" brings back the groups by difficulty.
+
 ## 2026-11-20 — Live games get their own colours
 
 - **Live in-class games now have an "arcade night" look**: deep indigo with neon pink, cyan and lime, and glowing
@@ -13,7 +17,6 @@ see `WORKFLOW.md` and the git commit log.
   its usual colours.
 - **Full screen on the teacher's screen now keeps the game's buttons**, so the game can go on without leaving full
   screen.
-
 
 ## 2026-11-20 — New live game: Hear the chord change
 
