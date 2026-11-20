@@ -115,6 +115,13 @@ beat; the first build was 3/4 from 1.133 s, which was a fade-in). Things to know
 - `scipy` is not installed on the Mac; `tools/beat-map.py` ran from a scratch venv (numpy and scipy).
 - Still Jonathan's: delete the temporary branches `transfer/recuerdame-moises` and `transfer/recuerdame-import`
   (the repo is public; they hold the audio); check each song by ear as a student; Falling Star's chords above all.
+- **Sailor Song: capo 4, rebuild on the Mac** (Jonathan, 2026-11-20: "check if there's a capo... there are more parts
+  of it too. check out the youtube tutorial"; he picked "Capo 4 + easy shapes"). Built songs now take `song.capo` 1-9
+  (`app/builtsongs.js`; `new-playalong.mjs` spec field `capo`): chords written as played (C Em G, not E G#m B), the
+  line reads "Capo on fret 4.", a tapped chord sounds 4 higher. Open: rebuild `sb-sailorsong` with `"capo": 4` and its
+  other parts after watching the tutorial (`rpoyXduMZZw`, cut at 551 s; the cloud session could not open YouTube or
+  any chord site), then Jonathan imports it. Import only once this code is on main: an older page drops a doc with
+  `song.capo`. Then a CHANGELOG entry.
 
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
 - Friday 2026-11-20: which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday

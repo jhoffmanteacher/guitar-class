@@ -54,6 +54,7 @@
        name, n       per section: the built section name and number, when the label is not one of the list
        range         { "from": i, "to": j }: the card plays sections i..j (0-based); left out = the whole song
        builtId       the id, when the slug gives fewer than 8 letters and digits
+       capo          the capo fret, 1-9 (song.capo): write the chords as PLAYED with it (C Em G at capo 4, not E G#m B)
      Captions, label_es, fileSlug, key, slowBpm and durationSec are not needed. --private is refused with it.
      It ends by running node tools/built-song-check.mjs <id>.json --audio <audio.id>.mp3 and printing its line;
      the exit code is that tool's. --dry-run prints the Import file (audio entry still empty), the validator's
@@ -291,7 +292,7 @@ if (BUILT) {
     anchor = barTimes[0];
   }
   const song = Object.assign({ meter, bpm: Math.round(felt * 10000) / 10000, anchor }, barTimes ? { barTimes } : {}, { chords, bars, sections: secs,
-    level: versions === 'both' ? { versions, start: chordStart } : { versions } }, S.range ? { range: S.range } : {});
+    level: versions === 'both' ? { versions, start: chordStart } : { versions } }, S.range ? { range: S.range } : {}, S.capo !== undefined ? { capo: S.capo } : {});
   const file = { id: bid, v: 1, title: S.song, artist: S.artist, audio: null, song };
 
   const dir = songFilesDir();

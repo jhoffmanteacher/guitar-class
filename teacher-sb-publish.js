@@ -521,7 +521,8 @@ function sbDraftFromDoc(id, p){
     pitch: { cents: Number(doc.audio.centsOff), peaks: null }, beat,
     chart: { text: '', meter: s.meter, fmt: 'the imported song', fromImport: true, sections, left: [], kept, edited: true, shapes: JSON.parse(JSON.stringify(s.chords)) },
     level: { versions: lv.versions, start: lv.versions === 'both' ? lv.start : null, range: s.range ? { from: s.range.from, to: s.range.to } : null },
-    pubVer: Number(p.ver) || null, sheet: s.sheet && typeof s.sheet === 'object' ? JSON.parse(JSON.stringify(s.sheet)) : null };
+    pubVer: Number(p.ver) || null, sheet: s.sheet && typeof s.sheet === 'object' ? JSON.parse(JSON.stringify(s.sheet)) : null,
+    capo: Number.isInteger(s.capo) ? s.capo : null };
 }
 /* The draft of the selected published song: its own, or one rebuilt from the published doc and saved (also in place of
    a stale draft, review R2-1: that draft's own levelled copy is then deleted unless a listed song plays it). */

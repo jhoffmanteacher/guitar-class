@@ -23,6 +23,8 @@
        pubVer: the song's last edit number on the list, kept by Unpublish so a later Publish counts on | null
        sheet:  { id, bytes, sha256, cols? } | null   the published song's lyrics sheet (song.sheet, app/builtsongs.js), set
                and cleared with the song by the Lyrics sheet row (teacher-sb-sheet.js), so Edit and Publish keep it
+       capo:   1-9 | null   an imported song's song.capo (sbDraftFromDoc), kept through Edit and Publish; the builder
+               has no control for it (a song with a capo comes in through Import)
        imported: true for a draft rebuilt from an IMPORTED song (sbDraftFromDoc, teacher-sb-publish.js): no source,
                no volume measurements, a beat that came with the song (beat.fromImport), its chord shapes (chart.shapes)
        savedAt: the server's time }
@@ -618,7 +620,7 @@ function sbAutoLevel(keep){
 }
 /* The one draft writer. Saves the fields a draft has, with the server's time, and keeps the copy in memory. */
 function sbDraftDoc(d){
-  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'pubVer', 'imported', 'sheet'];
+  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'pubVer', 'imported', 'sheet', 'capo'];   // capo: 2026-11-20 (song.capo)
   const out = {};
   keep.forEach(k => { out[k] = d[k] === undefined ? null : d[k]; });
   out.v = 1;

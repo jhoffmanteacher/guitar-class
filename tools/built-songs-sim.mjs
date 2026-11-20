@@ -348,6 +348,29 @@ async function runCases(files){
       'sheet: a sheet id on SONG_FILES, or another built song\'s audio id with other bytes, leaves that song out alone');
   }
 
+  /* ── capo: song.capo (2026-11-20, Sailor Song at capo 4): shapes as played, the line says where the capo goes ── */
+  {
+    const g = GOOD.find(x => x.key === 'fourFour'), sx = GOOD.find(x => x.key === 'sixEight');
+    const withCapo = (src, c) => { const d = JSON.parse(JSON.stringify(src.doc)); d.song.capo = c; return d; };
+    const run = (id, d, what) => base.run(`(() => { const x = builtSongExpand(${JSON.stringify(id)}, ${JSON.stringify(d)}); return ${what}; })()`);
+    const d4 = withCapo(g, 4), d6 = withCapo(sx, 2);
+    ok(base.run(`builtSongCheck(${JSON.stringify(g.id)}, ${JSON.stringify(d4)}).length`) === 0 && base.run(`builtSongCheck(${JSON.stringify(sx.id)}, ${JSON.stringify(d6)}).length`) === 0, 'capo: a doc with song.capo 4 (full only) and 2 (both versions) passes builtSongCheck');
+    const bad = [0, 10, 2.5, '4', null, -1].filter(c => base.run(`builtSongCheck(${JSON.stringify(g.id)}, ${JSON.stringify(withCapo(g, c))}).some(w => /song\.capo/.test(w))`));
+    ok(bad.length === 6, `capo: 0, 10, 2.5, "4", null and -1 are refused with the capo reason (${bad.length} of 6)`);
+    const en = run(g.id, d4, 'x.activity.intro'), es = run(g.id, d4, 'x.activity.intro_es');
+    ok(en === 'Capo on fret 4. Play along with the band: G, C, D and Em.' && es === 'Capo en el traste 4. Toca con la banda: G, C, D y Em.', `capo: the directions say where the capo goes, then the chords as played (${en} / ${es})`);
+    const pe = run(sx.id, d6, 'x.activity.intro_power'), pes = run(sx.id, d6, 'x.activity.intro_power_es');
+    ok(/^Capo on fret 2\. /.test(pe) && /^Capo en el traste 2\. /.test(pes), `capo: the power-chord line says it too (${pe} / ${pes})`);
+    const plain = run(g.id, g.doc, 'x.activity.card.sections[0].notes[0]'), capoed = run(g.id, d4, 'x.activity.card.sections[0].notes[0]');
+    ok(JSON.stringify(plain.frets) === JSON.stringify(capoed.frets) && plain.note === capoed.note && capoed.midi.length === plain.midi.length && capoed.midi.every((m, i) => m === plain.midi[i] + 4),
+      `capo: a chord is drawn as written (${capoed.note} ${JSON.stringify(capoed.frets)}) and sounds 4 half steps higher (${JSON.stringify(plain.midi)} → ${JSON.stringify(capoed.midi)})`);
+    const pv = run(sx.id, d6, 'x.activity.chordVersions.power.Am'), pv0 = run(sx.id, sx.doc, 'x.activity.chordVersions.power.Am');
+    ok(pv.midi.every((m, i) => m === pv0.midi[i] + 2) && JSON.stringify(pv.frets) === JSON.stringify(pv0.frets), 'capo: the power-chord shapes sound higher by the capo too, drawn as written');
+    ok(GOOD.every(x => !/Capo/.test(run(x.id, x.doc, 'x.activity.intro + x.activity.intro_es'))), `capo: no fixture without song.capo says Capo (${GOOD.length} of ${GOOD.length})`);
+    const short = base.run(`bsIntro(['G','C','D','Em','Am','A','E','F','Bm','Dm','B','Bb','C#m','F#m','G#m','D#m','A#m'], 'en', 3)`);
+    ok(short === 'Capo on fret 3. Play along, one part at a time.' && base.run(`bsIntro([], 'es', 3)`) === 'Capo en el traste 3. Toca una parte a la vez.', `capo: a line too long for one row falls back to the short one, still with the capo (${short})`);
+  }
+
   /* ── refused: one broken doc per rule, each left out alone ── */
   {
     const good = GOOD.find(g => g.key === 'fourFour');
@@ -555,6 +578,11 @@ async function main(){
       ['app/builtsongs.js', 'every refusal logged', "if(bsLogged) return;\n  bsLogged = true;", "bsLogged = true;"],
       ['app/builtsongs.js', 'an audio (or sheet) id on SONG_FILES kept', "if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, fid)){ why.push(", "if(false){ why.push("],
       /* song.sheet (2026-11-18): a chord sheet pdf in the song-file store, the card's Lyrics view. */
+      /* song.capo (2026-11-20). */
+      ['app/builtsongs.js', 'song.capo not checked', "if(s.capo !== undefined && (!bsInt(s.capo)", "if(false && (!bsInt(s.capo)"],
+      ['app/builtsongs.js', 'the capo left out of the directions', "intro: bsIntro(shown, 'en', capo), intro_es: bsIntro(shown, 'es', capo),", "intro: bsIntro(shown, 'en'), intro_es: bsIntro(shown, 'es'),"],
+      ['app/builtsongs.js', 'a capo chord sounds as written', "midi.push(BS_OPEN_MIDI[i] + f[i] + up);", "midi.push(BS_OPEN_MIDI[i] + f[i]);"],
+      ['app/builtsongs.js', 'song.capo refused as an unknown field', "'level', 'range', 'sheet', 'capo']);", "'level', 'range', 'sheet']);"],
       ['app/builtsongs.js', 'song.sheet not checked', "  if(s.sheet !== undefined){\n    const sh = s.sheet;", "  if(false){\n    const sh = s.sheet;"],
       ['app/builtsongs.js', 'a sheet id that is the audio id allowed', "else if(bsIsObj(a) && sh.id === a.id) no(", "else if(false) no("],
       ['app/builtsongs.js', 'no Lyrics view made from song.sheet', "    act.card.otherViews = { lyrics };\n", ""],

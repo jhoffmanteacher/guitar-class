@@ -67,6 +67,11 @@
                           chord grid, the same in English and Spanish, escaped where drawn
      level      { versions: 'full' | 'power' | 'both', start?: 'full' | 'power' } — Full chords only, Power
                 chords only, or both with the switch (start = which one it opens on; needed with 'both')
+     capo       optional 1-9 (2026-11-20, Jonathan: Sailor Song, capo 4 with G shapes): the fret the capo goes on.
+                The chords are then named and shaped AS PLAYED with the capo (C, Em, G), checked as written; the
+                directions line starts "Capo on fret N." and a tapped chord sounds N half steps higher, as the
+                record does. A page older than this format refuses a doc with song.capo (the whole song is left out
+                there), so the reader ships before the first song with a capo is imported.
      range      optional { from, to }: the card plays sections from..to (0-based, inclusive; Jonathan, 2026-11-14:
                 a from-to range, no gaps). Left out = the whole song. The card always LOOPS at its end (no
                 wholeSong; Jonathan: like ca-51)
@@ -224,10 +229,11 @@ function bsList(names, lang){
 }
 /* The directions line over the card (an activity's intro): the chords it uses, or the short line when that would
    not fit one rendered line (BS_CAP, both languages). */
-function bsIntro(names, lang){
-  if(!names.length) return bsLang('bs.introShort', lang);   // a card of rests only names no chord
-  const long = bsLang('bs.intro', lang, { chords: bsList(names, lang) });
-  return long.length <= BS_CAP ? long : bsLang('bs.introShort', lang);
+function bsIntro(names, lang, capo){
+  const c = capo ? 'Capo' : '';   // with a capo the line says where it goes first (bs.introCapo / bs.introShortCapo)
+  if(!names.length) return bsLang('bs.introShort' + c, lang, capo ? { capo } : undefined);   // a card of rests only names no chord
+  const long = bsLang('bs.intro' + c, lang, { chords: bsList(names, lang), capo });
+  return long.length <= BS_CAP ? long : bsLang('bs.introShort' + c, lang, capo ? { capo } : undefined);
 }
 
 /* ── The validator: every reason a doc is refused ([] = fine). `id` is the doc's id. Pure: no DOM, no store. Used
@@ -260,7 +266,7 @@ function builtSongCheck(id, doc){
   }
   const s = doc.song;
   if(!bsIsObj(s)) return no('song (the chart) is missing');
-  const sx = bsKeysOnly(s, ['meter', 'bpm', 'anchor', 'barTimes', 'chords', 'bars', 'sections', 'level', 'range', 'sheet']);
+  const sx = bsKeysOnly(s, ['meter', 'bpm', 'anchor', 'barTimes', 'chords', 'bars', 'sections', 'level', 'range', 'sheet', 'capo']);
   if(sx.length) no(`the chart has unknown field(s): ${sx.slice(0, 4).join(', ')} (a built song is never a whole-song, journey, teacher-only, check or required card)`);
   if(s.sheet !== undefined){
     const sh = s.sheet;
@@ -275,6 +281,7 @@ function builtSongCheck(id, doc){
       if(sh.cols !== undefined && sh.cols !== 1 && sh.cols !== 2) no('song.sheet.cols is 1 (one column) or 2 (two columns), or left out');
     }
   }
+  if(s.capo !== undefined && (!bsInt(s.capo) || s.capo < 1 || s.capo > 9)) no('song.capo is the fret the capo goes on, 1 to 9, or left out');
   const meter = bsMeter(s.meter);
   if(!meter) return no(`meter ${JSON.stringify(s.meter)} is not 4/4, 3/4 or 6/8`);
   if(!bsNum(s.bpm) || s.bpm < 30 || s.bpm > 260) no('bpm is not a number from 30 to 260 (counted beats a minute)');
@@ -368,13 +375,14 @@ function builtSongCheck(id, doc){
 /* ── The expansion: a checked doc → one ordinary practice card, one SNIPPET_TRACKS entry, one song-file entry.
    Every string a student reads comes from i18n.js (both languages) except the title, the artist and the lyric
    lines, which are the teacher's and the same in both. ── */
-function bsNoteOf(name, shape, beats, label){
-  const f = shape.frets, frets = [], midi = [];
-  for(let i = 0; i < 6; i++) if(f[i] !== null){ frets.push([BS_STRINGS[i], f[i]]); midi.push(BS_OPEN_MIDI[i] + f[i]); }
+/* `capo`: the shape is drawn as written and SOUNDS that many half steps higher (song.capo). */
+function bsNoteOf(name, shape, beats, label, capo){
+  const f = shape.frets, frets = [], midi = [], up = capo || 0;
+  for(let i = 0; i < 6; i++) if(f[i] !== null){ frets.push([BS_STRINGS[i], f[i]]); midi.push(BS_OPEN_MIDI[i] + f[i] + up); }
   return { frets, note: label || name, midi, beats };
 }
 function builtSongExpand(id, doc){
-  const s = doc.song, meter = bsMeter(s.meter), lv = s.level;
+  const s = doc.song, meter = bsMeter(s.meter), lv = s.level, capo = s.capo || 0;
   const versions = lv.versions;
   const notesFull = versions !== 'power';          // the notes hold full chords (a power-only card holds power chords)
   /* The chords the CARD plays (the sections in its range), in the order they first sound: the directions line and
@@ -384,7 +392,7 @@ function builtSongExpand(id, doc){
   const noteFor = x => {
     if(!x.name) return { rest: true, beats: x.beats };
     const c = s.chords[x.name];
-    return notesFull ? bsNoteOf(x.name, c.full, x.beats) : bsNoteOf(x.name, c.power, x.beats, bsChordName(x.name).q === '5' ? x.name : bsPowerName(x.name));
+    return notesFull ? bsNoteOf(x.name, c.full, x.beats, undefined, capo) : bsNoteOf(x.name, c.power, x.beats, bsChordName(x.name).q === '5' ? x.name : bsPowerName(x.name), capo);
   };
   const r = s.range || { from: 0, to: s.sections.length - 1 };
   const sections = s.sections.slice(r.from, r.to + 1).map(x => {
@@ -409,16 +417,16 @@ function builtSongExpand(id, doc){
   const act = {
     id, view: 'card', library: true, optional: true,
     title: name + BS_SEP + bsLang('bs.titleEnd', 'en'), title_es: name + BS_SEP + bsLang('bs.titleEnd', 'es'),
-    intro: bsIntro(shown, 'en'), intro_es: bsIntro(shown, 'es'),
+    intro: bsIntro(shown, 'en', capo), intro_es: bsIntro(shown, 'es', capo),
     card: { track: id, chordGrid: true, slowest: true, caption: bsLang('bs.caption', 'en'), caption_es: bsLang('bs.caption', 'es'), sections, checks: [] },
     steps: [],
   };
   if(versions === 'both'){
     const power = {};
-    used.forEach(n => { power[n] = bsNoteOf(n, s.chords[n].power, undefined, bsChordName(n).q === '5' ? n : bsPowerName(n)); delete power[n].beats; });
+    used.forEach(n => { power[n] = bsNoteOf(n, s.chords[n].power, undefined, bsChordName(n).q === '5' ? n : bsPowerName(n), capo); delete power[n].beats; });
     act.chordVersions = { power };
     act.chordStart = lv.start;
-    act.intro_power = bsIntro(powerNames, 'en'); act.intro_power_es = bsIntro(powerNames, 'es');
+    act.intro_power = bsIntro(powerNames, 'en', capo); act.intro_power_es = bsIntro(powerNames, 'es', capo);
   }
   /* THE LYRICS VIEW (song.sheet): the card's sections, drawn as his pdf, read loose (CARD VIEWS, app/cards-views.js;
      THE LOOSE READ, app/cards-sheet.js). One column unless cols is 2. */

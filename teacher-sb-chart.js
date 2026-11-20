@@ -385,6 +385,8 @@ function sbSongOf(d){
   if(lv.range && Number.isInteger(lv.range.from) && Number.isInteger(lv.range.to)) song.range = { from: lv.range.from, to: lv.range.to };
   /* The published song's lyrics sheet (the Lyrics sheet row, teacher-sb-sheet.js), kept through Edit and Publish. */
   if(d.sheet && typeof d.sheet === 'object') song.sheet = JSON.parse(JSON.stringify(d.sheet));
+  /* An imported song's capo (song.capo, app/builtsongs.js), kept through Edit and Publish. */
+  if(Number.isInteger(d.capo) && d.capo > 0) song.capo = d.capo;
   return song;
 }
 /* builtSongCheck's own reasons on the draft as a song ([] = it passes). The pitch reason is the Volume step's to

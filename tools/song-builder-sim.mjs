@@ -139,7 +139,7 @@ function clone(v){
   if(v && typeof v === 'object'){ const o = {}; for(const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
 }
-const DRAFT_KEYS = 'artist,audio,beat,chart,imported,level,pitch,pubVer,savedAt,sheet,source,step,title,v,volume';   // sheet: 2026-11-18 (the lyrics sheet, teacher-sb-sheet.js)
+const DRAFT_KEYS = 'artist,audio,beat,capo,chart,imported,level,pitch,pubVer,savedAt,sheet,source,step,title,v,volume';   // sheet: 2026-11-18 (the lyrics sheet, teacher-sb-sheet.js); capo: 2026-11-20 (song.capo)
 function rulesCheck(op, path, data){
   const p = path.split('/');
   if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces')))
@@ -1448,6 +1448,17 @@ async function importCases(consoleSrc, check){
     check('imported song: its page now offers Edit (a choice of 6 steps, Chart highlighted) and Unpublish, says what a rebuilt draft cannot bring back, and has no draft yet',
       steps === 6 && /class="sb-btn small primary" data-sb-act="edit-step" data-sb-v="4"/.test(h) && /data-sb-act="unpublish"/.test(h) && /chart's original text, the taps, the loudness numbers and the original mp3/.test(h) && !F6.S.has('songDrafts/' + A),
       JSON.stringify({ steps, draft: F6.S.has('songDrafts/' + A) }));
+  }
+  /* E1c (2026-11-20): an imported song with a capo (song.capo) keeps it through the rebuilt draft, its save, and the
+     doc that draft publishes; with no change it reads as no change; a draft with none publishes none. */
+  {
+    const doc = JSON.parse(JSON.stringify(F6.S.get('builtSongs/' + A))); delete doc.savedAt; doc.song.capo = 4;
+    const r = run(`(() => { const p = { doc: ${JSON.stringify(doc)}, ver: 9 }; const d = sbDraftFromDoc(${JSON.stringify(A)}, p);
+      const saved = sbDraftDoc(d); const out = sbDocOf(saved); const plain = sbDocOf(Object.assign({}, saved, { capo: null }));
+      return { draft: d.capo, saved: saved.capo, out: out && out.song.capo, same: sbSameSong(saved, p), lost: !sbSameSong(Object.assign({}, saved, { capo: null }), p),
+        plain: plain && ('capo' in plain.song), check: out ? builtSongCheck(${JSON.stringify(A)}, out).length : -1 }; })()`);
+    check('capo: an imported song with song.capo 4 keeps it in the rebuilt draft, in the saved draft and in the doc it publishes (no change; dropping it IS a change), which passes builtSongCheck; a draft with no capo publishes none',
+      r.draft === 4 && r.saved === 4 && r.out === 4 && r.same && r.lost && r.plain === false && r.check === 0, JSON.stringify(r));
   }
   /* E2: Edit on Beat: the draft is rebuilt and saved once; the steps say what came with the song */
   {

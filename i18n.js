@@ -533,6 +533,8 @@
     'bs.intro':                { en: 'Play along with the band: {chords}.', es: 'Toca con la banda: {chords}.' },
     'bs.introShort':           { en: 'Play along with the band, one part at a time.', es: 'Toca con la banda, una parte a la vez.' },
     'bs.and':                  { en: ' and ', es: ' y ' },
+    'bs.introCapo':            { en: 'Capo on fret {capo}. Play along with the band: {chords}.', es: 'Capo en el traste {capo}. Toca con la banda: {chords}.' },
+    'bs.introShortCapo':       { en: 'Capo on fret {capo}. Play along, one part at a time.', es: 'Capo en el traste {capo}. Toca una parte a la vez.' },
     'bs.sec.intro':            { en: 'Intro', es: 'Intro' },
     'bs.sec.verse':            { en: 'Verse', es: 'Estrofa' },
     'bs.sec.prechorus':        { en: 'Pre-chorus', es: 'Pre-coro' },
