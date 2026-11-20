@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-20 — "the cure" lyric sheet cleaned up
+
+- **One swear word on "the cure" lyric sheet is now a blank line.** The chords and everything else on the sheet are
+  the same.
+
+
 ## 2026-11-20 — Songs page: sort the Choice menu
 
 - **Sort the Choice songs.** A "Sort by" bar above the Choice menu lets you order the songs by Title, Artist or Date added. "Level" brings back the groups by difficulty.
