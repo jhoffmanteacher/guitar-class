@@ -34,7 +34,7 @@
                      so Claude can make a clean slow file later from the same source
      The stored copy is ONE file: the record levelled to "the cure" (one measured gain, a -1 dBFS limiter), 192k
      constant bitrate (Jonathan, 2026-11-14). Its four speeds are that one file played at 0.65, 0.85, 0.9 and 1,
-     pitch held (pcSpeed3Html, app/cards.js), opening on 0.85. A built track with a `srcSlow` (a clean slow file
+     pitch held (pcSpeed3Html, app/cards.js), opening on Normal, 1× (2026-11-20). A built track with a `srcSlow` (a clean slow file
      made later by a code push) would use today's two-file stops; v1 docs have none.
 
    THE CHART: `song` (format v1). Firestore refuses an array directly inside an array, so nothing here nests

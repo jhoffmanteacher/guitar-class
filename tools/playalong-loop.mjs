@@ -66,7 +66,7 @@
          at a rate halfway between the slow file's tempo and 1.
          A track with NO slow file (a built song, app/builtsongs.js) has the same four stops on its one file, at
          ONE_FILE_RATES below (0.65, 0.85, 0.9 and 1: the work order's numbers, typed here and compared with the
-         page's PC_ONE_FILE_RATES), and the card opens on Slower at 0.85 (data-slow "" and data-rate "0.85"). Every
+         page's PC_ONE_FILE_RATES), and the card opens on Normal at 1 (data-slow "" and data-rate "1"; 2026-11-20). Every
          stop reads the record's clock: the bars never move.
      R5 A section covers bars fromBar .. fromBar + bars x reps - 1; its notes are one pass of `bars` bars and
          the pass repeats `reps` times. Sections follow each other with no gap (the tool fails a card where they
@@ -2313,12 +2313,12 @@ async function main() {
         const d = checkDrawing(x.chart, o.scan, x.meter, x.view);
         drawIssues = d.issues; M.tables = d.tables; TT.pages += o.scan.pages.length;
       }
-      /* R4, one file: the four stops are the one file at ONE_FILE_RATES and the card opens on Slower (0.85). */
+      /* R4, one file: the four stops are the one file at ONE_FILE_RATES and the card opens on Normal (1, since 2026-11-20). */
       if (!M.tr.srcSlow) {
-        const want = STOPS.map((st, i) => st + '@' + ONE_FILE_RATES[i] + (i === 1 ? '*' : ''));
+        const want = STOPS.map((st, i) => st + '@' + ONE_FILE_RATES[i] + (i === 3 ? '*' : ''));
         if (!o.oneFile) drawIssues.push('a track with no slow file, and the speed control is not marked as one file (data-one-file)');
         if (JSON.stringify(o.ticks) !== JSON.stringify(want)) drawIssues.push(`the speed stops read ${o.ticks.join(' ') || '(none)'}; one file has ${want.join(' ')}`);
-        if (o.state.slow !== '' || o.state.rate !== String(ONE_FILE_RATES[1]) || o.slider !== '1') drawIssues.push(`the card opens with data-slow "${o.state.slow}", data-rate "${o.state.rate}", the slider on ${o.slider}; one file opens on Slower: "", "${ONE_FILE_RATES[1]}", 1`);
+        if (o.state.slow !== '' || o.state.rate !== String(ONE_FILE_RATES[3]) || o.slider !== '3') drawIssues.push(`the card opens with data-slow "${o.state.slow}", data-rate "${o.state.rate}", the slider on ${o.slider}; one file opens on Normal: "", "${ONE_FILE_RATES[3]}", 3`);
         TT.openChecked = (TT.openChecked || 0) + 1;
       }
       if (built && (a.id === 'ca-51' || a.id === CA51_BUILT_ID)) {

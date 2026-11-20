@@ -586,6 +586,18 @@ function caFullBtnHtml(){
   return `<button type="button" class="ca-bar-full" onclick="caToggleFullscreen()" title="${escAttr(on ? lab : t('ca.fullTitle'))}">`
     + `${on ? CA_FULL_ICON_OFF : CA_FULL_ICON_ON}<span class="ca-bar-full-lab">${escHtml(lab)}</span></button>`;
 }
+/* A play-along opens in full screen (Jonathan, 2026-11-20: "have songs default to full screen 1x speed when they
+   are opened" — every play-along card, from In-Class Activities, the Songs page, a pin or a Level up). Called from
+   the TAP that opens it (caCardMarkOpening, songsHubOpenCard, caOpenPin, caOpenLinkedCard): the browser enters full
+   screen only inside a tap, so a reload or a deep link still opens in the normal window. Any other kind of card,
+   the console preview and a browser that can't do it: nothing. Leaving is as before (the button, Esc, All activities). */
+function caSongFullscreen(a){
+  if(!caIsCard(a) || caFullscreenNow()) return;
+  try {
+    if(document.fullscreenEnabled && document.documentElement.requestFullscreen)
+      document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  } catch(e) { /* an old browser: the normal window */ }
+}
 function caToggleFullscreen(){
   try {
     if(caFullscreenNow()){ document.exitFullscreen().catch(() => {}); return; }
@@ -723,7 +735,10 @@ function caAutoStartMetro(a){
 // left alone, matching "closing a card does not scroll."
 function caCardMarkOpening(summary){
   const details = summary.closest('.ca-card');
-  if(details && !details.open) details.dataset.caOpening = '1';
+  if(details && !details.open){
+    details.dataset.caOpening = '1';
+    caSongFullscreen((window.CLASS_ACTIVITIES || []).find(x => x.id === details.dataset.id));
+  }
 }
 // Steps within one activity are a single-open accordion, independent of the
 // module-station .dp builder's own step/focus-mode machinery (deliberately —
@@ -1190,6 +1205,7 @@ function caOpenPin(id){
   const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(!a || !caPinReachable(a)) return;
   caSwap = null;
+  caSongFullscreen(a);
   caFocusActivity(id);
   caAutoStartMetro(a);
 }

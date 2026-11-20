@@ -254,19 +254,25 @@ function pcPlayBtnHtml(playing){
    data-rate; the card's data-rate is what pcRate() reads. */
 function pcSlowRate(tr){ return (1 + tr.trackBpmSlow / tr.trackBpm) / 2; }
 /* ONE-FILE SPEEDS (2026-11-14, Jonathan: "the browser slows the one file"): a track with no slow file (a built song,
-   app/builtsongs.js) gets the same four stops on its ONE file, at these rates, pitch held, opening on Slower (0.85).
+   app/builtsongs.js) gets the same four stops on its ONE file, at these rates, pitch held. Every card opens on Normal (1×, PC_START_NORMAL).
    The bars never move (the same file at another rate), so data-slow stays '' at every stop and only data-rate
    changes. A track that has a srcSlow keeps the two-file stops above, unchanged. */
 const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];
+/* Every play-along card opens on Normal, 1× (Jonathan, 2026-11-20: "have songs default to full screen 1x speed when
+   they are opened" — every play-along, In-Class Activities and the Songs page). Was Slower (the slow file, or 0.85
+   on one file). The card's data-slow / data-rate (pcCardHtml), the slider's START and the two-way switch all
+   start here; full screen is caSongFullscreen (app/activities-2.js). */
+const PC_START_NORMAL = true;
 function pcOneFile(tr){ return !!tr && !tr.srcSlow; }
 /* A control's tooltip naming its key (KEYS, below). None in the console's
    preview (`preview`), where the keys are off. */
 function pcKeyTitle(key, preview){ return preview ? '' : ` title="${escAttr(t(key))}"`; }
 function pcSpeedSwitchHtml(preview){
-  return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}"${pcKeyTitle('pc.keys.speed', preview)} onclick="pcSetSpeed(this)">`
-    +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
+  const n = PC_START_NORMAL;   // checked = Normal (pcSetSpeed)
+  return `<button type="button" class="pc-speed" role="switch" aria-checked="${n}" aria-label="${escAttr(t('ca.cardSpeedAria'))}"${pcKeyTitle('pc.keys.speed', preview)} onclick="pcSetSpeed(this)">`
+    +   `<span class="pc-speed-lab${n ? '' : ' on'}">${escHtml(t('ca.cardSlower'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
-    +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
+    +   `<span class="pc-speed-lab${n ? ' on' : ''}">${escHtml(t('ca.cardNormal'))}</span></button>`;
 }
 /* The Guitar switch (2026-10-09, Jonathan: "a switch like the old tempo
    switch" that says "guitar on / guitar off"): the same track-and-knob as
@@ -307,7 +313,7 @@ function pcSpeed3Html(tr, preview){
     ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4),   pcSlowRate(tr)],
     ['normal',  'ca.cardNormal',  1,                           1],
   ];
-  const START = 1;   // Slower — the card opens with data-slow="1" (one file: data-rate="0.85")
+  const START = PC_START_NORMAL ? 3 : 1;   // Normal (1×) — matches the card's data-slow / data-rate (pcCardHtml)
   const ticks = stops.map(([speed, key, rate, factor], i) => {
     const x = pcSpeedFactor(factor);
     return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
@@ -472,7 +478,7 @@ function caCardBodyHtml(a, opts){
      card, the hero card, the console preview) gets it the same way. */
   const sheet = !!a.card.sheet && typeof pcSheetHtml === 'function';   /* the sheet is app/cards-sheet.js, a later part: a page with the new cards.js without it draws the tab (W24 review R1-1) */
   if(sheet) setTimeout(pcSheetScan, 0);
-  return `<div class="pc" data-id="${escAttr(a.id)}"${pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
+  return `<div class="pc" data-id="${escAttr(a.id)}"${PC_START_NORMAL ? ' data-slow="" data-rate="1"' : pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a) + (typeof caViewSwitchHtml === 'function' ? caViewSwitchHtml(a) : '')   /* Chords / Tab / Lyrics: app/cards-views.js, a later part; guarded so a page that has the new cards.js without it still draws the card (W23 review R1-1) */
     + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES

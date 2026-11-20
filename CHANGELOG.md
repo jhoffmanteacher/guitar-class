@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-20 — Songs open full screen, at full speed
+
+- **A play-along now opens in full screen, at Normal speed (1×).** Tap a song on the Songs page or a play-along card
+  on In-Class Activities and it fills the screen and plays at the record's speed. The speed control is still there
+  to slow it down, and the Full screen button (or Esc) takes you back to the normal window.
+
 ## 2026-11-20 — "the cure" lyric sheet cleaned up
 
 - **One swear word on "the cure" lyric sheet is now a blank line.** The chords and everything else on the sheet are

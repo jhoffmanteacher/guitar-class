@@ -489,6 +489,7 @@ function songsCoreActsHtml(sg, idx){
 }
 function songsHubOpenCard(id){
   caSwap = null;   // from the Songs page it opens under the Songs heading, not in a card's slot
+  caSongFullscreen((window.CLASS_ACTIVITIES || []).find(x => x.id === id));   // a play-along opens in full screen
   goExploreHash('class-activities/' + id);
 }
 /* Song popularity (Jonathan, 2026-11-01: a counter on the teacher dashboard

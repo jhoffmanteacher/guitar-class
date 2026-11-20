@@ -887,6 +887,7 @@ function caCardLinkHtml(from, id){
 function caOpenLinkedCard(from, id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   caSwap = b && !caIsVisible(b) ? { from, to: id } : null;
+  caSongFullscreen(b);
   goExploreHash('class-activities/' + id);
 }
 /* The Journey button renders in an activity's LAST step only — every

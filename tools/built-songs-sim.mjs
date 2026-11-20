@@ -16,13 +16,13 @@
      zero      with no built song (the list missing, empty, refused, offline with no device copy, nobody signed
                in, no IndexedDB at all): CLASS_ACTIVITIES and SNIPPET_TRACKS deep-equal before and after (the same
                objects, the same tracks), no audio entry, no repaint, no write, no error-log line; every
-               coded practice card still has its two-file stops (no data-one-file, data-slow="1", Slowest 0.8 of the
+               coded practice card still has its two-file stops (no data-one-file, opens on Normal: data-slow="", Slowest 0.8 of the
                slow file, Slow at pcSlowRate) — the guard that 0 built songs changes nothing a student sees
      merge     the made-up fixtures (tools/built-songs-fixtures.mjs: 4/4, 3/4, 6/8 counted in six, a beat map,
                power chords only, both versions opening each way, lyric lines, a 1-bar section, 15 sections, a
                from-to range, and a built copy of ca-51) each merge as ONE library card and ONE one-file track,
                render through caCardBodyHtml in English and Spanish (section buttons, names, lyrics escaped, the
-               chord names of the view it opens on, the one-file stops 0.65 / 0.85 / 0.9 / 1 opening on 0.85), are
+               chord names of the view it opens on, the one-file stops 0.65 / 0.85 / 0.9 / 1 opening on 1), are
                on the Songs page list, never visible on In-Class Activities, never on the board, never moved by
                config/class.songLibrary, have no Mark complete, and fit their file
      sheet     (2026-11-18) a doc with song.sheet passes, expands to ONE Lyrics view (otherViews.lyrics: the private
@@ -223,8 +223,8 @@ async function runCases(files){
       const tr = SNIPPET_TRACKS[caView(a).card.track]; const h = caCardBodyHtml(a); if (!h) continue;
       const rates = [...h.matchAll(/class="pc-speed-tick[^"]*"[^>]*data-rate="([^"]+)"/g)].map(m => m[1]);
       const want = [String(SLOWEST_RATE), '1', pcSlowRate(tr).toFixed(4), '1'];
-      out.push({ id: a.id, ok: !/data-one-file/.test(h) && /<div class="pc" data-id="[^"]+" data-slow="1"/.test(h) && JSON.stringify(rates) === JSON.stringify(want) && !!tr.srcSlow }); } return out; })()`);
-    ok(res.length === 26 && res.every(r => r.ok), `zero: every coded practice card keeps its two-file stops (no data-one-file, data-slow="1", ${res.filter(r => r.ok).length} of ${res.length} cards; ${res.filter(r => !r.ok).map(r => r.id).join(', ')})`);
+      out.push({ id: a.id, ok: !/data-one-file/.test(h) && /<div class="pc" data-id="[^"]+" data-slow="" data-rate="1"/.test(h) && JSON.stringify(rates) === JSON.stringify(want) && !!tr.srcSlow }); } return out; })()`);
+    ok(res.length === 26 && res.every(r => r.ok), `zero: every coded practice card keeps its two-file stops (no data-one-file, opens on Normal, ${res.filter(r => r.ok).length} of ${res.length} cards; ${res.filter(r => !r.ok).map(r => r.id).join(', ')})`);
   }
 
   /* ── merge ── */
@@ -261,9 +261,9 @@ async function runCases(files){
         const firstChord = d.song.bars.map(b => b.split(/\s+/)[0].split(':')[0]).find(n => n !== '-');
         const shownName = start === 'power' && !/5$/.test(firstChord) ? firstChord.replace(/m$/, '') + '5' : firstChord;
         ok(h.length > 500 && (secs.length > 1 ? chips === secs.length : chips === 0) && names.every(n => h.includes(escapeHtml(n))) && rates === '0.65,0.85,0.9,1'
-          && /<div class="pc" data-id="[^"]+" data-slow="" data-rate="0.85"/.test(h) && /data-one-file="1"/.test(h)
+          && /<div class="pc" data-id="[^"]+" data-slow="" data-rate="1"/.test(h) && /data-one-file="1"/.test(h)
           && lyr.every(t => h.includes(`pc-row-label">${escapeHtml(t)}</div>`)) && h.includes(`>${escapeHtml(shownName)}<span class="tab-spkr"`),
-          `merge ${g.key} [${lang}]: renders through caCardBodyHtml: ${secs.length} section${secs.length === 1 ? '' : 's'} named in ${lang}, ${lyr.length} lyric line${lyr.length === 1 ? '' : 's'} escaped, opens on ${start} chords (${shownName}), the stops 0.65 / 0.85 / 0.9 / 1 opening on 0.85`);
+          `merge ${g.key} [${lang}]: renders through caCardBodyHtml: ${secs.length} section${secs.length === 1 ? '' : 's'} named in ${lang}, ${lyr.length} lyric line${lyr.length === 1 ? '' : 's'} escaped, opens on ${start} chords (${shownName}), the stops 0.65 / 0.85 / 0.9 / 1 opening on 1`);
       }
       p.run(`setLang('en')`);
     }
