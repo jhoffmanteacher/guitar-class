@@ -187,8 +187,8 @@ async function openPage(port) {
    (2026-11-14, main a0f4047: the Note Call walk called functions from two parts that had not run yet). It gives up
    after 30 s and lets the next step report what is missing.
    W25 (2026-11-19, Windows): on GitHub's runners Chrome sometimes CANCELS a reload's in-flight scripts
-   (`net::ERR_ABORTED`, about 100-150 ms after the commit) and ends the load with those parts never run: 21 of
-   1,120 reloads in a cold-boot-then-reload loop, 0 of ~700 in every other pattern and 0 on Windows and the Mac.
+   (`net::ERR_ABORTED`, about 100-150 ms after the commit) and ends the load with those parts never run: 28 of
+   ~600 reloads in a cold-boot-then-reload loop, 0 of ~700 in every other pattern and 0 on Windows and the Mac.
    The service worker, its cache and the server held the full files each time, no page code navigated or stopped,
    and the worker stayed running; so it is the headless browser, not the site. Once the document is complete this
    checks that every app part ran (the first top-level name each `defer` script in index.html declares, for the
