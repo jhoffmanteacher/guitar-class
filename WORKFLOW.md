@@ -115,8 +115,12 @@ chroma script, a guide only: E and G#m share two notes and blur):
 - **"Recuérdame (Arrullo)" - Gael García Bernal, Lucy Hernández (Coco)** (`rSWj__OmHis`): 1:11 long, and Jonathan said
   "build it with the 1:11". In tune (-0.1). It DRIFTS, so it needs `barTimes`. He made the Moises pair (2026-11-20, in
   `C:\Users\jhoffman\Downloads` on Windows, both named `...Recuérdame _Arrullo_..._rSWj__OmHis_-C major-79bpm-440hz`:
-  the plain name has the CLICK, the "(1)" copy has none and is the original record, unchanged). He has to copy
-  both to the Mac. The click file starts 2.100 s earlier (a count-in): trim 2.100 s off it, then
+  the plain name has the CLICK, the "(1)" copy has none and is the original record, unchanged). Both are on the
+  TEMPORARY branch `transfer/recuerdame-moises` (`bd360ae`; a branch with only these two files, named
+  `moises/recuerdame-arrullo-click.mp3` and `-noclick.mp3`). Copy them out with
+  `git fetch origin transfer/recuerdame-moises && git show FETCH_HEAD:moises/<name> > <outside the repo>`, never into
+  `audio/`. Then delete the branch: `git push origin --delete transfer/recuerdame-moises` (the repo is public; Jonathan
+  asked for it to be up only briefly, 2026-11-20). The click file starts 2.100 s earlier (a count-in): trim 2.100 s off it, then
   `tools/beat-map.py <no-click> <click-trimmed> 84 <downbeat> 3`. That found 88 clicks, 0 missed or doubled, beat gaps
   0.60-0.94 s (Moises follows the singer's rubato, about 79 bpm), bars 2.0-2.6 s. Which click is beat 1 (0, 1 or 2;
   anchors 0.303 / 1.133 / 1.893) was NOT settled: chroma per bar was too rough to match the chart, so check by ear
