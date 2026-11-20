@@ -86,7 +86,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-changes.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -4962,7 +4962,7 @@ function checkSpanishDrift() {
    values in coach.js — instead of guessed at.
    ════════════════════════════════════════════════════════════════════ */
 const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 'teacher.js',
-  'live-quiz.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
+  'live-quiz.js', 'live-changes.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
 
 // (stripJsComments lives in the shared-helpers block above — i18n.js's own
 // top-of-file "how to add a key" doc comment uses example strings like
@@ -5101,6 +5101,11 @@ function checkMissingI18nKeys(I18N) {
             if (/\{\w+\}/.test(entry[lang] || '')) { err(`live-quiz.js LIVE_QUIZZES['${id}'].promptKey '${q.promptKey}' (${lang}) carries a {param}: a Name prompt must not name the chord`); problems++; dynamicBad++; }
           }
         }
+      } else if (q.type === 'changes') {
+        /* "Hear the Chord Change" (2026-11-20, live-changes.js): the songs are its own (LQ_CC_SONGS); the bank entry
+           carries no choices, no strings, and no speed scoring (the console plays the song after the round opens). */
+        if (q.choices || q.strings) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'changes' but has choices or strings (its songs are LQ_CC_SONGS, live-changes.js)`); problems++; dynamicBad++; }
+        if (q.speedBonus !== false) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'changes' and must have speedBonus:false (the teacher's song sounds after the round opens)`); problems++; dynamicBad++; }
       } else {
         err(`live-quiz.js LIVE_QUIZZES['${id}'] has unknown type '${q.type}'`); problems++; dynamicBad++;
       }
@@ -5740,7 +5745,7 @@ async function checkLiveQuizPcNameNoLeak() {
    ════════════════════════════════════════════════════════════════════ */
 const DUPLICATE_GLOBALS_ALLOWED = new Set(['isTuningWarmupSection']);
 const CLASSIC_SCRIPTS = ['app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js',
-  'live-quiz.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
+  'live-quiz.js', 'live-changes.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
 
 function checkDuplicateGlobals() {
   head('1g. Duplicate top-level globals');
@@ -6591,6 +6596,29 @@ const PRECACHED_EXTRA_COUNT = 7;   // 6 + fonts/rubik-mono-one-top5.woff2 (the T
    An accidental edit to the pitch code fails here at the next commit, not in class. Not a spec: a deliberate change
    re-pins in the tool (--measure) with its reason. The deep listening tests stay in tools/mic-sim/.
    ════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════
+   1ey. HEAR THE CHORD CHANGE (2026-11-20, live-changes.js): tools/live-changes-sim.mjs runs the REAL game code on
+   every section of the three songs (the chord changes from the cards and beat maps, the 0.1 s / 0.5 s windows, the
+   points, the Stop, the overlap in Sweet Child's C D G bars) and one round end to end on made-up clocks (a Chromebook
+   37 s off with 40-400 ms delays, its one send, the console's Reveal, no name in the public scores). About 1 s.
+   ════════════════════════════════════════════════════════════════════ */
+function checkLiveChanges() {
+  head('1ey. Hear the Chord Change: the real game code on every section of its three songs (tools/live-changes-sim.mjs)');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'live-changes-sim.mjs')], { encoding: 'utf8', timeout: 60000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const last = lines[lines.length - 1] || '';
+  const m = /^live-changes-sim: (\d+) sections over 3 songs, (\d+) chord changes; .*; (\d+) of (\d+) cases pass$/.exec(last);
+  if (r.status !== 0 || !m || m[3] !== m[4]) {
+    err('tools/live-changes-sim.mjs failed' + (r.error ? ': ' + r.error.message : '') + ' — replay: node tools/live-changes-sim.mjs');
+    problems++;
+    for (const l of [...lines.filter(l => /FAIL/.test(l)).slice(0, 8), ...(r.stderr || '').trim().split('\n').slice(-4)]) if (l) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  /* Pinned: 29 sections and 458 changes today (the three cards' 143 + 94 + 224 sheet chords, less each song's first
+     chord). A song or section that drops out of the game, or a card edit that moves its changes, shows here. */
+  if (m[1] !== '29' || m[2] !== '458') { err(`1ey: the game now has ${m[1]} sections and ${m[2]} chord changes (pinned at 29 and 458): if a card's sections or chords changed on purpose, re-pin here`); problems++; return; }
+  ok(last.replace(/^live-changes-sim: /, ''));
+}
 function checkToneTest() {
   head('1cx. The pitch detectors read made-up tones as they did (tools/tone-test.mjs)');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'tone-test.mjs')], { encoding: 'utf8', timeout: 120000 });
@@ -22340,7 +22368,7 @@ function checkWeekendStreaks() {
   const files = [];
   try {
     for (const n of ['app.js', 'coach.js', 'teacher.js']) for (const p of siteParts(n, ROOT)) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
-    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
+    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-changes.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
       if (existsSync(join(ROOT, p))) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
   } catch (e) { fail('could not read the site scripts: ' + e.message); return; }
   // comments out, line breaks kept: a reported line number is the file's own
@@ -23067,6 +23095,7 @@ function checkNeverRules(sets) {
   checkLiveGamesList();
   await checkLiveQuizPcNameNoLeak();
   checkLiveQuizHideNames();
+  checkLiveChanges();
   checkCoachVerdicts();
   checkToneTest();
   await checkCountIn();

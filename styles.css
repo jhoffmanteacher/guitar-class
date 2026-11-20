@@ -5273,6 +5273,20 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-choice:hover{filter:brightness(1.08)}
 .lq-choice:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,0.22)}
 .lq-choice[disabled]{opacity:.45;cursor:default;box-shadow:none}
+/* Hear the Chord Change (live-changes.js): one big button the space bar also
+   presses, the press count, the rule; on the stage, how far into the section. */
+.lq-cc-song{text-align:center;font-weight:700;color:var(--blue-text);margin-top:4px}
+.lq-cc-note{text-align:center;color:var(--text2);font-size:0.9375rem;margin:0 0 10px}
+.lq-cc-tap{display:block;width:100%;min-height:110px;border:0;border-radius:16px;
+  background:#185fa5;color:#fff;font-family:inherit;font-size:1.75rem;font-weight:700;
+  cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.25);touch-action:manipulation;user-select:none}
+.lq-cc-tap.hit{animation:lq-cc-hit .18s ease-out}
+@keyframes lq-cc-hit{from{transform:translateY(3px);filter:brightness(1.3)}to{transform:none;filter:none}}
+.lq-cc-n{text-align:center;font-size:1.125rem;font-weight:700;color:var(--text);margin:12px 0 4px;font-variant-numeric:tabular-nums}
+.lq-cc-rule{text-align:center;color:var(--text2);font-size:0.875rem}
+.lq-cc-progress{width:100%;height:12px;border-radius:6px;background:rgba(127,127,127,0.25);overflow:hidden;margin:14px auto;max-width:720px}
+.lq-cc-progress span{display:block;height:100%;width:0;background:#185fa5;transition:width .1s linear}
+@media (prefers-reduced-motion: reduce){.lq-cc-tap.hit{animation:none}.lq-cc-progress span{transition:none}}
 @media(max-width:380px){.lq-choices{grid-template-columns:1fr}.lq-choice{min-height:60px}}
 
 .lq-wait{text-align:center;padding:18px 0 6px}

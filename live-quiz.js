@@ -182,6 +182,18 @@ const LIVE_QUIZZES = {
     strings: ['lowE', 'A'],
     changeAnswer: true,
     countOnly: true
+  },
+  /* "Hear the Chord Change" (Jonathan, 2026-11-20): the console plays a section of a song on the room speakers and
+     every student presses the space bar at each chord change. Its own file, live-changes.js (loaded after this one,
+     index.html only), holds the songs, the clock and the scoring; this entry and the type 'changes' branches below
+     are all this file knows of it. No choices, no strings, no limitSec: the song is the clock. */
+  'changes': {
+    id: 'changes',
+    type: 'changes',
+    titleKey:  'lq.title.changes',
+    promptKey: 'lq.prompt.changes',
+    teacherHint: 'Pick a song, then a section to play it on the room speakers. Students press the space bar at every chord change; the round is scored about 3 seconds after the song stops.',
+    speedBonus: false
   }
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
@@ -210,7 +222,7 @@ function lqCustomTitle(lang, s, id){
 function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
 // The strings a fret quiz may ASK on; `strings` alone unless the board shows more (pc-find).
 function lqRootStrings(quiz){ return quiz.rootStrings || quiz.strings || []; }
-function lqType(quiz){ return quiz.type === 'fret' ? 'fret' : (quiz.type === 'pcname' ? 'pcname' : 'mc'); }
+function lqType(quiz){ return quiz.type === 'fret' ? 'fret' : (quiz.type === 'pcname' ? 'pcname' : (quiz.type === 'changes' ? 'changes' : 'mc')); }
 // Natural notes per string, fret → letter. Mirrors app.js FG_NATURALS; kept
 // here because this file must not depend on app.js (Journey pages).
 const LQ_NATURALS = {
@@ -551,6 +563,7 @@ function lqStopListening(){
   if(lqUnsub){ try{ lqUnsub(); }catch(e){} lqUnsub = null; }
   lqSession = null; lqMyAnswer = null; lqJoinedId = null; lqInviteAnsweredId = null; lqRestoring = null;
   lqStopTick();
+  if(typeof lqCcReset === 'function') lqCcReset();
   lqSyncBanner(); lqSyncInvite();
 }
 
@@ -574,6 +587,7 @@ function lqOnSession(data){
   // choices came back and the rules allow `update`, so a reload was a
   // second pick. Read our own answer doc back before taking a tap.
   if(live && Number(live.qIndex) >= 0 && (!prev || prev.sessionId !== live.sessionId)) lqRestoreMyAnswer(live);
+  if(typeof lqCcOnSession === 'function') lqCcOnSession(data, live);   // "Hear the Chord Change": its clock and its round (live-changes.js)
   lqSyncBanner();
   lqSyncInvite();
   lqRenderStudent();
@@ -932,6 +946,7 @@ function lqStudentLobbyHtml(){
 function lqStudentQuestionHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStudentFretQuestionHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStudentPcNameQuestionHtml(s, quiz);
+  if(lqType(quiz) === 'changes') return typeof lqCcStudentQuestionHtml === 'function' ? lqCcStudentQuestionHtml(s) : '';
   const head = lqQNumHtml(s)
     + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}">${escHtml(t(quiz.promptKey))}</div>`
     + lqTimerHtml(s);
@@ -1027,6 +1042,7 @@ function lqCorrectVerdictHtml(me){
 function lqStudentRevealHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStudentFretRevealHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStudentPcNameRevealHtml(s, quiz);
+  if(lqType(quiz) === 'changes') return typeof lqCcStudentRevealHtml === 'function' ? lqCcStudentRevealHtml(s) : '';
   const correct = lqChoice(quiz, s.correct);
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
   const me = (s.scores || {})[lqUid()] || null;
@@ -1135,6 +1151,7 @@ function lqStudentEndedHtml(s){
 function lqTallyRows(s, quiz){
   // pcname: all eight names, always in button order, the right one green.
   if(lqType(quiz) === 'pcname') return lqPcNames().map(id => ({ id, label: id, key: null, color: id === s.correct ? '#3b6d11' : LQ_PC_NAME_COLOR }));
+  if(lqType(quiz) === 'changes') return [];   // no tally bars: its tally is class totals (live-changes.js)
   if(lqType(quiz) !== 'fret') return quiz.choices.map(c => ({ id:c.id, label:t(c.key), key:c.key, color:c.color }));
   const tally = s.tally || {};
   const correctIds = lqCorrectIds(s);
@@ -1318,6 +1335,7 @@ function lqTSetLimit(quizId, v){
   try { localStorage.setItem('gc-lq-limits', JSON.stringify(lqTLimits)); } catch(e){}
 }
 function lqLimitInputHtml(quizId){
+  if(lqType(lqQuiz(quizId)) === 'changes') return '';   // the song is the clock
   const v = lqTLimitFor(quizId);
   return `<label class="lq-ctl-lbl">Time to answer <input type="number" id="lq-limit" class="lq-limit" min="0" max="${LQ_LIMIT_MAX}" step="0.5" inputmode="decimal" value="${v ? escAttr(String(v)) : ''}" placeholder="none" onchange="lqTSetLimit('${escAttr(quizId)}',this.value);this.value=lqTLimitFor('${escAttr(quizId)}')||''"> sec</label>`;
 }
@@ -1338,7 +1356,7 @@ function lqTSetAutoReveal(on){
   lqTArmAutoReveal();
 }
 function lqAutoRevealInputHtml(quizId){
-  if(lqType(lqQuiz(quizId)) === 'mc') return '';
+  if(lqType(lqQuiz(quizId)) === 'mc' || lqType(lqQuiz(quizId)) === 'changes') return '';   // changes: it reveals when the song stops
   return `<label class="lq-ctl-lbl"><input type="checkbox" id="lq-autoreveal"${lqTAutoReveal ? ' checked' : ''} onchange="lqTSetAutoReveal(this.checked)"> Reveal when time runs out</label>`;
 }
 // Called after every change to lqTSession (snapshot, preview write, exiting
@@ -1560,6 +1578,7 @@ function lqStageLobbyHtml(s, quiz){
 function lqStageQuestionHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStageFretQuestionHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStagePcNameQuestionHtml(s, quiz);
+  if(lqType(quiz) === 'changes') return typeof lqCcStageQuestionHtml === 'function' ? lqCcStageQuestionHtml(s) : '';
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
@@ -1631,6 +1650,7 @@ function lqStagePcNameRevealHtml(s, quiz){
 function lqStageRevealHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStageFretRevealHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStagePcNameRevealHtml(s, quiz);
+  if(lqType(quiz) === 'changes') return typeof lqCcStageRevealHtml === 'function' ? lqCcStageRevealHtml(s) : '';
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
   const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
@@ -1747,26 +1767,28 @@ function lqPaintControls(){
     }
     const opts = ids.map(id =>
       `<option value="${escAttr(id)}"${id === lqTPickedQuizId ? ' selected' : ''}>${escHtml(lqCustomTitle('en', null, id) || tIn(LIVE_QUIZZES[id].titleKey, 'en'))}</option>`).join('');
-    const scoring = `<label class="lq-ctl-lbl">Scoring
+    const scoring = (lqType(lqQuiz(lqTPickedQuizId)) === 'changes' ? '' : `<label class="lq-ctl-lbl">Scoring
       <select id="lq-scoring" onchange="lqTScoring=this.value">
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
         <option value="speed"${lqTScoring === 'speed' ? ' selected' : ''}>Faster = more points</option>
-      </select></label>`
+      </select></label>`)
       + lqTotalInputHtml() + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
     el.innerHTML = `<label class="lq-ctl-lbl">Game <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>`
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherPreview()"${busy}>Preview</button>${closeBtn}${full}`
-      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Questions: how many the game has (blank or 0 = no set number). Time to answer: blank or 0 = no limit. Reveal when time runs out: the app presses Reveal for you about a second after the clock hits 0 (only on quizzes the app scores). Preview runs the quiz on this screen only, without inviting students.</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Questions: how many the game has (blank or 0 = no set number).${lqType(lqQuiz(lqTPickedQuizId)) === 'changes' ? '' : ' Time to answer: blank or 0 = no limit. Reveal when time runs out: the app presses Reveal for you about a second after the clock hits 0 (only on quizzes the app scores).'} Preview runs the quiz on this screen only, without inviting students.</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);
   const fret = lqType(quiz) === 'fret';
   const pcname = lqType(quiz) === 'pcname';
+  const changes = lqType(quiz) === 'changes' && typeof lqCcPickerHtml === 'function';
   if(s.state === 'lobby'){
     const opener = fret ? lqFretPickerHtml(quiz, busy)
       : pcname ? lqPcNamePickerHtml(quiz, busy)
+      : changes ? lqCcPickerHtml(busy)
       : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>First question</button>`;
     el.innerHTML = opener
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Cancel</button>${full}`
@@ -1779,6 +1801,8 @@ function lqPaintControls(){
       head = `<button type="button" class="lq-ctl go" onclick="lqTeacherRevealFret()"${busy}>Reveal</button>`;
     } else if(pcname){
       head = `<button type="button" class="lq-ctl go" onclick="lqTeacherRevealPcName()"${busy}>Reveal</button>`;
+    } else if(changes){
+      head = `<button type="button" class="lq-ctl go" onclick="lqTeacherCcStop()"${busy}>Stop the song</button>` + (typeof lqCcStatusHtml === 'function' ? lqCcStatusHtml() : '');
     } else {
       const picks = quiz.choices.map(c =>
         `<button type="button" class="lq-ctl mark" style="--lq-c:${c.color}" onclick="lqTeacherReveal('${c.id}')"${busy}>`
@@ -1797,6 +1821,7 @@ function lqPaintControls(){
   }
   const opener = fret ? lqFretPickerHtml(quiz, busy)
     : pcname ? lqPcNamePickerHtml(quiz, busy)
+    : changes ? lqCcPickerHtml(busy)
     : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`;
   el.innerHTML = opener + lqLimitInputHtml(s.quizId) + lqAutoRevealInputHtml(s.quizId)
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}` + pv;
@@ -1871,6 +1896,7 @@ async function lqTeacherPreview(){
 }
 function lqTeacherExitPreview(){
   if(!lqTPreview) return;
+  if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
   lqTPreview = false;
   lqTSession = lqTReal;
   lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();
@@ -1895,19 +1921,20 @@ function lqPreviewWrite(patch, replace){
 // `target` is set only by lqTeacherOpenFret (a fret quiz's note picker); the
 // plain "First/Next question" button calls this with no argument, same as
 // always, and an mc quiz never reads s.target.
-async function lqTeacherNext(target){
+async function lqTeacherNext(target, extra){
   const s = lqTSession;
   if(!s) return;
   const next = s.state === 'lobby' ? 0 : Number(s.qIndex) + 1;
   if(Number(s.totalQ) > 0 && next >= Number(s.totalQ)) return;   // the set number of questions has been asked
   // The time box between questions can change the limit mid-game; each new
   // question carries whatever it says now.
-  return lqWrite({
+  // `extra`: fields one question type adds (Hear the Chord Change: limitSec 0 and its `cc`, live-changes.js).
+  return lqWrite(Object.assign({
     state: 'question', qIndex: next, correct: null, correctIds: null, tally: null,
     limitSec: lqTLimitFor(s.quizId),
     target: target || null,
     askedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  }, extra || {}));
 }
 
 // Opens a fret question: validates the string against the quiz, resolves
@@ -1969,8 +1996,11 @@ async function lqTeacherOpenPcName(){
    judge — it reads this round's answer docs, marks them against the choice
    just clicked, and writes the running totals back onto the session doc so
    they survive a dashboard refresh and every student can see their own.
-   Shared by the mc and fret reveal below. */
-function lqScoreRound(s, rows, isRight, tallyKeys, isValidId){
+   Shared by the mc and fret reveal below.
+   `pointsOf(a)` (Hear the Chord Change, live-changes.js): a round scored in
+   points per answer rather than right or wrong; an answer is "right" when it
+   earns any, and no tally is counted here. */
+function lqScoreRound(s, rows, isRight, tallyKeys, isValidId, pointsOf){
   const tally = {};
   if(tallyKeys) tallyKeys.forEach(k => { tally[k] = 0; });
   const scores = {};
@@ -1981,13 +2011,15 @@ function lqScoreRound(s, rows, isRight, tallyKeys, isValidId){
   });
   rows.forEach(a => {
     if(!a.uid) return;
-    if(tallyKeys){
+    if(pointsOf){
+      // no tally: the caller keeps its own totals
+    } else if(tallyKeys){
       if(tally[a.choice] != null) tally[a.choice]++;
     } else if(!isValidId || isValidId(a.choice)){
       tally[a.choice] = (tally[a.choice] || 0) + 1;
     }
-    const right = isRight(a);
-    const pts = right ? lqPoints(a.ms, s) : 0;
+    const pts = pointsOf ? Math.max(0, Math.round(Number(pointsOf(a)) || 0)) : (isRight(a) ? lqPoints(a.ms, s) : 0);
+    const right = pointsOf ? pts > 0 : isRight(a);
     const cur = scores[a.uid] || { pts: 0, right: 0, answered: 0 };    // NO name here: this doc is read by every signed-in account
     cur.pts = (cur.pts || 0) + pts;
     cur.right = (cur.right || 0) + (right ? 1 : 0);
@@ -2047,15 +2079,18 @@ async function lqTeacherEnd(){
   const s = lqTSession;
   if(!s) return;
   if(s.state === 'question' && !lqTPreview){   // a preview round scores nothing anyway
-    const howToScore = lqType(lqQuiz(s.quizId)) !== 'mc' ? 'press Reveal' : 'mark the correct answer';   // fret and pcname: the app scores at Reveal
+    const type = lqType(lqQuiz(s.quizId));
+    const howToScore = type === 'changes' ? 'press Stop the song (or let the section finish)' : type !== 'mc' ? 'press Reveal' : 'mark the correct answer';   // fret and pcname: the app scores at Reveal
     if(!window.confirm('This question is still open. If you end the game now, this round is thrown away and nobody gets points for it.\n\n'
       + 'To count it: Cancel, ' + howToScore + ', then End game.\n\nEnd the game now anyway?')) return;
   }
+  if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
   await lqWrite({ state: 'ended', correct: null, endedAt: firebase.firestore.FieldValue.serverTimestamp(), scores: lqPublicScores(s.scores) }, 'fields');
 }
 // Takes the game off every student's screen. Scores stay in the doc — it's
 // the state flag students key off, so nothing is destroyed by clearing.
 async function lqTeacherClose(){
   if(!lqTSession) return;
+  if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
   await lqWrite({ state: 'off', correct: null, tally: null, scores: lqPublicScores(lqTSession.scores) }, 'fields');
 }

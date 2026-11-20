@@ -3126,7 +3126,19 @@
     'lq.answerPcAlso':       { en: '{chord}: the root is fret {n} or fret {m} on the {string} string', es: '{chord}: la raíz está en el traste {n} o en el traste {m} de la cuerda {string}' },
     // "Name the power chord" (2026-11-10): the chord box is the question, so the prompt carries NO param (a {chord} would answer it).
     'lq.title.pcName':       { en: 'Name the power chord', es: 'Nombra el acorde de potencia' },
-    'lq.prompt.pcName':      { en: 'Which power chord is this?', es: '¿Qué acorde de potencia es este?' }
+    'lq.prompt.pcName':      { en: 'Which power chord is this?', es: '¿Qué acorde de potencia es este?' },
+    // "Hear the Chord Change" (2026-11-20, live-changes.js): the room hears the song; each Chromebook times its own presses.
+    'lq.title.changes':      { en: 'Hear the chord change', es: 'Escucha el cambio de acorde' },
+    'lq.prompt.changes':     { en: 'Press the space bar every time the chord changes.', es: 'Presiona la barra espaciadora cada vez que cambie el acorde.' },
+    'lq.cc.tap':             { en: 'Change!', es: '¡Cambio!' },
+    'lq.cc.presses':         { en: 'Presses: {n}', es: 'Pulsaciones: {n}' },
+    'lq.cc.ready':           { en: 'Get ready. The song is starting.', es: 'Prepárate. La canción va a empezar.' },
+    'lq.cc.rule':            { en: 'A press counts up to half a second after the change. Extra presses take points away.', es: 'Una pulsación cuenta hasta medio segundo después del cambio. Las pulsaciones de más quitan puntos.' },
+    'lq.cc.caught':          { en: 'You caught {caught} of {total} chord changes', es: 'Atrapaste {caught} de {total} cambios de acorde' },
+    'lq.cc.extra':           { en: 'Extra presses: {n}', es: 'Pulsaciones de más: {n}' },
+    'lq.cc.notSent':         { en: "Your presses didn't send yet. Trying again…", es: 'Tus pulsaciones aún no se enviaron. Intentando de nuevo…' },
+    'lq.cc.stageRound':      { en: 'Question {n} — results', es: 'Pregunta {n}: resultados' },
+    'lq.cc.stageCaught':     { en: 'of the {n} chord changes caught', es: 'de los {n} cambios de acorde atrapados' }
   };
 
   let lang = 'en';

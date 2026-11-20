@@ -1,6 +1,7 @@
 ---
 paths:
   - "live-quiz.js"
+  - "live-changes.js"
 ---
 
 ## Live quiz — the whole-class game
@@ -52,6 +53,18 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   - The board is the app's `fgBoardSvg(sid, kind, opts)` (`app/drills.js`) behind a `typeof`
     guard. The fret UI only ever renders on `index.html`, never on a Journey
     page.
+- **"Hear the chord change"** (`changes`, `type:'changes'`, Jonathan 2026-11-20; its own file, `live-changes.js`,
+  loaded after `live-quiz.js` on index.html only, every call into it behind a `typeof` guard). The CONSOLE plays a
+  section of Sweet Child, "the cure" or Watchtower (the sections and chord changes of ca-33 / ca-30 / ca-29, the
+  fast full mix) on the room speakers (his call); each student presses the space bar at each chord change; a press
+  counts from 0 to 0.5 s after the change (his call), plus `LQ_CC_EARLY` 0.1 s for timing error. The console puts
+  the song on the database's clock (`cc.clk` pings, `cc.t0`); each Chromebook times its own presses against that
+  and writes ONE `choice` "cc:caught/changes/extra" when the section is over (fits the answer rule; NO rules change);
+  Reveal fires itself 2.5 s after the song stops (`lqTeacherRevealChanges`, points `1000 x (caught - extra) /
+  changes`, capped at the console's own count). The console's song stops on every way out (Reveal, End, Clear,
+  Exit preview, a new round, leaving the view in `setTeacherView`). After any change to it, its branches here, or
+  the three cards' sections / chords / beat maps: `node tools/live-changes-sim.mjs` (checks.mjs 1ey runs it and pins
+  29 sections, 458 changes).
 - **The two power chord quizzes differ from the rest in two ways** (Jonathan,
   2026-11-13; `checks.mjs` 1f pins both flags to `pc-find` and `pc-name`):
   - `changeAnswer:true`: a student may tap another answer while the question

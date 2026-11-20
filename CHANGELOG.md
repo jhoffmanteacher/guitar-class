@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-20 — New live game: Hear the chord change
+
+- **A new live in-class game, "Hear the chord change".** Your teacher plays part of Sweet Child O' Mine, "the cure"
+  or All Along the Watchtower on the room speakers. Press the space bar (or the big Change! button) every time the
+  chord changes. A press counts if it comes up to half a second after the change; extra presses take points away.
+  After the song stops you see how many changes you caught, and the top 3 go up on the projector.
+
+
 ## 2026-11-19 — A cleaner look
 
 - **A cleaner look across the site, same colours and same buttons.** Section labels in a lesson are plum with no
