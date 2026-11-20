@@ -11,6 +11,8 @@ see `WORKFLOW.md` and the git commit log.
 - **Live in-class games now have an "arcade night" look**: deep indigo with neon pink, cyan and lime, and glowing
   scores, on the projector and on your Chromebook's game screen. Every live game gets it. The rest of the site keeps
   its usual colours.
+- **Full screen on the teacher's screen now keeps the game's buttons**, so the game can go on without leaving full
+  screen.
 
 
 ## 2026-11-20 — New live game: Hear the chord change

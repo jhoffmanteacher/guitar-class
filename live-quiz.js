@@ -1750,7 +1750,7 @@ function lqPaintControls(){
   if(document.activeElement && (document.activeElement.id === 'lq-limit' || document.activeElement.id === 'lq-total') && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
-  const full = lqHideNamesInputHtml() + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`
+  const full = lqHideNamesInputHtml() + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">${lqIsFullscreen() ? 'Exit full screen' : 'Full screen'}</button>`
     + (lqTPreview ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherExitPreview()">Exit preview</button>` : '');
   const pv = lqTPreview ? `<div class="lq-ctl-hint"><b>Preview</b>: only this screen sees it. No student is invited and nothing is saved.</div>` : '';
   if(lqTPreview && s && s.state === 'ended'){
@@ -1827,12 +1827,18 @@ function lqPaintControls(){
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}` + pv;
 }
 
+/* Full screen takes the whole game panel, the stage AND the control strip under it (Jonathan, 2026-11-20:
+   "clicking on full screen doesn't advance the game": with the stage alone in full screen, Next, Reveal, the
+   song sections and Stop were out of reach). The strip is on the projector outside full screen too and names no
+   answer, so it may be seen. The button reads "Exit full screen" while it is on. */
 function lqToggleFullscreen(){
-  const stage = document.getElementById('lq-stage');
-  if(!stage) return;
-  if(document.fullscreenElement) document.exitFullscreen();
-  else if(stage.requestFullscreen) stage.requestFullscreen().catch(()=>{});
+  const shell = document.getElementById('lq-shell');
+  if(!shell) return;
+  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  else if(shell.requestFullscreen) shell.requestFullscreen().catch(()=>{});
 }
+function lqIsFullscreen(){ return !!(document.fullscreenElement && document.fullscreenElement.id === 'lq-shell'); }
+document.addEventListener('fullscreenchange', () => { if(document.getElementById('lq-controls')) lqPaintControls(); });
 
 // Every teacher write goes through here: one at a time, buttons greyed while
 // it's in flight, and a failed write repaints rather than leaving the strip
