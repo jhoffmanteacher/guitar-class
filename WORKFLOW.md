@@ -113,9 +113,16 @@ chroma script, a guide only: E and G#m share two notes and blur):
   from bar 41 on (E and B are not in the chart, but the record has them), and a quiet break at bars 57-73. Decide the
   sections from the strip and those laps.
 - **"Recuérdame (Arrullo)" - Gael García Bernal, Lucy Hernández (Coco)** (`rSWj__OmHis`): 1:11 long, and Jonathan said
-  "build it with the 1:11". In tune (-0.1). It DRIFTS (50 ms mid-song), so the skill says stop: it needs `barTimes`,
-  and a coded card has no beat map. Ask him (AskUserQuestion): a Moises click export, or a built song with a measured
-  beat map. 3/4 on 6 eighths: feltBpm 83.9445, files 84 / 70, anchor 1.656, 32 bars (29 played). Key C major, which
+  "build it with the 1:11". In tune (-0.1). It DRIFTS, so it needs `barTimes`. He made the Moises pair (2026-11-20, in
+  `C:\Users\jhoffman\Downloads` on Windows, both named `...Recuérdame _Arrullo_..._rSWj__OmHis_-C major-79bpm-440hz`:
+  the plain name has the CLICK, the "(1)" copy has none and is the original record, unchanged). He has to copy
+  both to the Mac. The click file starts 2.100 s earlier (a count-in): trim 2.100 s off it, then
+  `tools/beat-map.py <no-click> <click-trimmed> 84 <downbeat> 3`. That found 88 clicks, 0 missed or doubled, beat gaps
+  0.60-0.94 s (Moises follows the singer's rubato, about 79 bpm), bars 2.0-2.6 s. Which click is beat 1 (0, 1 or 2;
+  anchors 0.303 / 1.133 / 1.893) was NOT settled: chroma per bar was too rough to match the chart, so check by ear
+  or ask him. `new-playalong.mjs` reads `barTimes` only in `--built` mode, so a coded card needs them typed into its
+  SNIPPET_TRACKS entry (as Teen Spirit has), or offer him a built song. Steady-grid reading (ignore it now): 3/4,
+  84 / 70, anchor 1.656. Key C major, which
   matches UG 6053291 (C), not 6468074 (D). The chart line by line: C | Fm G | C | Fm G | F G Em Am | F Em Dm G | C |
   Fm G | C | Fm Em | F G Em Am | Fm Dm | Fm C. Fm has no open shape the class knows, so its power chord is F5.
 Then steps 4-6 of the skill. Before the push, Jonathan uploads each song's two files (Manage → Song files) and
