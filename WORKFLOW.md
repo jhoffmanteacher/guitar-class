@@ -93,10 +93,10 @@ Update this block whenever an item opens or closes.
 - The visual re-design look STARTED 2026-11-19 (Jonathan: "start redesign"): pictures only, two looks on three screens,
   in `Claude outputs/redesign-2026-11/`. He picked Look A, "Tidy plum" (2026-11-19). A cloud routine BUILT it on `ci-try/look-a` (tip 09357bf, 2026-11-19:
   full checks 0, 1s 807 pairs ≥ 4.5:1, 52 rules folded in, `--text3` a touch darker to pass 1s, a new dark
-  `--rail-active`); GitHub's browser tests, practice copy (7-day preview) and rules runs on it all passed. Next:
-  Jonathan looks at the preview (its address is on the "Practice copy" run for that branch), then the Mac rebases
-  it onto main, runs the full checks and pushes (`Review: Fast`). W15 follows. `look-a-spec` and `ci-try/look-a`
-  are his to delete after the merge.
+  `--rail-active`); GitHub's browser tests, practice copy (7-day preview) and rules runs on it all passed. LIVE
+  2026-11-19 (Jonathan looked at the preview: "Ship it to students"): aa4b672 + 67acfa3 (sw.js) on main, pushed by a
+  one-time cloud routine; GitHub's English smoke (5 areas), slow-load, update-reload-loop and the a11y scan passed on
+  67acfa3. W15 follows. `look-a-spec`, `ci-try/look-a` and `ship/look-a` are his to delete.
 
 **Dated:**
 - 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new signatures
