@@ -1585,7 +1585,8 @@ async function noChecklistWalk(page, run, events, stats) {
 
 /* The practice-card player's keys (KEYS in app/cards.js, 2026-11-13). Real key presses (CDP Input events) on
    practice card ca-18 at 1366x657, in English: with the focus on the page body Space plays (the Play button shows its
-   Stop state) and Space again stops; > then < move the speed control one stop and back; a MOUSE click on a section
+   Stop state) and Space again stops; < then > move the speed control one stop and back (the card opens on Normal,
+   the top stop, so > first must leave it there; a card opening lower gets > then <); a MOUSE click on a section
    chip leaves the focus on <body> once the press is over, so Space then stops instead of restarting that section;
    a reload brings the card back at its first speed (nothing persisted). LOOP THIS PART / BUILD UP SPEED
    (app/cards-loop.js, 2026-11-14): both open off; a mouse click on Loop turns it on, L turns it off and on again, a
@@ -1642,12 +1643,22 @@ async function cardKeysWalk(page, run, events, stats, base) {
     await key(' ');
     const s2 = await run('keys:space-stop', state, 10);
     if (!s2 || s2.playing || s2.stopLabel) fail('space-stop', `a second Space did not stop ${ID}: ${JSON.stringify(s2)}`);
-    await key('>');
-    const s3 = await run('keys:faster', state, 10);
-    if (!s3 || s3.speed === s0.speed) fail('faster', `> did not move the speed control: ${JSON.stringify(s0)} -> ${JSON.stringify(s3)}`);
-    await key('<');
-    const s4 = await run('keys:slower', state, 10);
-    if (!s4 || s4.speed !== s0.speed) fail('slower', `< did not bring the speed control back: ${JSON.stringify(s0)} -> ${JSON.stringify(s4)}`);
+    /* > and <: one stop each way from where the card opens, then back. Cards open on Normal (1x), the TOP stop, since
+       66b5585 (PC_START_NORMAL), so there < goes first and > must also do nothing more at the top. */
+    const top = await run('keys:speed-max', `(() => { const r = document.querySelector('.ca-card[open][data-id="${ID}"] .pc .pc-speed-range'); return r ? r.max : null; })()`, 10);
+    const atTop = top != null && s0.speed === top;
+    if (atTop) {
+      await key('>');
+      const s2b = await run('keys:faster-at-top', state, 10);
+      if (!s2b || s2b.speed !== s0.speed) fail('faster-at-top', `> at the top stop should leave the speed control there: ${JSON.stringify(s0)} -> ${JSON.stringify(s2b)}`);
+    }
+    const [k1, n1, k2, n2] = atTop ? ['<', 'slower', '>', 'faster'] : ['>', 'faster', '<', 'slower'];
+    await key(k1);
+    const s3 = await run('keys:' + n1, state, 10);
+    if (!s3 || s3.speed === s0.speed) fail(n1, `${k1} did not move the speed control: ${JSON.stringify(s0)} -> ${JSON.stringify(s3)}`);
+    await key(k2);
+    const s4 = await run('keys:' + n2, state, 10);
+    if (!s4 || s4.speed !== s0.speed) fail(n2, `${k2} did not bring the speed control back: ${JSON.stringify(s0)} -> ${JSON.stringify(s4)}`);
     // Loop this part / Build up speed: off as the card opens; a click, the L key, Build.
     if (s0.loop !== OFF || s0.build !== OFF || s0.hold !== 'hidden') fail('loop-default', `${ID} should open with Loop and Build off and Stay hidden: ${JSON.stringify(s0)}`);
     if (!(await clickSw('loop'))) fail('loop-click', `${ID} has no Loop this part switch`);
@@ -1897,7 +1908,8 @@ async function songTilesWalk(page, run, events, stats) {
         const out = tiles.filter(t => [...t.querySelectorAll('*')].some(e => e.getClientRects().length && (r(e).right > r(t).right + 0.5 || r(e).left < r(t).left - 0.5))).length;
         return { n: tiles.length, rows: Object.values(rows), above: !lib || tiles.every(t => r(t).bottom <= r(lib).top + 0.5), out,
           mains: tiles.map((t, i) => { const b = t.querySelector('.sh-tile-acts > button'); return { i, label: b ? b.textContent.trim() : '', play: !!(b && b.classList.contains('sh-play-btn')), slug: t.querySelector('.sh-tile-acts').dataset.slug }; }),
-          lib: [...document.querySelectorAll('#songs-screen .sh-lib-btn')].map(b => (/songsLibraryOpen\\("([^"]+)"\\)/.exec(b.getAttribute('onclick')) || [])[1] || '') }; })()`, 10);
+          /* Only the buttons that open a song: the Choice menu's sort buttons (0d0cd6e) share the .sh-lib-btn look. */
+          lib: [...document.querySelectorAll('#songs-screen .sh-lib-btn')].filter(b => /songsLibraryOpen\\(/.test(b.getAttribute('onclick') || '')).map(b => (/songsLibraryOpen\\("([^"]+)"\\)/.exec(b.getAttribute('onclick')) || [])[1] || '') }; })()`, 10);
       if (!lay) return;   // a checkout without the tiles
       const w = lang;
       if (lay.n !== 6) fail(w, `${lay.n} Core tiles, want 6`);
@@ -1916,7 +1928,9 @@ async function songTilesWalk(page, run, events, stats) {
         await run(`song-tiles:back-${m.i}:` + w, toSongs, 1500);
       }
       stats.songTiles = (stats.songTiles || 0) + ok;
+      if (!lay.lib.length) fail(w, 'no library button (songsLibraryOpen) on the Songs page');
       for (const id of lay.lib) {
+        if (!id) { fail(w, 'a library button whose song id cannot be read from its onclick'); continue; }
         await run(`song-tiles:lib-${id}:` + w, `(() => { const b = [...document.querySelectorAll('#songs-screen .sh-lib-btn')].find(x => x.getAttribute('onclick').includes(${JSON.stringify(JSON.stringify(id))})); if (b) b.click(); return !!b; })()`, 1200);
         const r = await run(`song-tiles:lib-after-${id}:` + w, `({ id: (document.querySelector('.ca-card[open]') || { dataset: {} }).dataset.id || null, hash: location.hash })`, 10);
         if (!r || r.id !== id || r.hash !== '#class-activities/' + id) fail(w, `the library button for ${id} opened ${JSON.stringify(r)}`);
