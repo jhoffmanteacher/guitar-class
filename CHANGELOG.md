@@ -8,7 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-21 — Shorter Spanish titles on five whole-song cards
 
-- **In Spanish, the five "whole song in power chords" cards now end "Toda la canción con acordes de potencia".**
+- **In Spanish, the five "whole song in power chords" cards now end "Toda con acordes de potencia".**
   All Along the Watchtower, "the cure", Seven Nation Army, "Luna" and Sweet Child O' Mine. The Watchtower title ran
   to four lines on its tile on the In class page; the shorter words fit in three.
 
