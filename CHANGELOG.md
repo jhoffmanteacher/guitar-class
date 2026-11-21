@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-21 — Shorter Spanish titles on five whole-song cards
+
+- **In Spanish, the five "whole song in power chords" cards now end "Toda la canción con acordes de potencia".**
+  All Along the Watchtower, "the cure", Seven Nation Army, "Luna" and Sweet Child O' Mine. The Watchtower title ran
+  to four lines on its tile on the In class page; the shorter words fit in three.
+
 ## 2026-11-20 — "Master of Puppets" removed from the Module 3 songs
 
 - **"Master of Puppets" (Metallica) is no longer in the Module 3 Choice songs.** Its lesson video was gone, so the song is taken out.

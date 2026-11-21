@@ -3867,7 +3867,7 @@ window.CLASS_ACTIVITIES = [
     journey: 'all-along-the-watchtower',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 3,
     title:    'All Along the Watchtower — The Whole Song in Power Chords',
-    title_es: 'All Along the Watchtower — La canción completa con acordes de potencia',
+    title_es: 'All Along the Watchtower — Toda la canción con acordes de potencia',
     intro:    'Play the whole song in power chords: the same roots, with two more strings added.',
     intro_es: 'Toca la canción completa con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
@@ -4065,7 +4065,7 @@ window.CLASS_ACTIVITIES = [
     journey: 'the-cure',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 3,
     title:    '"the cure" — The Whole Song in Power Chords',
-    title_es: '"the cure" — La canción completa con acordes de potencia',
+    title_es: '"the cure" — Toda la canción con acordes de potencia',
     intro:    'Play the whole song in power chords: the same roots, with two more strings added.',
     intro_es: 'Toca la canción completa con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
@@ -4395,7 +4395,7 @@ window.CLASS_ACTIVITIES = [
     journey: 'seven-nation-army',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 3,
     title:    'Seven Nation Army — The Whole Song in Power Chords',
-    title_es: 'Seven Nation Army — La canción completa con acordes de potencia',
+    title_es: 'Seven Nation Army — Toda la canción con acordes de potencia',
     intro:    'Play the whole song in power chords: the same roots, with two more strings added.',
     intro_es: 'Toca la canción completa con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
@@ -4644,7 +4644,7 @@ window.CLASS_ACTIVITIES = [
     journey: 'luna',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 3,
     title:    '"Luna" — The Whole Song in Power Chords',
-    title_es: '"Luna" — La canción completa con acordes de potencia',
+    title_es: '"Luna" — Toda la canción con acordes de potencia',
     intro:    'Play the whole song in power chords: the same roots, with two more strings added.',
     intro_es: 'Toca la canción completa con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
@@ -4772,7 +4772,7 @@ window.CLASS_ACTIVITIES = [
     journey: 'sweet-child-o-mine',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 3,
     title:    'Sweet Child O\' Mine — The Whole Song in Power Chords',
-    title_es: 'Sweet Child O\' Mine — La canción completa con acordes de potencia',
+    title_es: 'Sweet Child O\' Mine — Toda la canción con acordes de potencia',
     intro:    'Play the whole song in power chords: the same roots, with two more strings added.',
     intro_es: 'Toca la canción completa con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
