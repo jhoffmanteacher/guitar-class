@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-23 — Songs: "Date added" sorts newest first
+
+- **The Songs page's "Date added" button now sorts newest first.** Every song has the day it was added to the site,
+  so the newest songs come to the top. Before, no song had a date, and the button sorted the list by title.
+- **"More Play Along songs" follows it too** while "Date added" is pressed: the newest play-along songs come first.
+  With Level, Title or Artist pressed they stay in A-Z order, as before.
+
 ## 2026-11-23 — Going Back from a full-screen song returns to the normal window
 
 - **The browser's Back button from a Play Along song now leaves full screen.** A song opened by a tap fills the

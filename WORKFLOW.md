@@ -80,6 +80,12 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 Update this block whenever an item opens or closes.
 
+**Done 2026-11-23: Friday finding "Date added" (work order `friday-findings`, Part 3, Fast).** All 46 coded songs (120
+entries) carry `added`, the day each first entered the module data (git, 2026-05-15 .. 2026-08-07); the 8 cards with
+`library` too, and the More Play Along songs row follows "Date added" (newest first; A-Z otherwise). A built song's
+day is its doc's `savedAt` (last Import or Publish), so an Edit + Publish moves it to that day: keeping the first day
+needs a format change (a reader first, then the writer). `checks.mjs` 1fa pins the dates.
+
 **Done 2026-11-23: Friday finding "ca-53" (work order `friday-findings`, Part 1, Fast).** Step 2 reads "Play all eight
 bars 4 times through …" (4 tap dots, EN + ES); step 1 reads "Press ▶ to hear the pattern, then mute the strings and
 strum it 8 times in a row …" (no dots: 8 is over the dots' cap of 5, as before). One line each at 1366×657, both languages.
