@@ -80,6 +80,10 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 Update this block whenever an item opens or closes.
 
+**Done 2026-11-23: Friday finding "ca-53" (work order `friday-findings`, Part 1, Fast).** Step 2 reads "Play all eight
+bars 4 times through …" (4 tap dots, EN + ES); step 1 reads "Press ▶ to hear the pattern, then mute the strings and
+strum it 8 times in a row …" (no dots: 8 is over the dots' cap of 5, as before). One line each at 1366×657, both languages.
+
 **Live since 2026-11-17 (all on main, deploy confirmed):**
 - Look 1 redesign, Parts 1-5 and both review rounds (`39f1442`..`823516d`).
 - The Chords / Tab / Lyrics switch on the song cards (W23, `c83bcf7`) and Jonathan's answers to its five questions:

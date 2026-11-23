@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-23 — "Strum Pattern — The Chorus": the directions match the card
+
+- **Step 2 now says "Play all eight bars 4 times through"**, the eight bars the card shows (the chorus, twice). It
+  used to say "the four chorus bars".
+- **Step 1 now says to press ▶ to hear the pattern first, then mute the strings.** The ▶ plays the pattern with the
+  strings ringing; the line used to say only "mute the strings".
+
 ## 2026-11-23 — Live games on the projector: full screen and "Hear the chord change" fixed
 
 - **In full screen, the live game's screen shows only the game and its buttons again.** The teacher's list of games

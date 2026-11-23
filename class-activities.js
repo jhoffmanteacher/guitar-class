@@ -7510,8 +7510,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Muted strings',
         label_es: 'Practica — Cuerdas apagadas',
-        text:    'Mute the strings and strum the chorus pattern 8 times in a row without stopping.',
-        text_es: 'Apoya la mano de trastear sobre las cuerdas y rasguea el patrón del coro 8 veces seguidas sin detenerte.',
+        text:    'Press ▶ to hear the pattern, then mute the strings and strum it 8 times in a row without stopping.',
+        text_es: 'Pulsa ▶ para oír el patrón y luego rasguéalo con las cuerdas apagadas 8 veces seguidas sin detenerte.',
         strum: {
           caption:    'Muted strings · count "1 and 2 and 3 and 4 and" (the + is "and")',
           caption_es: 'Cuerdas apagadas · cuenta «1 y 2 y 3 y 4 y» (el + es «y»)',
@@ -7528,8 +7528,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — A5, C5, D5',
         label_es: 'Practica — A5, C5, D5',
-        text:    'Play the four chorus bars 4 times through, changing chord on the 1, the pattern never stopping.',
-        text_es: 'Toca los cuatro compases del coro 4 veces completos, cambiando de acorde en el 1, sin detener el patrón.',
+        text:    'Play all eight bars 4 times through, changing chord on the 1, the pattern never stopping.',
+        text_es: 'Toca los ocho compases 4 veces completos, cambiando de acorde en el 1, sin detener el patrón.',
         strum: {
           caption:    'Chorus · A5 · C5 · D5 · D5 · one bar each',
           caption_es: 'Coro · A5 · C5 · D5 · D5 · un compás cada uno',
