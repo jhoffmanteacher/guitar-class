@@ -37,7 +37,8 @@
        AND refetched, and the 200 answer is stored over the cached copy; a miss goes to the network
        (cache:'no-cache') and is stored;
      - each worker reads and writes only the cache named by its own CACHE_VERSION;
-     - activate deletes every cache except its own CACHE_VERSION and the two audio caches, so the old shell
+     - activate deletes every guitar-class- cache except its own CACHE_VERSION and the two audio caches (since
+       2026-11-23 never another site's at this address), so the old shell
        cache is DELETED, not reused; the new cache then holds only PRECACHE_CRITICAL until the page asks for
        the rest (gc-precache-rest) or uses a file;
      - install is cache.addAll(PRECACHE_CRITICAL): all or nothing.

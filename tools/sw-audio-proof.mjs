@@ -223,7 +223,7 @@ async function runScenarios(swSrcOf) {
     const st = await stored(all);
     for (const n of ['guitar-class-2026-10-01-old', 'guitar-class-audio-2026-09-01-oldname', 'guitar-class-v23-2026-06-15']) await st.open(n);
     /* Another site at the same address (jhoffmanteacher.github.io): Setlist Stand's offline copy, and any other name. */
-    const FOREIGN = ['setlist-stand-test', 'setlist-stand-2026-11-23-7', 'other-site-v1', 'guitar-classic-v1'];
+    const FOREIGN = ['setlist-stand-test', 'setlist-stand-2026-11-23-7', 'other-site-v1', 'guitar-classic-v1', 'old-guitar-class-v1'];
     for (const n of FOREIGN) await (await st.open(n)).put(keyFor('index.html'), new FakeResponse('<html>' + n, { type: 'basic' }));
     const hashes = await st.open('guitar-class-audio-hashes');
     await hashes.put(keyFor('audio/ghost.mp3'), new FakeResponse('deadbeef00'));
@@ -327,6 +327,9 @@ async function runScenarios(swSrcOf) {
     const sw = boot(swSrcOf(mapOf(all), ''), new FakeStorage(), {});
     check('AUDIO_CACHE, as the worker executes it, is the live name byte for byte', sw.read('AUDIO_CACHE') === AUDIO_CACHE_NAME);
     check('AUDIO_HASH_CACHE, as the worker executes it, is the pinned name', sw.read('AUDIO_HASH_CACHE') === AUDIO_HASH_CACHE_NAME);
+    /* activate deletes only names with this prefix: a kept name without it would never be cleaned up (review R1-2, 2026-11-23). */
+    let prefix = null; try { prefix = sw.read('SITE_CACHE_PREFIX'); } catch { /* a worker without one (the old delete-all) */ }
+    check('every name the worker keeps starts with SITE_CACHE_PREFIX', typeof prefix === 'string' && prefix.length > 0 && ['CACHE_VERSION', 'AUDIO_CACHE', 'AUDIO_HASH_CACHE'].every(n => sw.read(n).startsWith(prefix)));
   }
 
   scenario = 'install';
@@ -465,6 +468,7 @@ const MUTATIONS = [
   ['activate deletes another site\'s caches (the old behaviour)', "k.startsWith(SITE_CACHE_PREFIX) && ", ""],
   ['the site prefix has no dash (a name like guitar-classic-… would go too)', "const SITE_CACHE_PREFIX = 'guitar-class-';", "const SITE_CACHE_PREFIX = 'guitar-class';"],
   ['the site prefix misses the older name shapes', "const SITE_CACHE_PREFIX = 'guitar-class-';", "const SITE_CACHE_PREFIX = 'guitar-class-2';"],
+  ['the prefix is matched anywhere in the name, not at the start', "k.startsWith(SITE_CACHE_PREFIX) && ", "k.includes(SITE_CACHE_PREFIX) && "],
   ['a hit is refetched and stored over (the old behaviour)', "if (cached && audioFile) return cached;", ""],
   ['a miss does not revalidate', "const res = await fetch(audioFile.key, { cache: 'no-cache' });", "const res = await fetch(audioFile.key);"],
   ['reconcile is not run at activate', ".then(() => reconcileAudio().catch(() => {}))", ""],
