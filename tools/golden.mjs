@@ -749,23 +749,31 @@ const WRITERS = ['toggleStepDone', 'toggleSkill', 'setSkillLevel', 'onStepMcSele
    (2026-11-16: the two byte-identical self-checks). A game with no right or no wrong answer now fails its step. */
 const LQ_DEF = `window.__goldLq = function(quizId){
   const quiz = lqQuiz(quizId), type = lqType(quiz);
-  let target = null, correct, correctIds = null, wrong;
+  let target = null, correct, correctIds = null, wrong, cc = null;
   if (type === 'mc') { correct = quiz.choices[0].id; wrong = quiz.choices[1].id; }
   else if (type === 'fret') {
     const string = quiz.strings.find(x => lqTargetNotes(quiz, x).length), note = lqTargetNotes(quiz, string)[0];
     target = { string, note }; correctIds = lqTargetIds(quiz, target); correct = correctIds[0];
     for (let f = 0; f <= 12; f++) { const id = lqFretId(string, f); if (!correctIds.includes(id)) { wrong = id; break; } }
-  } else {
+  } else if (type === 'changes') {
+    /* "Hear the chord change" (live-changes.js, 2026-11-20) has no strings and no choices: a student's pick is the
+       result "cc:caught/changes/extra", the round carries a cc block, and the console's Reveal writes correct: null and
+       a class tally (lqCcRevealWhenFree). Made-up times, so the pictures do not hang on a song's beat map. */
+    cc = { changes: [1, 2, 3, 4], start: 0.5, end: 5, from: 0, t0: 0 };
+    target = { song: LQ_CC_SONGS[0].id, si: 0 };
+    correct = lqCcChoice({ caught: 4, changes: 4, extra: 0 }); wrong = lqCcChoice({ caught: 0, changes: 4, extra: 2 });
+  } else if (type === 'pcname') {
     const p = lqPcNamePool(quiz.strings)[0];
     target = { string: p.string, fret: p.fret }; correct = lqPcNameOf(target); wrong = lqPcNames().find(n => n !== correct);
-  }
+  } else throw new Error('golden: no made-up round for the quiz type ' + type + ' (' + quizId + '): add one to LQ_DEF');
   if (correct == null || wrong == null || correct === wrong) throw new Error('golden: no made-up right and wrong answer for the quiz ' + quizId);
   const lobby = { sessionId: 'lq-gold', quizId, state: 'lobby', qIndex: -1, correct: null, correctIds: null, tally: null, scores: {}, target: null,
     speedBonus: false, limitSec: 0, startedAt: null, askedAt: null, endedAt: null };
   const scores = { 'dev-user': { pts: 1000, right: 1, answered: 1, last: 1000, lastRight: true }, 'stub-uid-01': { pts: 0, right: 0, answered: 1, last: 0, lastRight: false },
     'stub-uid-02': { pts: 1000, right: 1, answered: 1, last: 1000, lastRight: true } };
-  const question = Object.assign({}, lobby, { state: 'question', qIndex: 0, target });
-  const reveal = Object.assign({}, question, { state: 'reveal', correct, correctIds, tally: { [correct]: 2, [wrong]: 1 }, scores });
+  const question = Object.assign({}, lobby, { state: 'question', qIndex: 0, target }, cc ? { cc } : {});
+  const reveal = Object.assign({}, question, cc ? { state: 'reveal', correct: null, correctIds: null, tally: { caught: 7, changes: 12, extra: 2, players: 3 }, scores }
+    : { state: 'reveal', correct, correctIds, tally: { [correct]: 2, [wrong]: 1 }, scores });
   const ended = Object.assign({}, reveal, { state: 'ended' });
   return { correct, wrong, sessions: { lobby, question, reveal, ended } };
 }; 1`;
