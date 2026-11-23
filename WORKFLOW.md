@@ -193,6 +193,27 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 - [~] **`tools/smoke.mjs` finds functions not defined after a page reload** (2026-11-02 on the Mac; 4 times on
   GitHub since 2026-11-14): W25, under "For Windows".
 - [ ] **ca-43 Note Call through a real guitar and a Chromebook mic:** not recorded as done (2026-10-31).
+- [ ] **Friday check 2026-11-23: open findings (MINOR; fixed ones are in `3bda5bc`, `e8f8aec`).** Details:
+  that run's session. Content and product calls for Jonathan:
+  - Songs page "Date added" sorts exactly like "Title": none of the 47 songs has an `added` date, and nothing makes a
+    new song carry one (`app/explore.js` ~316/325, `0d0cd6e`). Give the songs dates, or drop the button?
+  - ca-53 (`d2a676c8`): the chords step now shows the chorus twice (8 bars) but still says "the four chorus bars 4
+    times through" with 4 tap dots; step 1 says to mute the strings while its ▶ plays a ringing A5.
+  - 8 two-column lesson steps say "below" about a chart or Play button that the One step view (`11ff03f`) now draws
+    to the RIGHT at 1366: module-3.js:36, :305; module-4.js:215, :236, :711; module-5.js:76; module-9.js:1055;
+    module-10.js:358 (most say "abajo" too). Drop the direction word? (Module 3 is frozen: text only, no relabel.)
+  Code, not yet fixed:
+  - A play-along opened by a tap goes full screen (`66b5585`); browser Back to Songs leaves the page in full screen
+    with no Exit button (only Esc). Fix idea: `syncExploreNav()` exits when the open page is not In class; test it in
+    a browser first (the request is async, so it must not cancel the card's own entry). The full-screen default has
+    no pin in `checks.mjs` and no smoke click.
+  - "Hear the chord change" (`5c70ae9`): every signed-in student page sends a "cc:0/N/0" result, joined or not, so
+    students who dismissed the invite count as 0-point players and lower the stage's "% caught"
+    (`live-changes.js` ~253, `lqCcSync`); a page that reloads mid-song reads its clock off by the age of the last
+    `cc.clk` stamp (~235). The sim stubs the timers, so the console's round lifecycle is untested, and checks 1di
+    (Hide names) and 1cm (no names in scores) do not paint the new game yet.
+  - Labelling: `de68fd8` (the practice-minutes `firestore.rules` change) shipped `Review: Fast` though it is
+    danger-zone (its follow-ups were Reviewed; the Friday check's deep review found nothing wrong, pm-sim 407 of 407).
 
 **Deferred, not rejected** (only when Jonathan asks):
 - Fretboard Tap (2026-09-12): a chord-builder type, a per-student tap breakdown, sharp and flat targets.
