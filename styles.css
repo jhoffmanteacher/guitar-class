@@ -4058,7 +4058,7 @@ span.tab-count-held{margin-left:var(--sp-4)}
    item 2f) — the Today hero's own caught-up state, so it borrows .ca-card's
    shape (border-left etc.) via ca-card--hero below rather than its own box. */
 .ca-freeplay-hero{border-left-color:var(--green-text);padding:var(--sp-20) var(--sp-24)}
-.ca-freeplay-title{font:600 1.25rem var(--font-display);margin:0 0 var(--sp-4)}
+.ca-freeplay-title{font:600 var(--fs-20) var(--font-display);margin:0 0 var(--sp-4)}
 .ca-freeplay-text{color:var(--text2);margin:0}
 .ca-freeplay-actions{display:flex;flex-wrap:wrap;gap:var(--sp-8);margin-top:var(--sp-14)}
 
@@ -4072,7 +4072,7 @@ span.tab-count-held{margin-left:var(--sp-4)}
 /* "Today's activity · Mon, 11/2" once above the Today cards (caTodayHeadHtml,
    2026-10-31) — the label and date every hero card used to carry. */
 .ca-today-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--sp-4) var(--sp-10);margin:var(--sp-4) var(--sp-2) var(--sp-10)}
-.ca-today-label{font:700 1.25rem var(--font-display);color:var(--ca-accent)}
+.ca-today-label{font:700 var(--fs-20) var(--font-display);color:var(--ca-accent)}
 /* Today's cards side by side (Jonathan, 2026-11-10; renderClassActivities wraps
    them in .ca-today-grid): two equal columns, a row's Start tiles the same
    height, reading left to right, then down. One card keeps the full width. Two
@@ -4139,7 +4139,7 @@ span.tab-count-held{margin-left:var(--sp-4)}
    when its own content is narrower than that, which the pills' short text
    is and the title/blurb's longer text isn't. */
 .ca-hero-main{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sp-4);flex:1;min-width:0}
-.ca-hero-title{font:600 1.25rem var(--font-display);color:var(--text)}
+.ca-hero-title{font:600 var(--fs-20) var(--font-display);color:var(--text)}
 .ca-hero-blurb{margin:0;color:var(--text2);font-size:var(--fs-15)}
 /* width is a CEILING, not a fixed size — every module/activity figure is
    drawn on the same 640x244 board (checks.mjs 1v), so height follows width

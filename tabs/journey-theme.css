@@ -124,7 +124,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:var
 .layer-head[aria-expanded="true"] .layer-chevron{transform:rotate(180deg)}
 .layer.closed .layer-body{display:none}
 .layer-body{padding:var(--sp-16)}
-.layer-body p{font-size:var(--fs-14-5);margin-bottom:var(--sp-12)}
+.layer-body p{font-size:0.9063rem;margin-bottom:var(--sp-12)}
 .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
 .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
 .l5 .layer-num{background:var(--l5)} .l6 .layer-num{background:var(--l6)}
@@ -170,7 +170,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:var
    the clip used to give it. */
 .layer.ws-wide{overflow:visible}
 .layer.ws-wide .layer-head{border-radius:11px 11px 0 0}
-.playline{font-size:var(--fs-14-5);background:var(--bg2);border-left:3px solid var(--border2);padding:var(--sp-8) var(--sp-12);border-radius:0 8px 8px 0;margin-bottom:var(--sp-12)}
+.playline{font-size:0.9063rem;background:var(--bg2);border-left:3px solid var(--border2);padding:var(--sp-8) var(--sp-12);border-radius:0 8px 8px 0;margin-bottom:var(--sp-12)}
 .branch{font-size:var(--fs-13-5);color:var(--text2);margin-bottom:var(--sp-6)}
 .branch b{color:var(--text)}
 /* Tap-to-open folds ("More about this song", "The whole song tab") — mirrors the main app's step folds */
@@ -233,7 +233,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:var
 #fab-group .tool-popup{max-height:calc(100vh / var(--site-fill,1) - 250px);overflow-y:auto}
 /* No visual playing state by design — the pill always shows ▶ and keeps the
    same look; aria-pressed is maintained for assistive tech only. */
-footer{margin-top:36px;font-size:0.7812rem;color:var(--text3);border-top:1px solid var(--border);padding-top:var(--sp-14)}
+footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px solid var(--border);padding-top:var(--sp-14)}
 @media (max-width:480px){ h1{font-size:var(--fs-24)} .tab-ascii{font-size:var(--fs-12)} .tab-body{padding:var(--sp-8) var(--sp-10) var(--sp-10)} body{padding-left:var(--sp-16);padding-right:var(--sp-16)} }
 /* Printed Journey page — same pass the app's handout got in styles.css
    (2026-09-07): one notch smaller, the page's own margins doing the
@@ -289,7 +289,7 @@ footer{margin-top:36px;font-size:0.7812rem;color:var(--text3);border-top:1px sol
 .anatomy-row:first-of-type{border-top:0}
 .anatomy-row>b{font-weight:600}
 .anatomy-row>span{color:var(--text2)}
-.anatomy-row .an-layers{color:var(--text3);font-size:0.7812rem;white-space:nowrap;text-align:right}
+.anatomy-row .an-layers{color:var(--text3);font-size:0.7813rem;white-space:nowrap;text-align:right}
 @media (max-width:560px){ .anatomy-row{grid-template-columns:minmax(0,1fr) max-content} .anatomy-row>b{grid-column:1 / -1} }
 
 /* Story card — context & listening, deliberately separate from the rated
@@ -304,7 +304,7 @@ footer{margin-top:36px;font-size:0.7812rem;color:var(--text3);border-top:1px sol
 .story-chevron{margin-left:auto;color:var(--text3);transition:transform 0.15s}
 .story[open] .story-chevron{transform:rotate(180deg)}
 .story-body{padding:var(--sp-14) var(--sp-16)}
-.story-body p{margin:0 0 var(--sp-10);font-size:var(--fs-14-5)}
+.story-body p{margin:0 0 var(--sp-10);font-size:0.9063rem}
 .story-maplead{font-weight:600;font-size:var(--fs-14)}
 .story-body .branch{margin-bottom:var(--sp-8)}
 

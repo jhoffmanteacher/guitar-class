@@ -2252,9 +2252,13 @@ function checkFabToolsThemeDrift() {
    styles.css). Before the names there were 66 distinct font-size values and
    27 distinct z-index numbers in styles.css alone. Fails the push when, in
    styles.css, tabs/journey-theme.css or tabs/fab-tools.css (comments
-   stripped; inline styles in .html/.js are not read):
+   stripped; property names in any case; the size inside a `font:` shorthand
+   counts as a font-size):
    - a font-size or z-index is a value not on that file's pinned list below
      (a NEW one-off): use a name, or ask Jonathan for a new name;
+   - a var(--z-*) in a tabs/*.css file (the --z-* names live in styles.css
+     only, so on a Journey page the layer would become auto);
+   - a `font:` shorthand whose size it cannot find;
    - a literal equals a named value (write var(--fs-14), not 0.875rem; write
      var(--z-band), not 50);
    - a var() names something that is not one of the names (a size or layer
@@ -2266,6 +2270,11 @@ function checkFabToolsThemeDrift() {
    - it reads no font-size or no z-index at all (blind).
    Spacing (margin, padding, gap) has names too (--sp-*) but no ratchet: the
    odd one-offs (5px, 7px …) are summer work, not a push failure.
+   KNOWN LIMITS (review R1-4 to R1-6, accepted): a name redefined outside the
+   top-level :root (in a rule, an @media :root, a [data-theme] :root) passes;
+   one-offs are pinned by value, not by count, so a pinned one-off may spread;
+   sizes and layers inline in .js / .html are not read; an undefined --sp-*
+   name would silently be 0 (spacing has no ratchet).
    ════════════════════════════════════════════════════════════════════ */
 const DESIGN_FS_NAMES = { '--fs-11': '0.6875rem', '--fs-12': '0.75rem', '--fs-13': '0.8125rem', '--fs-13-5': '0.8438rem', '--fs-14': '0.875rem', '--fs-14-5': '0.9062rem',
   '--fs-15': '0.9375rem', '--fs-16': '1rem', '--fs-17': '1.0625rem', '--fs-18': '1.125rem', '--fs-20': '1.25rem', '--fs-22': '1.375rem', '--fs-24': '1.5rem' };
@@ -2273,7 +2282,9 @@ const DESIGN_Z_NAMES = { '--z-header': '20', '--z-band': '50', '--z-float': '54'
 /* The one-offs that exist today, per file. Only ever SHRINKS (a pin-only edit when one goes away).
    0.8437rem (5 rules) and 0.9rem (2) are near-twins of --fs-13-5 and --fs-14-5 that were folded and put
    back (W15): the fold moved text by a pixel at 1366x657 (hand screenshot pairs). Folding them is
-   Jonathan's call (summer), not a tidy. */
+   Jonathan's call (summer), not a tidy. The same for the Journey pages' 0.9063rem (3 rules) and 0.7813rem (2):
+   folded into 0.9062rem / 0.7812rem they matched at 1366x657 but moved pixels once site-fill enlarges the page
+   (1920x1080, 2560x1300; review R1-1), so they were put back too. */
 const DESIGN_ONE_OFFS = {
   'styles.css': {
     fs: ['0.3em', '0.625rem', '0.75em', '0.7812rem', '0.8437rem', '0.85em', '0.9rem', '1.1rem', '1.35rem', '1.75rem', '1.875rem', '1.9rem', '10px', '11pt', '15px', '19px', '2.125rem', '2.25rem',
@@ -2286,7 +2297,7 @@ const DESIGN_ONE_OFFS = {
       'clamp(2.75rem,8vw / var(--site-fill,1),6rem)', 'var(--t-card)', 'var(--t-label)', 'var(--t-page)', 'var(--t-sec)'],
     z: ['0', '1', '2', '3', '4', '5', '6', '30', '40', '45', '51', '90', '95', '130', '140', '200', '300', '1000'],
   },
-  'tabs/journey-theme.css': { fs: ['0.7812rem', '1.05rem', '1.75rem', '1.875rem', '16px', '18px'], z: ['120', '130', '140'] },
+  'tabs/journey-theme.css': { fs: ['0.7813rem', '0.9063rem', '1.05rem', '1.75rem', '1.875rem', '16px', '18px'], z: ['120', '130', '140'] },
   'tabs/fab-tools.css': { fs: ['1.875rem', '2.25rem', '3.125rem'], z: ['100'] },
 };
 function checkDesignValues() {
@@ -2331,17 +2342,40 @@ function checkDesignValues() {
   let nFs = 0, nZ = 0, named = 0;
   for (const [f, pins] of Object.entries(DESIGN_ONE_OFFS)) {
     const used = { fs: new Set(), z: new Set() };
-    const re = /(^|[{;\s])(font-size|z-index)\s*:\s*([^;{}]+?)\s*(?:!important\s*)?(?=[;}])/g; let m;
+    // property names in any case; the `font:` shorthand is read for its size (R1-3)
+    const re = /(^|[{;\s])(font-size|z-index|font)\s*:\s*([^;{}]+?)\s*(?:!\s*important\s*)?(?=[;}])/gi; let m;
+    const isApp = f === 'styles.css';
     while ((m = re.exec(src[f]))) {
-      const kind = m[2] === 'font-size' ? 'fs' : 'z', v = m[3].trim(), line = src[f].slice(0, m.index + m[1].length).split('\n').length;
+      const prop = m[2].toLowerCase(), line = src[f].slice(0, m.index + m[1].length).split('\n').length;
+      let v = m[3].trim();
+      if (prop === 'font') {
+        // a keyword alone (inherit, a system font) holds no size; otherwise the size is the first size-like token
+        if (/^(inherit|initial|unset|revert|revert-layer|caption|icon|menu|message-box|small-caption|status-bar)$/i.test(v)) continue;
+        const toks = []; let cur = '', par = 0;
+        for (const ch of v) { if (ch === '(') par++; if (ch === ')') par--; if (/\s/.test(ch) && !par) { if (cur) toks.push(cur); cur = ''; } else cur += ch; }
+        if (cur) toks.push(cur);
+        const size = toks.map(t => t.split('/')[0]).find(t => /^(\d*\.?\d+(px|rem|em|pt|pc|%|vw|vh|vmin|vmax|ch|ex|cqi|cqw|cqh)|xx?-small|small|medium|x{0,3}-?large|larger|smaller|(clamp|calc|min|max)\(.*\)|var\(--(fs|t)-[\w-]+\))$/i.test(t));
+        if (!size) { flag(`${f}:${line} font:${v} — 1fb cannot find the text size in this font shorthand: write the size as a var(--fs-*) name or one of the pinned one-offs`); continue; }
+        v = size;
+      }
+      const kind = prop === 'z-index' ? 'z' : 'fs', shown = `${prop}:${m[3].trim()}`;
       kind === 'fs' ? nFs++ : nZ++;
       const nameRe = kind === 'fs' ? /^var\((--fs-[\w-]+)\)$/ : /^var\((--z-[\w-]+)\)$/, nm = v.match(nameRe);
-      if (nm) { named++; if (!((kind === 'fs' ? DESIGN_FS_NAMES : DESIGN_Z_NAMES)[nm[1]])) flag(`${f}:${line} ${m[2]}:${v} — ${nm[1]} is not one of the names`); continue; }
+      if (nm) {
+        named++;
+        if (!((kind === 'fs' ? DESIGN_FS_NAMES : DESIGN_Z_NAMES)[nm[1]])) flag(`${f}:${line} ${shown} — ${nm[1]} is not one of the names`);
+        // the --z-* names exist only in styles.css's :root: on a Journey page var(--z-*) is undefined and the layer becomes auto (R1-2)
+        else if (kind === 'z' && !isApp) flag(`${f}:${line} ${shown} — the Journey pages have no --z-* names (they are in styles.css only), so this layer would be auto: use one of ${pins.z.join(', ')} or ask Jonathan`);
+        continue;
+      }
       // the --z-* names exist in styles.css only (a Journey page has its own few layers: #save-msg's 120 is not the Games screen)
-      const twin = kind === 'fs' ? fsByValue.get(v) : f === 'styles.css' ? zByValue.get(v) : undefined;
-      if (twin) { flag(`${f}:${line} ${m[2]}:${v} — that is ${twin}: write var(${twin})`); continue; }
+      const twin = kind === 'fs' ? fsByValue.get(v) : isApp ? zByValue.get(v) : undefined;
+      if (twin) { flag(`${f}:${line} ${shown} — that is ${twin}: write var(${twin})`); continue; }
       used[kind].add(v);
-      if (!pins[kind].includes(v)) flag(`${f}:${line} ${m[2]}:${v} is a NEW one-off ${kind === 'fs' ? 'text size' : 'layer number'} — use a ${kind === 'fs' ? '--fs-*' : '--z-*'} name (styles.css :root lists them)${kind === 'z' ? '; a layer over the page goes at 55 or under, or 90 or over' : ''}`);
+      if (!pins[kind].includes(v)) flag(kind === 'fs'
+        ? `${f}:${line} ${shown} is a NEW one-off text size — use a --fs-* name (styles.css :root lists them)`
+        : isApp ? `${f}:${line} ${shown} is a NEW one-off layer number — use a --z-* name (styles.css :root lists them); a layer over the page goes at 55 or under, or 90 or over`
+          : `${f}:${line} ${shown} is a NEW one-off layer number — the Journey pages have no --z-* names: use one of ${pins.z.join(', ')} or ask Jonathan`);
     }
     for (const kind of ['fs', 'z']) for (const v of pins[kind]) if (!used[kind].has(v))
       flag(`${f}: the pinned one-off ${kind === 'fs' ? 'font-size' : 'z-index'} ${v} is no longer used — take it off DESIGN_ONE_OFFS in tools/checks.mjs (a pin-only edit), so it cannot come back`);
