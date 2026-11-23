@@ -213,6 +213,12 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
     with no Exit button (only Esc). Fix idea: `syncExploreNav()` exits when the open page is not In class; test it in
     a browser first (the request is async, so it must not cancel the card's own entry). The full-screen default has
     no pin in `checks.mjs` and no smoke click.
+    **Part 4 DONE (2026-11-23, Windows, Fast; this push).** `syncExploreNav()` leaves the page's full screen
+    (documentElement only, never the live-quiz stage's `lq-shell`) whenever the HASH is not `#class-activities…`; the
+    hash, not the open screen, so the tap's own routing gap never cancels it. Real Chrome, real taps at 1366×657: 3 of
+    3 entry paths (Songs Play Along, an In class card, a Keep practicing pin) full screen after the tap, off after Back
+    on Songs; Forward reopens the card windowed. Pins: checks 1cr2 (19 cases; 3 mutations red), smoke
+    `fullscreenBackWalk` (exit removed: 0 of 3). Not changed: closing a card by its title on In class keeps full screen.
   - "Hear the chord change" (`5c70ae9`): every signed-in student page sends a "cc:0/N/0" result, joined or not, so
     students who dismissed the invite count as 0-point players and lower the stage's "% caught"
     (`live-changes.js` ~253, `lqCcSync`); a page that reloads mid-song reads its clock off by the age of the last

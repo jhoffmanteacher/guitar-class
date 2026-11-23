@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-23 — Going Back from a full-screen song returns to the normal window
+
+- **The browser's Back button from a Play Along song now leaves full screen.** A song opened by a tap fills the
+  screen; going Back to the Songs page (or wherever you came from) used to keep the page in full screen with no Exit
+  button, so only Esc got you out. Now the page you go back to is the normal window, with its menu and header.
+
 ## 2026-11-23 — "Hear the chord change": only students who joined count
 
 - **A student who skips "Hear the chord change" no longer lowers the class's % caught.** Before, every signed-in
