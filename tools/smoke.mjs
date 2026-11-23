@@ -91,6 +91,19 @@ import { writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+/* Is today in a practice-minutes skipWeeks week (practice-minutes-config.js, Mondays)? Then the strip has no goal and
+   reads "N min K", not "N/M min K" (Friday check 2026-11-23: the Thanksgiving week turned pm-header red). Same
+   machine clock as the page. */
+const PM_SKIP_WEEK_NOW = (() => {
+  try {
+    const src = readFileSync(join(ROOT, 'practice-minutes-config.js'), 'utf8');
+    const block = (/skipWeeks\s*:\s*\[([\s\S]*?)\]/.exec(src) || [])[1] || '';
+    const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const p = n => String(n).padStart(2, '0');
+    const monday = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    return [...block.matchAll(/'(\d{4}-\d{2}-\d{2})'/g)].some(x => x[1] === monday);
+  } catch (e) { return false; }
+})();
 /* THE LEAD the smoke expects (app/cards.js PC_LEAD; checks.mjs 1bf PC_LEAD_PIN): its own number, so a fault in the
    page's pcLeadBars cannot move the expectation with it (W17). A new lead is Jonathan's: re-pin it here too. */
 const SMOKE_PC_LEAD = 0;
@@ -2243,7 +2256,7 @@ async function pmHeaderWalk(page, run, events, stats) {
         else if (m.top.length !== 1 || m.top[0] !== (name === 'Games' ? 'pm-games' : 'pm-header')) fail(label, 'the strips showing and on top are ' + JSON.stringify(m.top) + ', expected only ' + (name === 'Games' ? 'pm-games' : 'pm-header'));
         if (m.inCardBar) fail(label, 'a strip is also drawn in the practice card\'s bar');
         if (m.over > 0) fail(label, `the page scrolls sideways by ${m.over}px`);
-        if (w === 1366 && lang === 'en' && !/^\d+\/\d+ min \d+$/.test(m.text)) fail(label, 'strip text is ' + JSON.stringify(m.text));
+        if (w === 1366 && lang === 'en' && !(PM_SKIP_WEEK_NOW ? /^\d+ min \d+$/ : /^\d+\/\d+ min \d+$/).test(m.text)) fail(label, 'strip text is ' + JSON.stringify(m.text) + (PM_SKIP_WEEK_NOW ? ' (a skipWeeks week: no goal, want "N min K")' : ''));
         if (w === 1366 && m.hdrH > 56) fail(label, `the top bar is ${m.hdrH}px tall (one row is ≤ 56px)`);
         if (m.tip !== (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso')) fail(label, 'tooltip is ' + JSON.stringify(m.tip));
         stats.pmHeaderViews = (stats.pmHeaderViews || 0) + 1;
