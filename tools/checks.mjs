@@ -6514,7 +6514,7 @@ function bumpServiceWorker() {
    then breaks the worker 42 ways and needs every one to turn
    the proof red. The totals are pinned, so deleting a scenario or a breakage to
    get green fails here too. */
-const SW_AUDIO_PROOF_PIN = { assertions: 72, scenarios: 11, mutations: 42 };
+const SW_AUDIO_PROOF_PIN = { assertions: 75, scenarios: 11, mutations: 45 };
 function checkAudioWorker(swPath) {
   head('1ce. sw.js keeps the audio cache (the worker is run, not read)');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'sw-audio-proof.mjs'), swPath], { encoding: 'utf8', timeout: 120000 });

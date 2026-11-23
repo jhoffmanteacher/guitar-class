@@ -444,11 +444,20 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'gc-precache-rest') event.waitUntil(precacheRest());
 });
 
+/* Cache Storage is shared by every site at this address (jhoffmanteacher.github.io):
+   Setlist Stand keeps its offline copy there too, as `setlist-stand-…`. So activate
+   deletes only THIS site's old caches, the names that start with `guitar-class-`
+   (every name this worker has ever used does: guitar-class-v<N>-<date>,
+   guitar-class-<date>-<hash>, guitar-class-audio-…), and never another site's
+   (2026-11-23; before that, every guitar-class update emptied Setlist Stand's
+   offline copy on a tablet that had opened both). The kill switch already did this. */
+const SITE_CACHE_PREFIX = 'guitar-class-';
+
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_VERSION && k !== AUDIO_CACHE && k !== AUDIO_HASH_CACHE).map(k => caches.delete(k))
+        keys.filter(k => k.startsWith(SITE_CACHE_PREFIX) && k !== CACHE_VERSION && k !== AUDIO_CACHE && k !== AUDIO_HASH_CACHE).map(k => caches.delete(k))
       ))
       .then(() => reconcileAudio().catch(() => {}))
       .then(() => self.clients.claim())

@@ -221,13 +221,21 @@ async function runScenarios(swSrcOf) {
   scenario = 'activate housekeeping';
   {
     const st = await stored(all);
-    for (const n of ['guitar-class-2026-10-01-old', 'guitar-class-audio-2026-09-01-oldname']) await st.open(n);
+    for (const n of ['guitar-class-2026-10-01-old', 'guitar-class-audio-2026-09-01-oldname', 'guitar-class-v23-2026-06-15']) await st.open(n);
+    /* Another site at the same address (jhoffmanteacher.github.io): Setlist Stand's offline copy, and any other name. */
+    const FOREIGN = ['setlist-stand-test', 'setlist-stand-2026-11-23-7', 'other-site-v1', 'guitar-classic-v1'];
+    for (const n of FOREIGN) await (await st.open(n)).put(keyFor('index.html'), new FakeResponse('<html>' + n, { type: 'basic' }));
     const hashes = await st.open('guitar-class-audio-hashes');
     await hashes.put(keyFor('audio/ghost.mp3'), new FakeResponse('deadbeef00'));
     const sw = boot(swSrcOf(mapOf(all), ''), st, {});
     await sw.activate();
     check('an old shell cache is deleted', !st.names().includes('guitar-class-2026-10-01-old'));
     check('an old per-change audio cache is deleted', !st.names().includes('guitar-class-audio-2026-09-01-oldname'));
+    check('the oldest shell cache name (guitar-class-v<N>-<date>) is deleted', !st.names().includes('guitar-class-v23-2026-06-15'));
+    check('another site\'s caches are kept (setlist-stand-…, any name not starting guitar-class-)', FOREIGN.every(n => st.names().includes(n)));
+    let foreignIntact = true;
+    for (const n of FOREIGN) { const r = await (await st.open(n)).match(keyFor('index.html')); foreignIntact = foreignIntact && !!r && (await r.text()) === '<html>' + n; }
+    check('...with their contents untouched', foreignIntact);
     check('the stable audio cache is kept', st.names().includes(sw.read('AUDIO_CACHE')));
     check('a record with no file is removed', (await record(st, sw, 'audio/ghost.mp3')) === null);
   }
@@ -453,6 +461,10 @@ const MUTATIONS = [
   ['a stored track has no record', "await hashes.put(info.key, new Response(info.hash));\n}", "}"],
   ['an unmapped track is cached', "if (isAudio && !audioFile) return;", ""],
   ['activate deletes the stable audio cache', "k !== CACHE_VERSION && k !== AUDIO_CACHE && k !== AUDIO_HASH_CACHE", "k !== CACHE_VERSION"],
+  /* 2026-11-23: Cache Storage is shared with the other sites at this address (Setlist Stand). */
+  ['activate deletes another site\'s caches (the old behaviour)', "k.startsWith(SITE_CACHE_PREFIX) && ", ""],
+  ['the site prefix has no dash (a name like guitar-classic-… would go too)', "const SITE_CACHE_PREFIX = 'guitar-class-';", "const SITE_CACHE_PREFIX = 'guitar-class';"],
+  ['the site prefix misses the older name shapes', "const SITE_CACHE_PREFIX = 'guitar-class-';", "const SITE_CACHE_PREFIX = 'guitar-class-2';"],
   ['a hit is refetched and stored over (the old behaviour)', "if (cached && audioFile) return cached;", ""],
   ['a miss does not revalidate', "const res = await fetch(audioFile.key, { cache: 'no-cache' });", "const res = await fetch(audioFile.key);"],
   ['reconcile is not run at activate', ".then(() => reconcileAudio().catch(() => {}))", ""],
