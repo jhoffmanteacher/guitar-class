@@ -264,6 +264,47 @@ function sbPowerFrets(pc){
   const fE = (pc - 4 + 12) % 12, fA = (pc - 9 + 12) % 12;
   return fE <= 5 ? [fE, fE + 2, fE + 2, null, null, null] : [null, fA, fA + 2, fA + 2, null, null];
 }
+/* WHERE A POWER CHORD SITS (Jonathan, 2026-11-23: "the classical guitars can't go that high"). No power chord the
+   builder writes has a fret above SB_POWER_MAX_FRET: the builder's own pick (sbPowerFrets, at most fret 8) never
+   does, and an imported song's power shape above it is moved to the spot nearest where it was (sbSongOf). He can
+   move any power chord at the Level step ("Where the power chords sit"): its root on the low E string or the A
+   string, at any spot whose frets all stay at or under the cap. Saved as chart.powerAt: { E5: 'A7' }. */
+const SB_POWER_MAX_FRET = 10;
+const SB_PC_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+/* A power chord's spots: [{ at: 'E0' | 'E12' | 'A7' …, frets }], the root on the low E or the A string, lowest first. */
+function sbPowerSpots(pc){
+  const out = [];
+  [['E', 4], ['A', 9]].forEach(([s, open]) => {
+    const f0 = (pc - open + 12) % 12;
+    [f0, f0 + 12].forEach(f => {
+      const frets = s === 'E' ? [f, f + 2, f + 2, null, null, null] : [null, f, f + 2, f + 2, null, null];
+      if(f + 2 <= SB_POWER_MAX_FRET) out.push({ at: s + f, frets });
+    });
+  });
+  return out.sort((a, b) => Number(a.at.slice(1)) - Number(b.at.slice(1)));
+}
+function sbSpotLabel(at){ const f = Number(at.slice(1)); return (at[0] === 'E' ? 'Low E string' : 'A string') + (f ? `, fret ${f}` : ', open'); }
+function sbFretsTooHigh(shape){ return !!(shape && Array.isArray(shape.frets) && shape.frets.some(f => typeof f === 'number' && f > SB_POWER_MAX_FRET)); }
+/* A shape → its spot ('A7'), or '' when it is not one of the builder's three-string spots. */
+function sbSpotOf(pc, shape){
+  const f = shape && Array.isArray(shape.frets) ? JSON.stringify(shape.frets) : '';
+  const s = f && sbPowerSpots(pc).find(o => JSON.stringify(o.frets) === f);
+  return s ? s.at : '';
+}
+/* The power shape a chord gets in the song: his pick at the Level step, else the shape it has (an imported one, or the
+   builder's), moved to the builder's pick when a fret is above the cap. */
+function sbPowerShapeFor(name, have, powerAt){
+  const c = bsChordName(name);
+  if(!c) return have;
+  const pn = c.q === '5' ? name : bsPowerName(name), at = powerAt && bsOwn(powerAt, pn) ? powerAt[pn] : '';
+  const spot = at && sbPowerSpots(c.pc).find(o => o.at === at);
+  if(spot) return { frets: spot.frets.slice() };
+  if(!have) return { frets: sbPowerFrets(c.pc) };
+  if(!sbFretsTooHigh(have)) return have;
+  /* Too high: the spot nearest where it was (E5 at fret 12 → the A string at fret 7), so the hand stays near. */
+  const was = Math.min(...have.frets.filter(f => typeof f === 'number'));
+  return { frets: sbPowerSpots(c.pc).reduce((a, o) => Math.abs(Number(o.at.slice(1)) - was) < Math.abs(Number(a.at.slice(1)) - was) ? o : a).frets.slice() };
+}
 /* A chord name → { full: { frets }|null, power: { frets }, taught, how: 'site' | 'barre' | 'power' } or null. */
 function sbShapeOf(name){
   const c = bsChordName(name);
@@ -376,6 +417,10 @@ function sbSongOf(d){
     const sh = sbShapeOf(n), imp = ch.shapes && bsOwn(ch.shapes, n) && bsIsObj(ch.shapes[n]) ? ch.shapes[n] : null;
     if(imp) chords[n] = { full: imp.full || (needFull && sh ? sh.full : null), power: imp.power || (needPower && sh ? sh.power : null) };
     else if(sh) chords[n] = { full: sh.full, power: sh.power };
+    /* Where the power chord sits (sbPowerShapeFor): never above fret 10. A 5 chord's full shape is its power shape. */
+    const c = chords[n];
+    if(c && c.power) c.power = sbPowerShapeFor(n, c.power, ch.powerAt);
+    if(c && c.full && bsChordName(n).q === '5') c.full = sbPowerShapeFor(n, c.full, ch.powerAt);
   });
   /* An imported song's beat (beat.fromImport) is kept exactly: its bpm unrounded and its own bar times. */
   const song = { meter: beat.meter, bpm: beat.fromImport ? beat.bpm : Math.round(sbPinBpm(beat) * 1000) / 1000, anchor: beat.anchor, chords, bars, sections,
@@ -561,6 +606,27 @@ function sbBarPanelHtml(d, sel){
       <div class="sb-row"><button type="button" class="sb-btn small" data-sb-act="sec-edge" data-sb-dir="-1"${off || at.si === 0 || ch.sections[at.si - 1].bars.length < 2 ? ' disabled' : ''}>Start 1 bar earlier</button><button type="button" class="sb-btn small" data-sb-act="sec-edge" data-sb-dir="1"${off || at.si === 0 || s.bars.length < 2 ? ' disabled' : ''}>Start 1 bar later</button></div>
     </div>`;
 }
+/* "Where the power chords sit" (the Level step): one row per power chord the card plays, a button per spot. Shown when
+   the card has power chords (Power only, Both, or a 5 chord in the chart). */
+function sbPowerRowsHtml(d, off){
+  const ch = d.chart, lv = d.level || { versions: 'full' }, names = sbChartChords(ch.sections);
+  const rows = [], seen = {};
+  names.forEach(n => {
+    const c = bsChordName(n);
+    if(!c || (lv.versions === 'full' && c.q !== '5')) return;
+    const pn = c.q === '5' ? n : bsPowerName(n);
+    if(seen[pn]) return;
+    seen[pn] = 1;
+    const imp = ch.shapes && bsOwn(ch.shapes, n) && bsIsObj(ch.shapes[n]) ? ch.shapes[n].power : null, sh = sbShapeOf(n);
+    const have = imp || (sh && sh.power), now = sbPowerShapeFor(n, have, ch.powerAt), at = sbSpotOf(c.pc, now);
+    const moved = sbFretsTooHigh(have) && !(ch.powerAt && bsOwn(ch.powerAt, pn))
+      ? `<span class="sb-hint" style="margin:0">Was at fret ${Math.min(...have.frets.filter(f => typeof f === 'number'))}: moved under fret ${SB_POWER_MAX_FRET + 1}.</span>` : '';
+    const btns = sbPowerSpots(c.pc).map(o => `<button type="button" class="${o.at === at ? 'on' : ''}" data-sb-act="level-power" data-sb-chord="${escAttr(pn)}" data-sb-v="${o.at}" aria-pressed="${o.at === at}"${off}>${escHtml(sbSpotLabel(o.at))}</button>`).join('');
+    rows.push(`<div class="sb-row"><b style="min-width:3em">${escHtml(pn)}</b><span class="sb-seg">${btns}</span>${at ? '' : '<span class="sb-hint" style="margin:0">Its own shape from the imported song.</span>'}${moved}</div>`);
+  });
+  if(!rows.length) return '';
+  return `<div class="sb-h">Where the power chords sit</div>${rows.join('')}<p class="sb-hint">The tab shows this spot. Nothing goes above fret ${SB_POWER_MAX_FRET}: the classical guitars cannot reach higher.</p>`;
+}
 function sbLevelPaneHtml(d){
   const ch = d && d.chart;
   if(!d || !ch || !Array.isArray(ch.sections) || !ch.sections.length) return `<div class="sb-box"><p class="sb-note" style="margin:0">Read the chart first (step 4).</p></div>`;
@@ -583,6 +649,7 @@ function sbLevelPaneHtml(d){
       <div class="sb-h">Which chords?</div>
       <div role="radiogroup" aria-label="Which chords">${opt('full', 'Full chords only', escHtml(names.join(' · ') || 'no chords'))}${opt('power', 'Power chords only', escHtml(powers.join(' · ') || 'no chords') + ', made from the same chart')}${opt('both', 'Both, with the switch on the card', 'Like Perdón Mamá: Full chords / Power chords.')}</div>
       ${both}
+      ${sbPowerRowsHtml(d, off)}
       <p class="sb-hint">Speeds come free: Slowest · Slower · Slow · Normal, from the one file.</p>
       ${verdict}
     </div><div>
@@ -626,7 +693,7 @@ function sbChartDoRead(d, text){
   if(!read.sections.length){ sbNote = read.bad.length ? `No chords could be read: ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} ${read.bad.length === 1 ? 'was' : 'were'} refused (line ${read.bad[0].line} ${SB_WHY[read.bad[0].why] || ''}).` : 'No chords could be read in that text.'; if(st.text == null) st.text = t; teacherSbPaint(); return; }
   st.read = read; st.readOf = meter + '\n' + t; st.view = 'read'; st.text = null; st.sel = null; st.undo = [];
   const lv = d.level && d.level.range ? Object.assign({}, d.level, { range: null }) : d.level;
-  return sbChartSet(d, Object.assign({ chart: { text: t, meter, fmt: read.fmt, sections: read.sections, left: [], kept: ((d.chart && d.chart.kept) || []).filter(n => read.chords.includes(n)), edited: false } }, lv !== d.level ? { level: lv } : {}),
+  return sbChartSet(d, Object.assign({ chart: { text: t, meter, fmt: read.fmt, sections: read.sections, left: [], kept: ((d.chart && d.chart.kept) || []).filter(n => read.chords.includes(n)), edited: false, powerAt: (d.chart && d.chart.powerAt) || null } }, lv !== d.level ? { level: lv } : {}),
     `Read: ${read.sections.length} section${read.sections.length === 1 ? '' : 's'}, ${sbChartBars(read.sections)} bars${read.bad.length ? `, ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} refused` : ''}.`, true);
 }
 /* A chart given at step 1, read when the draft is saved. Which view step 4 opens on is chosen when it is first shown,
@@ -676,6 +743,12 @@ function sbChartAct(act, b){
   }
   if(act === 'level-versions'){ const v = b.dataset.sbV; sbChartSet(d, { level: Object.assign({ range: null }, d.level, { versions: v, start: v === 'both' ? ((d.level && d.level.start) || 'full') : v }) }, null); return true; }
   if(act === 'level-start'){ sbChartSet(d, { level: Object.assign({ versions: 'both', range: null }, d.level, { start: b.dataset.sbV }) }, null); return true; }
+  if(act === 'level-power'){
+    const pn = b.dataset.sbChord, at = b.dataset.sbV, c = bsChordName(pn);
+    if(!c || !sbPowerSpots(c.pc).some(o => o.at === at)) return true;
+    sbChartSet(d, { chart: Object.assign({}, ch, { powerAt: Object.assign({}, ch.powerAt, { [pn]: at }) }) }, `${pn}: ${sbSpotLabel(at)}.`);
+    return true;
+  }
   if(act === 'level-range'){ sbChartSet(d, { level: Object.assign({ versions: 'full' }, d.level, { range: b.dataset.sbV === 'whole' ? null : { from: 0, to: ch.sections.length - 1 } }) }, null); return true; }
   if(act === 'bar-pick'){ const g = Number(b.dataset.sbG); st.sel = st.sel === g ? null : g; st.part = 0; teacherSbPaint(); return true; }
   const sel = st.sel, at = sel != null ? sbGridAt(ch.sections, sel) : null;

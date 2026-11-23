@@ -167,11 +167,15 @@ const rootFret = (c, s) => { const f = (pcOf(c.root) - (OPEN[s] % 12) + 12) % 12
    E5 on a play-along since the Watchtower retired it) and a full chord with an open shape uses it. */
 function choosePositions(chords, fixed, allowOpen) {
   const opts = chords.map(n => {
-    if (fixed[n]) return [fixed[n]];
+    if (fixed[n]) { if (!allowOpen && Number(String(fixed[n]).slice(1)) + 2 > 10) die(`powerShapes "${n}": ${fixed[n]} goes above fret 10 (the classical guitars cannot reach it)`); return [fixed[n]]; }
     if (allowOpen && OPEN_SHAPES[n]) return ['open'];
     const c = parseChord(n);
     if (!c) die(`cannot place "${n}": write the plain chord (C#m, not C#m7) or give its shape in "shapes"`);
-    return ['E', 'A'].map(s => s + rootFret(c, s));
+    /* A power chord never goes above fret 10 (Jonathan, 2026-11-23: the classical guitars cannot reach it): its top
+       fret is the root + 2, so the root stays at fret 8 or lower. Every root has such a spot on one of the two strings. */
+    const at = ['E', 'A'].map(s => s + rootFret(c, s)).filter(w => allowOpen || Number(w.slice(1)) + 2 <= 10);
+    if (!at.length) die(`"${n}": no power-chord spot at fret 10 or under`);
+    return at;
   });
   let best = null;
   const walk = (i, pick) => {

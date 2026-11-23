@@ -624,6 +624,26 @@ async function chartCases(consoleSrc, check){
       !bad.length && JSON.stringify(g.full.frets) === '[3,2,0,0,0,3]' && g.taught && g.how === 'site' && !bb.taught && bb.how === 'barre' && !fs.taught, bad.join('; ') || JSON.stringify({ G: g.full.frets, Bb: bb.full.frets, 'F#m': fs.full.frets, Bb5: bb.power.frets }));
   }
 
+  /* where a power chord sits (2026-11-23): never above fret 10; an imported E5 at fret 12 moves to the A string at 7 */
+  {
+    const bad = [];
+    let spots = 0;
+    for(let pc = 0; pc < 12; pc++){
+      const list = run('sbPowerSpots')(pc), name = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][pc] + '5';
+      if(!list.length) bad.push(name + ': no spot');
+      list.forEach(o => { spots++; const w = run('bsShapeProblem')(name, { frets: o.frets }, 'power'); if(w) bad.push(`${name} ${o.at}: ${w}`); if(o.frets.some(f => f > 10)) bad.push(`${name} ${o.at} above fret 10`); });
+      const own = run('sbShapeOf')(name).power.frets;
+      if(own.some(f => f > 10)) bad.push(name + ': the builder\'s own pick is above fret 10');
+    }
+    const high = { frets: [12, 14, 14, null, null, null] };
+    const moved = JSON.stringify(run('sbPowerShapeFor')('E5', high, null).frets), movedE = JSON.stringify(run('sbPowerShapeFor')('E', high, null).frets);
+    const picked = JSON.stringify(run('sbPowerShapeFor')('Em', high, { E5: 'E0' }).frets), kept = JSON.stringify(run('sbPowerShapeFor')('G', { frets: [3, 5, 5, null, null, null] }, null).frets);
+    const junk = JSON.stringify(run('sbPowerShapeFor')('G', { frets: [3, 5, 5, null, null, null] }, { G5: 'A10' }).frets);
+    check(`power spots: ${spots} spots for the 12 roots, every one the validator takes and none above fret 10; an imported E5 / E at fret 12 moves to the A string at 7; a pick at the Level step wins; a shape under the cap is kept; a spot that is not one is ignored`,
+      !bad.length && moved === '[null,7,9,9,null,null]' && movedE === moved && picked === '[0,2,2,null,null,null]' && kept === '[3,5,5,null,null,null]' && junk === kept,
+      bad.join('; ') || JSON.stringify({ moved, movedE, picked, kept, junk }));
+  }
+
   /* every accepted chart is a song the validator passes, and renders as the real card */
   {
     const page = appPage(ROOT);
@@ -719,6 +739,18 @@ async function chartCases(consoleSrc, check){
     d.level.versions === 'both' && d.level.start === 'power' && JSON.stringify(d.level.range) === '{"from":1,"to":1}' && d.step === 5 && !songWhy.length && /passes every check/.test(lvPane) && song.bars.length === 7 && song.sections.length === 2 && song.sections[1].from === 5
     && JSON.stringify(song.range) === '{"from":1,"to":1}' && JSON.stringify(song.level) === '{"versions":"both","start":"power"}' && Object.keys(song.chords).sort().join(' ') === 'Am Bb C D Em G' && song.bpm === 96 && song.anchor === 0.5,
     JSON.stringify({ level: d.level, step: d.step, why: songWhy, bars: song.bars.length, chords: Object.keys(song.chords) }));
+  /* where the power chords sit: a pick at the Level step is saved in the draft and is the song's power shape */
+  {
+    const before = run('sbLevelPaneHtml(sbDraft())'), was = JSON.stringify(run('sbSongOf(sbDraft())').chords.Bb.power.frets);
+    act('level-power', { sbChord: 'Bb5', sbV: 'E18' });
+    const refused = JSON.stringify(run('sbDraft().chart.powerAt || null'));
+    act('level-power', { sbChord: 'Bb5', sbV: 'E6' });
+    await flush(); d = stored();
+    const sg = JSON.parse(JSON.stringify(run('sbSongOf(sbDraft())'))), why = run('sbSongWhy(sbDraft(), sbSel)'), now = JSON.stringify(sg.chords.Bb.power.frets);
+    check('level: "Where the power chords sit" lists the card\'s power chords with only spots at fret 10 or under; Bb5 moved from the A string at 1 to the low E string at 6 is saved (chart.powerAt) and is the song\'s Bb power shape; a spot above fret 10 is refused; the song still passes',
+      /Where the power chords sit/.test(before) && /data-sb-chord="Bb5" data-sb-v="E6"/.test(before) && !/data-sb-v="A10"/.test(before) && refused === 'null' && was === '[null,1,3,3,null,null]'
+      && d.chart.powerAt && d.chart.powerAt.Bb5 === 'E6' && now === '[6,8,8,null,null,null]' && !why.length, JSON.stringify({ was, refused, powerAt: d.chart.powerAt, now, why }));
+  }
   /* too many bars for the recording: the validator's own line */
   {
     const many = '[Verse]\n' + Array.from({ length: 7 }, () => 'G D Em C').join('\n');
