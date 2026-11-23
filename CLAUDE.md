@@ -26,7 +26,7 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
      golden snapshot of what the site shows and saves, on the commit before and on your tree, then compare:
      `node tools/golden.mjs --out <dir> --shots` twice (`--root <site folder>` snapshots another checkout), then
      `node tools/golden.mjs --compare <dirA> <dirB>`. About 30 minutes each (29 and 38 measured 2026-11-13, longer
-     under load); only one headless-browser run at a time (no smoke, `pm-e2e.mjs` or `slow-load.mjs` beside it); it
+     under load); at most TWO headless-browser runs at a time (Jonathan, 2026-11-23: "make two the default"; a smoke, `pm-e2e.mjs`, `slow-load.mjs` or a golden snapshot each count as one; a third waits); it
      uses Chrome for Testing when `CHROME` is set. Coverage is on by default: every run prints, per script, how many
      top-level functions it NEVER ran (names in `coverage.json`), and the compare prints that count for each file the
      two sites differ in. "Identical" says nothing about code a run never reached: read the header's "not covered"
@@ -44,7 +44,7 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    itself: if no step starts for 120 s (`--stall`) or the run passes 40 minutes (`--timeout`),
    it prints `smoke: ✗ HUNG … Stuck at "<walk>: <step>"`, closes its Chrome and exits 3. A hang
    is a finding: report the step it names. Only a run killed from outside can leave Chrome
-   behind (`pkill -f gc-smoke-chrome`). Never run it while another smoke or `pm-e2e.mjs` runs
+   behind (`pkill -f gc-smoke-chrome`). Never run it while two other browser runs (smoke, `pm-e2e.mjs`, `slow-load.mjs`, golden) are already going
    (macOS: `pgrep -f 'tools/smoke.mjs|tools/pm-e2e.mjs'`; Windows Git Bash: `ps -W | grep -E
    'smoke|pm-e2e'`).
 4. Changed what a student SEES (a renderer, a colour, a new control, or
@@ -108,7 +108,7 @@ these limits and the load line in the report. On the Mac, run
   commits no idle lines since 2026-11-19, only a "started" line under an item it picks up and the DONE note: an
   item with no "started" line 2 hours after it was added → treat Windows as asleep and say so. The Mac keeps what
   only it can do: student takes, audio and other Mac-only files (`Claude outputs/`), and the lead.
-- **On the Mac at once:** the lead, at most 2 local agents, at most 1 headless-Chrome run. A 3rd local agent only
+- **On the Mac at once:** the lead, at most 2 local agents, at most 2 headless-Chrome runs (the second only while the load is under 8). A 3rd local agent only
   when the load is under 4 and it is Node-only. Each agent's brief says: one job at a time, no sub-agents, and wait
   while `uptime` shows over 8 (10 minutes at most, then go on and say so).
 - On the Mac, every report that ran agents or long jobs ends with one line: the load when it started and the highest you saw.
@@ -181,7 +181,7 @@ There is no `app.js`, `coach.js` or `teacher.js` file: each was cut into parts, 
 - **The old names are LOGICAL names.** Tools and check messages still say `app.js` / `coach.js` / `teacher.js` for "the whole script" (`siteSource('app.js')` in `tools/site-src.mjs`, which every Node tool reads them through). Never recreate those three files.
 - **Load order matters now.** A new top-level statement that RUNS at load may only use what is defined in the same or an earlier part. Anything that starts things (a listener whose handler uses later parts, sign-in) is registered in `app/start.js`.
 - **After changing any part:** `node tools/checks.mjs`, as before. A change to load order, a loader, the `index.html` script tags or the `sw.js` lists: also `node tools/slow-load.mjs`. (`tools/sw-upgrade-proof.mjs` proved the one-time move from `app.js` to the parts; it needs a pre-cut checkout as `--old` and is kept as the record.)
-  - A change to `sw.js`, the service-worker block in `app/start.js`, `swResume*` in `app/boot.js` or `teacherResume*` in `teacher-core.js`: also `node tools/update-reload-loop.mjs` (headless Chrome, about 16 minutes, only one browser run at a time; every case passes, 29 of 29; the deep-link fault it found was fixed 2026-11-12).
+  - A change to `sw.js`, the service-worker block in `app/start.js`, `swResume*` in `app/boot.js` or `teacherResume*` in `teacher-core.js`: also `node tools/update-reload-loop.mjs` (headless Chrome, about 16 minutes, at most two browser runs at a time; every case passes, 29 of 29; the deep-link fault it found was fixed 2026-11-12).
 - **Keep the parts small, so this never needs doing again.** A new feature (a new game, drill, console view, card type) gets its OWN part, not a new section at the bottom of the nearest one. New code otherwise goes in the part whose banner already covers it (the table above); a shared helper goes in the EARLIEST part that uses it, never a later one. `checks.mjs` 1cv warns when a part passes 2,000 lines and fails the push over 2,600; never raise those numbers without Jonathan.
 - **A Fast change never stops to split a part** (Jonathan, 2026-11-11: "I frequently need fast changes"). Touched a part that is over 2,000 lines? Say so in one line of the report and ship as usual. Splitting a part (moving one banner section, whole and unchanged, into a new part loaded right after it, then `node tools/slow-load.mjs`) is its own change at a quiet moment, never bundled into something he asked for quickly. Only the 2,600 limit blocks; if a part is near it, tell him before it bites. `coach-core.js` is only split with him (the listening code).
 - **A new part file** goes in `index.html`'s `site-parts:app.js` block (app) or the `COACH_JS_PARTS` / `TEACHER_JS_PARTS` array in `app/boot.js`, and, for an app or arcade part, in the `sw.js` lists (`checks.mjs` enforces it; a console part stays OUT of them, which it enforces too). Name it `app/<x>.js`, `coach-<x>.js` or `teacher-<x>.js`. Do not edit `tools/split-plan.json`: the cut is done, and that file and `tools/split-site.mjs` are kept only as the record of how it was made.
@@ -371,7 +371,7 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - **Parallel by area.** One reviewer per independent area (for example the coach stop path, the Tuning Simulator, small Fast commits), all spawned in a single message. Use `site-reviewer-deep` for a danger-zone file, 50+ strings or any sub-agent sweep, otherwise `site-reviewer`. Reviewers are Opus (`high` for `site-reviewer`, `xhigh` for `site-reviewer-deep` and the Friday check): "Opusplan" below.
 - **Re-review every fix round with a fresh agent.** After fixes, spawn a new reviewer; never reuse the one that found the bug. On 2026-11-08 every `coach.js` round found a real major bug in the previous round's fixes. Stop after the first round with no BLOCKER or MAJOR finding (severity words as in `.claude/skills/site-sweep/reviewer.md`); fix its MINOR findings with a break-it proof and start no new round for them. At most 3 rounds: if round 3 still finds a BLOCKER or MAJOR, stop and ask Jonathan (AskUserQuestion) whether to ship, revert or keep going.
 - **Fixers.** Fix findings in one file family yourself. Spawn `site-fixer` only when they span two or more independent file families: create its worktree first, spawn it there, then cherry-pick its commits. Before spawning more than 3 agents, read skill `site-sweep`.
-- **Brief each agent with the limits.** Its own worktree only; no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while a smoke run is going (check with the `pgrep` command in step 3, because another session's run counts).
+- **Brief each agent with the limits.** Its own worktree only; no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while two browser runs are already going (check with the `pgrep` command in step 3, because another session's run counts).
 - **Short reports** (Jonathan, 2026-11-13: "accurate and efficient"). Every brief says: the final message is 20 lines at most (verdict or tip first; counts with denominators; what needs the lead or Jonathan); tables, quoted lines, proofs and logs go in ONE details file in the session scratchpad (a reviewer: its scratch folder), path given, which the lead reads only to verify. Only a reviewer's one line per BLOCKER / MAJOR (file:line) may pass the cap.
 - **Smoke and reviews run at the same time**, smoke in its own detached worktree (step 3), so your checkout stays free for your own area.
 - **Treat agent output as claims.** Read every quoted line yourself. Make a fixer prove each new guard by breaking the code and pasting the red line. Send product choices found in a review to Jonathan with AskUserQuestion.
@@ -380,7 +380,7 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - Read the load first and choose cloud, Windows or the Mac: "Keep the Mac's load just right" in "Start here".
 - Still your call each time: a few tool calls or one file family is faster done yourself.
 - Every brief states a size (how many agents or sub-agents, how many browser runs) and the limits in "Brief each agent with the limits".
-- Agents that edit work in their own worktree, created first; you cherry-pick their commits. Only one smoke, `pm-e2e.mjs` or other headless-Chrome run at a time on this machine.
+- Agents that edit work in their own worktree, created first; you cherry-pick their commits. At most two smoke, `pm-e2e.mjs` or other headless-Chrome runs at a time on this machine (2026-11-23).
 - "Treat agent output as claims" applies to builders as much as to reviewers.
 
 **Triggers.** Review trigger = 3+ files, a danger-zone file (the console's config plumbing: `teacherWriteConfig()` and the `config/class` reads in `teacher-config.js`,
