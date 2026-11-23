@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-23 — Lesson steps no longer say "below" about a chart beside them
+
+- **Seven lesson steps in Modules 3, 4, 5, 9 and 10 drop the word "below" (Spanish: "abajo").** In One step view the
+  chord charts, the scale picture and the Play button sit to the right of the directions, not under them, so lines
+  like "The three charts below have no names" now read "The three charts have no names". "Answer the question below"
+  stays: the question is still under the directions.
+
 ## 2026-11-23 — Songs: "Date added" sorts newest first
 
 - **The Songs page's "Date added" button now sorts newest first.** Every song has the day it was added to the site,

@@ -80,6 +80,12 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 Update this block whenever an item opens or closes.
 
+**Done 2026-11-23: Friday finding "below" (work order `friday-findings`, Part 2, Fast).** 7 two-column steps lost the
+direction word (EN 7 "below", ES 7 "abajo"): module-3 power-chord step and Challenge 6, module-4's two Mystery Chart
+steps, module-5 Pattern 1 as C major, module-9 partial shape, module-10 relative vs. parallel. Kept: "the question
+below" x2 (+ ES twins; the MC renders full width under both columns), "hacia abajo" (= downward), and the "the cure"
+step's "pre-loaded below" (a switched-off Take It to a Song section; 1do refuses any edit there, never shown).
+
 **Done 2026-11-23: Friday finding "Date added" (work order `friday-findings`, Part 3, Fast).** All 46 coded songs (120
 entries) carry `added`, the day each first entered the module data (git, 2026-05-15 .. 2026-08-07); the 8 cards with
 `library` too, and the More Play Along songs row follows "Date added" (newest first; A-Z otherwise). A built song's

@@ -212,8 +212,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Mystery Chart', label_es: 'Reto — Diagrama misterioso',
-                text: 'The two charts below have no names.<ol><li>Look at the left chart only.</li><li>Find the string with an X, the open strings, and where each finger goes.</li><li>Answer the question below.</li></ol>',
-                text_es: 'Los dos diagramas de abajo no tienen nombre.<ol><li>Mira solo el diagrama de la izquierda.</li><li>Encuentra la cuerda con X, las cuerdas al aire y dónde va cada dedo.</li><li>Responde la pregunta de abajo.</li></ol>',
+                text: 'The two charts have no names.<ol><li>Look at the left chart only.</li><li>Find the string with an X, the open strings, and where each finger goes.</li><li>Answer the question below.</li></ol>',
+                text_es: 'Los dos diagramas no tienen nombre.<ol><li>Mira solo el diagrama de la izquierda.</li><li>Encuentra la cuerda con X, las cuerdas al aire y dónde va cada dedo.</li><li>Responde la pregunta de abajo.</li></ol>',
                 hint: 'Check the low E string first: X or open? Then read each dot: which string, which fret. Match the shape to a chord you know.',
                 hint_es: 'Revisa primero la cuerda Mi grave: ¿X o al aire? Luego lee cada punto: qué cuerda, qué traste. Compara la forma con un acorde que conoces.',
                 stuck: 'Compare the low E string on both charts. One has an X. The other plays the low E open.',
@@ -233,8 +233,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — Play a Shape You Have Never Seen', label_es: 'Reto — Toca una forma que nunca has visto',
-                text: 'The chart below has no name.<ol><li>Read the low E string first: X or O?</li><li>Read each dot: which string, which fret, which finger.</li><li>Put your fingers where the chart shows.</li><li>Pluck each string one at a time. Skip any string with an X.</li><li>Press &#x25B6; and compare your notes with it.</li></ol>You\'ve got it when: every string with an O or a dot rings clean three times in a row, and your notes match the &#x25B6; notes.',
-                text_es: 'El diagrama de abajo no tiene nombre.<ol><li>Lee primero la cuerda Mi grave: ¿X u O?</li><li>Lee cada punto: qué cuerda, qué traste, qué dedo.</li><li>Pon tus dedos donde muestra el diagrama.</li><li>Pulsa cada cuerda una por una. Sáltate cualquier cuerda con X.</li><li>Presiona &#x25B6; y compara tus notas con él.</li></ol>Lo tienes cuando: cada cuerda con O o con un punto suena limpia tres veces seguidas, y tus notas son iguales a las notas de &#x25B6;.',
+                text: 'The chart has no name.<ol><li>Read the low E string first: X or O?</li><li>Read each dot: which string, which fret, which finger.</li><li>Put your fingers where the chart shows.</li><li>Pluck each string one at a time. Skip any string with an X.</li><li>Press &#x25B6; and compare your notes with it.</li></ol>You\'ve got it when: every string with an O or a dot rings clean three times in a row, and your notes match the &#x25B6; notes.',
+                text_es: 'El diagrama no tiene nombre.<ol><li>Lee primero la cuerda Mi grave: ¿X u O?</li><li>Lee cada punto: qué cuerda, qué traste, qué dedo.</li><li>Pon tus dedos donde muestra el diagrama.</li><li>Pulsa cada cuerda una por una. Sáltate cualquier cuerda con X.</li><li>Presiona &#x25B6; y compara tus notas con él.</li></ol>Lo tienes cuando: cada cuerda con O o con un punto suena limpia tres veces seguidas, y tus notas son iguales a las notas de &#x25B6;.',
                 hint: 'The number in each dot is the finger. The row the dot sits in is the fret.',
                 hint_es: 'El número dentro de cada punto es el dedo. La fila donde está el punto es el traste.',
                 stuck: 'Build the left chart from the Mystery Chart above. Compare it with this chart, dot by dot. Find the dot that is missing.',
