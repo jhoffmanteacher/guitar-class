@@ -2264,6 +2264,10 @@ async function fullscreenBackWalk(page, run, events, stats) {
     await run('fs-back:unpin', `((window.__fsPins !== undefined && (activityPins = window.__fsPins, delete window.__fsPins)), (document.fullscreenElement && document.exitFullscreen()), caCloseOpen(), renderClassActivities(), 1)`, 500);
     await page.send('Emulation.clearDeviceMetricsOverride');
   }
+  /* The page's known, harmless ResizeObserver warning (app/boot.js only warns on it; the other walks drop it at their
+     own opening step too). On GitHub's Linux Chrome the scroll-into-view of each path's first tap raised it once
+     (the activities job on 93b6a7a5, 2026-11-23); Windows never shows it. Only that warning, only at these steps. */
+  for (let i = events.length - 1; i >= 0; i--) if (/^fs-back:[a-z-]+:where$/.test(events[i].step) && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   stats.fsBack = `${held} of ${paths.length}`;
 }
 
