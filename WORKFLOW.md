@@ -124,10 +124,10 @@ beat; the first build was 3/4 from 1.133 s, which was a fade-in). Things to know
   `song.capo`. Then a CHANGELOG entry.
 
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
-- Friday 2026-11-20: which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday
-  check of 2026-11-20 was cancelled and its routine (`trig_016m5HTbmhxb2oEqDaefQurB`) is DISABLED. A one-time routine
-  (`trig_016pjBWVDN5ychbioZJqmVEf`) re-enables it Friday 2026-11-27 at 9 AM Pacific so it runs that night; check on
-  2026-11-27 that `enabled` is true (the next run covers everything since `last-run.txt`).
+- Which of this week's changes get a Fable review (the list under "Opus reviews" below). The Friday check routine
+  (`trig_016m5HTbmhxb2oEqDaefQurB`) is ENABLED again (Jonathan, 2026-11-23); its next run is Friday 2026-11-27, 11 PM
+  Pacific, and covers everything since `last-run.txt`. The one-time routine `trig_016pjBWVDN5ychbioZJqmVEf` (set to
+  re-enable it on 2026-11-27) is no longer needed; Jonathan can delete it at https://claude.ai/code/routines.
 - The three Friday-check product calls are settled (Jonathan, 2026-11-19): the Games heading now says "Notes on the
   fretboard"; the practice-minutes keepalive's dead-link loss (up to about 60 s, `practice-minutes.js` ~1082) is
   ACCEPTED; no "goal reached" toast on a Journey page is LEFT as it is. Do not raise the last two again.
