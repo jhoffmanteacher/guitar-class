@@ -5342,6 +5342,7 @@ async function checkLiveQuizNoNames() {
   try {
     vm.createContext(box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-changes.js'), 'utf8'), box, { filename: 'live-changes.js' });
     vm.runInContext('var currentUser = { uid: "me", displayName: "Me Myself" };', box);
   } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
   const run = code => vm.runInContext(code, box);
@@ -5398,11 +5399,14 @@ async function checkLiveQuizNoNames() {
     const pcNameId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "pcname") || ""');
     if (!pcNameId) { flag('the bank has no "Name the power chord" quiz (type pcname) to test'); return; }
     const pcNameAnswers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: 'B5', ms: 900 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: 'F♯5', ms: 800 }];
+    // "Hear the chord change" (live-changes.js, 2026-11-23): its own Reveal writer, 3 changes counted; u3 caught 2 of 3 with no extra.
+    const ccAnswers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: 'cc:3/3/0', ms: 0 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: 'cc:2/3/0', ms: 0 }];
     for (const [label, state, extra, call, ans] of [
       ['mc Reveal', 'question', {}, `lqTeacherReveal(${JSON.stringify(mcChoice)})`],
       ['fret Reveal', 'question', { quizId: fretId, target: { string: 'lowE', note: 'G' } }, 'lqTeacherRevealFret()'],
       ['Find the power chord Reveal', 'question', { quizId: pcFindId, target: { string: 'A', note: 'F♯' } }, 'lqTeacherRevealFret()', pcAnswers],
       ['Name the power chord Reveal', 'question', { quizId: pcNameId, target: { string: 'A', fret: 9 } }, 'lqTeacherRevealPcName()', pcNameAnswers],
+      ['Hear the chord change Reveal', 'question', { quizId: 'changes', target: { song: 'the-cure', si: 0 }, cc: { start: 1, end: 9, changes: [2, 4, 6], t0: 1, cut: null } }, 'lqTeacherRevealChanges()', ccAnswers],
       ['End', 'reveal', {}, 'lqTeacherEnd()'],
       ['Close', 'ended', {}, 'lqTeacherClose()']
     ]) {
@@ -5414,6 +5418,10 @@ async function checkLiveQuizNoNames() {
       if (ans === pcAnswers) {
         if (JSON.stringify(data.correctIds) !== '["A:9"]') flag(`${label}: F♯5 on the A string should be fret 9 only, the writer wrote correctIds ${JSON.stringify(data.correctIds)}`);
         if (!(data.scores.u3 && data.scores.u3.lastRight === true && data.scores.u1.lastRight === false)) flag(`${label}: the round was scored wrong: ${JSON.stringify(data.scores)}`);
+      }
+      if (ans === ccAnswers) {
+        if (!(data.scores.u3 && data.scores.u3.last === 667 && data.scores.u1.last === 1000)) flag(`${label}: the round was scored wrong: ${JSON.stringify(data.scores)}`);
+        if (JSON.stringify(data.tally) !== '{"caught":5,"changes":6,"extra":0,"players":2}') flag(`${label}: the tally should be class totals for 2 players: ${JSON.stringify(data.tally)}`);
       }
       if (ans === pcNameAnswers) {
         if (data.correct !== 'F♯5') flag(`${label}: the A-string shape at fret 9 is F♯5, the writer wrote correct ${JSON.stringify(data.correct)}`);
@@ -5463,8 +5471,8 @@ async function checkLiveQuizNoNames() {
     const reads = [...ablock.matchAll(/allow\s+([a-z, ]+?):/g)].map(m => m[1].replace(/\s/g, ''));
     if (reads.some(r => /(^|,)(read|list)(,|$)/.test(r) && r !== 'read,delete')) flag(`firestore.rules answers: an extra read/list rule (${reads.join(' | ')})`);
   }
-  if (cases !== 16) flag(`ran ${cases} cases, pinned at 16`);
-  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret + Find-the-power-chord + Name-the-power-chord Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start (the default quiz and both power-chord quizzes); the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
+  if (cases !== 17) flag(`ran ${cases} cases, pinned at 17`);
+  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret + Find-the-power-chord + Name-the-power-chord + Hear-the-chord-change Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start (the default quiz and both power-chord quizzes); the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -22188,8 +22196,9 @@ async function checkMicZipsAnonymous() {
    (gc-lq-hidenames): it never writes the session doc and never changes a
    student's own screen. EXECUTES the real i18n.js + guitar-diagrams.js +
    live-quiz.js in a VM and paints the stage through lqPaintStage() for made-up
-   players ("Test 0" …) in every state: lobby; question (mc, fret, Name);
-   Reveal (mc, fret, Find the power chord, Name the power chord); final. Off,
+   players ("Test 0" …) in every state: lobby; question (mc, fret, Name, Hear the
+   chord change); Reveal (mc, fret, Find the power chord, Name the power chord,
+   Hear the chord change, live-changes.js loaded too, 2026-11-23); final. Off,
    every name it should show is there (the matcher is not blind) and the rows
    are today's; on, no name or uid is anywhere in the stage HTML, the rows
    carry the right places and points, and the counts stay. Also: default off on
@@ -22198,7 +22207,7 @@ async function checkMicZipsAnonymous() {
    doc and leaves the session copy unchanged; the strip offers the box in every
    state; a student's end screen is the same either way.
    ════════════════════════════════════════════════════════════════════ */
-const LQ_HIDE_NAMES_RENDERS = 19;
+const LQ_HIDE_NAMES_RENDERS = 23;
 function checkLiveQuizHideNames() {
   head('1di. Live In-Class Games: "Hide names on the projector" is off by default and leaves no name on the stage');
   let bad = 0, renders = 0;
@@ -22227,6 +22236,7 @@ function checkLiveQuizHideNames() {
     if (typeof box.t !== 'function' && box.window.t) { box.t = box.window.t; box.tIn = box.window.tIn; }
     vm.runInContext(readFileSync(join(ROOT, 'guitar-diagrams.js'), 'utf8'), box, { filename: 'guitar-diagrams.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-changes.js'), 'utf8'), box, { filename: 'live-changes.js' });
     box.__docCalls = 0;
     vm.runInContext('var teacherView = "livequiz"; var currentUser = { uid: "uid-test-3", displayName: "Test 3" }; lqDb = {}; lqEnsureDb = async () => {}; lqDoc = () => { __docCalls++; return { set: async () => {}, collection: () => ({ onSnapshot() { return () => {}; } }), onSnapshot() { return () => {}; } }; };', box);
     return { box, store, stage, controls, run: code => vm.runInContext(code, box) };
@@ -22254,6 +22264,8 @@ function checkLiveQuizHideNames() {
     ['fret Reveal', { quizId: fretId, state: 'reveal', target: { string: 'lowE', note: 'G' }, correct: 'lowE:3', correctIds: ['lowE:3'], tally: { 'lowE:3': 7 } }, 3],
     ['Find Reveal', { quizId: findId, state: 'reveal', target: { string: 'A', note: 'F♯' }, correct: 'A:9', correctIds: ['A:9'], tally: { 'A:9': 7 } }, 3],
     ['Name Reveal', { quizId: pcNameId, state: 'reveal', target: { string: 'A', fret: 9 }, correct: 'F♯5', tally: { 'F♯5': 7 } }, 3],
+    ['Hear the chord change question', { quizId: 'changes', state: 'question', target: { song: 'the-cure', si: 0 }, cc: { start: 1, end: 9, changes: [2, 4, 6], t0: 1, cut: null } }, 'none'],
+    ['Hear the chord change Reveal', { quizId: 'changes', state: 'reveal', target: { song: 'the-cure', si: 0 }, cc: { start: 1, end: 9, changes: [2, 4, 6], t0: 1, cut: null }, tally: { caught: 15, changes: 21, extra: 2, players: 7 } }, 3],
     ['final scores', { quizId: mcId, state: 'ended' }, 3]
   ];
   // The places and points the board must show, from the players above (ties share the lower place, ties read by name).
@@ -22300,18 +22312,18 @@ function checkLiveQuizHideNames() {
     const W2 = load({ 'gc-lq-hidenames': '1' });
     if (W2.run('lqTHideNames') !== true || !/id="lq-hidenames" checked\b/.test(W2.run('lqHideNamesInputHtml()'))) flag('a console reload forgets that the box was ticked: the names would come back on the projector');
     // The strip offers the box in every state.
-    for (const [label, sess] of [['no game', null], ['lobby', STATES[0][1]], ['question', STATES[1][1]], ['reveal', STATES[4][1]], ['last Reveal', Object.assign({}, STATES[4][1], { qIndex: 9 })], ['final scores', STATES[8][1]]]) {
+    for (const [label, sess] of [['no game', null], ['lobby', STATES[0][1]], ['question', STATES[1][1]], ['reveal', STATES[4][1]], ['last Reveal', Object.assign({}, STATES[4][1], { qIndex: 9 })], ['final scores', STATES[10][1]]]) {
       run(`lqTSession = ${sess ? JSON.stringify(Object.assign({}, base, sess)) : 'null'}; lqTBusy = false; lqPaintControls();`);
       if (!/<input type="checkbox" id="lq-hidenames"/.test(controls.innerHTML)) flag(`the control strip (${label}) has no "Hide names on the projector" box`);
     }
     // A student's own screen does not change.
-    const endSess = JSON.stringify(Object.assign({}, base, STATES[8][1]));
+    const endSess = JSON.stringify(Object.assign({}, base, STATES[10][1]));
     run('lqTSetHideNames(false)'); const stOff = run(`lqStudentEndedHtml(${endSess})`);
     run('lqTSetHideNames(true)'); const stOn = run(`lqStudentEndedHtml(${endSess})`);
     if (stOff !== stOn) flag("the box changed a student's own end screen");
   } catch (e) { flag(`a stage render or the switch threw: ${e.message}`); return; }
   if (renders !== LQ_HIDE_NAMES_RENDERS) flag(`painted the stage ${renders} times, pinned at ${LQ_HIDE_NAMES_RENDERS}`);
-  if (bad === 0) ok(`OFF by default; ${STATES.length} stage states painted with names shown and hidden (lobby, 3 questions, 4 Reveals, final; ${renders} paints): hidden, 0 of ${PLAYERS.length} made-up names or uids on the stage and the places and points kept; shown, today's rows; repaints at once, remembered on the device, no doc write, a student's screen unchanged`);
+  if (bad === 0) ok(`OFF by default; ${STATES.length} stage states painted with names shown and hidden (lobby, 4 questions, 5 Reveals with Hear the chord change, final; ${renders} paints): hidden, 0 of ${PLAYERS.length} made-up names or uids on the stage and the places and points kept; shown, today's rows; repaints at once, remembered on the device, no doc write, a student's screen unchanged`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

@@ -221,6 +221,40 @@ let lqCcSkew = { sessionId: null, min: Infinity, seen: new Set() };
 // This round on this Chromebook: its presses (local ms), whether its result went out.
 let lqCcRound = { key: null, presses: [], sent: false, sending: false, result: null };
 let lqCcTimer = null;
+/* Who counts (2026-11-23). Every signed-in page sees the round, joined or not, and used to send "cc:0/N/0" when it
+   ended, so a student who dismissed the invite counted as a 0-point player and lowered the stage's "% caught". A
+   page now sends only when this student JOINED this game: the game screen was open on this page at some moment of
+   the game (Join, the banner, #live-quiz), or they pressed in this round. A student who joined and pressed nothing
+   still sends 0 caught; one who never opened the game sends nothing and adds nothing to `players`. The sessionId of
+   the game this page joined (memory only: a reload back onto the game screen joins again at once). */
+let lqCcJoinedId = null;
+/* The clock across a reload (2026-11-23). The console writes no cc.clk after t0, so a page that reloads mid-song
+   sees only the t0 write's stamp, as old as the song is long so far, and read its clock off by that much (30 s
+   into a song: every press read 30 s early, nothing caught). The best (smallest) gap is therefore kept in
+   sessionStorage for this game, converted to the wall clock (Date.now), which a reload keeps (the page clock,
+   timeOrigin + now, starts again with the new page and can lag the wall clock after a sleep). A stale stamp still
+   goes through Math.min, where it can only lose to the kept one. A NEW tab or another device has nothing kept: there
+   the stale stamp is still the only reading (as before). */
+const LQ_CC_CLOCK_KEY = 'lq-cc-clock';
+function lqCcSaveClock(){
+  if(!Number.isFinite(lqCcSkew.min) || !lqCcSkew.sessionId) return;
+  const d = lqCcSkew.min - (lqCcNow() - Date.now());
+  try { sessionStorage.setItem(LQ_CC_CLOCK_KEY, JSON.stringify({ sessionId: lqCcSkew.sessionId, d })); } catch(e){}
+}
+function lqCcLoadClock(sessionId){
+  let v = null;
+  try { v = JSON.parse(sessionStorage.getItem(LQ_CC_CLOCK_KEY) || 'null'); } catch(e){ v = null; }
+  if(!v || v.sessionId !== sessionId || !Number.isFinite(Number(v.d))) return Infinity;
+  return Number(v.d) + (lqCcNow() - Date.now());
+}
+function lqCcScreenOpen(){
+  const scr = typeof document !== 'undefined' ? document.getElementById('live-quiz-screen') : null;
+  return !!(scr && !scr.hidden);
+}
+// Marks this game joined when the game screen is open now. Called on every snapshot, tick and press.
+function lqCcNoteJoined(sessionId){
+  if(sessionId && lqCcJoinedId !== sessionId && lqCcScreenOpen()) lqCcJoinedId = sessionId;
+}
 
 function lqCcIsRound(s){ return !!(s && s.state === 'question' && lqType(lqQuiz(s.quizId)) === 'changes'); }
 // This round's result has gone out: sent from this page, or read back after a reload (lqRestoreMyAnswer).
@@ -231,12 +265,13 @@ function lqCcDone(s){
 // Called by lqOnSession (live-quiz.js) for every snapshot of liveQuiz/current.
 function lqCcOnSession(data, live){
   const arrived = lqCcNow();
-  if(data && data.sessionId !== lqCcSkew.sessionId) lqCcSkew = { sessionId: data.sessionId, min: Infinity, seen: new Set() };
+  if(data && data.sessionId !== lqCcSkew.sessionId) lqCcSkew = { sessionId: data.sessionId, min: lqCcLoadClock(data.sessionId), seen: new Set() };
   const clk = data && data.cc ? lqTsMs(data.cc.clk) : 0;
   if(clk && !lqCcSkew.seen.has(clk)){            // each stamp once: a cached copy arriving again later says nothing new
     lqCcSkew.seen.add(clk);
-    lqCcSkew.min = Math.min(lqCcSkew.min, arrived - clk);
+    if(arrived - clk < lqCcSkew.min){ lqCcSkew.min = arrived - clk; lqCcSaveClock(); }
   }
+  if(live) lqCcNoteJoined(live.sessionId);
   if(live && lqCcIsRound(live)){
     const key = live.sessionId + ':' + live.qIndex + ':' + lqUid();
     if(lqCcRound.key !== key){
@@ -262,10 +297,15 @@ function lqCcReset(){
   lqCcStop();
   lqCcRound = { key: null, presses: [], sent: false, sending: false, result: null };
   lqCcSkew = { sessionId: null, min: Infinity, seen: new Set() };
+  lqCcJoinedId = null;
+  try { sessionStorage.removeItem(LQ_CC_CLOCK_KEY); } catch(e){}
 }
 function lqCcTick(){
   const s = lqSessionIsLive(lqSession) ? lqSession : null;
   if(!s || !lqCcIsRound(s)){ lqCcStop(); return; }
+  lqCcNoteJoined(s.sessionId);
+  // Not joined and no press: send nothing (the timer keeps looking until the round closes, so joining late still counts).
+  if(lqCcJoinedId !== s.sessionId && !lqCcRound.presses.length) return;
   const cc = s.cc || {};
   const t0 = Number(cc.t0);
   if(!(t0 > 0) || !Number.isFinite(lqCcSkew.min)) return;     // the song has not started yet
@@ -309,6 +349,7 @@ function lqCcPress(e){
   if(!s || !lqCcIsRound(s) || lqCcDone(s) || lqCcRound.sending) return;
   const at = (e && e.timeStamp > 0) ? performance.timeOrigin + e.timeStamp : lqCcNow();
   lqCcRound.presses.push(at);
+  lqCcJoinedId = s.sessionId;
   const n = document.getElementById('lq-cc-n');
   if(n) n.textContent = t('lq.cc.presses', { n: lqCcRound.presses.length });
   const btn = document.getElementById('lq-cc-tap');

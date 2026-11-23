@@ -65,6 +65,14 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   Exit preview, a new round, leaving the view in `setTeacherView`). After any change to it, its branches here, or
   the three cards' sections / chords / beat maps: `node tools/live-changes-sim.mjs` (checks.mjs 1ey runs it and pins
   29 sections, 458 changes).
+  - **Only students who joined count** (2026-11-23): a page sends its result only when the game screen was open on it
+    at some moment of the game (`lqCcJoinedId`) or the student pressed this round; one who dismissed the invite and
+    never opened it sends nothing, so adds nothing to `players` or "% caught". A student who joined and pressed
+    nothing still sends 0 caught.
+  - **The clock survives a reload** (2026-11-23): the best clock gap is kept in sessionStorage (`lq-cc-clock`, per
+    game, on the wall clock); the console writes no `cc.clk` after `t0`, so without it a page reloaded mid-song read
+    its clock off by the age of the last stamp. Cleared on sign-out (`lqCcReset`). A NEW tab mid-song still has only
+    the stale stamp. checks 1di and 1cm paint this game's stage and run its Reveal writer.
 - **The two power chord quizzes differ from the rest in two ways** (Jonathan,
   2026-11-13; `checks.mjs` 1f pins both flags to `pc-find` and `pc-name`):
   - `changeAnswer:true`: a student may tap another answer while the question

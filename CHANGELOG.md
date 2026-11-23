@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-23 — "Hear the chord change": only students who joined count
+
+- **A student who skips "Hear the chord change" no longer lowers the class's % caught.** Before, every signed-in
+  page sent a 0 result, so a student who tapped "Not now" counted as a player who caught nothing. A student who
+  joined the game and pressed nothing still counts, with 0 caught.
+- **Reloading the page in the middle of a song no longer throws off a student's timing.** Before, every press after
+  the reload read many seconds early and caught nothing; now the page keeps its clock through the reload.
+
 ## 2026-11-23 — "Strum Pattern — The Chorus": the directions match the card
 
 - **Step 2 now says "Play all eight bars 4 times through"**, the eight bars the card shows (the chorus, twice). It

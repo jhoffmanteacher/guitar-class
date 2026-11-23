@@ -14,6 +14,9 @@
    And the round end to end, with a fake clock and a fake database: a Chromebook whose clock is 37 s off and whose
    copies of the doc arrive 40-400 ms late presses 0.2 s after each change, sends once, and the console's Reveal
    (lqTeacherRevealChanges through the real lqScoreRound) gives it 1000 with no name in the public scores.
+   Who counts (2026-11-23): dismissed and no press -> nothing sent; joined and no press -> one result, 0 caught; joined
+   earlier this game -> still counts; a new game does not inherit the join. A reload mid-song: the clock error after it
+   (printed, in ms) stays at the wire's (the smallest delivery delay), not the age of the last cc.clk stamp.
    Prints one line per song and a summary with denominators. */
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
@@ -165,5 +168,92 @@ for (const song of songs) {
   ok(written.scores['uid-C'].pts === 1000, `an over-reported caught is capped at 1000 (got ${written.scores['uid-C'].pts})`);
 }
 
+/* Who counts (Work order 2026-11-23, Part 5): a student who never opened the game screen this game (dismissed the
+   invite) and pressed nothing sends NOTHING, so they add nothing to `players` or "% caught"; a student who joined and
+   pressed nothing still sends one result with 0 caught. And a reload mid-song: the clock must come back as good as the
+   wire allowed before the reload, not off by the age of the last cc.clk stamp (the console writes none after t0). */
+let clockErrMs = NaN;
+{
+  const plan = G(`lqCcPlan('all-along-the-watchtower', 1)`);
+  const SKEW = 37000, T0 = 1_800_000_000_000;
+  const stamp = ms => ({ toMillis: () => ms });
+  const store = new Map();
+  box.sessionStorage = { getItem: k => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) };
+  // The Chromebook's wall clock (Date.now) is SKEW ahead of the database; its page clock (timeOrigin + now) can lag the
+  // wall clock (a page that went through a sleep): `lag` ms on the first page, 0 after the reload.
+  let wall = 0, lag = 500;
+  box.Date = Object.assign(function (...a) { return new Date(...a); }, { now: () => Math.round(wall) });
+  const setWall = w => { wall = w; perfNow = w - lag; };
+  let screenOpen = false;
+  const screenEl = { get hidden() { return !screenOpen; }, hasAttribute: n => n === 'hidden' && !screenOpen };
+  box.document.getElementById = id => (id === 'live-quiz-screen' ? screenEl : null);
+  const sent = [];
+  box.__answers3 = sent;
+  run(`lqWriteAnswer = (s, q, choice, ms) => { __answers3.push({ sessionId: s.sessionId, qIndex: q, choice }); return Promise.resolve(); };`, 'join-stubs');
+  const base = { sessionId: 'lq-join', quizId: 'changes', state: 'question', target: { song: 'all-along-the-watchtower', si: 1 }, limitSec: 0, scores: {} };
+  const cc0 = { start: plan.start, end: plan.end, changes: plan.changes, cut: null };
+  const snap = (qIndex, cc, clk, arriveDb) => {
+    setWall(arriveDb + SKEW);
+    box.__doc = Object.assign({}, base, { qIndex, cc: Object.assign({}, cc, { clk: stamp(clk) }) });
+    run('lqSession = __doc; lqCcOnSession(__doc, __doc);', 'snap');
+  };
+  const openRound = qIndex => {
+    for (const [clk, late] of [[T0 - 6000, 300], [T0 - 5500, 40], [T0 - 5000, 150]]) snap(qIndex, Object.assign({}, cc0, { t0: null }), clk + qIndex * 1e6, clk + qIndex * 1e6 + late);
+  };
+  const endRound = qIndex => { setWall(T0 + qIndex * 1e6 + plan.end * 1000 + 900 + SKEW); run('lqCcTick(); lqCcTick();', 'tick'); };
+  const roundCc = qIndex => Object.assign({}, cc0, { t0: T0 + qIndex * 1e6 });
+  run('lqCcReset(); lqMyAnswer = null; lqInviteAnsweredId = null;', 'reset');
+  // Round 0: the invite was dismissed ("Not now"), the screen never opened, no press.
+  run(`lqSession = ${JSON.stringify(Object.assign({}, base, { qIndex: 0, state: 'lobby' }))}; lqMarkInviteAnswered('lq-join');`, 'dismiss');
+  openRound(0); snap(0, roundCc(0), T0 - 4000, T0 - 3900);
+  endRound(0);
+  ok(sent.length === 0, `dismissed, no press: 0 results sent (got ${sent.length})`);
+  // Round 2: the student joins (opens the game screen) and presses nothing: one result, 0 caught.
+  openRound(2); screenOpen = true; snap(2, roundCc(2), T0 + 2e6 - 4000, T0 + 2e6 - 3900);
+  endRound(2);
+  const r2 = sent.length === 1 ? G(`lqCcParse(${JSON.stringify(sent[0].choice)})`) : null;
+  ok(sent.length === 1 && r2 && r2.caught === 0 && r2.extra === 0 && r2.changes === plan.changes.length, `joined, no press: 1 result with 0 caught (got ${JSON.stringify(sent)})`);
+  // Round 3: joined earlier this game, has since left the game screen, presses nothing: still a player (0 caught).
+  screenOpen = false;
+  openRound(3); snap(3, roundCc(3), T0 + 3e6 - 4000, T0 + 3e6 - 3900);
+  endRound(3);
+  ok(sent.length === 2 && /^cc:0\//.test(sent[1].choice), `joined earlier this game, off the screen now, no press: still sends 0 caught (got ${JSON.stringify(sent.slice(1))})`);
+  // A new game: joining the last one does not carry over.
+  base.sessionId = 'lq-join-2';
+  openRound(0); snap(0, roundCc(0), T0 - 4000, T0 - 3900); endRound(0);
+  ok(sent.length === 2, `a new game, never joined, no press: nothing sent (got ${sent.length - 2} more)`);
+
+  // Reload mid-song. Page 1 sees the round open (pings delivered 40-300 ms late) and t0; then the page reloads
+  // 30 s into the song: memory is gone, sessionStorage stays, the first snapshot carries the t0 write's stamp, 30 s old.
+  base.sessionId = 'lq-reload';
+  screenOpen = true;
+  run('lqCcReset(); lqMyAnswer = null;', 'reset2');
+  lag = 500;
+  openRound(0);
+  const tW = T0 + 1200;            // the t0 write's server stamp (the song started about 1 s earlier)
+  snap(0, roundCc(0), tW, tW + 60);
+  const truePage1 = SKEW - lag;
+  const before = G('lqCcSkew.min') - truePage1;
+  // The reload: a new page clock (no lag), memory wiped.
+  lag = 0;
+  run('lqCcSkew = { sessionId: null, min: Infinity, seen: new Set() }; lqCcRound = { key: null, presses: [], sent: false, sending: false, result: null }; lqCcJoinedId = null; lqMyAnswer = null;', 'reload');
+  snap(0, roundCc(0), tW, tW + 30000);
+  clockErrMs = G('lqCcSkew.min') - SKEW;
+  ok(Math.abs(before - 40) < 1, `page 1 reads its clock 40 ms early, the smallest delivery delay (got ${before.toFixed(0)} ms)`);
+  ok(clockErrMs >= 0 && clockErrMs <= 100, `reload mid-song: clock error ${clockErrMs.toFixed(0)} ms after the reload (the stale stamp alone would make it about 30 000 ms)`);
+  // The changes after the reload, pressed 0.2 s after each, are all caught.
+  const later = plan.changes.filter(c => (T0 + c * 1000) > tW + 30000);
+  for (const c of later) run(`lqCcPress({ timeStamp: ${T0 + (c + 0.2) * 1000 + SKEW} });`, 'press');
+  const n0 = sent.length;
+  endRound(0);
+  const rr = sent.length === n0 + 1 ? G(`lqCcParse(${JSON.stringify(sent[n0].choice)})`) : null;
+  ok(later.length > 0 && rr && rr.caught === later.length && rr.extra === 0, `after the reload, ${rr && rr.caught} of ${later.length} later changes caught, ${rr && rr.extra} extra`);
+  // Sign-out leaves nothing behind for the next student on this tab.
+  run('lqCcReset();', 'signout');
+  ok(G('lqCcJoinedId') === null && box.sessionStorage.getItem('lq-cc-clock') === null, 'sign-out clears the joined mark and the saved clock');
+  box.document.getElementById = () => null;
+}
+
+console.log(`live-changes-sim: who counts and reload: clock error after a reload mid-song ${Number.isFinite(clockErrMs) ? clockErrMs.toFixed(0) : '?'} ms`);
 console.log(`live-changes-sim: ${sections} sections over ${songs.length} songs, ${changesTotal} chord changes; closest two ${minGap.toFixed(3)} s apart; ${cases - fails} of ${cases} cases pass`);
 process.exit(fails ? 1 : 0);

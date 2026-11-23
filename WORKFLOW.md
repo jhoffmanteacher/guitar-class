@@ -218,6 +218,14 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
     (`live-changes.js` ~253, `lqCcSync`); a page that reloads mid-song reads its clock off by the age of the last
     `cc.clk` stamp (~235). The sim stubs the timers, so the console's round lifecycle is untested, and checks 1di
     (Hide names) and 1cm (no names in scores) do not paint the new game yet.
+    **Part 5 DONE (2026-11-23, cloud session, Fast; this push).** A page sends its result only if the game screen was
+    open on it at some moment of this game, or the student pressed this round (`lqCcJoinedId`): dismissed + no press
+    -> 0 results sent; joined + no press -> 1 result, 0 caught; joined earlier this game -> still counts. The best
+    clock gap is kept in sessionStorage per game (`lq-cc-clock`, on the wall clock; cleared on sign-out): reload
+    30 s into a song, clock error 30 000 ms before, 40 ms after (the smallest delivery delay). Checks 1di and 1cm now
+    paint this game's stage and run its Reveal writer (break-it red on both). Left out: a NEW tab mid-song still has
+    only the stale stamp (no fix without a console write); the console's round lifecycle (audio, pings, auto-Reveal)
+    in the sim: needs a fake Audio element, fake timers and a fake Firestore listener, not cheap.
   - Labelling: `de68fd8` (the practice-minutes `firestore.rules` change) shipped `Review: Fast` though it is
     danger-zone (its follow-ups were Reviewed; the Friday check's deep review found nothing wrong, pm-sim 407 of 407).
 
