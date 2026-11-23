@@ -76,7 +76,9 @@ function makeFirestore(){
       if (st.offline) throw err('unavailable');
       if (st.denyAll || st.deny.has(path)) throw err('permission-denied');
       const d = docs.get(path);
-      return { exists: d !== undefined, id: path.split('/').pop(), data: () => d === undefined ? undefined : JSON.parse(JSON.stringify(d)) };
+      /* A savedAt with toDate() stands for a Firestore Timestamp and is handed over as it is (JSON would drop it). */
+      const data = () => { if (d === undefined) return undefined; const o = JSON.parse(JSON.stringify(d)); if (d.savedAt && typeof d.savedAt.toDate === 'function') o.savedAt = d.savedAt; return o; };
+      return { exists: d !== undefined, id: path.split('/').pop(), data };
     },
     async set(){ st.writes++; }, async update(){ st.writes++; }, async delete(){ st.writes++; },
   });
@@ -423,6 +425,42 @@ async function runCases(files){
     ok(p6.run('__repaints') === rp + 1, 'store: a merge that changes nothing repaints nothing');
     p6.run('builtSongsClear()');
     ok(snap(p6) === snap(makePage(files)), 'store: sign-out clears every built entry: CLASS_ACTIVITIES and SNIPPET_TRACKS deep-equal a page with none');
+  }
+  /* ── "Date added" (2026-11-23): the day of savedAt rides beside the doc, into the activity and the device copy ── */
+  {
+    const idbMap = new Map();
+    const shared = { fs: makeFirestore(), idb: makeIdb(idbMap) }; publish(shared.fs, [g1, g2]);
+    const at = new Date(2026, 10, 21, 23, 30);          // late evening, this computer's calendar: still the 21st
+    shared.fs.docs.set('builtSongs/' + g1.id, Object.assign({}, g1.doc, { savedAt: { toDate: () => new Date(at.getTime()) } }));
+    const addedOf = (p, id) => p.run(`(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(id)}) || {}).added`);
+    const p1 = makePage(files, shared); p1.signIn(); await sync(p1);
+    ok(addedOf(p1, g1.id) === '2026-11-21' && addedOf(p1, g2.id) === undefined, `date added: a song gets the day of its savedAt (${addedOf(p1, g1.id)}); one with no savedAt gets none (the Songs page's default)`);
+    ok(p1.run(`builtSongCheck(${JSON.stringify(g1.id)}, ${JSON.stringify(g1.doc)}).length`) === 0 && !p1.run(`'added' in builtSongExpand(${JSON.stringify(g1.id)}, ${JSON.stringify(g1.doc)}).activity`), 'date added: the doc format is unchanged (the validator and the expansion know nothing of it)');
+    shared.fs.st.offline = true;
+    const p2 = makePage(files, shared); p2.signIn(); await sync(p2);
+    ok(addedOf(p2, g1.id) === '2026-11-21', 'date added: offline, the device copy keeps the day');
+    shared.fs.st.offline = false; shared.fs.st.reads = [];
+    const p3 = makePage(files, shared); p3.signIn(); await sync(p3);
+    ok(!shared.fs.st.reads.some(r => r.startsWith('builtSongs/')) && addedOf(p3, g1.id) === '2026-11-21', `date added: the same edit numbers: the day comes from the device copy, no song doc read (${shared.fs.st.reads.length} read)`);
+    /* A device copy written before "Date added" (no `added`): each song is read again once, then dated. */
+    const rec = idbMap.get('gc-built-songs').get('songs').rows.get('all');
+    Object.values(rec.songs).forEach(s => { delete s.added; });
+    shared.fs.st.reads = [];
+    const p4 = makePage(files, shared); p4.signIn(); await sync(p4);
+    const songReads = shared.fs.st.reads.filter(r => r.startsWith('builtSongs/')).length;
+    ok(songReads === 2 && addedOf(p4, g1.id) === '2026-11-21', `date added: an older device copy is read again once for the day (${songReads} of 2 song docs read)`);
+    shared.fs.st.reads = [];
+    const p5 = makePage(files, shared); p5.signIn(); await sync(p5);
+    ok(!shared.fs.st.reads.some(r => r.startsWith('builtSongs/')), 'date added: and not again after that (the copy now holds the day, or "" for none)');
+    /* The day changes on the page: a merge with the same edit number but a newly known day replaces the activity. */
+    const p6 = makePage(files, shared); p6.signIn();
+    shared.fs.st.offline = true; idbMap.get('gc-built-songs').get('songs').rows.get('all').songs[g1.id].added = '';
+    await sync(p6);
+    const before = addedOf(p6, g1.id);
+    shared.fs.st.offline = false;
+    idbMap.get('gc-built-songs').get('songs').rows.get('all').songs[g1.id].added = undefined;
+    await sync(p6);
+    ok(before === undefined && addedOf(p6, g1.id) === '2026-11-21', `date added: a later merge that learns the day puts it on the page (${before} → ${addedOf(p6, g1.id)})`);
   }
   {
     const shared = fresh(); publish(shared.fs, [g1, g2]);

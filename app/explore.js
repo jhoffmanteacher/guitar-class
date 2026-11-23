@@ -239,6 +239,13 @@ function openSongsScreen(){
   renderSongsHub();
 }
 let songsSortKey = 'default';
+/* "Date added" (2026-11-23): a song's date is its `added` ('YYYY-MM-DD'). Every coded song entry in the module
+   data has one (the day it first entered the data, from git; checks.mjs 1fa), and so has every card with `library`
+   (class-activities.js, LIBRARY). A built song's is the day of its last Import or Publish (savedAt, read by
+   app/builtsongs.js). Anything without one, such as a built song the device copy kept from before that date
+   existed, counts as SONG_ADDED_DEFAULT. */
+const SONG_ADDED_DEFAULT = '2026-11-20';
+function songAddedOf(x){ const d = x && x.added; return typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : ''; }
 function songsSetSort(k){
   songsSortKey = k;
   renderSongsHub();
@@ -262,6 +269,7 @@ async function renderSongsHub(){
   const backingOf = (a, b) => (b.backingUrl && (!a.backingUrl || (isLocalAudio(a.backingUrl) && !isLocalAudio(b.backingUrl)))) ? b : a;
   const noteSong = (song, moduleNum) => {
     const e = byName.get(song.name) || { song, modules: new Set() };
+    const wasAdded = songAddedOf(e.song);
     e.modules.add(moduleNum);
     if(song.journeyUrl && !e.song.journeyUrl){ const bk = backingOf(song, e.song); e.song = { ...song, backingUrl: bk.backingUrl, backingKey: bk.backingKey }; }
     /* The kept entry is the FIRST one met (Module 1/2), and for the six core
@@ -272,6 +280,10 @@ async function renderSongsHub(){
        copy; never mutate the module data.
        Found 2026-09-25. */
     else { const bk = backingOf(e.song, song); if(bk !== e.song) e.song = { ...e.song, backingUrl: bk.backingUrl, backingKey: bk.backingKey }; }
+    /* Every copy of a song carries the date it first entered the data (checks.mjs 1fa holds them equal); the
+       kept entry takes the EARLIEST one met all the same, whichever copy the code above kept. */
+    const earliest = [wasAdded, songAddedOf(song)].filter(Boolean).sort()[0] || '';
+    if(earliest && songAddedOf(e.song) !== earliest) e.song = { ...e.song, added: earliest };
     byName.set(song.name, e);
   };
   SETS.filter(w => w.moduleNum === 1 && w.songs).forEach(w => w.songs.forEach(sg => noteSong(sg, 1)));
@@ -311,9 +323,7 @@ async function renderSongsHub(){
   ].map(g => ({ ...g, entries: rest.filter(g.match) })).filter(g => g.entries.length);
   /* Sort bar for the Choice menu (Jonathan, 2026-11-20): Level keeps the
      difficulty groups; Title, Artist and Date added show one flat list.
-     A song's date is its `added` ('YYYY-MM-DD'); a song without one counts
-     as SONG_ADDED_DEFAULT, so only a song added after that date needs it. */
-  const SONG_ADDED_DEFAULT = '2026-11-20';
+     Date added: newest first, then title (songAddedOf, SONG_ADDED_DEFAULT above). */
   const nameOf = e => tf(e.song, 'name');
   const titleOf = e => { const n = nameOf(e), c = n.indexOf(' \u2014 '); return (c > 0 ? n.slice(0, c) : n).replace(/^["\u201c\u201d]+|["\u201c\u201d]+$/g, ''); };
   const artistOf = e => { const n = nameOf(e), c = n.indexOf(' \u2014 '); return c > 0 ? n.slice(c + 3) : ''; };
@@ -322,7 +332,7 @@ async function renderSongsHub(){
   const SORTS = {
     title:  byTitle,
     artist: (a, b) => (!artistOf(a) - !artistOf(b)) || cmp(artistOf(a), artistOf(b)) || byTitle(a, b),
-    added:  (a, b) => cmp(b.song.added || SONG_ADDED_DEFAULT, a.song.added || SONG_ADDED_DEFAULT) || byTitle(a, b),
+    added:  (a, b) => cmp(songAddedOf(b.song) || SONG_ADDED_DEFAULT, songAddedOf(a.song) || SONG_ADDED_DEFAULT) || byTitle(a, b),
   };
   const sortKey = SORTS[songsSortKey] ? songsSortKey : 'default';
   const sortedRest = sortKey === 'default' ? null : [...rest].sort(SORTS[sortKey]);
@@ -407,7 +417,10 @@ function songsLibraryHtml(){
   // Two cards for one song (Las Mañanitas has a chord ladder and a Play
   // Along) show their full titles, so the rows can be told apart.
   const name = a => cards.filter(b => short(b) === short(a)).length > 1 ? caTitle(a) : short(a);
-  cards.sort((x, y) => name(x).localeCompare(name(y)));
+  /* A-Z; with the sort bar on "Date added", newest first, then A-Z (2026-11-23: the built songs and the coded
+     Play Along songs live here, not in the Choice menu the sort bar heads). */
+  const day = a => songAddedOf(a) || SONG_ADDED_DEFAULT;
+  cards.sort((x, y) => (songsSortKey === 'added' && day(y).localeCompare(day(x))) || name(x).localeCompare(name(y)));
   /* One wrapping row of buttons, one per song, in this order (Look 1, Part 3,
      2026-11-17): ▶ and the song's name, ✓ once done. Until then each song was
      a row with its name and a Play Along button, both opening the card. The

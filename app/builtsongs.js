@@ -112,7 +112,7 @@
    config/class; opening a built song counts in songOpens through the existing songsLibraryOpen().
 
    THE DEVICE COPY: IndexedDB 'gc-built-songs', store 'songs', ONE record { id: 'all', savedAt, songs: { <id>:
-   { ver, doc } } }, rewritten after each merge made from the database (songs with lyrics add up, and
+   { ver, doc, added } } } (added: the "Date added" day, bsDayOf; a copy without it is read again once), rewritten after each merge made from the database (songs with lyrics add up, and
    localStorage is small and shared with the site's other keys). Every doc in it is checked again before use. A
    failed or slow IndexedDB never blocks anything: the page goes on without it. It holds the class-wide songs
    only, nothing of any student; a shared Chromebook's next account reads it only when the database cannot be
@@ -507,7 +507,20 @@ function bsListOf(data){
 /* Who may see built songs on this page: someone signed in. The console reads them too (its Songs view). */
 function bsHost(){ return { user: typeof currentUser !== 'undefined' ? currentUser : null, db: () => (typeof ensureDb === 'function' ? ensureDb() : null) }; }
 
-/* Keep the songs that pass, in id order: { id, ver, doc, ex }. A song that clashes with the page's own data or
+/* "Date added" (2026-11-23): a built song's date on the Songs page is the day (this device's calendar) of the doc's
+   savedAt, the server time of its last Import or Publish. The doc's FORMAT is unchanged (no new field: the rules
+   allow none, and an older page refuses an unknown one); the date rides beside the doc, in the entry and in the
+   device copy ({ ver, doc, added }), and lands on the activity as `added` (app/explore.js songAddedOf). '' = not
+   known: the Songs page counts it as SONG_ADDED_DEFAULT. */
+function bsDayOk(d){ return typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : ''; }
+function bsDayOf(t){
+  try {
+    const d = t && typeof t.toDate === 'function' ? t.toDate() : (t instanceof Date ? t : null);
+    if(!d || isNaN(d.getTime())) return '';
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  } catch(e){ return ''; }
+}
+/* Keep the songs that pass, in id order: { id, ver, doc, added, ex }. A song that clashes with the page's own data or
    another built song's audio is left out alone. */
 function bsKeep(entries){
   const kept = [], audioSha = new Map();
@@ -525,13 +538,15 @@ function bsKeep(entries){
     }
     if(why.length){ bsLog(e.id + ': ' + why[0]); return; }
     files.forEach(([, fid, sha]) => audioSha.set(fid, sha));
-    kept.push(Object.assign({}, e, { ex: builtSongExpand(e.id, e.doc) }));
+    const ex = builtSongExpand(e.id, e.doc);
+    if(e.added) ex.activity.added = e.added;    // the Songs page's "Date added" (bsDayOf)
+    kept.push(Object.assign({}, e, { ex }));
   });
   return kept;
 }
 /* Replace every built entry on the page with `kept`, as a whole. Returns true when anything changed. */
 function bsApply(kept){
-  const sig = kept.map(k => k.id + ':' + k.ver + ':' + k.doc.audio.sha256).join('|');
+  const sig = kept.map(k => k.id + ':' + k.ver + ':' + k.doc.audio.sha256 + ':' + (k.added || '')).join('|');
   if(sig === bsSig) return false;
   const list = window.CLASS_ACTIVITIES;
   if(Array.isArray(list)){
@@ -595,7 +610,7 @@ async function bsSyncOnce(gen){
   if(!live()) return;
   if(offline){
     /* No answer from the database: the device copy, while someone is signed in. */
-    const entries = Object.keys(copy).filter(id => BS_ID_RE.test(id) && copy[id] && bsIsObj(copy[id].doc)).map(id => ({ id, ver: copy[id].ver, doc: copy[id].doc }));
+    const entries = Object.keys(copy).filter(id => BS_ID_RE.test(id) && copy[id] && bsIsObj(copy[id].doc)).map(id => ({ id, ver: copy[id].ver, doc: copy[id].doc, added: bsDayOk(copy[id].added) }));
     if(bsApply(bsKeep(entries))) bsRepaint();
     return;
   }
@@ -603,16 +618,18 @@ async function bsSyncOnce(gen){
   const entries = [];
   await Promise.all(ids.map(async id => {
     const have = copy[id];
-    if(have && have.ver === list[id] && bsIsObj(have.doc)){ entries.push({ id, ver: have.ver, doc: have.doc }); return; }
+    /* A copy written before "Date added" (no `added` string) is read again once, for its date. */
+    if(have && have.ver === list[id] && bsIsObj(have.doc) && typeof have.added === 'string'){ entries.push({ id, ver: have.ver, doc: have.doc, added: bsDayOk(have.added) }); return; }
     try {
       const snap = await db.collection('builtSongs').doc(id).get();
       if(snap.exists){
         const d = Object.assign({}, snap.data());
+        const added = bsDayOf(d.savedAt);
         delete d.savedAt;                       // a server Timestamp: not part of the chart, and not cloneable everywhere
-        entries.push({ id, ver: list[id], doc: d });
+        entries.push({ id, ver: list[id], doc: d, added });
       }
     } catch(e){
-      if(!bsDenied(e) && have && bsIsObj(have.doc)) entries.push({ id, ver: have.ver, doc: have.doc });
+      if(!bsDenied(e) && have && bsIsObj(have.doc)) entries.push({ id, ver: have.ver, doc: have.doc, added: bsDayOk(have.added) });
     }
   }));
   if(!live()) return;
@@ -621,7 +638,7 @@ async function bsSyncOnce(gen){
   /* A refused read is no answer about the songs: the device copy is left as it was (and not used). */
   if(!teacher && !denied){
     const out = {};
-    kept.forEach(k => { out[k.id] = { ver: k.ver, doc: k.doc }; });
+    kept.forEach(k => { out[k.id] = { ver: k.ver, doc: k.doc, added: k.added || '' }; });
     try { await bsCopyWrite(out); } catch(e) {}
   }
 }

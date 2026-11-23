@@ -1172,22 +1172,22 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[9] = [
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Map the intro up the neck — D & G strings', meta_es: 'Ubica la intro arriba del mástil — cuerdas Re y Sol', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', added: '2026-05-29', meta: 'Map the intro up the neck — D & G strings', meta_es: 'Ubica la intro arriba del mástil — cuerdas Re y Sol', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Punteo line crossing four strings', meta_es: 'Línea de punteo que cruza cuatro cuerdas', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', added: '2026-07-09', meta: 'Punteo line crossing four strings', meta_es: 'Línea de punteo que cruza cuatro cuerdas', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Write the riff out as TAB yourself', meta_es: 'Escribe el riff como TAB tú mismo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', added: '2026-05-15', meta: 'Write the riff out as TAB yourself', meta_es: 'Escribe el riff como TAB tú mismo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Beat It" — Michael Jackson', meta: 'Riff notes across E, A & D — map them', meta_es: 'Notas del riff a través de las cuerdas Mi grave, La y Re — ubícalas', type: 'Choice', core: false, level: 2,
+      { name: '"Beat It" — Michael Jackson', added: '2026-05-20', meta: 'Riff notes across E, A & D — map them', meta_es: 'Notas del riff a través de las cuerdas Mi grave, La y Re — ubícalas', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
         tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
-      { name: '"Just Like Heaven" — The Cure', meta: 'Arpeggiated riff — read it up the neck', meta_es: 'Riff arpegiado — léelo arriba del mástil', type: 'Choice', core: false, level: 2,
+      { name: '"Just Like Heaven" — The Cure', added: '2026-07-09', meta: 'Arpeggiated riff — read it up the neck', meta_es: 'Riff arpegiado — léelo arriba del mástil', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
         tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'Write its riff as TAB — the classic starter riff', meta_es: 'Escribe su riff como TAB — el clásico riff para principiantes', type: 'Choice', core: false, level: 1,
+      { name: '"Smoke on the Water" — Deep Purple', added: '2026-05-15', meta: 'Write its riff as TAB — the classic starter riff', meta_es: 'Escribe su riff como TAB — el clásico riff para principiantes', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' }
     ];

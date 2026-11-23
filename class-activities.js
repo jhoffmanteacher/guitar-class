@@ -144,6 +144,11 @@
    caIsLibraryCard (app.js) ignores the field on any card with `journey`,
    `card.wholeSong` or `card.sheet`, and checks.mjs 1bq fails the push if a
    Core song's card is marked, by journey, track or title.
+   A card with `library` also has `added: 'YYYY-MM-DD'` (2026-11-23): the
+   day it reached the Songs page (`library: false`: the day the card was
+   added). The Songs page's "Date added" sorts its More Play Along songs by
+   it, newest first (app/explore.js); tools/new-playalong.mjs writes today's
+   date; checks.mjs 1fa fails the push without one.
 
    TEACHER ONLY — `teacherOnly: true` (optional; the only value; Jonathan,
    2026-10-22: "make it only visible to me … a teacher console page"). The
@@ -5015,6 +5020,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
     library: true,    // on the Songs page for everyone (Jonathan, 2026-10-20: "move las mananitas from class activities to songs") — see LIBRARY above
+    added: '2026-10-20',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board (Jonathan, 2026-10-14) — see OPTIONAL above
     /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
        caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
@@ -5374,6 +5380,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-35',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    added: '2026-10-20',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
        caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
@@ -5730,6 +5737,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-36',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    added: '2026-10-20',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     /* Key of G / Key of F switch — see KEY VERSIONS beside caView in app.js.
        The record is in F; the G track is the same record raised two half
@@ -5958,6 +5966,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-37',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    added: '2026-10-20',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     title:    '"Arsenal Efectivo" - Lolo Félix — Play Along',
     title_es: '"Arsenal Efectivo" - Lolo Félix — Toca con la canción',
@@ -6259,6 +6268,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-39',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    added: '2026-10-20',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     chordStart: 'power',   // opens on Power chords until the student picks — see CHORD VERSIONS above
     chordVersions: {
@@ -6575,6 +6585,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-41',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: false,   // starts as a class activity; the console can move it to the Songs page — see LIBRARY above
+    added: '2026-10-25',    // the Songs page's "Date added" — see LIBRARY above
     title:    '"Smells Like Teen Spirit" - Nirvana — Play Along',
     title_es: '"Smells Like Teen Spirit" - Nirvana — Toca con la canción',
     intro:    'Play Smells Like Teen Spirit with the band: F5, Bb5, Ab5 and Db5, and two single notes in the verses.',
@@ -6802,6 +6813,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-42',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    added: '2026-10-26',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     title:    '"Vuelve a la Vida" - Efecto Elegante — Play Along',
     title_es: '"Vuelve a la Vida" - Efecto Elegante — Toca con la canción',
@@ -7303,6 +7315,7 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-51',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    added: '2026-11-09',    // the Songs page's "Date added" — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     chordStart: 'power',   // opens on Power chords until the student picks — see CHORD VERSIONS above
     chordVersions: {

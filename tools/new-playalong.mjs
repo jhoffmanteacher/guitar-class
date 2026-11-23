@@ -89,7 +89,7 @@
      library                      true (default: More Play Along songs, for everyone, from the push)
      intro, intro_es, intro_power, intro_power_es   optional: one line each; a default is written from the loop
      id                           optional: default the next never-used ca-N (the RETIRED IDS note)
-     date                         optional: YYYY-MM-DD for the comments and the changelog (default today)
+     date                         optional: YYYY-MM-DD for the comments, the changelog and the card's `added` (default today)
 
    WHAT IT WRITES (and --dry-run prints): audio/ (with --from), app/snippets.js (the track, last in
    SNIPPET_TRACKS), class-activities.js (the card, last in the array, and the RETIRED IDS note's next id),
@@ -119,7 +119,11 @@ const S = JSON.parse(readFileSync(specPath, 'utf8'));
 for (const k of BUILT ? ['song', 'artist', 'slug', 'feltBpm', 'beatsPerBar', 'anchor', 'sections']
   : ['song', 'artist', 'slug', 'fileSlug', 'key', 'bpm', 'slowBpm', 'feltBpm', 'beatsPerBar', 'anchor', 'durationSec', 'sections'])
   if (S[k] == null) die(`the spec has no "${k}"`);
-const date = S.date || new Date().toISOString().slice(0, 10);
+/* Today on this computer's calendar (toISOString is UTC: after 4 PM Pacific it is already tomorrow). It is also the
+   card's `added`, the Songs page's "Date added" (2026-11-23; checks.mjs 1fa). */
+const localDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const date = S.date || localDay(new Date());
+if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(Date.parse(date + 'T00:00:00Z')) || new Date(date + 'T00:00:00Z').toISOString().slice(0, 10) !== date) die(`"date" must be YYYY-MM-DD (got ${JSON.stringify(date)})`);
 const versions = S.versions || 'both';
 const chordStart = S.chordStart || (versions === 'both' ? 'power' : null);
 const library = S.library !== false;
@@ -593,6 +597,7 @@ const cardJs = [
   `    id:    '${id}',`,
   `    view:  'card',    // one screen: Play song + tab + checks — see CARD above`,
   ...(library ? [`    library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above`] : []),
+  `    added: '${date}',    // the Songs page's "Date added" — see LIBRARY above`,
   `    optional: true,   // Optional until switched to Required on the board — see OPTIONAL above`,
   ...powerMap,
   `    title:    ${q(`"${S.song}" - ${S.artist} — Play Along`)},`,

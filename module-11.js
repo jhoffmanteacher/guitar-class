@@ -978,22 +978,22 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[11] = [
-      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F = I–V–vi–IV, the famous four', meta_es: 'C–G–Am–F = I–V–vi–IV, los famosos cuatro', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
+      { name: '"Let It Be" — The Beatles', added: '2026-05-21', meta: 'C–G–Am–F = I–V–vi–IV, the famous four', meta_es: 'C–G–Am–F = I–V–vi–IV, los famosos cuatro', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'F–Am = I–iii in F — proof it\'s not always the famous four', meta_es: 'F–Am = I–iii en F — prueba de que no siempre son los famosos cuatro', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', added: '2026-07-09', meta: 'F–Am = I–iii in F — proof it\'s not always the famous four', meta_es: 'F–Am = I–iii en F — prueba de que no siempre son los famosos cuatro', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Number the progression in C', meta_es: 'Numera la progresión en C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', added: '2026-07-02', meta: 'Number the progression in C', meta_es: 'Numera la progresión en C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Find the key from Am–G–F', meta_es: 'Encuentra la tonalidad a partir de Am–G–F', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', added: '2026-05-20', meta: 'Find the key from Am–G–F', meta_es: 'Encuentra la tonalidad a partir de Am–G–F', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Bm and barre practice with numerals', meta_es: 'Práctica de Bm y cejilla con números romanos', type: 'Choice', core: false, level: 3,
+      { name: '"Oye Mi Amor" — Maná', added: '2026-07-02', meta: 'Bm and barre practice with numerals', meta_es: 'Práctica de Bm y cejilla con números romanos', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Number an A-minor-family progression', meta_es: 'Numera una progresión de la familia de A menor', type: 'Choice', core: false, level: 2,
+      { name: '"House of the Rising Sun" — The Animals', added: '2026-05-29', meta: 'Number an A-minor-family progression', meta_es: 'Numera una progresión de la familia de A menor', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
         tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' }
     ];

@@ -1087,25 +1087,25 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[8] = [
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–Am–C, F–C–F–C', meta_es: 'Toca la estrofa con fingerpicking para una sensación suave · Am–C–Am–C, F–C–F–C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', added: '2026-07-02', meta: 'Fingerpick the verse for a soft feel · Am–C–Am–C, F–C–F–C', meta_es: 'Toca la estrofa con fingerpicking para una sensación suave · Am–C–Am–C, F–C–F–C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', meta_es: 'Toca la estrofa con fingerpicking · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
+      { name: '"Let It Be" — The Beatles', added: '2026-05-21', meta: 'Fingerpick the verse · C–G–Am–F', meta_es: 'Toca la estrofa con fingerpicking · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F–Am–C–E–E · the classic fingerpicked song', meta_es: 'Am–C–D–F–Am–C–E–E · la canción clásica de fingerpicking', type: 'Choice', core: false, level: 2,
+      { name: '"House of the Rising Sun" — The Animals', added: '2026-05-29', meta: 'Am–C–D–F–Am–C–E–E · the classic fingerpicked song', meta_es: 'Am–C–D–F–Am–C–E–E · la canción clásica de fingerpicking', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
         tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU&t=40' },
-      { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', meta_es: 'Estrofa con fingerpicking · capo en el traste 4 (formas de G)', type: 'Choice', core: false, level: 3,
+      { name: '"Sailor Song" — Gigi Perez', added: '2026-06-12', meta: 'Fingerpicked verse · capo IV (G-shapes)', meta_es: 'Estrofa con fingerpicking · capo en el traste 4 (formas de G)', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw&end=551' },
-      { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · hardest song on the list', meta_es: 'Fingerpicking avanzado · la canción más difícil de la lista', type: 'Choice', core: false, level: 3,
+      { name: '"Blackbird" — The Beatles', added: '2026-05-21', meta: 'Advanced fingerpicking · hardest song on the list', meta_es: 'Fingerpicking avanzado · la canción más difícil de la lista', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
-      { name: '"Está Dañada" — Iván Cornejo', meta: 'Fingerpicked sierreño intro', meta_es: 'Intro sierreña con fingerpicking', type: 'Choice', core: false, level: 3,
+      { name: '"Está Dañada" — Iván Cornejo', added: '2026-08-07', meta: 'Fingerpicked sierreño intro', meta_es: 'Intro sierreña con fingerpicking', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=rBLLbgD0FsM',
         tutorialUrl: 'https://www.youtube.com/watch?v=DjSzkgEeddc' },
-      { name: '"Just Like Heaven" — The Cure', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', meta_es: 'Riff de intro arpegiado e icónico — punteo de acordes soñador', type: 'Choice', core: false, level: 2,
+      { name: '"Just Like Heaven" — The Cure', added: '2026-07-09', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', meta_es: 'Riff de intro arpegiado e icónico — punteo de acordes soñador', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
         tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' }
     ];

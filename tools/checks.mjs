@@ -289,6 +289,7 @@ function validateModules() {
 
   if (problems === 0) ok(`${allSets.length} Sets across ${MODULE_FILES.length} modules — all valid`);
   checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule);
+  checkSongAdded(allSets, moduleSongsByModule);
   validateNoteBeats(allSets);
   checkMcAnswerTells(allSets);
   checkFrozenGradedMcs(allSets);
@@ -15268,6 +15269,71 @@ function checkPendingFileSwitch(ctx) {
   }
 }
 
+/* 1fa. "DATE ADDED" HAS A DATE TO SORT BY (work order friday-findings
+   2026-11-23, Part 3; Jonathan: "give the songs dates"). The Songs page's
+   Date added button sorts newest first (app/explore.js songAddedOf): the
+   Choice menu by each song entry's `added`, the More Play Along songs by
+   each card's. Until this pin no song had one, so the button sorted exactly
+   like Title. Fails the push when:
+   - a coded song entry (Module 1's set `songs`, MODULE_SONGS; not the
+     `request: true` row) has no `added`, or one that is not a real
+     YYYY-MM-DD day between the repo's first commit (2026-05-13) and
+     tomorrow;
+   - two copies of one song (the same `name` in several modules) carry
+     different dates (each copy has the day the song FIRST entered the data;
+     the hub keeps the earliest either way);
+   - a card with `library` (class-activities.js, LIBRARY: the only cards the
+     Songs page can list) has no valid `added` (tools/new-playalong.mjs
+     writes today's);
+   - it finds no song entry or no library card at all (it would be blind).
+   Built songs take their date from the database (app/builtsongs.js
+   bsDayOf), not from here. */
+function checkSongAdded(allSets, moduleSongsByModule) {
+  head('1fa. Date added: every coded song and every Songs-page card has a real `added` day');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const okDay = d => {
+    if (typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+    const t = Date.parse(d + 'T00:00:00Z');
+    return !isNaN(t) && new Date(t).toISOString().slice(0, 10) === d && d >= '2026-05-13' && d <= tomorrow;
+  };
+  const entries = [];
+  allSets.filter(s => s && Number(s.moduleNum) === 1 && Array.isArray(s.songs))
+    .forEach(s => s.songs.forEach((sg, i) => entries.push({ sg, where: `module-1.js · set "${s.id}" songs[${i}]` })));
+  for (const [m, list] of moduleSongsByModule) if (Array.isArray(list))
+    list.forEach((sg, i) => entries.push({ sg, where: `module-${m}.js · MODULE_SONGS[${m}][${i}]` }));
+  const byName = new Map();
+  let n = 0;
+  for (const { sg, where } of entries) {
+    if (!sg || sg.request === true) continue;
+    n++;
+    const nm = String(sg.name);
+    if (!okDay(sg.added)) { flag(`${where} "${nm}": \`added\` ${JSON.stringify(sg.added)} is not a real YYYY-MM-DD day from 2026-05-13 to tomorrow — give it the day the song first entered the module data (git log -S)`); continue; }
+    if (!byName.has(nm)) byName.set(nm, new Map());
+    byName.get(nm).set(sg.added, where);
+  }
+  for (const [nm, days] of byName) if (days.size > 1)
+    flag(`"${nm}": its copies carry different \`added\` days (${[...days].map(([d, w]) => `${d} in ${w}`).join('; ')}) — every copy takes the day the song FIRST entered the data`);
+  let activities = [];
+  try {
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(readFileSync(join(ROOT, 'class-activities.js'), 'utf8'), sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { /* reported by 1d */ }
+  let lib = 0;
+  for (const a of activities) {
+    if (!a || (a.library !== true && a.library !== false)) continue;
+    lib++;
+    if (!okDay(a.added)) flag(`class-activities.js ${a.id}: a card with \`library\` needs \`added\` (the day it reached the Songs page; library: false = the day the card was added), got ${JSON.stringify(a.added)}`);
+  }
+  if (!n) flag('1fa found no coded song entry — it is blind (the module loader changed?)');
+  if (!lib) flag('1fa found no card with `library` in class-activities.js — it is blind');
+  if (!bad) ok(`${n} song entries (${byName.size} songs) and ${lib} Songs-page card${lib === 1 ? '' : 's'}, each with a real \`added\` day; every song's copies agree`);
+}
+
 /* 1bq. THE SONG LIBRARY HOLDS NO CORE SONG (Jonathan, 2026-10-20: "make
    sure that the core songs are not included with the library songs because
    those have class activities"). A `library: true` card is on every
@@ -21959,7 +22025,7 @@ function checkSongBuilder() {
    file (data-slow stays empty), opening on 0.85; and index.html loads
    app/builtsongs.js right after app/snippets.js.
    ════════════════════════════════════════════════════════════════════ */
-const BUILT_SONGS_SIM_PIN = 171;   // 163 -> 171 (2026-11-20, song.capo): the capo checked (6 bad values), named first in both directions lines, chords drawn as written and sounding higher, no capo line without one, the short line (8); 148 -> 163 (2026-11-18, private chord sheets P3): song.sheet checked, expanded to a loose Lyrics view, its pdf entry handed to the loader, its id clashes refused (9 cases), and 6 broken sheet docs refused alone; 2026-11-14, Song builder Part a2: 14 zero, 63 merge and directions, 44 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle; -> 148, review round 1: Object.prototype names, the lyric cap, the directions line)
+const BUILT_SONGS_SIM_PIN = 178;   // 171 -> 178 (2026-11-23, "Date added"): the day of savedAt on the activity, none without one, the doc format unchanged, kept offline and from the device copy with no doc read, an older copy read again once and not twice, a later merge that learns the day; 163 -> 171 (2026-11-20, song.capo): the capo checked (6 bad values), named first in both directions lines, chords drawn as written and sounding higher, no capo line without one, the short line (8); 148 -> 163 (2026-11-18, private chord sheets P3): song.sheet checked, expanded to a loose Lyrics view, its pdf entry handed to the loader, its id clashes refused (9 cases), and 6 broken sheet docs refused alone; 2026-11-14, Song builder Part a2: 14 zero, 63 merge and directions, 44 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle; -> 148, review round 1: Object.prototype names, the lyric cap, the directions line)
 const ONE_FILE_STOPS = '0.65,0.85,0.9,1', ONE_FILE_OPEN = '1';   // Jonathan, 2026-11-20: every play-along opens on Normal, 1× (was 0.85, 2026-11-14)
 function checkBuiltSongs(ctx) {
   head('1em. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');
