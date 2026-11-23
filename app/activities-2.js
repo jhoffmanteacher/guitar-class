@@ -570,7 +570,8 @@ window.addEventListener('resize', () => { caFitBar(); caPlaceToolPopups(); });
    page"), because the browser won't enter full screen without a tap.
    "All activities" leaves full screen too (Jonathan, 2026-10-29: it used to
    stay on, so the next card opened full screen); Esc, or the button, leaves
-   it. Nothing is saved — a reload starts in the normal window, which is the
+   it, and so does any route off In class, the browser's Back included
+   (syncExploreNav, app/shell.js, 2026-11-23). Nothing is saved — a reload starts in the normal window, which is the
    browser's own rule anyway (full screen needs a tap every time); it reopens
    the card folded, at normal size. Hidden where the browser can't do it (an
    iPhone), so the button never does nothing. */
@@ -590,7 +591,8 @@ function caFullBtnHtml(){
    are opened" — every play-along card, from In-Class Activities, the Songs page, a pin or a Level up). Called from
    the TAP that opens it (caCardMarkOpening, songsHubOpenCard, caOpenPin, caOpenLinkedCard): the browser enters full
    screen only inside a tap, so a reload or a deep link still opens in the normal window. Any other kind of card,
-   the console preview and a browser that can't do it: nothing. Leaving is as before (the button, Esc, All activities). */
+   the console preview and a browser that can't do it: nothing. Leaving is as before (the button, Esc, All activities),
+   plus any route off In class, the browser's Back included (syncExploreNav, app/shell.js; 2026-11-23). */
 function caSongFullscreen(a){
   if(!caIsCard(a) || caFullscreenNow()) return;
   try {

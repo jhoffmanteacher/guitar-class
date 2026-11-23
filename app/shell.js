@@ -1052,6 +1052,17 @@ function syncExploreNav(){
      requestAnimationFrame — those don't run in a background tab, so the
      student would come back to a page that hadn't restored itself.) */
   if(inColumn !== wasOpen) scrollPane().scrollTo({ top: inColumn ? 0 : practiceScrollTop });
+  /* Full screen belongs to an open card on In class (caSongFullscreen, caToggleFullscreen, app/activities-2.js).
+     Leaving that page any other way than its own buttons (the browser's Back from a play-along opened on Songs, a
+     pin or a Level up) left the page in full screen with no Exit button, only Esc (Friday check 2026-11-23).
+     So: off In class, leave it. Read from the HASH, not the open screen: a tap asks for full screen and then routes
+     to '#class-activities/<id>', and routeExploreHash() closes the old page before opening the new one, so a sync in
+     that gap sees no page open but already the card's hash; it must not cancel the full screen the tap asked for.
+     Only the whole page's full screen (documentElement): the console's live-quiz stage has its own (lq-shell). */
+  if(document.fullscreenElement && document.fullscreenElement === document.documentElement
+    && exploreHashBase(location.hash) !== '#class-activities'){
+    try { document.exitFullscreen().catch(() => {}); } catch(e) { /* an old browser: nothing to leave */ }
+  }
   /* The slim / wide menu for a student with no saved choice (railAutoSync,
      app/audio-ui.js; Look 1, Part 5). Modules = no page open and no explore
      hash: routeExploreHash() closes the old page before opening the new one,

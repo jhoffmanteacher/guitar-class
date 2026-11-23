@@ -11487,6 +11487,67 @@ function checkNoChecklist(ctx) {
   if (cards !== NO_CHECKLIST_CARDS || extra !== NO_CHECKLIST_EXTRA) flag(`rendered ${cards} practice cards and ${extra} extra songs (EN + ES), pinned ${NO_CHECKLIST_CARDS} / ${NO_CHECKLIST_EXTRA} — update the pins on purpose`);
   if (!bad) ok(`1ct: ${cards} practice card renders end in one Mark complete and ${extra} extra-song renders in none, EN + ES; no checklist, no ticks counted`);
 }
+/* 1cr2. A play-along tap asks for full screen, and leaving In class leaves it (Friday check 2026-11-23: the
+   browser's Back from a play-along opened on Songs left the page in full screen with no Exit button).
+   Runs the REAL caSongFullscreen and syncExploreNav in the 0b context: each of the four taps that open a card
+   (caCardMarkOpening, songsHubOpenCard, caOpenPin, caOpenLinkedCard) asks before it routes; syncExploreNav
+   exits the page's full screen on every hash off In class, never on '#class-activities…' (the card's own hash,
+   also in the gap where routeExploreHash has closed the old page and not yet opened In class), and never the
+   live-quiz stage's own full screen. tools/smoke.mjs (fullscreenBackWalk) clicks it in a real browser. */
+function checkFullscreenBack(ctx) {
+  head('1cr2. A play-along tap asks for full screen; any route off In class (Back included) leaves it');
+  let bad = 0, cases = 0;
+  const flag = m => { err('1cr2: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  const want = (cond, msg) => { cases++; if (!cond) flag(msg); };
+  const taps = ['caCardMarkOpening', 'songsHubOpenCard', 'caOpenPin', 'caOpenLinkedCard'];
+  for (const fn of ['caSongFullscreen', 'syncExploreNav', ...taps]) if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found (renamed? update 1cr2 with it)`); return; }
+  // Each tap asks for full screen, and before it routes (the browser only grants it inside the tap).
+  for (const fn of taps) {
+    const src = String(run(`String(${fn})`)).replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+    const at = src.indexOf('caSongFullscreen(');
+    const route = Math.min(...['goExploreHash(', 'caFocusActivity('].map(s => src.indexOf(s)).filter(i => i >= 0), Infinity);
+    want(at >= 0 && at < route, `${fn}() must call caSongFullscreen() before it routes to the card (a play-along tap opens in full screen)`);
+  }
+  const doc = ctx.document, keepBody = doc.body, keepGid = doc.getElementById, keepHash = ctx.location.hash;
+  const keep = { fse: doc.fullscreenElement, fsen: doc.fullscreenEnabled, rfs: doc.documentElement.requestFullscreen, efs: doc.exitFullscreen };
+  const set = new Set();
+  const body = { classList: { contains: c => set.has(c), toggle: (c, on) => { const v = on === undefined ? !set.has(c) : !!on; v ? set.add(c) : set.delete(c); return v; }, add: c => set.add(c), remove: c => set.delete(c) }, style: { setProperty() {} } };
+  let asked = 0, exits = 0;
+  try {
+    doc.body = body;
+    doc.fullscreenEnabled = true;
+    doc.documentElement.requestFullscreen = () => { asked++; return Promise.resolve(); };
+    doc.exitFullscreen = () => { exits++; return Promise.resolve(); };
+    // caSongFullscreen: a play-along card asks; another kind of card does not; already full screen does not.
+    const ids = run(`(() => { const L = window.CLASS_ACTIVITIES || []; const c = L.find(x => caIsCard(x)); const o = L.find(x => !caIsCard(x)); return [c && c.id, o && o.id]; })()`);
+    want(ids.every(Boolean), `need a play-along card and another activity, found ${JSON.stringify(ids)}`);
+    const ask = (id, fse) => { asked = 0; doc.fullscreenElement = fse; run(`caSongFullscreen((window.CLASS_ACTIVITIES || []).find(x => x.id === ${JSON.stringify(id)}))`); return asked; };
+    want(ask(ids[0], null) === 1, `caSongFullscreen(${ids[0]}) in the normal window must ask for full screen once`);
+    want(ask(ids[1], null) === 0, `caSongFullscreen(${ids[1]}) is not a play-along: it must not ask for full screen`);
+    want(ask(ids[0], doc.documentElement) === 0, 'caSongFullscreen() already in full screen must not ask again');
+    // syncExploreNav for real: every screen hidden except `open`.
+    let open = null;
+    doc.getElementById = id => { if (id === 'rail-collapse-btn') return null; const e = keepGid(id); e.hasAttribute = a => a === 'hidden' && id !== open; return e; };
+    const sync = (hash, screen, fse) => { exits = 0; ctx.location.hash = hash; open = screen; doc.fullscreenElement = fse; run('syncExploreNav()'); return exits; };
+    const page = doc.documentElement, stage = { id: 'lq-shell' };
+    const card = '#class-activities/' + ids[0];
+    for (const [hash, screen] of [['#songs', 'songs-screen'], ['', null], ['#my-progress', 'my-progress-screen'], ['#games', 'games-screen'], ['#live-quiz', 'live-quiz-screen'], ['#search', null]])
+      want(sync(hash, screen, page) === 1, `Back (or any route) to '${hash}' in full screen: syncExploreNav must leave full screen once — the page stays full screen with no Exit button`);
+    want(sync(card, null, page) === 0, `the gap while a tap routes to ${card} (old page closed, In class not yet open): syncExploreNav left full screen — it cancels the play-along's own full screen`);
+    want(sync(card, 'class-activities-screen', page) === 0, `a card open on In class (${card}) in full screen: syncExploreNav must not leave it`);
+    want(sync('#class-activities', 'class-activities-screen', page) === 0, 'In class itself in full screen: syncExploreNav must not leave it (its own buttons do)');
+    want(sync('#songs', 'songs-screen', null) === 0, 'not in full screen: syncExploreNav must not call exitFullscreen()');
+    want(sync('#live-quiz', 'live-quiz-screen', stage) === 0, 'the live-quiz stage\'s own full screen (lq-shell): syncExploreNav must leave it alone');
+  } catch (e) { flag('the page threw — ' + e.message); }
+  finally {
+    doc.body = keepBody; doc.getElementById = keepGid; ctx.location.hash = keepHash;
+    doc.fullscreenElement = keep.fse; doc.fullscreenEnabled = keep.fsen; doc.documentElement.requestFullscreen = keep.rfs; doc.exitFullscreen = keep.efs;
+    set.clear();
+  }
+  if (!bad) ok(`1cr2: ${cases} cases — 4 of 4 play-along taps ask for full screen before they route; syncExploreNav leaves it on 6 of 6 routes off In class and keeps it on In class, in the tap's routing gap and for the live-quiz stage`);
+}
 function checkFoldedActivity(ctx) {
   head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the three tools; an open Focus step fills the screen');
   let bad = 0, asserts = 0;
@@ -23094,6 +23155,7 @@ function checkNeverRules(sets) {
   await checkKeepToday(rcCtx);
   await checkSinceLastVisit(rcCtx);
   checkFoldedActivity(rcCtx);
+  checkFullscreenBack(rcCtx);
   checkNoChecklist(rcCtx);
   checkCardKeysAndTickPop(rcCtx, rcSets, i18nTable);
   checkLoopSpeed(rcCtx, i18nTable);
