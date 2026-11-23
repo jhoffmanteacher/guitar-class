@@ -69,7 +69,7 @@
                 chords only, or both with the switch (start = which one it opens on; needed with 'both')
      capo       optional 1-9 (2026-11-20, Jonathan: Sailor Song, capo 4 with G shapes): the fret the capo goes on.
                 The chords are then named and shaped AS PLAYED with the capo (C, Em, G), checked as written; the
-                directions line starts "Capo on fret N." and a tapped chord sounds N half steps higher, as the
+                directions line starts "Put a capo on fret N and" (one sentence, verb first) and a tapped chord sounds N half steps higher, as the
                 record does. A page older than this format refuses a doc with song.capo (the whole song is left out
                 there), so the reader ships before the first song with a capo is imported.
      range      optional { from, to }: the card plays sections from..to (0-based, inclusive; Jonathan, 2026-11-14:

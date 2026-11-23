@@ -358,17 +358,17 @@ async function runCases(files){
     const bad = [0, 10, 2.5, '4', null, -1].filter(c => base.run(`builtSongCheck(${JSON.stringify(g.id)}, ${JSON.stringify(withCapo(g, c))}).some(w => /song\.capo/.test(w))`));
     ok(bad.length === 6, `capo: 0, 10, 2.5, "4", null and -1 are refused with the capo reason (${bad.length} of 6)`);
     const en = run(g.id, d4, 'x.activity.intro'), es = run(g.id, d4, 'x.activity.intro_es');
-    ok(en === 'Capo on fret 4. Play along with the band: G, C, D and Em.' && es === 'Capo en el traste 4. Toca con la banda: G, C, D y Em.', `capo: the directions say where the capo goes, then the chords as played (${en} / ${es})`);
+    ok(en === 'Put a capo on fret 4 and play along with the band: G, C, D and Em.' && es === 'Pon el capo en el traste 4 y toca con la banda: G, C, D y Em.', `capo: the directions say where the capo goes, then the chords as played (${en} / ${es})`);
     const pe = run(sx.id, d6, 'x.activity.intro_power'), pes = run(sx.id, d6, 'x.activity.intro_power_es');
-    ok(/^Capo on fret 2\. /.test(pe) && /^Capo en el traste 2\. /.test(pes), `capo: the power-chord line says it too (${pe} / ${pes})`);
+    ok(/^Put a capo on fret 2 and /.test(pe) && /^Pon el capo en el traste 2 y /.test(pes), `capo: the power-chord line says it too (${pe} / ${pes})`);
     const plain = run(g.id, g.doc, 'x.activity.card.sections[0].notes[0]'), capoed = run(g.id, d4, 'x.activity.card.sections[0].notes[0]');
     ok(JSON.stringify(plain.frets) === JSON.stringify(capoed.frets) && plain.note === capoed.note && capoed.midi.length === plain.midi.length && capoed.midi.every((m, i) => m === plain.midi[i] + 4),
       `capo: a chord is drawn as written (${capoed.note} ${JSON.stringify(capoed.frets)}) and sounds 4 half steps higher (${JSON.stringify(plain.midi)} → ${JSON.stringify(capoed.midi)})`);
     const pv = run(sx.id, d6, 'x.activity.chordVersions.power.Am'), pv0 = run(sx.id, sx.doc, 'x.activity.chordVersions.power.Am');
     ok(pv.midi.every((m, i) => m === pv0.midi[i] + 2) && JSON.stringify(pv.frets) === JSON.stringify(pv0.frets), 'capo: the power-chord shapes sound higher by the capo too, drawn as written');
-    ok(GOOD.every(x => !/Capo/.test(run(x.id, x.doc, 'x.activity.intro + x.activity.intro_es'))), `capo: no fixture without song.capo says Capo (${GOOD.length} of ${GOOD.length})`);
+    ok(GOOD.every(x => !/[Cc]apo/.test(run(x.id, x.doc, 'x.activity.intro + x.activity.intro_es'))), `capo: no fixture without song.capo says Capo (${GOOD.length} of ${GOOD.length})`);
     const short = base.run(`bsIntro(['G','C','D','Em','Am','A','E','F','Bm','Dm','B','Bb','C#m','F#m','G#m','D#m','A#m'], 'en', 3)`);
-    ok(short === 'Capo on fret 3. Play along, one part at a time.' && base.run(`bsIntro([], 'es', 3)`) === 'Capo en el traste 3. Toca una parte a la vez.', `capo: a line too long for one row falls back to the short one, still with the capo (${short})`);
+    ok(short === 'Put a capo on fret 3 and play along, one part at a time.' && base.run(`bsIntro([], 'es', 3)`) === 'Pon el capo en el traste 3 y toca una parte a la vez.', `capo: a line too long for one row falls back to the short one, still with the capo (${short})`);
   }
 
   /* ── refused: one broken doc per rule, each left out alone ── */
