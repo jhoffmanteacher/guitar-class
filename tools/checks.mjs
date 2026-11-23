@@ -2245,6 +2245,110 @@ function checkFabToolsThemeDrift() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1fb. NO NEW ONE-OFF TEXT SIZE OR LAYER NUMBER (W15, 2026-11-23: "tidy the
+   design values"). The stylesheets name today's most-used text sizes
+   (--fs-11 .. --fs-24, in the :root of styles.css and, the same block, of
+   tabs/journey-theme.css) and the page's layers (--z-header .. --z-toast,
+   styles.css). Before the names there were 66 distinct font-size values and
+   27 distinct z-index numbers in styles.css alone. Fails the push when, in
+   styles.css, tabs/journey-theme.css or tabs/fab-tools.css (comments
+   stripped; inline styles in .html/.js are not read):
+   - a font-size or z-index is a value not on that file's pinned list below
+     (a NEW one-off): use a name, or ask Jonathan for a new name;
+   - a literal equals a named value (write var(--fs-14), not 0.875rem; write
+     var(--z-band), not 50);
+   - a var() names something that is not one of the names (a size or layer
+     smuggled in through another custom property);
+   - a pinned one-off is no longer used (a ratchet: take it off the list, so
+     it cannot come back);
+   - the two --fs-* blocks differ, the --z-* values do not climb in the
+     order they are written, or a name is missing (the pins below hold them);
+   - it reads no font-size or no z-index at all (blind).
+   Spacing (margin, padding, gap) has names too (--sp-*) but no ratchet: the
+   odd one-offs (5px, 7px …) are summer work, not a push failure.
+   ════════════════════════════════════════════════════════════════════ */
+const DESIGN_FS_NAMES = { '--fs-11': '0.6875rem', '--fs-12': '0.75rem', '--fs-13': '0.8125rem', '--fs-13-5': '0.8438rem', '--fs-14': '0.875rem', '--fs-14-5': '0.9062rem',
+  '--fs-15': '0.9375rem', '--fs-16': '1rem', '--fs-17': '1.0625rem', '--fs-18': '1.125rem', '--fs-20': '1.25rem', '--fs-22': '1.375rem', '--fs-24': '1.5rem' };
+const DESIGN_Z_NAMES = { '--z-header': '20', '--z-band': '50', '--z-float': '54', '--z-backdrop': '55', '--z-drawer': '60', '--z-popup': '70', '--z-screen': '120', '--z-overlay': '150', '--z-toast': '9999' };
+/* The one-offs that exist today, per file. Only ever SHRINKS (a pin-only edit when one goes away). */
+const DESIGN_ONE_OFFS = {
+  'styles.css': {
+    fs: ['0.3em', '0.625rem', '0.75em', '0.7812rem', '0.85em', '1.1rem', '1.35rem', '1.75rem', '1.875rem', '1.9rem', '10px', '11pt', '15px', '19px', '2.125rem', '2.25rem',
+      '2.375rem', '2.5rem', '2.6rem', '2.75rem', '2.875rem', '2rem', '3.125rem', '3.5rem', '3rem', '5.5px', '7px', '7rem', '87.5%', '9px', 'inherit',
+      'clamp(0.75rem,1.15vw / var(--site-fill,1),0.9375rem)', 'clamp(0.875rem, calc(28cqi / var(--strum-cols,16)), 1.375rem)', 'clamp(0.875rem,1.4vw / var(--site-fill,1),1.125rem)',
+      'clamp(0.875rem,1.5vw / var(--site-fill,1),1.125rem)', 'clamp(0.9375rem,1.5vw / var(--site-fill,1),1.25rem)', 'clamp(1.0625rem,2.6vw / var(--site-fill,1),2.15rem)',
+      'clamp(1.25rem,2.9vw / var(--site-fill,1),2.35rem)', 'clamp(1.25rem,3.2vw / var(--site-fill,1),2.5rem)', 'clamp(1.5rem,3.6vw / var(--site-fill,1),3rem)',
+      'clamp(1.75rem, calc(95cqi / var(--strum-cols,16)), 84px)', 'clamp(1.75rem,4.4vw / var(--site-fill,1),3.5rem)', 'clamp(1.75rem,4vw / var(--site-fill,1),3.25rem)',
+      'clamp(1rem, calc(30cqi / var(--strum-cols,16)), 1.5rem)', 'clamp(1rem,2.2vw / var(--site-fill,1),1.75rem)', 'clamp(1rem,2vw / var(--site-fill,1),1.5rem)',
+      'clamp(2.75rem,8vw / var(--site-fill,1),6rem)', 'var(--t-card)', 'var(--t-label)', 'var(--t-page)', 'var(--t-sec)'],
+    z: ['0', '1', '2', '3', '4', '5', '6', '30', '40', '45', '51', '90', '95', '130', '140', '200', '300', '1000'],
+  },
+  'tabs/journey-theme.css': { fs: ['0.7812rem', '1.05rem', '1.75rem', '1.875rem', '16px', '18px'], z: ['120', '130', '140'] },
+  'tabs/fab-tools.css': { fs: ['1.875rem', '2.25rem', '3.125rem'], z: ['100'] },
+};
+function checkDesignValues() {
+  head('1fb. No new one-off text size or layer number (the --fs-* and --z-* names)');
+  let bad = 0;
+  const flag = m => { err(`1fb: ${m}`); problems++; bad++; };
+  const strip = s => s.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '));
+  // the top-level :root blocks' custom properties (not inside @media)
+  const rootDefs = css => {
+    const out = new Map(); let depth = 0, sel = '';
+    for (let i = 0; i < css.length; i++) {
+      const c = css[i];
+      if (c === '{') {
+        if (depth === 0 && sel.trim() === ':root') {
+          const end = css.indexOf('}', i);
+          for (const d of css.slice(i + 1, end).split(';')) { const k = d.indexOf(':'); if (k > 0) out.set(d.slice(0, k).trim(), d.slice(k + 1).trim()); }
+          i = end; sel = ''; continue;
+        }
+        depth++; sel = '';
+      } else if (c === '}') { depth--; sel = ''; }
+      else if (depth === 0) sel = c === ';' ? '' : sel + c;
+    }
+    return out;
+  };
+  const read = f => { try { return strip(readFileSync(join(ROOT, f), 'utf8')); } catch { flag(`${f} is unreadable`); return ''; } };
+  const src = Object.fromEntries(Object.keys(DESIGN_ONE_OFFS).map(f => [f, read(f)]));
+  const appRoot = rootDefs(src['styles.css']), jRoot = rootDefs(src['tabs/journey-theme.css']);
+  for (const [n, v] of Object.entries(DESIGN_FS_NAMES)) {
+    if (appRoot.get(n) !== v) flag(`styles.css :root must define ${n}:${v} (found ${appRoot.has(n) ? appRoot.get(n) : 'nothing'})`);
+    if (jRoot.get(n) !== v) flag(`tabs/journey-theme.css :root must define ${n}:${v}, the same block as styles.css (found ${jRoot.has(n) ? jRoot.get(n) : 'nothing'})`);
+  }
+  for (const [defs, f] of [[appRoot, 'styles.css'], [jRoot, 'tabs/journey-theme.css']])
+    for (const n of defs.keys()) if (/^--fs-/.test(n) && !(n in DESIGN_FS_NAMES)) flag(`${f} defines ${n}, which is not one of the pinned --fs-* names: a new text size is Jonathan's call (add it to DESIGN_FS_NAMES with him)`);
+  let prevZ = -Infinity;
+  for (const [n, v] of Object.entries(DESIGN_Z_NAMES)) {
+    if (appRoot.get(n) !== v) flag(`styles.css :root must define ${n}:${v} (found ${appRoot.has(n) ? appRoot.get(n) : 'nothing'}): moving a layer changes which one covers which`);
+    if (+v <= prevZ) flag(`DESIGN_Z_NAMES must climb in order: ${n} is ${v}`);
+    prevZ = +v;
+  }
+  for (const n of appRoot.keys()) if (/^--z-/.test(n) && !(n in DESIGN_Z_NAMES)) flag(`styles.css defines ${n}, which is not one of the pinned --z-* names: a new layer is Jonathan's call (add it to DESIGN_Z_NAMES with him)`);
+  const fsByValue = new Map(Object.entries(DESIGN_FS_NAMES).map(([n, v]) => [v, n])), zByValue = new Map(Object.entries(DESIGN_Z_NAMES).map(([n, v]) => [v, n]));
+  let nFs = 0, nZ = 0, named = 0;
+  for (const [f, pins] of Object.entries(DESIGN_ONE_OFFS)) {
+    const used = { fs: new Set(), z: new Set() };
+    const re = /(^|[{;\s])(font-size|z-index)\s*:\s*([^;{}]+?)\s*(?:!important\s*)?(?=[;}])/g; let m;
+    while ((m = re.exec(src[f]))) {
+      const kind = m[2] === 'font-size' ? 'fs' : 'z', v = m[3].trim(), line = src[f].slice(0, m.index + m[1].length).split('\n').length;
+      kind === 'fs' ? nFs++ : nZ++;
+      const nameRe = kind === 'fs' ? /^var\((--fs-[\w-]+)\)$/ : /^var\((--z-[\w-]+)\)$/, nm = v.match(nameRe);
+      if (nm) { named++; if (!((kind === 'fs' ? DESIGN_FS_NAMES : DESIGN_Z_NAMES)[nm[1]])) flag(`${f}:${line} ${m[2]}:${v} — ${nm[1]} is not one of the names`); continue; }
+      // the --z-* names exist in styles.css only (a Journey page has its own few layers: #save-msg's 120 is not the Games screen)
+      const twin = kind === 'fs' ? fsByValue.get(v) : f === 'styles.css' ? zByValue.get(v) : undefined;
+      if (twin) { flag(`${f}:${line} ${m[2]}:${v} — that is ${twin}: write var(${twin})`); continue; }
+      used[kind].add(v);
+      if (!pins[kind].includes(v)) flag(`${f}:${line} ${m[2]}:${v} is a NEW one-off ${kind === 'fs' ? 'text size' : 'layer number'} — use a ${kind === 'fs' ? '--fs-*' : '--z-*'} name (styles.css :root lists them)${kind === 'z' ? '; a layer over the page goes at 55 or under, or 90 or over' : ''}`);
+    }
+    for (const kind of ['fs', 'z']) for (const v of pins[kind]) if (!used[kind].has(v))
+      flag(`${f}: the pinned one-off ${kind === 'fs' ? 'font-size' : 'z-index'} ${v} is no longer used — take it off DESIGN_ONE_OFFS in tools/checks.mjs (a pin-only edit), so it cannot come back`);
+  }
+  if (!nFs || !nZ) flag(`read ${nFs} font-size and ${nZ} z-index declarations — it is blind`);
+  const offs = Object.values(DESIGN_ONE_OFFS).reduce((n, p) => n + p.fs.length + p.z.length, 0);
+  if (!bad) ok(`${nFs} font-size and ${nZ} z-index declarations in 3 stylesheets: ${named} use a name, the rest are among ${offs} pinned one-offs; ${Object.keys(DESIGN_FS_NAMES).length} --fs-* names (both :root blocks equal) and ${Object.keys(DESIGN_Z_NAMES).length} --z-* names in order`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1t3. JOURNEY POPUP MARKUP ↔ APP MARKUP — 1t/1t2 cover the CSS these
    floating tools share with the main app; nothing covered the HTML
    itself. Found 2026-09-27: the six Journey pages' tool popups still
@@ -23171,6 +23275,7 @@ function checkNeverRules(sets) {
   checkContrast();
   checkJourneyThemeDrift();
   checkFabToolsThemeDrift();
+  checkDesignValues();
   checkJourneyPopupMarkup();
   checkJourneyTabCards();
   checkTabAsciiAlignment();
