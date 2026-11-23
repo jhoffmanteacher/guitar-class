@@ -117,7 +117,8 @@ function lqMusicAudible(){
 }
 function lqMusicToggle(){
   lqmOn = !lqMusicAudible();   // the button does what its label says
-  if(lqmOn){ lqmPressed = true; lqmErr = lqmErr.indexOf('not uploaded') === 0 ? '' : lqmErr; }   // try the store again
+  // Play tries the store again after any failure but the month's limit and a page with no song player.
+  if(lqmOn){ lqmPressed = true; lqmErr = /used up|not on this page/.test(lqmErr) ? lqmErr : ''; }
   try { localStorage.setItem('gc-lq-music', lqmOn ? '1' : '0'); } catch(e){}
   if(!lqmOn) lqMusicStop();
   lqMusicSync();

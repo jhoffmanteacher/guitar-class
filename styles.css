@@ -5429,6 +5429,8 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-shell:fullscreen{background:#140f38;color:#ffffff;padding:10px;gap:10px;overflow:auto}
 .lq-shell:fullscreen > .lq-stage{flex:1 1 auto;min-height:0;border-radius:12px;justify-content:center}
 .lq-shell:fullscreen > .lq-controls{flex:none}
+/* The Games list (teacher-livegames.js, inside #lq-shell) stays off the projector in full screen: the stage keeps the room. */
+.lq-shell:fullscreen > .lq-games{display:none}
 .lq-st-title{font-family:var(--font-display);font-size:clamp(1.75rem,4vw / var(--site-fill,1),3.25rem);
   font-weight:600;line-height:1.15}
 .lq-st-qnum{font-size:clamp(0.875rem,1.4vw / var(--site-fill,1),1.125rem);font-weight:700;letter-spacing:0.08em;

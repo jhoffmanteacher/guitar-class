@@ -475,13 +475,14 @@ async function lqCcRun(st){
       setTimeout(() => { a.removeEventListener('seeked', done); res(); }, 8000);
     });
     if(Math.abs(st.audio.currentTime - st.plan.from) > 0.5) throw new Error('could not jump to the section');
-    if(!lqCcCurrent(st)) return;
+    if(!lqCcCurrent(st) || st.stopped) return;   // a Stop pressed before the song started: it never starts
     await st.audio.play();
     await new Promise(res => { if(!st.audio.paused && st.audio.readyState >= 3) res(); else { st.audio.addEventListener('playing', res, { once: true }); setTimeout(res, 3000); } });
     await lqCcSleep(300);
     const t0 = await lqCcMeasureT0(st);
     if(t0 == null || !lqCcCurrent(st)) return;
     await lqCcWrite(st, { t0 });
+    if(!lqCcCurrent(st) || st.stopped) return;   // the round ended during the write: no watch for it
     st.timer = setInterval(() => lqCcWatch(st), 100);
   } catch(e){
     console.warn('[live-quiz] chord-change round: the song did not play', e);
@@ -490,7 +491,8 @@ async function lqCcRun(st){
 }
 // While the song plays: the stage's progress bar, and the end.
 function lqCcWatch(st){
-  if(!lqCcCurrent(st)){ lqCcStopAudio(); return; }
+  // A watch whose round is over stops itself only: it must never silence a later round (lqTCc is then another st).
+  if(!lqCcCurrent(st)){ clearInterval(st.timer); st.timer = null; if(lqTCc === st) lqCcStopAudio(); return; }
   const a = st.audio, end = lqCcEnd(st.cc);
   const bar = document.getElementById('lq-cc-prog');
   if(bar){
