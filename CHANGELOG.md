@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-23 — Live games on the projector: full screen and "Hear the chord change" fixed
+
+- **In full screen, the live game's screen shows only the game and its buttons again.** The teacher's list of games
+  was showing on the projector and squeezed the game into a thin strip.
+- **"Hear the chord change": the song plays in every round.** If a round was stopped right as it started, later
+  rounds stayed silent until the teacher's page was reloaded. Stop pressed before the song starts now keeps it off.
+
+
 ## 2026-11-21 — Shorter Spanish titles on five whole-song cards
 
 - **In Spanish, the five "whole song in power chords" cards now end "Toda con acordes de potencia".**
