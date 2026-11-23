@@ -193,7 +193,9 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 - [~] **`tools/smoke.mjs` finds functions not defined after a page reload** (2026-11-02 on the Mac; 4 times on
   GitHub since 2026-11-14): W25, under "For Windows".
 - [ ] **ca-43 Note Call through a real guitar and a Chromebook mic:** not recorded as done (2026-10-31).
-- [ ] **Friday check 2026-11-23: open findings (MINOR; fixed ones are in `3bda5bc`, `e8f8aec`).** Details:
+- [ ] **Friday check 2026-11-23: open findings (MINOR; fixed ones are in `3bda5bc`, `e8f8aec`).** Jonathan settled the
+  three product calls 2026-11-23; the whole list is written up as a work order for another machine:
+  `docs/work-orders/WORK-ORDER-friday-findings-2026-11-23.md` (5 parts). Do not start these by hand. Details:
   that run's session. Content and product calls for Jonathan:
   - Songs page "Date added" sorts exactly like "Title": none of the 47 songs has an `added` date, and nothing makes a
     new song carry one (`app/explore.js` ~316/325, `0d0cd6e`). Give the songs dates, or drop the button?
