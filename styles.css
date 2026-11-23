@@ -52,6 +52,14 @@
      tabs/journey-theme.css. */
   --fs-11:0.6875rem;--fs-12:0.75rem;--fs-13:0.8125rem;--fs-13-5:0.8438rem;--fs-14:0.875rem;--fs-14-5:0.9062rem;
   --fs-15:0.9375rem;--fs-16:1rem;--fs-17:1.0625rem;--fs-18:1.125rem;--fs-20:1.25rem;--fs-22:1.375rem;--fs-24:1.5rem;
+  /* Layers (W15, 2026-11-23): the page-level stack, at today's numbers. Bottom to top:
+     header 20 · band 50 (the sticky set band and In class's top bar) · float 54 (back-to-top, the minutes
+     toast and recap) · backdrop 55 (the phone drawer's) · drawer 60 (the phone rail) · popup 70 (a rail
+     tool's popup) · screen 120 (the Games screen) · overlay 150 (a full-page dialog) · toast 9999.
+     The one-off numbers between them stay literal (30, 40, 45, 51, 90, 95, 130, 140, 200, 300, 1000), and a
+     component's own 0-6 stays literal; checks.mjs 1fb refuses a NEW one-off number. A new layer over the
+     page goes at 55 or under, or 90 or over: never in 56-89, around the phone drawer. */
+  --z-header:20;--z-band:50;--z-float:54;--z-backdrop:55;--z-drawer:60;--z-popup:70;--z-screen:120;--z-overlay:150;--z-toast:9999;
   /* One title scale (Look A): page · section · card title · caps label. */
   --t-page:var(--fs-22);--t-sec:var(--fs-18);--t-card:var(--fs-17);--t-label:var(--fs-12);
   /* The "Your response" box: a faint plum wash. */
@@ -100,7 +108,7 @@
   }
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg2);color:var(--text);min-height:calc(100dvh / var(--site-fill,1));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-.header{background:var(--brand);color:#fff;border-bottom:0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:0 1px 0 rgba(0,0,0,0.06)}
+.header{background:var(--brand);color:#fff;border-bottom:0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:var(--z-header);box-shadow:0 1px 0 rgba(0,0,0,0.06)}
 .header-title{font-size:var(--fs-22);font-weight:600;color:#fff;line-height:1.2;letter-spacing:-0.01em;font-family:var(--font-display)}
 .header .btn-sign,.header .btn-out,.header .btn-translate{color:#fff;border-color:rgba(255,255,255,0.45);background:transparent}
 .header .btn-sign:hover,.header .btn-out:hover,.header .btn-translate:hover{background:rgba(255,255,255,0.12)}
@@ -219,7 +227,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .reflection-ta{width:100%;box-sizing:border-box;border:1px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:var(--fs-15);font-family:inherit;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
 .reflection-ta::placeholder{color:var(--text2);font-weight:400}
 /* Transient hint toast (e.g. tapping a locked set) — self-made element, no markup needed. */
-#gate-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:var(--fs-14-5);font-weight:600;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;z-index:9999;max-width:min(90vw / var(--site-fill,1),360px);text-align:center;transition:opacity .18s ease,transform .18s ease}
+#gate-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:var(--fs-14-5);font-weight:600;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;z-index:var(--z-toast);max-width:min(90vw / var(--site-fill,1),360px);text-align:center;transition:opacity .18s ease,transform .18s ease}
 #gate-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .reflection-ta:focus{outline:none;border-color:var(--text2)}
 .reflection-ta:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
@@ -305,7 +313,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    between the two lines made the wrapped band taller than the card it is
    meant to be saving room for. */
 .set-eyebrow{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;
-  position:sticky;top:0;z-index:50;background:var(--bg2);
+  position:sticky;top:0;z-index:var(--z-band);background:var(--bg2);
   margin:0 0 12px;padding:8px 0;border-bottom:1px solid var(--border);border-bottom-color:var(--border)}
 .set-eyebrow-title{font-size:var(--fs-15);font-weight:600;color:var(--text)}
 /* The set's subtitle, first line of the About panel (item 7). */
@@ -1128,7 +1136,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 /* Backdrop behind the drawer — sits below the header so the header (and the
    toggle button that closes the drawer) stays reachable while it's open. */
 .rail-backdrop{display:none;position:fixed;top:var(--hdr);left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.45);z-index:55}
+  background:rgba(0,0,0,0.45);z-index:var(--z-backdrop)}
 /* ── Responsive: below 760px the rail becomes an off-canvas drawer instead of
    stacking in the page flow, so a narrow window shows the main content first
    instead of a long sidebar you have to scroll past. ── */
@@ -1173,7 +1181,7 @@ body.rail-collapsed .rail-tools .tool-popup{
   .rail{width:calc(82vw / var(--site-fill,1));max-width:300px;flex:none;position:fixed;top:var(--hdr);left:0;
     height:calc(100vh / var(--site-fill,1) - var(--hdr));
     height:calc(100dvh / var(--site-fill,1) - var(--hdr));border-right:1px solid var(--border);border-bottom:none;
-    transform:translateX(-100%);transition:transform 0.2s ease;z-index:60;box-shadow:var(--shadow-raised)}
+    transform:translateX(-100%);transition:transform 0.2s ease;z-index:var(--z-drawer);box-shadow:var(--shadow-raised)}
   body.rail-open .rail{transform:translateX(0)}
   body.rail-open .rail-backdrop{display:block}
   body.rail-open{overflow:hidden}
@@ -1276,7 +1284,7 @@ body.rail-collapsed .rail-tools .tool-popup{
   .rail-tools .fab svg{width:18px;height:18px}
 }
 /* Popups open upward above the dock, filling the rail's width */
-.rail-tools .tool-popup{position:absolute;left:8px;right:8px;bottom:calc(100% + 6px);width:auto;z-index:70;box-shadow:var(--shadow-raised)}
+.rail-tools .tool-popup{position:absolute;left:8px;right:8px;bottom:calc(100% + 6px);width:auto;z-index:var(--z-popup);box-shadow:var(--shadow-raised)}
 .tool-popup{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;box-shadow:var(--shadow-raised);display:none}
 .tool-popup.open{display:block}
 .tuner-note{font-size:3.125rem;font-weight:500;text-align:center;line-height:1;color:var(--text);min-height:56px;margin-bottom:2px}
@@ -3097,7 +3105,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 /* z-index 54: above the sticky set band (50), under the phone drawer's
    backdrop (55) and the drawer (60). At 80 the pill stayed bright and
    tappable on top of an open drawer. */
-.back-to-top{position:fixed;right:18px;bottom:18px;z-index:54;font-family:inherit;font-size:var(--fs-13-5);font-weight:600;padding:8px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
+.back-to-top{position:fixed;right:18px;bottom:18px;z-index:var(--z-float);font-family:inherit;font-size:var(--fs-13-5);font-weight:600;padding:8px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
 .back-to-top.show{opacity:1;visibility:visible;pointer-events:auto}
 .back-to-top:hover{color:var(--text);border-color:var(--text2)}
 .sk-where-btn{display:block;margin-top:5px;font-family:inherit;font-size:var(--fs-13);font-weight:600;padding:0;background:none;border:none;color:var(--blue-text);cursor:pointer;text-align:left}
@@ -3225,7 +3233,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .daily5-inline-btn:hover{filter:brightness(0.97)}
 /* Daily 5 popup — opened from Station C's warm-up card, floats over the
    activities (above the FABs at z 100 and the mini-player at z 90). */
-.daily5-overlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:48px 16px 24px}
+.daily5-overlay{position:fixed;inset:0;z-index:var(--z-overlay);background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:48px 16px 24px}
 .daily5-modal{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 18px;width:min(560px,100%);max-height:calc(100vh / var(--site-fill,1) - 72px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.30)}
 /* Report-an-issue modal reuses the .daily5-overlay/.daily5-modal shell above. */
 .issue-actions{display:flex;justify-content:flex-end;margin-top:10px}
@@ -3331,7 +3339,7 @@ body.explore-open #week-panels{display:none}
    padding on the scroll container's child would let 24px of card scroll
    past ABOVE the pinned bar (see the .set-eyebrow note near the top). */
 .ca-screen .page-shell{padding-top:0}
-.ca-screen .page-topbar{position:sticky;top:0;z-index:50;background:var(--bg);
+.ca-screen .page-topbar{position:sticky;top:0;z-index:var(--z-band);background:var(--bg);
   border-bottom:2px solid var(--ca-accent);padding:24px 0 12px;min-height:0;border-bottom-width:2px}
 /* With a card open the bar is just the card's name, Back and its count —
    it stays on screen the whole time the student plays, so it gives back the
@@ -3474,7 +3482,7 @@ body.ca-fold:has(#class-activities-screen:not([hidden])) .rail{visibility:hidden
   border:0;overflow:hidden;transform:none;transition:none;box-shadow:none}
 body.ca-fold:has(#class-activities-screen:not([hidden])) .rail-tools .tool-popup.open{visibility:visible;position:fixed;
   top:var(--ca-tool-top,64px);right:var(--ca-tool-right,16px);left:auto;bottom:auto;width:250px;
-  max-height:calc(100dvh / var(--site-fill,1) - var(--ca-tool-top,64px) - 8px);overflow-y:auto;z-index:70}
+  max-height:calc(100dvh / var(--site-fill,1) - var(--ca-tool-top,64px) - 8px);overflow-y:auto;z-index:var(--z-popup)}
 /* 6. Full screen also grows the activity to fill the width (Jonathan,
    2026-10-13: "make everything bigger too", not just wider), on
    body.ca-full only — the folded view (5) stays at 1×. With the rail gone the 1000px
@@ -4324,7 +4332,7 @@ body.games-open .g-set{display:none}
    game is running. z-index clears the FABs (100) and mini-player (90) but
    stays under the Daily 5 / gate modals (150). body.games-open locks the page
    behind it so trackpads can't rubber-band the practice view underneath. */
-.games-screen{position:fixed;inset:0;z-index:120;overflow-y:auto;background:linear-gradient(160deg,#3d3763 0%,var(--brand) 100%)}
+.games-screen{position:fixed;inset:0;z-index:var(--z-screen);overflow-y:auto;background:linear-gradient(160deg,#3d3763 0%,var(--brand) 100%)}
 body.games-open{overflow:hidden}
 /* 1240px (was 760): the games use the width of a 1366px Chromebook; the height
    (657px) is the scarce side, so each game's own body decides how much of the
@@ -5622,12 +5630,12 @@ body.lq-invite-open{overflow:hidden}
 .pm-flame-svg{width:16px;height:16px;flex-shrink:0}
 /* Pills that drop down from the header strip (placed by practice-minutes.js). z 54: above
    the practice card's sticky bar (50) and the header (20), under the phone drawer (60). */
-.pm-toast{position:fixed;z-index:54;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;
+.pm-toast{position:fixed;z-index:var(--z-float);transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;
   background:var(--pm-surface);color:var(--pm-text);border-radius:20px;padding:8px 16px;font-size:var(--fs-15);font-weight:700;
   box-shadow:0 6px 20px rgba(0,0,0,0.3);animation:pm-in 0.25s ease-out;max-width:calc(100vw / var(--site-fill,1) - 16px)}
 .pm-toast .pm-flame-svg{color:var(--goal);width:20px;height:20px}
 @keyframes pm-in{from{opacity:0;margin-top:-6px}to{opacity:1;margin-top:0}}
-.pm-recap{position:fixed;z-index:54;width:min(320px,calc(100vw / var(--site-fill,1) - 16px));background:var(--bg);color:var(--text);
+.pm-recap{position:fixed;z-index:var(--z-float);width:min(320px,calc(100vw / var(--site-fill,1) - 16px));background:var(--bg);color:var(--text);
   border:1px solid var(--border2);border-radius:12px;padding:12px 40px 12px 16px;box-shadow:0 8px 28px rgba(30,27,70,0.22);animation:pm-in 0.25s ease-out}
 .pm-recap-big{font-family:var(--font-display);font-size:1.75rem;font-weight:700;line-height:1.1}
 .pm-recap-sub{margin-top:4px;font-size:var(--fs-14);color:var(--text2)}
