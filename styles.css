@@ -232,7 +232,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .reflection-ta{width:100%;box-sizing:border-box;border:1px solid var(--border2);border-radius:var(--radius);padding:var(--sp-10) 13px;font-size:var(--fs-15);font-family:inherit;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
 .reflection-ta::placeholder{color:var(--text2);font-weight:400}
 /* Transient hint toast (e.g. tapping a locked set) — self-made element, no markup needed. */
-#gate-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:var(--sp-10) var(--sp-16);border-radius:12px;font-size:var(--fs-14-5);font-weight:600;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;z-index:var(--z-toast);max-width:min(90vw / var(--site-fill,1),360px);text-align:center;transition:opacity .18s ease,transform .18s ease}
+#gate-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:var(--sp-10) var(--sp-16);border-radius:12px;font-size:0.9rem;font-weight:600;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;z-index:var(--z-toast);max-width:min(90vw / var(--site-fill,1),360px);text-align:center;transition:opacity .18s ease,transform .18s ease}
 #gate-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .reflection-ta:focus{outline:none;border-color:var(--text2)}
 .reflection-ta:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
@@ -4884,7 +4884,7 @@ body.games-open{overflow:hidden}
 .rep-goal-note{color:var(--green-text);font-weight:500}
 .rep-sep{color:var(--text3)}
 .rep-actions{margin-top:var(--sp-8)}
-.rep-log-btn{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-text);border-radius:6px;padding:5px var(--sp-12);font:inherit;font-size:var(--fs-13-5);font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
+.rep-log-btn{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-text);border-radius:6px;padding:5px var(--sp-12);font:inherit;font-size:0.8437rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
 .rep-log-btn:hover{filter:brightness(0.96)}
 .rep-log-btn.rep-logged{animation:repPulse 0.5s ease}
 @keyframes repPulse{0%{transform:scale(1)}35%{transform:scale(1.07)}100%{transform:scale(1)}}
@@ -4892,10 +4892,10 @@ body.games-open{overflow:hidden}
 .fg-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--sp-10) var(--sp-12) var(--sp-8);margin-bottom:var(--sp-8)}
 .fg-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-10);flex-wrap:wrap;margin-bottom:var(--sp-4)}
 .fg-status{display:flex;align-items:center;gap:var(--sp-10);flex-wrap:wrap;font-size:var(--fs-14-5);color:var(--text);line-height:1.45}
-.fg-intro{color:var(--text2);font-size:var(--fs-13-5)}
+.fg-intro{color:var(--text2);font-size:0.8437rem}
 .fg-count{font-size:0.7812rem;color:var(--text3);white-space:nowrap}
 .fg-best{font-size:0.7812rem;color:var(--text2);white-space:nowrap}
-.fg-start-btn{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-text);border-radius:6px;padding:var(--sp-4) var(--sp-12);font:inherit;font-size:var(--fs-13-5);font-weight:500;cursor:pointer;line-height:1.3}
+.fg-start-btn{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-text);border-radius:6px;padding:var(--sp-4) var(--sp-12);font:inherit;font-size:0.8437rem;font-weight:500;cursor:pointer;line-height:1.3}
 .fg-start-btn:hover{filter:brightness(0.95)}
 .fg-score{font-weight:600}
 /* 600 → 820 with the wider column (2026-09-19): it's an SVG, so the
@@ -5104,7 +5104,7 @@ body.games-open{overflow:hidden}
 .review-slot:empty{display:none}
 .review-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:var(--sp-14) var(--sp-16);margin-bottom:var(--sp-14);box-shadow:var(--shadow-card)}
 .review-head{display:flex;align-items:center;gap:var(--sp-8);font-size:var(--fs-16);font-weight:700;color:var(--purple-text);margin-bottom:3px}
-.review-explainer{font-size:var(--fs-13-5);color:var(--text2);margin-bottom:var(--sp-10);line-height:1.5}
+.review-explainer{font-size:0.8437rem;color:var(--text2);margin-bottom:var(--sp-10);line-height:1.5}
 .review-items{display:flex;flex-direction:column;gap:var(--sp-8)}
 .review-item{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-12);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px var(--sp-12)}
 .review-item-main{min-width:0}
@@ -5119,7 +5119,7 @@ body.games-open{overflow:hidden}
    Same purple "special card" family as .review-card/.resume-card above. */
 .jl-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:var(--sp-14) var(--sp-16);margin-bottom:var(--sp-14);box-shadow:var(--shadow-card)}
 .jl-title{font-size:var(--fs-16);font-weight:700;color:var(--purple-text);margin-bottom:3px}
-.jl-sub{font-size:var(--fs-13-5);color:var(--text2);margin:0 0 var(--sp-10);line-height:1.5}
+.jl-sub{font-size:0.8437rem;color:var(--text2);margin:0 0 var(--sp-10);line-height:1.5}
 .jl-songs{display:flex;flex-wrap:wrap;gap:var(--sp-8)}
 .jl-song-btn{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:var(--sp-8) var(--sp-14);font:inherit;font-size:var(--fs-14);font-weight:600;cursor:pointer;min-height:40px}
 .jl-song-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
@@ -5194,7 +5194,7 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .dkr-prompt{font-size:var(--fs-14);color:var(--text2);margin:0 0 11px;line-height:1.45}
 .dkr-row{display:flex;gap:var(--sp-8);justify-content:center;flex-wrap:wrap;margin-top:var(--sp-12)}
 .dkr-btn{padding:var(--sp-8) var(--sp-16);border:1px solid var(--border2);background:var(--bg);color:var(--text);
-  border-radius:20px;font-size:var(--fs-14-5);font-family:inherit;cursor:pointer}
+  border-radius:20px;font-size:0.9rem;font-family:inherit;cursor:pointer}
 .dkr-btn:hover{background:var(--bg3)}
 .dkr-btn.good{border-color:var(--green-text);color:var(--green-text)}
 .dkr-btn.again{border-color:var(--amber-text);color:var(--amber-text)}

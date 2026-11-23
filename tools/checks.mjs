@@ -2270,10 +2270,13 @@ function checkFabToolsThemeDrift() {
 const DESIGN_FS_NAMES = { '--fs-11': '0.6875rem', '--fs-12': '0.75rem', '--fs-13': '0.8125rem', '--fs-13-5': '0.8438rem', '--fs-14': '0.875rem', '--fs-14-5': '0.9062rem',
   '--fs-15': '0.9375rem', '--fs-16': '1rem', '--fs-17': '1.0625rem', '--fs-18': '1.125rem', '--fs-20': '1.25rem', '--fs-22': '1.375rem', '--fs-24': '1.5rem' };
 const DESIGN_Z_NAMES = { '--z-header': '20', '--z-band': '50', '--z-float': '54', '--z-backdrop': '55', '--z-drawer': '60', '--z-popup': '70', '--z-screen': '120', '--z-overlay': '150', '--z-toast': '9999' };
-/* The one-offs that exist today, per file. Only ever SHRINKS (a pin-only edit when one goes away). */
+/* The one-offs that exist today, per file. Only ever SHRINKS (a pin-only edit when one goes away).
+   0.8437rem (5 rules) and 0.9rem (2) are near-twins of --fs-13-5 and --fs-14-5 that were folded and put
+   back (W15): the fold moved text by a pixel at 1366x657 (hand screenshot pairs). Folding them is
+   Jonathan's call (summer), not a tidy. */
 const DESIGN_ONE_OFFS = {
   'styles.css': {
-    fs: ['0.3em', '0.625rem', '0.75em', '0.7812rem', '0.85em', '1.1rem', '1.35rem', '1.75rem', '1.875rem', '1.9rem', '10px', '11pt', '15px', '19px', '2.125rem', '2.25rem',
+    fs: ['0.3em', '0.625rem', '0.75em', '0.7812rem', '0.8437rem', '0.85em', '0.9rem', '1.1rem', '1.35rem', '1.75rem', '1.875rem', '1.9rem', '10px', '11pt', '15px', '19px', '2.125rem', '2.25rem',
       '2.375rem', '2.5rem', '2.6rem', '2.75rem', '2.875rem', '2rem', '3.125rem', '3.5rem', '3rem', '5.5px', '7px', '7rem', '87.5%', '9px', 'inherit',
       'clamp(0.75rem,1.15vw / var(--site-fill,1),0.9375rem)', 'clamp(0.875rem, calc(28cqi / var(--strum-cols,16)), 1.375rem)', 'clamp(0.875rem,1.4vw / var(--site-fill,1),1.125rem)',
       'clamp(0.875rem,1.5vw / var(--site-fill,1),1.125rem)', 'clamp(0.9375rem,1.5vw / var(--site-fill,1),1.25rem)', 'clamp(1.0625rem,2.6vw / var(--site-fill,1),2.15rem)',
