@@ -57,6 +57,12 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   **Windows: SCHEDULE** for 2026-11-26 at 7:00 AM Pacific, model `claude-sonnet-5-5` (reading and counting only;
   the public pages need no sign-in and no browser).
   Windows: scheduled https://claude.ai/code/routines/trig_011u2gbkdE7fC3GsUzfnLyYh for 2026-11-26 7:00 AM Pacific.
+  **Read early on 2026-11-24 (Claude on Windows, with `gh`; Jonathan asked for it): 73 runs of "Browser tests" on main
+  since 2026-11-19 (first push 11ef3268, last 982194ea).** The "a11y scan" job ran in 68 of them: all 68 say "0 rules
+  with findings, 0 elements, on 0 of 12 screens" and "0 new signatures, 0 gone". The other 5 did not run it: 2 were
+  cancelled by a newer push (445a320b, 7efe39bc, 2026-11-23) and 3 were manual or scheduled runs that skipped it
+  (2026-11-21). Runs with a new signature: 0. The baseline file holds 0 findings (22 screens, both languages), so with
+  the ratchet on ANY finding axe makes fails the run. The routine above still reads again on 11-26 (adds 11-24 .. 11-26).
 - [ ] **W27 — on or after 2026-12-01: remove the split bridges.** The spec is `todo.md` → "Remove the 2026-11-16
   and 2026-11-18 split bridges" (`grep -n "DELIBERATE BRIDGE" coach-*.js` finds 6; keep the two `typeof` guards it
   names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
