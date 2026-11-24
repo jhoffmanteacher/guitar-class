@@ -49,7 +49,7 @@ var GUITAR_DIAGRAM_THEMES = {
 
 var GD_SANS = "Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
 
-/* Matches app.js's escHtml exactly — kept private so this file has
+/* Matches app/boot.js's escHtml exactly — kept private so this file has
    no dependency on app.js load order. */
 function gdEsc(s){
   // Escaping quotes too (harmless in text content) means this is also safe
@@ -233,7 +233,7 @@ var CHORD_DIAGRAMS = {
   'Fmaj7' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,0,0]] },
   'Dm7'   : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,1,1]] },
   /* Open-chord chart shapes (2026-10-14). Library only: nothing links to
-     them yet — not in app.js's CHORD_NAMES, no data-chord, no game deck —
+     them yet — not in app/snippets.js's CHORD_NAMES, no data-chord, no game deck —
      so adding them changes nothing a student sees until a lesson names one.
      A7 / D7 / E7 use the same frets and fingers as Module 11's inline
      boxes and the E7 play-along cards; Dsus = D's fingers, Em7 = Em +
@@ -263,7 +263,7 @@ var CHORD_DIAGRAMS = {
      CHORD_NAMES auto-link ever reaches them. Kept rather than deleted for whenever a lesson adds them; the
      arcade games' former "barre" deck drilled all three against each
      other and was removed the same day for the same reason (see
-     coach.js's CHORD_RANK). Module 7 (barre chords) skips these auto-link
+     coach-chordcards.js's CHORD_RANK). Module 7 (barre chords) skips these auto-link
      pop-ups entirely (see wrapChordLinksIn) and renders full-barre shapes
      inline instead. */
   'Bm' : { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,4],[3,4,3],[2,3,2],[1,2,1]] },
@@ -535,7 +535,7 @@ function localStringNotesSvg(kind, notes, opts){
    [{kind, notes}, ...], each `notes` the same [fret, label] shape
    localStringNotesSvg takes. Every listed string renders as a target
    (green) string; localStringNotesSvg itself is untouched so existing
-   single-string figures and the noteName exit-check board (app.js) render
+   single-string figures and the noteName exit-check board (app/activities-2.js) render
    exactly as before. */
 function localStringMultiNotesSvg(specs, opts){
   if (!specs || !specs.length) return null;

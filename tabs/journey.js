@@ -113,7 +113,7 @@ function applyJourneyLang(lang){
   if(lbl){
     lbl.textContent = (lang === 'es') ? 'English' : 'Español';
     // The label names the OTHER language, in that language — tag it so a
-    // screen reader says "Español" in Spanish (same as syncTranslateBtn in app.js).
+    // screen reader says "Español" in Spanish (same as syncTranslateBtn in app/audio-ui.js).
     lbl.lang = (lang === 'es') ? 'en' : 'es';
   }
   updateProgressPill();
@@ -155,7 +155,7 @@ function openLayer(section, scroll){
   // An open whole-song tab is re-measured: a resize while its layer was
   // closed could not size it (a hidden layer measures 0).
   section.querySelectorAll('.ws-fold').forEach(wsReflow);
-  // Same rule as app.js's scrollBehavior(): an OS "reduce motion" setting
+  // Same rule as app/snippets.js's scrollBehavior(): an OS "reduce motion" setting
   // means jump, not slide. Inlined because these pages don't load app.js.
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(scroll) section.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
@@ -175,7 +175,7 @@ function firstUnreadyLayer(){
   })[0];
 }
 
-/* The hash carries up to two things, '&'-separated (journeyHref in app.js):
+/* The hash carries up to two things, '&'-separated (journeyHref in app/activities.js):
    'layer-N' (which layer to open) and 'from=<hash without #>' (where on
    the class site the student came from — e.g. class-activities/ca-20).
    hashLayerId() is the first; journeyFrom() the second. Only ever read,
@@ -264,7 +264,7 @@ window.addEventListener('beforeprint', function(){
    of every file it declares — data-audio-full, plus data-audio-full-metronome
    / data-audio-slow-full / data-audio-slow-full-metronome for each of the
    other three it has. The player then grows a third toggle, the same Guitar
-   toggle a class-activity snippet card has (app.js buildSnippet) and with
+   toggle a class-activity snippet card has (app/snippets.js buildSnippet) and with
    the same i18n keys: ON by default ("Record plays it"), press it and the
    rhythm-down mix plays ("You play it") — the part turned down, not muted,
    which is why the label names who plays it rather than saying "Guitar".
@@ -278,20 +278,20 @@ window.addEventListener('beforeprint', function(){
    beat the room counts, instead of switching to the track's metronome file
    (2026-09-27, "the cure"): data-click-anchor — the fast file's first
    downbeat in seconds, the same number as SNIPPET_TRACKS[...].anchor in
-   app.js — with data-bpm / data-bpm-slow holding the COUNTED tempos (72 /
+   app/snippets.js — with data-bpm / data-bpm-slow holding the COUNTED tempos (72 /
    60 there, where the files are 144 / 120; the ratio is the same, so the
    Slow rescale doesn't move) and optional data-click-beats (default 4) for
    the loud click on beat 1. "the cure"'s metronome files click at the
    file's 144 BPM, twice the pulse the room counts, so the page declares no
    metronome files at all. The click is scheduled on an AudioContext a few
-   ms ahead of each beat, offset by the same 80 ms output latency app.js
+   ms ahead of each beat, offset by the same 80 ms output latency app/snippets.js
    uses (SNIP_OUTPUT_LATENCY), and follows Slow, Guitar and the loop.
 
    A song played by a band with no click cannot use one anchor and a steady
    tempo — the grid drifts off the record by mid-song — so its page lists
    every bar's downbeat instead (2026-10-01): data-click-bars, seconds on the
    FAST file, comma-separated, the same numbers as SNIPPET_TRACKS[...].barTimes
-   in app.js (checks.mjs 1bk compares them), with data-click-beats clicks
+   in app/snippets.js (checks.mjs 1bk compares them), with data-click-beats clicks
    spread evenly inside each bar and the loud one on the downbeat. The slow
    tier is the same list scaled by data-bpm / data-bpm-slow. Nothing clicks
    before the first listed downbeat or after the last. Seven Nation Army,
@@ -434,7 +434,7 @@ function ensurePlayer(){
     return lo * clickBeats + Math.ceil((t - clickBars[lo]) / step - 1e-6);
   };
   /* +5 dB (10^(5/20), 2026-10-30), the same constant as PLAYALONG_CLICK_GAIN
-     in app.js — this page has no app.js, so it is a hand-kept copy. */
+     in app/cards.js — this page has no app.js, so it is a hand-kept copy. */
   var CLICK_GAIN = Math.pow(10, 5 / 20);
   var clickAt = function(at, accent){
     var o = clickCtx.createOscillator(), g = clickCtx.createGain();
@@ -622,7 +622,7 @@ function toggleTrackFab(){
 }
 
 /* The tuner is opening (fab-tools.js) and it hears everything: pause the
-   backing track first. On index.html app.js's stopAllDemoAudio() does this;
+   backing track first. On index.html app/audio-ui.js's stopAllDemoAudio() does this;
    this page has no app.js. The page's own click stops by itself once the
    track is paused (clickTick returns while a.paused). */
 function stopJourneyAudio(){
@@ -1037,8 +1037,8 @@ var locallyClickedLayers = {};
    over every layer saved on another day. Hence (readyToSave, flushSave):
    no save while 'pending' (the read flushes when it settles; only a closing
    tab writes early), only the layers clicked this load after 'failed', and
-   every layer once 'done' — resumeSongPick() in app.js counts the keys as
-   the song's layer total. Same class as app.js's progressLoadFailed guard
+   every layer once 'done' — resumeSongPick() in app/shell.js counts the keys as
+   the song's layer total. Same class as app/save.js's progressLoadFailed guard
    (checks.mjs 1bo); checks.mjs 1bw runs this file against a fake Firestore.
    loadGen tells a read that settles after a newer auth change to do nothing. */
 var readState = 'pending', loadGen = 0;
@@ -1161,7 +1161,7 @@ function queueSave(){
 /* ── Module 4/5 swap (2026-10-12) ──
    Layers 4 and 5 traded places with Modules 4 and 5, and songReady is keyed
    by layer NUMBER. The main app moves each student's doc to the new
-   numbering once and marks it `migrations.swap45` (swap45Commit in app.js
+   numbering once and marks it `migrations.swap45` (swap45Commit in app/save.js
    — read the comment there); until then the doc holds OLD-numbered data
    only, and it must stay that way, or the move would swap a tick made here
    the wrong way. So this page shows an unmarked doc's Layer 4/5 ticks
@@ -1170,7 +1170,7 @@ function queueSave(){
    meanwhile cannot be caught out. A doc this page creates is born in the
    new numbering and carries the marker. Once the doc is known to be
    marked, saves go back to the plain set().
-   Safe to remove with app.js's swap45 block (summer reset at the latest). */
+   Safe to remove with app/save.js's swap45 block (summer reset at the latest). */
 var swap45DocNew = false;   // the stored doc is known to carry migrations.swap45
 function swap45IsMarked(d){ return !!(d && d.migrations && d.migrations.swap45 === true); }
 function swap45SwapLayers(map){
@@ -1232,8 +1232,8 @@ window.addEventListener('online', function(){ if(dirty) flushSave(false); });
 
 /* ── Activity gate (Today-first work order, Phase 1) ──
    A bookmarked Journey page sits behind the same gate as the main site — see
-   caIsVisible/caBlockers in app.js, which this deliberately does NOT share:
-   app.js's own `activityDates`/`hiddenActivityIds`/`activityClears` globals
+   caIsVisible/caBlockers in app/activities-2.js, which this deliberately does NOT share:
+   app/boot.js's own `activityDates`/`hiddenActivityIds`/`activityClears` globals
    are populated only by loadClassConfig(), the main app's boot path, which
    this page never runs. class-activities.js (a plain data array, no
    dependencies of its own) is loaded on these six pages just for this check.
@@ -1243,7 +1243,7 @@ function journeyDayStr(d){
 }
 /* Individual activities (console "Who" picker): config/class.activityStudents,
    id -> { uid -> true }. A card with nobody ticked is the whole class's.
-   Mirrors caForMe in app.js. */
+   Mirrors caForMe in app/activities-2.js. */
 function journeyForStudent(a, cfg, uid){
   var who = ((cfg && cfg.activityStudents) || {})[a.id];
   if(!who || typeof who !== 'object') return true;
@@ -1252,21 +1252,21 @@ function journeyForStudent(a, cfg, uid){
 }
 function journeyIsVisible(a, cfg, uid){
   // Archived or deleted from the console — out of the course entirely, so it
-  // can never gate a Journey page. Mirrors retiredActivityIds in app.js.
+  // can never gate a Journey page. Mirrors retiredActivityIds in app/boot.js.
   if(((cfg && cfg.archivedActivities) || {})[a.id] === true) return false;
   if(((cfg && cfg.deletedActivities) || {})[a.id] === true) return false;
   /* Not placed on the console's activity board = not in the course, so it
      cannot gate anything either. Mirrors the assigned check in caIsVisible()
-     (app.js), and it MATTERS here more than anywhere: un-assigning a card
+     (app/activities-2.js), and it MATTERS here more than anywhere: un-assigning a card
      deliberately keeps its release date, so without this a dated card pulled
      back to Built would stop blocking the main site while still blanking all
      six Journey pages — a lock with nothing left on In-Class Activities to clear it.
      Keyed off activityBoardSeeded, never off the board being empty, for the
-     reason activityBoardOn in app.js spells out.
+     reason activityBoardOn in app/boot.js spells out.
      A library song or a teacher-only card is never assigned either, whatever
      the board holds — Move to Songs and Move to Teacher view songs keep the
      row for the trip back. Copies caIsSongCard / caIsLibraryCard /
-     caIsTeacherSong, which caBoardOrder (app.js) applies before it assigns
+     caIsTeacherSong, which caBoardOrder (app/activities-2.js) applies before it assigns
      anything; this page has no app.js to call them through. */
   var lib = (cfg && cfg.songLibrary) || {};
   var songCard = (a.library === true || a.library === false) && a.kind !== 'check' && !a.journey && !(a.card && (a.card.wholeSong || a.card.sheet));
@@ -1280,7 +1280,7 @@ function journeyIsVisible(a, cfg, uid){
 }
 /* True when activity b sits LATER on the console board than activity a
    (a higher module, or the same module and a higher pos) — the same order
-   caBoardOrder() in app.js reads. An unseeded board, or either card
+   caBoardOrder() in app/activities-2.js reads. An unseeded board, or either card
    unplaced, reads as "not later": never lock on a guess. */
 function journeyBoardAfter(b, a, cfg){
   if(!cfg || cfg.activityBoardSeeded !== true) return false;
@@ -1292,11 +1292,11 @@ function journeyBoardAfter(b, a, cfg){
   return (Number(pb.pos) || 0) > (Number(pa.pos) || 0);
 }
 /* The activity gate no longer locks Journey pages (Jonathan, 2026-10-07).
-   Kept as a switch, like CA_GATE_LOCKS in app.js — true restores it. */
+   Kept as a switch, like CA_GATE_LOCKS in app/activities-2.js — true restores it. */
 var JOURNEY_GATE_LOCKS = false;
 /* Optional: the console's flag (true / false), else the default — Optional
    when the data says `optional: true` or the card is given to individual
-   students. Mirrors caIsOptional in app.js. */
+   students. Mirrors caIsOptional in app/activities-2.js. */
 function journeyOptional(a, cfg){
   var f = ((cfg && cfg.optionalActivities) || {})[a.id];
   if(f === true) return true;
@@ -1308,7 +1308,7 @@ function journeyOptional(a, cfg){
 function journeyBlockers(cfg, classActivities, uid, ownPeriod){
   var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
   // CAS students: every activity is optional, so nothing blocks — mirrors
-  // caStudentIsCAS() in app.js. Effective period = override || own answer.
+  // caStudentIsCAS() in app/activities-2.js. Effective period = override || own answer.
   if((((cfg && cfg.periodOverrides) || {})[uid] || ownPeriod || '') === 'CAS') return [];
   // Optional activities (console switch) never block — mirrors caBlockers.
   return (window.CLASS_ACTIVITIES || []).filter(function(a){
@@ -1341,7 +1341,7 @@ function showJourneyGate(){
   document.body.appendChild(card);
 }
 
-/* Same two guards as loadFirestoreSdk() in app.js: one load shared by every
+/* Same two guards as loadFirestoreSdk() in app/boot.js: one load shared by every
    auth resolution that arrives while it is in flight (no second <script>),
    and a failed tag removed and forgotten so a later sign-in can retry
    without leaving dead tags in <head>. */
@@ -1455,7 +1455,7 @@ window.addEventListener('load', function(){
       // is undefined only if that tag is ever removed, which journeyBlockers
       // treats as "nothing to block on" ([] default).
       if(typeof TEACHER_EMAIL !== 'undefined' && user.email === TEACHER_EMAIL) return;
-      // Switched off 2026-10-07 — mirrors CA_GATE_LOCKS in app.js.
+      // Switched off 2026-10-07 — mirrors CA_GATE_LOCKS in app/activities-2.js.
       if(!JOURNEY_GATE_LOCKS) return;
       var classActivities = (data && data.classActivities) || {};
       return fbDb.collection('config').doc('class').get().then(function(cfgDoc){

@@ -3,7 +3,7 @@
 <head>
 <!--
   GUITAR CLASS STUDENT DASHBOARD
-  Files: index.html · styles.css · app.js · tuner.js · coach.js ·
+  Files: index.html · styles.css · app/*.js · tuner.js · coach-*.js ·
          firebase-config.js · config-main.js · module-1.js … module-13.js
   To add or edit content: edit config-main.js and the module-N.js files.
   To update the live site: push the changed files to GitHub (see CLAUDE.md).
@@ -60,7 +60,7 @@
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <!-- The Firestore SDK (~100 KB) is NOT loaded here. It's only needed AFTER a
      student signs in (to load/save progress), so it's fetched on demand by
-     ensureDb() in app.js — keeping it off the initial sign-in-screen paint.
+     ensureDb() in app/boot.js — keeping it off the initial sign-in-screen paint.
      signIn() pre-warms it during the Google popup so it's ready on return. -->
 <script defer src="config-main.js"></script>
 <!-- Teacher-curated In-Class Activities — a data file like config-main.js,
@@ -68,7 +68,7 @@
      the nav/screen off it. -->
 <script defer src="class-activities.js"></script>
 <!-- module-N.js files are NO LONGER loaded here. They're fetched on demand
-     the first time a student opens that module (see loadModuleData in app.js),
+     the first time a student opens that module (see loadModuleData in app/boot.js),
      so first load only parses one module's data instead of all eight. The
      service worker still caches every module file for offline use (after the
      first page load following an update: sw.js precacheRest). -->
@@ -119,11 +119,11 @@
             the "it made me sign in twice" bug. setAuthWallChecking() swaps the
             line to auth.loading and takes the button away.
 
-       revealAuthWallSignIn() (app.js) brings the buttons back only on a real
+       revealAuthWallSignIn() (app/boot.js) brings the buttons back only on a real
        signed-out answer (or a 6 s safety timeout). -->
   <div id="auth-checking" class="auth-checking">
     <p id="auth-checking-msg" data-i18n="auth.checking">Checking your sign-in&hellip;</p>
-    <!-- Revealed by the 20 s stall timer (app.js). Taking the sign-in button
+    <!-- Revealed by the 20 s stall timer (app/boot.js). Taking the sign-in button
          away during the load is what fixes the double sign-in, but it also
          removes the student's only button — so if Firestore hangs (it retries
          forever rather than failing) they'd have no way out at all. This is
@@ -217,7 +217,7 @@
               <span class="rs-num">1</span><span class="rs-text"><span class="rs-title" data-i18n="nav.lessonTitle">The lesson</span><span class="rs-sub" data-i18n="nav.lessonSub">Watch &middot; Listen &middot; Practice</span></span>
             </button>
             <!-- Jump links for a set shown in two parts (display only — see
-                 lessonParts() in app.js). Filled by syncRailStations() from
+                 lessonParts() in app/lesson.js). Filled by syncRailStations() from
                  the set's own data and hidden for every other set. -->
             <div class="rail-parts" id="rail-parts" hidden></div>
             <button type="button" class="rail-station st-chk" data-station="checklist" onclick="railStation('checklist')">
@@ -230,7 +230,7 @@
                  a module that has one; railModuleReview() reads that dataset
                  to open it. The trophy moved down from beside the MODULE
                  heading — same element/id, same earned/celebrate behavior
-                 (renderProgressStrip() in app.js), just relocated. -->
+                 (renderProgressStrip() in app/snippets.js), just relocated. -->
             <button type="button" class="rail-station st-review" id="rail-review-btn" data-station="review" onclick="railModuleReview()" hidden>
               <span class="sec-goal rs-num" id="rail-module-goal" title="Finish all skills to complete this module" data-i18n-attr="title:nav.moduleGoalTitle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4.5A2.5 2.5 0 0 0 7 8.5"/><path d="M17 5h2.5A2.5 2.5 0 0 1 17 8.5"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M9.5 20 10 16h4l.5 4"/></svg></span><span class="rs-text"><span class="rs-title" data-i18n="nav.moduleReview">Module review</span></span>
             </button>
@@ -387,7 +387,7 @@
            work order, Phase 2) they're sections inside My progress instead.
            Games is the one deliberate exception: a full-viewport arcade that
            covers rail and header, hence the dialog semantics below. See the
-           `overlay` flag on EXPLORE_PAGES in app.js. -->
+           `overlay` flag on EXPLORE_PAGES in app/shell.js. -->
       <div class="games-screen" id="games-screen" role="dialog" aria-modal="true" aria-label="Guitar games" data-i18n-attr="aria-label:nav.gamesScreenAria" hidden>
         <div class="games-shell">
           <div class="games-topbar">
@@ -445,7 +445,7 @@
            (Today-first work order, Phase 2, nav collapse) — three sections,
            one page. Each keeps its own render function and host div id
            (renderDailyReview/renderKeepPracticing/renderMyProgress in
-           app.js); only where each renders into moved. #keep-practicing and
+           app/explore.js); only where each renders into moved. #keep-practicing and
            #daily-review stay valid hashes (routeExploreHash redirects them
            here) so an old bookmark or Journey link still resolves. -->
       <div class="page-screen" id="my-progress-screen" role="region" aria-label="My progress" data-i18n-attr="aria-label:nav.myProgress" hidden>
@@ -480,7 +480,7 @@
           </div>
           <div class="page-body" id="class-activities-body"></div>
           <!-- "Pick up where you left off" — filled by renderResumeCard()
-               (app.js), called from renderClassActivities() once Today's own
+               (app/shell.js), called from renderClassActivities() once Today's own
                groups are in. Moved here from the practice column 2026-09-11
                (Today-first work order, Phase 1): once today's activities are
                done, "Your practice" is the next thing on the page. Stays
@@ -496,7 +496,7 @@
        so the step's questions stay visible and usable behind it. Drag by
        the header; ✕ or Escape closes (removing the iframe stops video). -->
   <div class="video-overlay" id="video-overlay" hidden>
-    <!-- tabindex="-1" so loadPanel/clearPanel (app.js) can move focus into the
+    <!-- tabindex="-1" so loadPanel/clearPanel (app/audio-ui.js) can move focus into the
          dialog on open and hand it back to the trigger on close — without it
          a keyboard user opening a video kept focus behind the player and had
          to tab through the whole step to reach Close. NOT focus-trapped: this
@@ -522,7 +522,7 @@
 </div>
 <div id="teacher-app" style="display:none">
   <!-- Layout A (2026-11-08): a grouped left sidebar replaces the old row of
-       view buttons. showTeacherApp fills #t-side from TEACHER_NAV (teacher.js);
+       view buttons. showTeacherApp fills #t-side from TEACHER_NAV (teacher-core.js);
        the slim top bar keeps the title, the class-period filter, Refresh and
        Student view (both injected into #t-topbar-tools by showTeacherApp). -->
   <div class="t-shell">

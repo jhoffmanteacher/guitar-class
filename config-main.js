@@ -14,7 +14,7 @@
 //       precached for offline use (tools/checks.mjs fails if it's missing).
 //    4. Run `node tools/checks.mjs`, then push to GitHub.
 //    Do NOT add a <script> tag for it to index.html: module files are
-//    fetched on demand by loadModuleData() in app.js, so a tag would load
+//    fetched on demand by loadModuleData() in app/boot.js, so a tag would load
 //    the file twice and push its SETS twice.
 // ============================================================
 
@@ -24,7 +24,7 @@ const MODULE_REVIEWS = {};
 // Lightweight module index so the Module dropdown, progress strip, and per-module
 // completion counts can render WITHOUT loading every module's data file. Each
 // module-N.js is fetched on demand the first time its module is opened (see
-// loadModuleData in app.js). Keep the `name` values in sync with each file's
+// loadModuleData in app/boot.js). Keep the `name` values in sync with each file's
 // `module:` field.
 //
 // `skillCount` = number of set-level skills in that module (module reviews' own
@@ -50,7 +50,7 @@ const MODULE_REVIEWS = {};
    Module N at sign-in. Covers students who sign in for the first time later,
    which the console's per-uid "Open everyone through" cannot. Nothing is
    marked done and no progress key moves. Set to 0 to turn it off. Read by
-   app.js (classOpenThrough) and teacher.js (teacherStudentOpenThrough). */
+   app/boot.js (classOpenThrough) and teacher-core.js (teacherStudentOpenThrough). */
 const CLASS_OPEN_THROUGH = 3;
 
 const MODULE_MANIFEST = [
@@ -74,11 +74,11 @@ const MODULE_MANIFEST = [
 // all at 60 BPM. These are conditioning, not speed — slow and even beats fast
 // and sloppy, and the step text says so.
 // Neither reader is shown to students right now: the 10-Minute Routine card
-// was taken off Module Review in 52ae05f (buildModuleRoutine() in app.js is
+// was taken off Module Review in 52ae05f (buildModuleRoutine() in app/lesson.js is
 // left in place with no caller), and the Daily 5 is switched off
-// (DAILY5_ENABLED = false in app.js). The data stays so either can come back.
+// (DAILY5_ENABLED = false in app/lesson.js). The data stays so either can come back.
 // text_es/label_es: hand-written Spanish (module-content i18n, phase 2) —
-// picked up by tf() in app.js's buildModuleRoutine and buildDaily5. Keep
+// picked up by tf() in app/lesson.js's buildModuleRoutine and buildDaily5. Keep
 // both twins on every entry so switching either one back on needs no
 // translation work.
 const WARMUP_BANK = [

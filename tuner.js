@@ -4,7 +4,7 @@
    Chromatic tuner: Web Audio FFT → Harmonic Product Spectrum for a coarse
    pitch, refined by YIN, then smoothed. Loaded as a plain <script> AFTER
    app.js; all functions are global, so the onclick handlers in index.html
-   and closePopup() in app.js find them at event time regardless of order.
+   and closePopup() in fab-tools.js find them at event time regardless of order.
    ════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════
@@ -115,7 +115,7 @@ function detectPitchYIN(buf, sampleRate, minRms) {
   const half = Math.floor(W / 2);
   // Lags longer than sampleRate/60 can only yield frequencies below 60 Hz,
   // which the final range check rejects anyway (low E is ~82 Hz) — capping
-  // here cuts the scan ~5× with no accuracy loss (coach.js caps the same way).
+  // here cuts the scan ~5× with no accuracy loss (coach-core.js caps the same way).
   const maxTau = Math.min(half, Math.ceil(sampleRate / 60));
 
   // Silence check (lowered so sustained/decaying notes still register;
@@ -205,7 +205,7 @@ function detectPitchHPS(freqData, sampleRate, fftSize) {
 }
 
 // Analysis buffers reused every frame — allocating them per frame caused
-// steady GC churn at ~16 fps (coach.js reuses coachFrameBuf for the same
+// steady GC churn at ~16 fps (coach-core.js reuses coachFrameBuf for the same
 // reason). Lazily (re)sized so an analyser config change can't break them.
 let tunerTimeBuf = null, tunerFreqBuf = null;
 function tunerLoop() {
@@ -375,7 +375,7 @@ async function startTuner() {
   const myStartToken = ++tunerStartToken;
   // One mic owner at a time: a 90-second self-recording in progress stops here
   // rather than running alongside the tuner. Guarded — stopAnyRec lives in
-  // app.js, which journey pages don't load.
+  // app/review.js, which journey pages don't load.
   if (typeof stopAnyRec === 'function') stopAnyRec();
   // What THIS start acquired — the catch releases exactly these, never a
   // newer start's stream that may already sit in the globals.
@@ -465,7 +465,7 @@ async function startTuner() {
        audio-context limit after many opens, say). Release this start's
        stream and context now — left alone, the mic stayed on until the
        popup closed, with the tuner showing an error. Same guard as
-       coachAcquireMicInner in coach.js. */
+       coachAcquireMicInner in coach-core.js. */
     if (myStream) myStream.getTracks().forEach(tr => tr.stop());
     if (myCtx){ try { myCtx.close().catch(() => {}); } catch(_){} }
     if (myStream && tunerStream === myStream){
@@ -473,7 +473,7 @@ async function startTuner() {
       tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
       tunerHP = null; tunerLP = null;
     }
-    /* Say what actually went wrong (same split as coach.js coachMicFailMsg).
+    /* Say what actually went wrong (same split as coach-core.js coachMicFailMsg).
        myStream is only set once getUserMedia has succeeded, so with it the
        mic opened and the setup after it failed; without it, getUserMedia
        itself refused — the student or the site setting said no (denied),
@@ -503,14 +503,14 @@ function stopTuner() {
 }
 
 /* No Start/Stop button — opening the tuner popup starts listening, closing it
-   stops (wired in app.js togglePopup/closePopup). */
+   stops (wired in fab-tools.js togglePopup/closePopup). */
 
 /* Privacy + battery: the mic never keeps running in a tab the student isn't
-   looking at. Lives HERE (not just in coach.js's visibilitychange handler,
+   looking at. Lives HERE (not just in coach-core.js's visibilitychange handler,
    which only index.html loads) so the six Journey pages get it too. Goes
    through closePopup — the normal stop path — so the popup slides shut and
    the readout resets exactly as a manual close would. Idempotent: on
-   index.html coach.js's handler may also run (coachEvictTuner), but whichever
+   index.html coach-core.js's handler may also run (coachEvictTuner), but whichever
    fires second sees tunerRunning already false and does nothing. */
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden || !tunerRunning) return;

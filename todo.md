@@ -139,10 +139,12 @@ Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`te
   `checks.mjs --check --skip-links` sat at 0% CPU for over 5 minutes during a branch push (2026-11-16; the Mac's
   load was about 10; run by hand it finished). Until understood, give either a time limit when it runs in a chain
   (`perl -e 'alarm 300; exec @ARGV' node tools/…`).
-- **Comments that still say `app.js` / `coach.js` / `teacher.js`** as a place to look (about 850 mentions; the 40
-  most misleading are in `index.html`, `sw.js`, `tuner.js`, `guitar-diagrams.js`, `config-main.js`,
-  `tabs/journey.js`, `live-quiz.js`, `fab-tools.js`). CLAUDE.md says the old names are logical names, so this is
-  tidying, not a hazard. `sw.js` says the shell is 16 requests; it is 30.
+- **Comments that still say `app.js` / `coach.js` / `teacher.js`** as a place to look. W28 (2026-11-24) fixed
+  66 lines in `index.html`, `tuner.js`, `guitar-diagrams.js`, `config-main.js`, `tabs/journey.js`, `live-quiz.js`
+  and `fab-tools.js`; their 36 left are logical names, history or the `site-parts` markers, except two naming
+  functions that no longer exist (`loopBpmRow`, index.html; `pcCheck`, tabs/journey.js). Left: the other files
+  (about 1,300 mentions in code files, `tools/` included, many of them rightly logical) and `sw.js` (7; waits for
+  its next real change; it says the shell is 16 requests, it is 30). Tidying, not a hazard.
 
 ## The clean-ups after the cut (Phase 2; not started)
 

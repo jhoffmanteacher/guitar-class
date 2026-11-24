@@ -122,7 +122,7 @@ function radioGroupKeydown(e, groupSel, itemSel, onClass){
    ahead: every click due in the next METRO_AHEAD seconds is handed to Web
    Audio at its exact time, so a late timer changes when a click is queued,
    never when it sounds. The same "two clocks" scheduler as Strum Hero's
-   shSchedule (coach.js) and the practice card's pcScheduleClick (app.js).
+   shSchedule (coach-strum.js) and the practice card's pcScheduleClick (app/cards.js).
    The horizon is 200 ms, not their ~100, so a main-thread stall of up to
    ~175 ms still lands every click on time; a longer one skips the clicks
    whose time has already gone rather than playing them late, so the grid
@@ -342,7 +342,7 @@ function toggleTimer(){ if(timerRunning){ /* pause: bank the true remaining seco
 /* ── Popup logic ── */
 /* Every button that opens a tool's popup: the dock's #fab-<which> and, on the
    main site's In class page while an activity is open, that card's bar copy
-   (app.js caBarFabsHtml — the rail is folded away then). A Journey page has
+   (app/activities-2.js caBarFabsHtml — the rail is folded away then). A Journey page has
    only the dock's, so nothing changes there. */
 function fabOpeners(which){ return Array.from(document.querySelectorAll('[aria-controls="'+which+'-popup"]')); }
 function setFabExpanded(which, isOpen){ fabOpeners(which).forEach(f=>f.setAttribute('aria-expanded', isOpen?'true':'false')); }
@@ -385,7 +385,7 @@ function togglePopup(which){
   // togglePopup('rec') now; kept so putting the popup back restores it. The
   // 'rec' entries in the popup loops here are null-guarded for the same reason.
   // Populates the idle recorder body on open. Guarded: refreshRecUI lives in
-  // app.js, which the tabs/*.html Journey pages don't load, but they still
+  // app/review.js, which the tabs/*.html Journey pages don't load, but they still
   // load this file verbatim for the shared Tuner/Timer/Metronome. Idle-only
   // (!recState.fab): re-opening the popup during a recording or a playing
   // preview must not innerHTML-rebuild the body — that would reset the

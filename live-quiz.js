@@ -225,7 +225,7 @@ function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
 // The strings a fret quiz may ASK on; `strings` alone unless the board shows more (pc-find).
 function lqRootStrings(quiz){ return quiz.rootStrings || quiz.strings || []; }
 function lqType(quiz){ return quiz.type === 'fret' ? 'fret' : (quiz.type === 'pcname' ? 'pcname' : (quiz.type === 'changes' ? 'changes' : 'mc')); }
-// Natural notes per string, fret → letter. Mirrors app.js FG_NATURALS; kept
+// Natural notes per string, fret → letter. Mirrors app/drills.js FG_NATURALS; kept
 // here because this file must not depend on app.js (Journey pages).
 const LQ_NATURALS = {
   lowE:  {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'},
@@ -254,11 +254,11 @@ function lqFretIdsFor(string, note){
 /* ── Power chords (the "Find the power chord" round, 2026-11-10) ──
    A power chord is named after its root, and its root sits on the low E or A
    string. The eight names Jonathan picked: the seven naturals plus F♯, sharps
-   with the ♯ sign, never flats (the spelling app.js's SD_NOTE_NAMES and
+   with the ♯ sign, never flats (the spelling app/drills.js's SD_NOTE_NAMES and
    renderPowerName use). Listed in fret order from the open low E string, the
-   order app.js's PWN_NAMES uses. */
+   order app/drills-call.js's PWN_NAMES uses. */
 const LQ_PC_ROOTS = ['E','F','F♯','G','A','B','C','D'];
-// Mirrors app.js SD_NOTE_NAMES (this file must not depend on app.js).
+// Mirrors app/drills.js SD_NOTE_NAMES (this file must not depend on app.js).
 const LQ_CHROMATIC = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 const LQ_PC_OPEN = { lowE: 4, A: 9 };   // the open string's index in LQ_CHROMATIC
 // All six open strings, for the marker labels on "Find the power chord"'s six-string board only (never for scoring).
@@ -397,7 +397,7 @@ function lqDefaultScoring(quizId){ return lqQuiz(quizId).speedBonus === false ? 
 function lqDoc(){ return lqDb.collection('liveQuiz').doc('current'); }
 
 /* ── Firestore, from whichever page we're on ──
-   index.html has app.js's ensureDb(); a Song Journey page (tabs/*.html) has
+   index.html has app/boot.js's ensureDb(); a Song Journey page (tabs/*.html) has
    no app.js at all but has already loaded the SDK itself before it calls
    lqStartListening(). Resolving whatever is actually present — rather than
    assuming app.js — is what lets the same listener, and the same one
@@ -842,7 +842,7 @@ function openLiveQuizScreen(){
   if(exit) exit.focus();
 }
 /* `toPrevious`: the Back button returns to the page the quiz was opened from
-   (exitOverlayHash, app.js), same as Games' "Main site". */
+   (exitOverlayHash, app/shell.js), same as Games' "Main site". */
 function closeLiveQuizScreen(toPrevious){
   if(location.hash === '#live-quiz'){ toPrevious ? exitOverlayHash() : exitExploreHash(); return; }   // the router finishes the job
   lqClosePanel();

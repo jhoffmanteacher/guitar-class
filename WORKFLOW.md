@@ -89,6 +89,7 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   `config-main.js`, `tabs/journey.js`, `live-quiz.js` and `fab-tools.js`, make each comment name the part
   (`app/<x>.js`, `coach-<x>.js`, `teacher-<x>.js`). Leave `sw.js` alone (its comments wait for its next real change).
   Comments only, so the full checks prove no code moved; Fast, no reviewer. Shrink the todo.md item in the same push.
+  DONE (2026-11-24, `wo/w28-comments`, Fast): 66 comment lines in the 7 files now name the part; 66 of 66 changed lines proved comment-only.
 
 ---
 
