@@ -63,6 +63,16 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   cancelled by a newer push (445a320b, 7efe39bc, 2026-11-23) and 3 were manual or scheduled runs that skipped it
   (2026-11-21). Runs with a new signature: 0. The baseline file holds 0 findings (22 screens, both languages), so with
   the ratchet on ANY finding axe makes fails the run. The routine above still reads again on 11-26 (adds 11-24 .. 11-26).
+  **Both languages, 2026-11-24 (Windows, `node tools/smoke.mjs --only a11y`, exit 0): 0 rules with findings, 0
+  elements, on 0 of 22 screens; 0 new signatures, 0 gone.** Axe could not decide (listed, never counted):
+  color-contrast 155, label-content-name-mismatch 17, skip-link 1. Not scanned at all: games mid-play, the tuner, the
+  mic panel, tool popups and other modals, the narrow-window drawer, Module Review, exit checks, 5 of 6 Song Journey
+  pages, keyboard order and focus: the ratchet does not cover those.
+  **Switch-on scheduled (Jonathan, 2026-11-24: "schedule the other things to run in the cloud on 11/27"):** cloud
+  routine https://claude.ai/code/routines/trig_01GQnmbEwRvA9vNbiy7ju77i, once, 2026-11-27 7:00 AM Pacific, Opus. It
+  extends the run count, stops (and writes the finding here) if any run has a new signature or a scan lists a
+  finding, otherwise sets `A11Y_RATCHET = true`, runs one fresh `site-reviewer` round (Opus, high), pushes, reads
+  GitHub's result and reverts the switch itself if the ratchet turns the run red. The Friday check runs that night as usual.
 - [ ] **W27 — on or after 2026-12-01: remove the split bridges.** The spec is `todo.md` → "Remove the 2026-11-16
   and 2026-11-18 split bridges" (`grep -n "DELIBERATE BRIDGE" coach-*.js` finds 6; keep the two `typeof` guards it
   names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
