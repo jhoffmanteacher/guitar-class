@@ -80,6 +80,15 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 Update this block whenever an item opens or closes.
 
+**Done 2026-11-23: W15, the design-values tidy (Reviewed, `site-reviewer` on Opus, 2 rounds).** Text sizes (`--fs-*`,
+13), layers (`--z-*`, 9) and spacings (`--sp-*`, 11) have names equal to today's values; students see nothing (no
+CHANGELOG entry). Golden, origin/main against the tip: 1,600 of 1,603 files identical (the 3 others are the stylesheets
+themselves); hand pairs on the 6 Journey pages at 1366×657, 1920×1080 and 2560×1300. Near-twin folds that moved pixels
+were put back (0.8437rem, 0.9rem, and the Journey pages' 0.9063rem / 0.7813rem); folding them is summer work.
+`checks.mjs` 1fb now refuses a new one-off text size or layer number, reads `font:` shorthand and any case, refuses
+`var(--z-*)` on the Journey pages and pins the four `--t-*` title names. Its header lists the known limits (R1-4 to
+R1-6, R2-2).
+
 **Done 2026-11-23: Friday finding "below" (work order `friday-findings`, Part 2, Fast).** 7 two-column steps lost the
 direction word (EN 7 "below", ES 7 "abajo"): module-3 power-chord step and Challenge 6, module-4's two Mystery Chart
 steps, module-5 Pattern 1 as C major, module-9 partial shape, module-10 relative vs. parallel. Kept: "the question
@@ -156,10 +165,27 @@ beat; the first build was 3/4 from 1.133 s, which was a fade-in). Things to know
   one-time cloud routine; GitHub's English smoke (5 areas), slow-load, update-reload-loop and the a11y scan passed on
   67acfa3. W15 follows. `look-a-spec`, `ci-try/look-a` and `ship/look-a` are his to delete.
 
-**Dated:**
-- 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new signatures
-  (W26 counts them), then one `site-reviewer` round.
-- On or after 2026-12-01: remove the split bridges (W27).
+**Dated** (queue written 2026-11-23, Jonathan's list a-f; any session can pick these up):
+- a. 2026-11-26: W26, the accessibility scan's counts (a cloud routine is already scheduled for it,
+  `trig_011u2gbkdE7fC3GsUzfnLyYh`; spec under "For Windows").
+- b. 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new
+  signatures (W26 counts them), then one `site-reviewer` round. The Friday check also runs that night, 11 PM Pacific
+  (`trig_016m5HTbmhxb2oEqDaefQurB`).
+- c. On or after 2026-12-01: remove the split bridges (W27).
+- d. Whenever Jonathan decides: a Fable review (he names it; CLAUDE.md "Opusplan") of this week's Fast changes. Suggested
+  targets: the live "Hear the chord change" game (friday-findings Part 5, `live-changes.js`, `6be9381a`) and the
+  full-screen exit in the shared nav (Part 4, `syncExploreNav()` in `app/shell.js`, `18950838` + `f009eeb8`).
+- e. Summer (add to skill `summer-reset` when touched): fold the two near-twin text sizes (0.8437rem, 0.9rem) into
+  named sizes, a change that moves pixels; the switched-off "pre-loaded below" step in module-4 (1do refuses any edit
+  there); the out-of-scope "below" / "abajo" at `tabs/sweet-child-o-mine.html:206` and a Spanish "de arriba" in a
+  Module 4 Challenge step's "Stuck?" tip; keeping a built song's first "Date added" needs a two-step format change
+  (a reader first, then the writer).
+- f. Jonathan's own: the Chromebook strum-check takes; delete the cloud routine "WO friday findings Part 5:
+  chord-change game joins" (`trig_01YJq53MxkeHHF4Mg5xpL7Ug`) at claude.ai/code/routines (Claude cannot delete routines).
+- Left out of friday-findings Part 5: a NEW tab opened mid-song still has the stale clock stamp (needs a console
+  write); the console's round lifecycle is not in `tools/live-changes-sim.mjs`.
+- golden.mjs now has a made-up "Hear the chord change" round (`86258a07`): the next golden compare shows the
+  chord-change pictures as new files, not as changes.
 - About mid-December: Power Chord Switch leaves the class; aim listening work at the Listening Coach and the other
   mic features. Its takes and timing rules stay, as the base for a chord switch game ("Power Chord Switch: where we
   stopped").
