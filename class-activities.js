@@ -333,7 +333,8 @@
                                            // complete; only the Level up's card /
                                            // Journey link still renders. Kept as data.
          { label, label_es, text, text_es },            // numbered checks
-         { levelUp: true, text, text_es },               // last, exactly one;
+         { levelUp: true, text, text_es },               // last, exactly one (a card with `rounds`, ca-54, has NONE:
+                                                         // record speed is its target; checks.mjs 1bf, 1fc);
          // slot: n (optional) keeps the tick key `<id>:c<n>` a check had
          // before earlier checks were removed (ca-25)
          // card: 'ca-N' (optional, Level up only) — a button that opens that

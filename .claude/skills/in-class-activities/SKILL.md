@@ -566,7 +566,10 @@ Code and guards:
   and starting a card calls `stopAllDemoAudio()`.
 - **1bf** checks the data: track exists, sections back to back, each section's
   beats = bars × beatsPerBar, notes' midi/name from string + fret, window
-  inside the file, exactly one Level up and it's last, help steps carry no
+  inside the file, exactly one Level up and it's last (a card with `rounds` —
+  ca-54, the speed ladder, 2026-11-24 — has none: its last round's check is
+  plain, record speed being the target; 1fc pins `rounds`, `slowestRate`,
+  `startStop` and `buildLaps` to that card alone), help steps carry no
   snippet/drill/video.
 - A section with a `repLabel` counts in that word in its caption — "3 laps"
   under a Lap badge, "2 times" under a Time badge. 1bm fails a mix.

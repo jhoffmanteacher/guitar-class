@@ -266,7 +266,7 @@ function pcPlayBtnHtml(playing){
 /* The speed control. Every card gets the Slower / Normal switch (the slow
    and fast files). A card with `slowest: true` gets a four-way control
    instead — Slowest / Slower / Slow / Normal — where Slowest is the SLOW file
-   played at SLOWEST_RATE, pitch held (preservesPitch), so the tuner
+   played at SLOWEST_RATE (ca-54: its own `slowestRate`, pcSlowestRate), pitch held (preservesPitch), so the tuner
    still agrees with it. ca-18 only, for now (Jonathan, 2026-09-29: a
    student needed it that day); ca-10 got it the same day. "the cure" goes
    60 -> 48 felt BPM. There is no third file: every timing below reads the
@@ -289,11 +289,13 @@ const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];
 /* Every play-along card opens on Normal, 1× (Jonathan, 2026-11-20: "have songs default to full screen 1x speed when
    they are opened" — every play-along, In-Class Activities and the Songs page). Was Slower (the slow file, or 0.85
    on one file). The card's data-slow / data-rate (pcCardHtml), the slider's START and the two-way switch all
-   start here; full screen is caSongFullscreen (app/activities-2.js). */
+   start here; full screen is caSongFullscreen (app/activities-2.js). ONE card is the exception: ca-54, the speed
+   ladder, opens on its bottom stop, 90 (`startStop`, below; checks.mjs 1fc pins it to that card alone). */
 const PC_START_NORMAL = true;
-/* The one exception (Jonathan, 2026-11-24, ca-54, the speed ladder): a card with `startStop: 'slowest'` opens on its
-   bottom stop, and `slowestRate` (0.9 there: the slow file, 100, at 0.9 = 90) replaces SLOWEST_RATE for that card's
-   bottom stop. Every other card, and SLOWEST_RATE itself, are unchanged. Two files only: a one-file track keeps its stops. */
+/* The one exception to both rules above and to "the Slowest stop is the slow file at SLOWEST_RATE" (Jonathan, 2026-11-24,
+   ca-54, the speed ladder): a card with `startStop: 'slowest'` opens on its bottom stop, and `slowestRate` (0.9 there:
+   the slow file, 100, at 0.9 = 90) replaces SLOWEST_RATE for that card's bottom stop. Every other card, and
+   SLOWEST_RATE itself, are unchanged. Two files only: a one-file track keeps its stops. */
 function pcOneFile(tr){ return !!tr && !tr.srcSlow; }
 function pcSlowestRate(c){ return c && c.slowestRate > 0 && c.slowestRate < 1 ? c.slowestRate : SLOWEST_RATE; }
 function pcStartsSlowest(c, tr){ return !!c && c.startStop === 'slowest' && !!c.slowest && !pcOneFile(tr); }

@@ -31,7 +31,7 @@
    status line (pcStatus), the one that reads "Playing from: …" without Loop. Key: L presses Loop
    (KEYS in app/cards.js). Everything this starts is the card's own audio, stopped by pcStop.
    ROUNDS (Jonathan, 2026-11-24, ca-54, the speed ladder): a card with `card.rounds` is the exception to "always from the
-   slowest stop, after PC_BUILD_LAPS laps, both switches off". Its Loop and Build switches are not shown; a round button
+   slowest stop, after PC_BUILD_LAPS laps" above (and to the switches being on screen); it is the only card that is. Its Loop and Build switches are not shown; a round button
    (pcFromRound, app/cards.js) turns both on and starts the round, which loops the sections from..to as ONE lap (st.loopTo)
    from the round's own stop (root.dataset.round -> startStop), moving up after `card.buildLaps` laps (root.dataset.buildLaps,
    1 there: pcBuildLaps). Stay at this speed and the take-over rule work as above. Every other card is unchanged. */

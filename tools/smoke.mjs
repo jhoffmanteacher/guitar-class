@@ -161,8 +161,18 @@ function serve(dir) {
     if (p.endsWith('/')) p += 'index.html';
     const f = normalize(join(dir, p));
     if (!f.startsWith(dir) || !existsSync(f) || !statSync(f).isFile()) { res.writeHead(404); res.end('not found'); return; }
-    res.writeHead(200, { 'content-type': MIME[extname(f).toLowerCase()] || 'application/octet-stream' });
-    res.end(readFileSync(f));
+    const buf = readFileSync(f), type = MIME[extname(f).toLowerCase()] || 'application/octet-stream';
+    /* Byte ranges (2026-11-24, ca-54): an <audio> element seeks into a file with Range requests. A card that starts deep in
+       its track (the speed ladder's verse is 58 s in) never started playing against a server that always sent the whole file. */
+    const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range || '');
+    if (range && +range[1] < buf.length) {
+      const a = +range[1], b = Math.min(buf.length - 1, range[2] ? +range[2] : buf.length - 1);
+      res.writeHead(206, { 'content-type': type, 'accept-ranges': 'bytes', 'content-range': `bytes ${a}-${b}/${buf.length}`, 'content-length': b - a + 1 });
+      res.end(buf.subarray(a, b + 1));
+      return;
+    }
+    res.writeHead(200, { 'content-type': type, 'accept-ranges': 'bytes', 'content-length': buf.length });
+    res.end(buf);
   });
   return new Promise(r => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
 }
@@ -670,7 +680,7 @@ async function cardViewsWalk(page, run, events, stats, base) {
     const btns = [...sw.querySelectorAll('button')], h = btns.length ? btns[0].getBoundingClientRect().height : 0;
     return { pressed: btns.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.view),
              drew: q('.pc-sheet') ? 'lyrics' : q('.pc-tab [data-beat]') ? 'chords' : q('.pc-tab [data-seq]') ? 'tab' : 'nothing',
-             chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, secs: pcLayout(pcActivity(q('.pc'))).sections.length,
+             chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, secs: (L => L.rounds ? L.rounds.length : L.sections.length)(pcLayout(pcActivity(q('.pc')))),   /* a rounds card (ca-54) has a button per round */
              oneLine: sw.getBoundingClientRect().height <= h * 1.5, playerTop: q('.pc-player').getBoundingClientRect().top - sw.getBoundingClientRect().bottom,
              saved: localStorage.getItem('caCardViews'), playing: !!(pcState && pcState.root === q('.pc')),
              st: pcState && pcState.__smk, el: pcState && pcState.audio && pcState.audio.__smk, paused: pcState && pcState.audio ? pcState.audio.paused : null,
@@ -722,6 +732,9 @@ async function cardViewsWalk(page, run, events, stats, base) {
     const c = await run('cardviews:' + id + ':after-reload', state, 10);
     if (!c || c.missing || JSON.stringify(c.pressed) !== JSON.stringify([other]) || c.drew !== other) fail(id, `after a reload the card shows ${c && JSON.stringify(c.pressed)} / ${c && c.drew}, not the saved ${other}`);
     stats.cardViewClicks = (stats.cardViewClicks || 0) + list.length + 1;
+    /* A card whose own view is the lyric sheet (ca-54) draws a sheet at once: the page's known, harmless ResizeObserver warning
+       (app/boot.js only warns on it; the sheet-follow walks drop it the same way). */
+    if (own === 'lyrics') for (let i = events.length - 1; i >= 0; i--) if (events[i].step.startsWith('cardviews:' + id + ':') && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
     await run('cardviews:' + id + ':back', press(own), 500);
     await run('cardviews:' + id + ':reset', clear, 10);
     void last;
@@ -1797,6 +1810,8 @@ async function speedLadderWalk(page, run, events, stats, base) {
     else stats.speedLadder = (stats.speedLadder || 0) + 1;
     await run('ladder:done', `(caCloseOpen(), 1)`, 300);
   } finally {
+    // The page's known, harmless ResizeObserver warning (a sheet card draws its sheet; the other walks drop it the same way).
+    for (let i = events.length - 1; i >= 0; i--) if (/^ladder:/.test(events[i].step) && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
     await run('ladder:stop-end', `(pcStop(), 1)`, 100);
     if (lang0 && lang0 !== 'en') await run('ladder:lang-back', `setLang(${JSON.stringify(lang0)})`, 500);
     await page.send('Emulation.clearDeviceMetricsOverride');
@@ -1894,6 +1909,8 @@ async function todayGridWalk(page, run, events, stats) {
         for (const col of xs) {
           const id = todo.rows.find(r => r.x === col).id;
           await run(`today:todo-open-${col}:` + w, `caFocusActivity(${JSON.stringify(id)})`, 900);
+          // The card opened may be a lyric-sheet card (ca-54): the page's known, harmless ResizeObserver warning.
+          for (let i = events.length - 1; i >= 0; i--) if (events[i].step === `today:todo-open-${col}:` + w && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
           const o = await run(`today:todo-open-state-${col}:` + w, `(() => { const c = document.querySelector('.ca-card[open]'); const g = c && c.closest('.ca-todo-grid');
             return c ? { id: c.dataset.id, solo: c.classList.contains('ca-solo-card'), disp: g ? getComputedStyle(g).display : null } : null; })()`, 10);
           if (!o || o.id !== id || !o.solo || o.disp !== 'block') fail(w, `a card opened from Unfinished column ${xs.indexOf(col) + 1} should open on its own, the grid out of the way: ${JSON.stringify(o)}`);

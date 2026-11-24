@@ -774,7 +774,8 @@ function snipTimeAtBars(win, b){
    SLOWEST_RATE with the pitch held, so no extra export and the tuner still
    agrees with the band. Anything that reads the file's own clock
    (currentTime, the bar windows) is unchanged; only real-time amounts —
-   output latency, a scheduled click — are scaled by the rate. */
+   output latency, a scheduled click — are scaled by the rate. ca-54 (the speed ladder) plays its own bottom stop at
+   0.9 (card.slowestRate, pcSlowestRate in app/cards.js); SLOWEST_RATE stays 0.8 for every other card and snippet. */
 const SLOWEST_RATE = 0.8;
 function slowestApplyRate(audio, rate){
   audio.preservesPitch = true;
