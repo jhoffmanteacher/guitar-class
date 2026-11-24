@@ -201,7 +201,35 @@ function pcLayout(a){
   if(!sections.length) return null;
   const firstBar = sections[0].fromBar;
   const last = sections[sections.length - 1];
-  return { tr, sections, firstBar, totalBars: last.fromBar + last.bars * last.reps - firstBar };
+  return { tr, sections, firstBar, totalBars: last.fromBar + last.bars * last.reps - firstBar, rounds: pcRoundsOf(c, sections.length) };
+}
+/* ROUNDS (Jonathan, 2026-11-24, ca-54 "Sweet Child O' Mine — Speed Ladder"). A card with `card.rounds` shows round
+   buttons where the section chips sit. A round is { label, what, from, to, startStop }: the sections from..to
+   (indexes; one lap is all of them in order) played with Loop and Build up speed on, beginning at stop `startStop`
+   of the speed control (0 = the bottom stop). With `card.buildLaps` 1 the climb moves up after ONE time through
+   a stop (Build's usual is PC_BUILD_LAPS, app/cards-loop.js). Nothing is stored. A card without `rounds` is
+   unchanged. pcRoundsOf returns the validated list, or null (the card then draws its section chips). */
+function pcRoundsOf(c, n){
+  const rs = c && c.rounds;
+  if(!Array.isArray(rs) || !rs.length) return null;
+  const ok = rs.every(r => r && Number.isInteger(r.from) && Number.isInteger(r.to) && r.from >= 0 && r.to >= r.from && r.to < n && (r.startStop === undefined || (Number.isInteger(r.startStop) && r.startStop >= 0 && r.startStop <= 3)));
+  return ok ? rs : null;
+}
+// The round tapped last (root.dataset.round), or null.
+function pcRoundNow(a, root){
+  const n = a && a.card && a.card.sections ? a.card.sections.length : 0;
+  const rs = pcRoundsOf(a && a.card, n);
+  return rs && root ? rs[parseInt(root.dataset.round, 10)] || null : null;
+}
+// The round tapped last, when section `si` is inside it; else null (a plain loop of that section).
+function pcRoundIn(a, root, si){
+  const rd = pcRoundNow(a, root);
+  return rd && si >= rd.from && si <= rd.to ? rd : null;
+}
+// The buttons of the .pc-secs row: one per section, or one per round.
+function pcSecButtonsHtml(L, preview){
+  if(L.rounds) return L.rounds.map((rd, ri) => `<button type="button" class="pc-sec pc-round" data-round="${ri}" onclick="pcFromRound(this,${ri})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(rd, 'label'))}</button>`).join('');
+  return L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('');
 }
 /* Where `barsIn` (fractional bars from the window start) falls: which
    section, which repeat of it, which note on its page, that note's
@@ -263,7 +291,12 @@ const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];
    on one file). The card's data-slow / data-rate (pcCardHtml), the slider's START and the two-way switch all
    start here; full screen is caSongFullscreen (app/activities-2.js). */
 const PC_START_NORMAL = true;
+/* The one exception (Jonathan, 2026-11-24, ca-54, the speed ladder): a card with `startStop: 'slowest'` opens on its
+   bottom stop, and `slowestRate` (0.9 there: the slow file, 100, at 0.9 = 90) replaces SLOWEST_RATE for that card's
+   bottom stop. Every other card, and SLOWEST_RATE itself, are unchanged. Two files only: a one-file track keeps its stops. */
 function pcOneFile(tr){ return !!tr && !tr.srcSlow; }
+function pcSlowestRate(c){ return c && c.slowestRate > 0 && c.slowestRate < 1 ? c.slowestRate : SLOWEST_RATE; }
+function pcStartsSlowest(c, tr){ return !!c && c.startStop === 'slowest' && !!c.slowest && !pcOneFile(tr); }
 /* A control's tooltip naming its key (KEYS, below). None in the console's
    preview (`preview`), where the keys are off. */
 function pcKeyTitle(key, preview){ return preview ? '' : ` title="${escAttr(t(key))}"`; }
@@ -289,7 +322,7 @@ function pcGuitarSwitchHtml(){
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardGuitarOn'))}</span></button>`;
 }
-function pcSpeed3Html(tr, preview){
+function pcSpeed3Html(tr, preview, c){
   /* A stepped slider (2026-10-08): the dot-row version left students unsure
      the middle dots were options at all. The ends read "Slower" and
      "Normal" (Jonathan, 2026-10-09) as directions, not stop names; every
@@ -308,12 +341,12 @@ function pcSpeed3Html(tr, preview){
     ['slow',    'ca.cardSlow',    PC_ONE_FILE_RATES[2],        PC_ONE_FILE_RATES[2]],
     ['normal',  'ca.cardNormal',  PC_ONE_FILE_RATES[3],        PC_ONE_FILE_RATES[3]],
   ] : [
-    ['slowest', 'ca.cardSlowest', SLOWEST_RATE,                ratio * SLOWEST_RATE],
+    ['slowest', 'ca.cardSlowest', pcSlowestRate(c),            ratio * pcSlowestRate(c)],
     ['slower',  'ca.cardSlower',  1,                           ratio],
     ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4),   pcSlowRate(tr)],
     ['normal',  'ca.cardNormal',  1,                           1],
   ];
-  const START = PC_START_NORMAL ? 3 : 1;   // Normal (1×) — matches the card's data-slow / data-rate (pcCardHtml)
+  const START = pcStartsSlowest(c, tr) ? 0 : PC_START_NORMAL ? 3 : 1;   // Normal (1×), or a startStop card's bottom stop — matches the card's data-slow / data-rate (caCardBodyHtml)
   const ticks = stops.map(([speed, key, rate, factor], i) => {
     const x = pcSpeedFactor(factor);
     return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
@@ -334,7 +367,7 @@ function pcPlayerHtml(a, L, preview){
   return `<div class="pc-player">`
     + `<button type="button" class="pc-play"${pcKeyTitle('pc.keys.play', preview)} onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
-    + ((a.card.slowest || pcOneFile(L.tr)) ? pcSpeed3Html(L.tr, preview) : pcSpeedSwitchHtml(preview))   // one file: always the four stops
+    + ((a.card.slowest || pcOneFile(L.tr)) ? pcSpeed3Html(L.tr, preview, a.card) : pcSpeedSwitchHtml(preview))   // one file: always the four stops
     /* The Guitar switch: only where a full mix exists, ON by default. */
     + (hasFull ? pcGuitarSwitchHtml() : '')
     + `</div>`;
@@ -343,8 +376,8 @@ function pcTabHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
   const chips = many
-    ? `<p class="pc-hint">${escHtml(t('ca.cardSectionHint'))}</p><div class="pc-secs">`
-      + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
+    ? `<p class="pc-hint">${escHtml(t(L.rounds ? 'ca.roundHint' : 'ca.cardSectionHint'))}</p><div class="pc-secs">`
+      + pcSecButtonsHtml(L, preview)
       + pcLoopHtml(L, preview) + `</div>`
     : '';
   const pages = L.sections.map((S, si) => {
@@ -478,9 +511,9 @@ function caCardBodyHtml(a, opts){
      card, the hero card, the console preview) gets it the same way. */
   const sheet = !!a.card.sheet && typeof pcSheetHtml === 'function';   /* the sheet is app/cards-sheet.js, a later part: a page with the new cards.js without it draws the tab (W24 review R1-1) */
   if(sheet) setTimeout(pcSheetScan, 0);
-  return `<div class="pc" data-id="${escAttr(a.id)}"${PC_START_NORMAL ? ' data-slow="" data-rate="1"' : pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
+  return `<div class="pc" data-id="${escAttr(a.id)}"${pcStartsSlowest(a.card, L.tr) ? ` data-slow="1" data-rate="${pcSlowestRate(a.card)}"` : PC_START_NORMAL ? ' data-slow="" data-rate="1"' : pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${a.card.buildLaps >= 1 ? ` data-build-laps="${Math.floor(a.card.buildLaps)}"` : ''}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a) + (typeof caViewSwitchHtml === 'function' ? caViewSwitchHtml(a) : '')   /* Chords / Tab / Lyrics: app/cards-views.js, a later part; guarded so a page that has the new cards.js without it still draws the card (W23 review R1-1) */
-    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
+    + `<p class="pc-dir">${escHtml(t(L.rounds ? 'ca.roundDirections' : sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
     + pcPlayerHtml(a, L, preview) + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
@@ -670,11 +703,26 @@ function pcToggle(btn){
   if(pcState && pcState.root === root){ pcStop(); return; }
   // Stop while the song is still loading (SONG FILES): cancel the wait.
   if(songFileWaitingFor(root)){ songFileCancelWait(); return; }
-  pcStart(root, 0);
+  /* ROUNDS: Play plays the round tapped last again (its switches are still as the round left them: a hand-picked speed
+     left a plain loop of it); before any round, the whole card from the top. */
+  const rd = pcRoundNow(pcActivity(root), root);
+  pcStart(root, rd ? rd.from : 0);
 }
 function pcFromSection(btn, si){
   const root = btn.closest('.pc');
   if(root) pcStart(root, si);
+}
+/* A round button (ROUNDS): Loop and Build up speed on, the round remembered (pcStart reads it), then the round plays
+   from a count-in at its first stop. Stay at this speed starts off. */
+function pcFromRound(btn, ri){
+  const root = btn.closest('.pc');
+  const a = root && pcActivity(root), L = a && pcLayout(a), rd = L && L.rounds && L.rounds[ri];
+  if(!rd) return;
+  root.dataset.round = String(ri);
+  pcLoopSet(root, 'loop', true);
+  pcLoopSet(root, 'build', true);
+  pcLoopSet(root, 'hold', false);
+  pcStart(root, rd.from);
 }
 function pcStart(root, si, rep, keepBuild){
   if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
@@ -685,7 +733,8 @@ function pcStart(root, si, rep, keepBuild){
   /* Loop this part / Build up speed (app/cards-loop.js): Build starts every
      play at the slowest stop (or, after a private song loaded, the stop it
      reached: keepBuild), so the speed control is set before the file is picked. */
-  const build = pcBuildBegin(root, keepBuild);
+  const rd = pcRoundIn(a, root, si);   // a round tapped (ROUNDS): the climb starts at its stop, its lap is all its sections
+  const build = pcBuildBegin(root, keepBuild, rd ? rd.startStop : 0);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const src = snippetSrc(L.tr, slow, guitar);
   // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
@@ -700,7 +749,7 @@ function pcStart(root, si, rep, keepBuild){
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
   const st = { root, L, audio, win: pcWindow(L, slow, guitar), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet && typeof pcSheetHtml === 'function', raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
-               loopSi: root.dataset.loop === '1' ? si : -1, build, laps: 0,
+               loopSi: root.dataset.loop === '1' ? si : -1, loopTo: rd ? rd.to : si, build, laps: 0,
                passFrom: L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar };   // where this pass began, in window bars (THE LEAD)
   pcState = st;
   const btn = root.querySelector('.pc-play');
@@ -1054,7 +1103,8 @@ document.addEventListener('fullscreenchange', pcRefollow);
 window.addEventListener('resize', pcRefollow);
 function pcShowSection(root, L, si){
   root.querySelectorAll('.pc-page').forEach(p => { p.hidden = Number(p.dataset.page) !== si; });
-  root.querySelectorAll('.pc-sec').forEach(b => b.classList.toggle('cur', Number(b.dataset.sec) === si));
+  root.querySelectorAll('.pc-sec[data-sec]').forEach(b => b.classList.toggle('cur', Number(b.dataset.sec) === si));
+  root.querySelectorAll('.pc-round').forEach(b => b.classList.toggle('cur', b.dataset.round === root.dataset.round));   // ROUNDS: the round tapped last
   const pager = root.querySelector('.pc-pager');
   if(!pager) return;
   const label = pager.querySelector('.tab-pager-label');
@@ -1376,7 +1426,7 @@ function pcKeydown(e){
     if(btn){ pcToggle(btn); done = true; }
   } else if(act === 'loop'){
     const sw = root.querySelector('.pc-loop-sw[data-loop-sw="loop"]');
-    if(sw){ pcSetLoopSw(sw); done = true; }
+    if(sw && !sw.hidden){ pcSetLoopSw(sw); done = true; }   // a rounds card hides its Loop switch: its rounds start the loops
   } else if(act === 'prev' || act === 'next'){
     const dir = act === 'next' ? 1 : -1;
     if(playing){

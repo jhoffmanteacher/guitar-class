@@ -619,6 +619,12 @@
     'pc.looping':              { en: 'Looping: {section}', es: 'Repitiendo: {section}' },
     'pc.lapOf':                { en: 'Round {n} of {total} at {speed}', es: 'Ronda {n} de {total} en {speed}' },
     'pc.lapAt':                { en: 'Round {n} at {speed}', es: 'Ronda {n} en {speed}' },
+    // Rounds (card.rounds, ca-54 the speed ladder, 2026-11-24): the round buttons' hint and directions, and the status line ("Verse at 90 BPM").
+    'pc.roundAt':              { en: '{what} at {bpm} BPM', es: '{what} a {bpm} BPM' },
+    'ca.roundHint':            { en: 'Tap a round to start it.',
+                                 es: 'Pulsa una ronda para empezarla.' },
+    'ca.roundDirections':      { en: 'Play along as the song speeds up by itself.',
+                                 es: 'Toca con la canción mientras acelera sola.' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
     'ca.sheetDirections':      { en: 'Press Play song, strum the way the recording does and change chords on the word under each name.',
                                  es: 'Presiona «Tocar la canción», rasguea como la grabación y cambia de acorde en la palabra bajo cada nombre.' },

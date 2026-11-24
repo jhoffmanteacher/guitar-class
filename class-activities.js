@@ -7559,6 +7559,59 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  /* ca-54 — Sweet Child O' Mine — Speed Ladder (Jonathan, 2026-11-24; his Semester 1 Calendar, Day 39: "Sweet Child
+     speed ladder"; WORK-ORDER-sweet-child-speed-ladder). The Unit 3 assessment's Task 1 is this song at the record's
+     tempo, verse and chorus only (2026-10-29): this card climbs there. ca-33's Verse 1 (bars 25-40) and Chorus 1
+     (bars 41-48), by reference (joined after the array), in power chords, read from a lyric sheet cut from
+     sheets/sweet-child-o-mine.pdf to those two parts (sheets/sweet-child-o-mine-verse-chorus.pdf, one column, 14 chord
+     names = 13 chord changes + the verse's second lap, which opens on a D5 still ringing and is named again). It opens
+     on the sheet, with the Chords and Tab views of ca-33's switch.
+     THE LADDER: four stops, 90 · 100 · 112 · 125 BPM. The bottom stop is the slow file (100) at 0.9 (`slowestRate`),
+     not the site's usual 0.8; the card opens on it (`startStop`, the one card that does not open on Normal 1x).
+     Three ROUNDS (`rounds`, app/cards.js; app/cards-loop.js): 1 the verse and 2 the chorus climb 90 -> 100 -> 112 -> 125,
+     3 the verse and chorus as one lap starts at 100 and climbs to 125. One time through at each stop (`buildLaps`: 1),
+     then it keeps looping at 125. 112 has no check of its own: every round passes through it. The third check is the
+     assessment's target, so it is a plain check, not a Level up; no Song Journey button. */
+  {
+    id:    'ca-54',
+    view:  'card',    // one screen: Play song + sheet + checks — see CARD above
+    title:    'Sweet Child O\' Mine — Speed Ladder',
+    title_es: 'Sweet Child O\' Mine — Escalera de velocidad',
+    intro:    'Climb to record speed on the verse, then the chorus, then both.',
+    intro_es: 'Sube a la velocidad de la grabación en la estrofa, luego en el coro y después en las dos.',
+    card: {
+      track: 'sweet-child-o-mine',
+      slowest: true,       // four-way speed control: Slowest / Slower / Slow / Normal
+      slowestRate: 0.9,    // this card's bottom stop: the slow file (100) at 0.9 = 90 (the site's usual is 0.8 = 80)
+      startStop: 'slowest',   // opens on the bottom stop, 90 (every other card opens on Normal)
+      buildLaps: 1,        // a round climbs one stop after ONE time through (Build up speed's usual is two)
+      sheet: 'sheets/sweet-child-o-mine-verse-chorus.pdf',
+      sheetColumns: 1,     // one column, read line by line
+      sheetNamedAgain: ['Verse 1'],   // the second lap opens on the sheet's D5, though it is still ringing (as ca-45)
+      sheetChords: 14,     // chord names on the sheet = 13 chord changes + 1 D5 named again (checks.mjs 1bf2)
+      caption:    'Lyrics and chords · verse and chorus',
+      caption_es: 'Letra y acordes · estrofa y coro',
+      sections: null,      // ca-33's Verse 1 and Chorus 1 — joined after the array, below
+      rounds: [
+        { label: '1 Verse',           label_es: '1 Estrofa',         what: 'Verse',           what_es: 'Estrofa',        from: 0, to: 0, startStop: 0 },
+        { label: '2 Chorus',          label_es: '2 Coro',            what: 'Chorus',          what_es: 'Coro',           from: 1, to: 1, startStop: 0 },
+        { label: '3 Verse + Chorus',  label_es: '3 Estrofa + coro',  what: 'Verse + Chorus',  what_es: 'Estrofa + coro', from: 0, to: 1, startStop: 1 }
+      ],
+      checks: [
+        { label: 'Round 1 — the verse', label_es: 'Ronda 1 — la estrofa',
+          text:    'Climb the verse from 90 to record speed without stopping.',
+          text_es: 'Sube la estrofa de 90 a la velocidad de la grabación sin detenerte.' },
+        { label: 'Round 2 — the chorus', label_es: 'Ronda 2 — el coro',
+          text:    'Climb the chorus from 90 to record speed without stopping.',
+          text_es: 'Sube el coro de 90 a la velocidad de la grabación sin detenerte.' },
+        { label: 'Round 3 — verse and chorus', label_es: 'Ronda 3 — estrofa y coro',
+          text:    'Play verse and chorus together from 100 up to record speed without stopping.',
+          text_es: 'Toca estrofa y coro juntos desde 100 hasta la velocidad de la grabación sin detenerte.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
 ];
 
 /* Each lyric-sheet card plays its play-along card's sections from its chord
@@ -7571,6 +7624,14 @@ window.CLASS_ACTIVITIES = [
     const from = list.find(a => a.id === f), to = list.find(a => a.id === t);
     if(from && to) to.card.sections = from.card.sections;
   });
+})();
+
+/* ca-54 (the speed ladder) plays ca-33's Verse 1 and Chorus 1: the same section objects, not copies, so it cannot drift
+   from the play-along. Found by label; a missing one leaves the card with no sections, which checks.mjs 1bf2 reports. */
+(function(){
+  const list = window.CLASS_ACTIVITIES;
+  const from = list.find(a => a.id === 'ca-33'), to = list.find(a => a.id === 'ca-54');
+  if(from && to) to.card.sections = ['Verse 1', 'Chorus 1'].map(l => from.card.sections.find(sec => sec.label === l)).filter(Boolean);
 })();
 
 /* CARD VIEWS (Jonathan, 2026-11-17: "chords/tab switch"; see otherViews in the
@@ -7611,6 +7672,15 @@ window.CLASS_ACTIVITIES = [
     host.card.otherViews = { tab: take(host.card, ['caption', 'caption_es']) };
     if(sheet) host.card.otherViews.lyrics = take(sheet.card, ['caption', 'caption_es', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain']);
   });
+})();
+
+/* ca-54 (Sweet Child O' Mine — Speed Ladder): its own view is the lyric sheet; Chords (the chord grid) and Tab (its own
+   power chords note by note) are its other views, both on the card's own two sections (1er). */
+(function(){
+  const a = window.CLASS_ACTIVITIES.find(x => x.id === 'ca-54');
+  if(!a) return;
+  const cap = { caption: 'The verse and chorus in power chords', caption_es: 'La estrofa y el coro con acordes de potencia' };
+  a.card.otherViews = { chords: { ...cap }, tab: { ...cap } };
 })();
 
 /* All Along the Watchtower — the Neil Young version of ca-26, ca-29 and ca-40

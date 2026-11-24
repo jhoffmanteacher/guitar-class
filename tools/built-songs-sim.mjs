@@ -221,7 +221,7 @@ async function runCases(files){
     }
     /* Every coded practice card keeps its two-file stops. */
     const p = makePage(files);
-    const res = p.run(`(() => { const out = []; for (const a of CLASS_ACTIVITIES) { if (a.view !== 'card' || !a.card || !a.card.slowest) continue;
+    const res = p.run(`(() => { const out = []; for (const a of CLASS_ACTIVITIES) { if (a.view !== 'card' || !a.card || !a.card.slowest || a.card.startStop) continue;   /* the speed ladder (ca-54) opens on its bottom stop, 90: 1fc pins it */
       const tr = SNIPPET_TRACKS[caView(a).card.track]; const h = caCardBodyHtml(a); if (!h) continue;
       const rates = [...h.matchAll(/class="pc-speed-tick[^"]*"[^>]*data-rate="([^"]+)"/g)].map(m => m[1]);
       const want = [String(SLOWEST_RATE), '1', pcSlowRate(tr).toFixed(4), '1'];

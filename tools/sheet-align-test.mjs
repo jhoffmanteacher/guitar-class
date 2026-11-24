@@ -21,7 +21,7 @@
              first mismatch, false on it, null after
      pdf     (default; --no-cards skips) a made-up one-column sheet written here as a real pdf (Courier): the app's own
              pcSheetModel gives the chord names, their lines and the header / repeat marks the loose read needs
-     cards   (default; --no-cards skips) the three coded sheet cards (ca-38, ca-44, ca-45): their PDFs read through
+     cards   (default; --no-cards skips) the four coded sheet cards (ca-38, ca-44, ca-45, ca-54): their PDFs read through
              the vendored pdf.js in Node and the app's own pcSheetModel, then pcSheetAlign gives pcSheetMap's map
              exactly (tok and start, every note of every lap)
    --breaks  runs the made-up cases against broken copies of pcSheetAlign; each must turn at least one case red.
@@ -206,7 +206,7 @@ const BREAKS = [
 const real = suite(load(SRC), false);
 let cardsLine = '';
 if (!process.argv.includes('--no-cards')) {
-  console.log('== real pdfs through pdf.js and pcSheetModel: a made-up sheet, and the three coded sheet cards (pcSheetAlign = pcSheetMap)');
+  console.log('== real pdfs through pdf.js and pcSheetModel: a made-up sheet, and the four coded sheet cards (pcSheetAlign = pcSheetMap)');
   const res = await cardsCheck();
   for (const x of res.rows) { console.log((x.ok ? '  ✓ ' : '  ✗ ') + x.line); if (x.ok) real.pass++; else { real.fail++; real.red.push(x.line); } }
   const cr = res.rows.filter(x => x.card);
@@ -263,7 +263,7 @@ async function cardsCheck(){
     const same = r.names === want.names && r.lines === want.lines && r.marks === want.marks && r.ok && r.skipped === 4 && r.cycled === 2 && r.folded === 1;
     rows.push({ ok: same, line: `a made-up pdf (Courier, one column): ${r.names.split(' ').length} chord names on ${new Set(r.lines).size} lines, marks ${r.marks || 'none'}; loose read ${r.ok ? 'ok' : 'NOT ok: ' + r.why}, skipped ${r.skipped}, folded ${r.folded}, cycled ${r.cycled}${same ? '' : ' — expected ' + J(want) + ', skipped 4, folded 1, cycled 2'}` });
   } catch (e) { rows.push({ ok: false, line: `a made-up pdf: threw ${String(e && e.message || e).slice(0, 200)}` }); }
-  if (ids.length !== 3) rows.push({ ok: false, line: `expected 3 coded sheet cards (ca-38, ca-44, ca-45), found ${ids.length}: ${J(ids)}` });
+  if (ids.length !== 4) rows.push({ ok: false, line: `expected 4 coded sheet cards (ca-38, ca-44, ca-45, ca-54), found ${ids.length}: ${J(ids)}` });
   for (const id of ids) {
     try {
       page.ctx.__id = id;

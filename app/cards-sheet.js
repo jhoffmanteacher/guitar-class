@@ -397,7 +397,7 @@ function pcSheetHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
   const chips = many
-    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + pcLoopHtml(L, preview) + `</div>`
+    ? `<div class="pc-secs">` + pcSecButtonsHtml(L, preview) + pcLoopHtml(L, preview) + `</div>`
     : '';
   const cells = ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2)
     .map(n => `<span class="pc-strip-cell"><span class="pc-strip-ch"></span><span class="pc-strip-n">${n}</span></span>`).join('');
@@ -405,7 +405,7 @@ function pcSheetHtml(a, L, preview){
   return `<div class="pc-sheet" data-sheet="${escAttr(c.sheet)}">`
     + (title ? `<p class="pc-sheet-title">${escHtml(title)}</p>` : '')
     + `<p class="pc-status" aria-live="polite"></p>`
-    + `<p class="pc-hint">${escHtml(t('ca.sheetTapHint'))}</p>${chips}`
+    + `<p class="pc-hint">${escHtml(t(L.rounds ? 'ca.roundHint' : 'ca.sheetTapHint'))}</p>${chips}`
     + `<div class="pc-sheet-bar"><span class="pc-sheet-where">${escHtml(pcSheetWhere(L, 0, 0))}</span>`
     +   `<span class="pc-strip" aria-hidden="true"><span class="pc-strip-label">${escHtml(t('ca.sheetThisBar'))}</span>${cells}</span></div>`
     + `<div class="pc-sheet-paper"><p class="pc-sheet-msg">${escHtml(t('ca.sheetLoading'))}</p></div>`

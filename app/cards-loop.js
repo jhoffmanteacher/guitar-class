@@ -29,8 +29,18 @@
    The line saying where the student is ("Round 1 of 2 at Slowest", "Looping: Chorus"; "Round", not "Lap": a section
    with reps already shows its own "Lap 2 of 3" badge) is the card's own
    status line (pcStatus), the one that reads "Playing from: …" without Loop. Key: L presses Loop
-   (KEYS in app/cards.js). Everything this starts is the card's own audio, stopped by pcStop. */
+   (KEYS in app/cards.js). Everything this starts is the card's own audio, stopped by pcStop.
+   ROUNDS (Jonathan, 2026-11-24, ca-54, the speed ladder): a card with `card.rounds` is the exception to "always from the
+   slowest stop, after PC_BUILD_LAPS laps, both switches off". Its Loop and Build switches are not shown; a round button
+   (pcFromRound, app/cards.js) turns both on and starts the round, which loops the sections from..to as ONE lap (st.loopTo)
+   from the round's own stop (root.dataset.round -> startStop), moving up after `card.buildLaps` laps (root.dataset.buildLaps,
+   1 there: pcBuildLaps). Stay at this speed and the take-over rule work as above. Every other card is unchanged. */
 const PC_BUILD_LAPS = 2;
+// Laps a stop plays before Build moves up: the card's own (data-build-laps, ROUNDS above), else PC_BUILD_LAPS.
+function pcBuildLaps(root){
+  const n = root ? parseInt(root.dataset.buildLaps, 10) : 0;
+  return n >= 1 ? n : PC_BUILD_LAPS;
+}
 const PC_SPEED_KEYS = { slowest: 'ca.cardSlowest', slower: 'ca.cardSlower', slow: 'ca.cardSlow', normal: 'ca.cardNormal' };
 function pcLoopHtml(L, preview){
   /* Classes of their own (not .pc-speed / .pc-guitar, which the player, the keys and the tools look up as the speed
@@ -40,9 +50,10 @@ function pcLoopHtml(L, preview){
     + `<span class="pc-loop-track" aria-hidden="true"><span class="pc-loop-knob"></span></span></button>`;
   const tr = L && L.tr;
   const canBuild = !!(tr && (tr.srcSlow || pcOneFile(tr)));   // a slow file, or the one-file stops (ONE-FILE SPEEDS, app/cards.js)
+  const hide = L && L.rounds ? ' hidden' : '';   // ROUNDS: the round buttons turn Loop and Build on; only Stay at this speed shows
   return `<span class="pc-loop">`
-    + sw('loop', 'pc.loop', pcKeyTitle('pc.keys.loop', preview))
-    + (canBuild ? sw('build', 'pc.build', ` title="${escAttr(t('pc.buildTitle'))}"`)
+    + sw('loop', 'pc.loop', pcKeyTitle('pc.keys.loop', preview), hide)
+    + (canBuild ? sw('build', 'pc.build', ` title="${escAttr(t('pc.buildTitle'))}"`, hide)
       + sw('hold', 'pc.hold', ` title="${escAttr(t('pc.holdTitle'))}"`, ' hidden') : '')
     + `</span>`;
 }
@@ -76,10 +87,11 @@ function pcBuildShow(root, i){
   if(labs[1]) labs[1].classList.toggle('on', !s.slow);
 }
 /* pcStart: with Build on, the play begins at the slowest stop (or at `keep`'s stop after a private song
-   loaded), and the speed control shows it before the file is chosen. Returns the build state or null. */
-function pcBuildBegin(root, keep){
+   loaded; or at `start`, a round's own first stop, ROUNDS), and the speed control shows it before the file is chosen.
+   Returns the build state or null. */
+function pcBuildBegin(root, keep, start){
   if(!pcLoopFlag(root, 'loop') || !pcLoopFlag(root, 'build')) return null;
-  const b = { stop: keep ? keep.stop : 0, laps: keep ? keep.laps : 0 };
+  const b = { stop: keep ? keep.stop : (start > 0 ? start | 0 : 0), laps: keep ? keep.laps : 0 };
   pcBuildShow(root, b.stop);
   return b;
 }
@@ -87,7 +99,7 @@ function pcBuildBegin(root, keep){
 function pcLoopSec(st){ return st.loopSi >= 0 ? st.loopSi : st.loopFrom; }
 function pcLoopEndBars(st){
   if(!(st.loopSi >= 0)) return st.L.totalBars;
-  const S = st.L.sections[st.loopSi];
+  const S = st.L.sections[st.loopTo > st.loopSi ? st.loopTo : st.loopSi];   // a round's lap runs to its last section (ROUNDS)
   return S.fromBar + S.bars * S.reps - st.L.firstBar;
 }
 function pcLoopEnd(st){ return st.loopSi >= 0 ? snipTimeAtBars(st.win, pcLoopEndBars(st)) : st.win.end; }
@@ -104,7 +116,7 @@ function pcLoopClamp(st, bars){
 /* The lap coming up is one stop faster: { stop, slow, rate, src, win }; else null. */
 function pcLoopNext(st){
   const b = st.build;
-  if(!b || !(st.loopSi >= 0) || pcLoopFlag(st.root, 'hold') || b.laps + 1 < PC_BUILD_LAPS) return null;
+  if(!b || !(st.loopSi >= 0) || pcLoopFlag(st.root, 'hold') || b.laps + 1 < pcBuildLaps(st.root)) return null;
   const stops = pcBuildStops(st.root), nx = stops[b.stop + 1];
   if(!nx) return null;
   return { stop: b.stop + 1, slow: nx.slow, rate: nx.rate, src: snippetSrc(st.L.tr, nx.slow, st.root.dataset.guitar === '1'), win: pcWindow(st.L, nx.slow, st.root.dataset.guitar === '1') };
@@ -133,10 +145,15 @@ function pcLoopStatus(st){
   if(!(st.loopSi >= 0) || st.counting || pcState !== st) return;
   const b = st.build;
   let txt;
-  if(b){
-    const stops = pcBuildStops(st.root), speed = t(stops[Math.min(b.stop, stops.length - 1)].key), n = b.laps + 1;
-    txt = pcLoopFlag(st.root, 'hold') || b.stop >= stops.length - 1 ? t('pc.lapAt', {n, speed}) : t('pc.lapOf', {n, total: PC_BUILD_LAPS, speed});
-  } else txt = t('pc.looping', {section: tf(st.L.sections[st.loopSi].s, 'label')});
+  /* ROUNDS: the round and the speed in BPM ("Verse at 90 BPM"); "Round" already means a lap on the other cards. */
+  const rd0 = st.L.rounds ? st.L.rounds[parseInt(st.root.dataset.round, 10)] : null, rd = rd0 && st.loopSi >= rd0.from && st.loopSi <= rd0.to ? rd0 : null;
+  if(b && rd){
+    const stops = pcBuildStops(st.root), s = stops[Math.min(b.stop, stops.length - 1)];
+    txt = t('pc.roundAt', {what: tf(rd, 'what'), bpm: Math.floor((s.slow ? st.L.tr.trackBpmSlow : st.L.tr.trackBpm) * parseFloat(s.rate) + 1e-6)});
+  } else if(b){
+    const stops = pcBuildStops(st.root), speed = t(stops[Math.min(b.stop, stops.length - 1)].key), n = b.laps + 1, total = pcBuildLaps(st.root);
+    txt = pcLoopFlag(st.root, 'hold') || b.stop >= stops.length - 1 || total < 2 ? t('pc.lapAt', {n, speed}) : t('pc.lapOf', {n, total, speed});
+  } else txt = t('pc.looping', {section: rd ? tf(rd, 'what') : tf(st.L.sections[st.loopSi].s, 'label')});
   pcStatus(st.root, escHtml(txt));
 }
 // The section playing now, read off the file (not the cursor's lead); during the count-in, the one counted in.
@@ -179,7 +196,7 @@ function pcSetLoopSw(btn){
   } else if(name === 'hold'){
     pcLoopSet(root, 'hold', on);
     if(!st || !st.build) return;
-    if(!on) st.build.laps = Math.min(st.build.laps, PC_BUILD_LAPS - 1);   // the lap playing is the last at this stop
+    if(!on) st.build.laps = Math.min(st.build.laps, pcBuildLaps(root) - 1);   // the lap playing is the last at this stop
     pcCancelHandoff(st);
     pcSparePark(st);                   // the next lap's stop changed
     pcLoopStatus(st);
@@ -198,5 +215,8 @@ function pcBuildTakeover(root){
 /* Both switches off when a card closes (caOnToggle), so every opening starts with them off. */
 function pcLoopReset(scope){
   if(!scope) return;
-  scope.querySelectorAll('.pc').forEach(root => { if(root.dataset.loop || root.dataset.build){ pcLoopSet(root, 'loop', false); pcLoopSet(root, 'build', false); } });
+  scope.querySelectorAll('.pc').forEach(root => {
+    if(root.dataset.loop || root.dataset.build){ pcLoopSet(root, 'loop', false); pcLoopSet(root, 'build', false); }
+    if(root.dataset.round){ root.dataset.round = ''; root.querySelectorAll('.pc-round.cur').forEach(b => b.classList.remove('cur')); }   // ROUNDS: no round is picked when a card opens
+  });
 }
