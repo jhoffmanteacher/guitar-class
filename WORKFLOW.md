@@ -315,6 +315,12 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-24 — Sweet Child speed ladder, ca-54 (`03807845`, `f886ef02`; work order `WORK-ORDER-sweet-child-speed-ladder`).**
+  ca-33's Verse 1 and Chorus 1 on a cut lyric sheet (14 names), three round buttons, bottom stop 90 (`slowestRate` 0.9),
+  opens there (`startStop`), one lap a stop (`buildLaps` 1), Round 3 from 100, no Level up. The settings sit on ca-54
+  alone (checks.mjs 1fc, 53 assertions, 13 of 13 break-its red). Played for real, muted: `tools/speed-ladder-loop.mjs`.
+  `tools/smoke.mjs`'s server now answers byte ranges. `Review: Fast`.
+
 - **2026-11-19 — The practice copy: why it would not publish, and the fixes (`a5aba48`, `0899b65`).** Its rules now
   go out through the Admin SDK (the CLI's Service Usage pre-check was refused 403; the IAM roles had landed on the class
   project's row and were removed again). From 12:38 the pages failed too: HTTP 429, the free plan's Hosting storage

@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-24 — A Sweet Child speed ladder
+
+- **A new practice card, "Sweet Child O' Mine — Speed Ladder", climbs the verse and the chorus up to record speed.**
+  It opens on the lyric sheet at 90 BPM (Chords and Tab are one tap away). Round 1 is the verse and Round 2 is the
+  chorus: each plays once at 90, 100, 112 and 125 and goes up by itself. Round 3 plays the verse and chorus together,
+  from 100 up to 125. It has three checks, one per round, and a Spanish version.
+
 ## 2026-11-23 — Lesson steps no longer say "below" about a chart beside them
 
 - **Seven lesson steps in Modules 3, 4, 5, 9 and 10 drop the word "below" (Spanish: "abajo").** In One step view the
