@@ -86,7 +86,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-changes.js', 'config-main.js',
+  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -5111,7 +5111,7 @@ function checkSpanishDrift() {
    values in coach.js — instead of guessed at.
    ════════════════════════════════════════════════════════════════════ */
 const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 'teacher.js',
-  'live-quiz.js', 'live-changes.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
+  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
 
 // (stripJsComments lives in the shared-helpers block above — i18n.js's own
 // top-of-file "how to add a key" doc comment uses example strings like
@@ -5492,6 +5492,7 @@ async function checkLiveQuizNoNames() {
     vm.createContext(box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-changes.js'), 'utf8'), box, { filename: 'live-changes.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-hilo.js'), 'utf8'), box, { filename: 'live-hilo.js' });
     vm.runInContext('var currentUser = { uid: "me", displayName: "Me Myself" };', box);
   } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
   const run = code => vm.runInContext(code, box);
@@ -5902,7 +5903,7 @@ async function checkLiveQuizPcNameNoLeak() {
    ════════════════════════════════════════════════════════════════════ */
 const DUPLICATE_GLOBALS_ALLOWED = new Set(['isTuningWarmupSection']);
 const CLASSIC_SCRIPTS = ['app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js',
-  'live-quiz.js', 'live-changes.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
+  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
 
 function checkDuplicateGlobals() {
   head('1g. Duplicate top-level globals');
@@ -6775,6 +6776,29 @@ function checkLiveChanges() {
      chord). A song or section that drops out of the game, or a card edit that moves its changes, shows here. */
   if (m[1] !== '29' || m[2] !== '458') { err(`1ey: the game now has ${m[1]} sections and ${m[2]} chord changes (pinned at 29 and 458): if a card's sections or chords changed on purpose, re-pin here`); problems++; return; }
   ok(last.replace(/^live-changes-sim: /, ''));
+}
+/* ════════════════════════════════════════════════════════════════════
+   1ez. HIGHER OR LOWER? (2026-11-24, live-hilo.js): tools/live-hilo-sim.mjs runs the REAL game code: the bank entry,
+   the picker for every level (5,000 rounds each: inside C3 to C6, the sizes of the level, no size repeated, never four
+   the same way), the 14 piano files and the bending of each note, playing a pair on a fake AudioContext (nearest
+   recording, exact pitch, Stop), the console's round (no note in the public doc, Reveal scores through the real
+   lqScoreRound, no name in the scores) and the strip. About 1 s.
+   ════════════════════════════════════════════════════════════════════ */
+function checkLiveHilo() {
+  head('1ez. Higher or lower?: the real game code, the picker and the piano (tools/live-hilo-sim.mjs)');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'live-hilo-sim.mjs')], { encoding: 'utf8', timeout: 60000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const last = lines[lines.length - 1] || '';
+  const m = /^live-hilo-sim: 4 levels, (\d+) pairs, 14 piano files, 37 notes; (\d+) of (\d+) cases pass$/.exec(last);
+  if (r.status !== 0 || !m || m[2] !== m[3]) {
+    err('tools/live-hilo-sim.mjs failed' + (r.error ? ': ' + r.error.message : '') + ' — replay: node tools/live-hilo-sim.mjs');
+    problems++;
+    for (const l of [...lines.filter(l => /FAIL/.test(l)).slice(0, 8), ...(r.stderr || '').trim().split('\n').slice(-4)]) if (l) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  /* Pinned: 20,000 pairs (4 levels x 5,000) and at least 70 cases. A tool that quietly stops checking shows here. */
+  if (m[1] !== '20000' || Number(m[3]) < 70) { err(`1ez: the sim ran ${m[1]} pairs and ${m[3]} cases (pinned: 20000 pairs, at least 70 cases): if the proof changed on purpose, re-pin here`); problems++; return; }
+  ok(last.replace(/^live-hilo-sim: /, ''));
 }
 function checkToneTest() {
   head('1cx. The pitch detectors read made-up tones as they did (tools/tone-test.mjs)');
@@ -22624,6 +22648,7 @@ function checkLiveQuizHideNames() {
     vm.runInContext(readFileSync(join(ROOT, 'guitar-diagrams.js'), 'utf8'), box, { filename: 'guitar-diagrams.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-changes.js'), 'utf8'), box, { filename: 'live-changes.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-hilo.js'), 'utf8'), box, { filename: 'live-hilo.js' });
     box.__docCalls = 0;
     vm.runInContext('var teacherView = "livequiz"; var currentUser = { uid: "uid-test-3", displayName: "Test 3" }; lqDb = {}; lqEnsureDb = async () => {}; lqDoc = () => { __docCalls++; return { set: async () => {}, collection: () => ({ onSnapshot() { return () => {}; } }), onSnapshot() { return () => {}; } }; };', box);
     return { box, store, stage, controls, run: code => vm.runInContext(code, box) };
@@ -22775,7 +22800,7 @@ function checkWeekendStreaks() {
   const files = [];
   try {
     for (const n of ['app.js', 'coach.js', 'teacher.js']) for (const p of siteParts(n, ROOT)) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
-    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-changes.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
+    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
       if (existsSync(join(ROOT, p))) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
   } catch (e) { fail('could not read the site scripts: ' + e.message); return; }
   // comments out, line breaks kept: a reported line number is the file's own
@@ -23506,6 +23531,7 @@ function checkNeverRules(sets) {
   await checkLiveQuizPcNameNoLeak();
   checkLiveQuizHideNames();
   checkLiveChanges();
+  checkLiveHilo();
   checkCoachVerdicts();
   checkToneTest();
   await checkCountIn();

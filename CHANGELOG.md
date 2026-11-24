@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-24 — New Live In-Class Game: Higher or lower?
+
+- **A new game in Live In-Class Games: two piano notes play on the room speakers, and everyone taps Higher or Lower
+  for the second note.** The notes are real piano recordings. Every round is a new pair, so the jump changes from round
+  to round (from a half step up to an octave, up or down). Jonathan picks Mixed, Close, Medium or Wide before each
+  round, and Play again repeats the same two notes. Students see two big buttons, Higher and Lower (Spanish: Más aguda
+  and Más grave), and the app marks the round when Jonathan presses Reveal.
+
 ## 2026-11-24 — A Sweet Child speed ladder
 
 - **A new practice card, "Sweet Child O' Mine — Speed Ladder", climbs the verse and the chorus up to record speed.**

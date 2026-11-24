@@ -2,6 +2,7 @@
 paths:
   - "live-quiz.js"
   - "live-changes.js"
+  - "live-hilo.js"
 ---
 
 ## Live quiz — the whole-class game
@@ -73,6 +74,21 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
     game, on the wall clock); the console writes no `cc.clk` after `t0`, so without it a page reloaded mid-song read
     its clock off by the age of the last stamp. Cleared on sign-out (`lqCcReset`). A NEW tab mid-song still has only
     the stale stamp. checks 1di and 1cm paint this game's stage and run its Reveal writer.
+- **"Higher or lower?"** (`hilo`, a `hilo:true` flag on a plain two-choice quiz, Jonathan 2026-11-24; its own file,
+  `live-hilo.js`, loaded after `live-changes.js` on index.html only, every call into it behind a `typeof` guard). The
+  CONSOLE plays two piano notes on the room speakers (real Salamander Grand recordings in `vendor/salamander-piano/`,
+  CC BY 3.0, console only); students tap Higher or Lower for the second one. It is the one `mc` quiz the app scores:
+  at Reveal (`lqTeacherRevealHilo` -> `lqTeacherReveal`).
+  - **The pair is NEVER in `liveQuiz/current`** (`target` stays null; the doc is public). The console keeps it in memory
+    (`lqHlRound`, keyed by session and question) and in no storage key. A console reload mid-round forgets it: the
+    strip then shows the plain "Mark the correct answer" buttons for that round and Reveal does nothing by itself.
+  - Variety: each round is a new pair; the size (1 to 12 semitones) does not repeat within the last two rounds, the
+    direction never runs four the same way, both notes stay C3 to C6; the strip's Mixed / Close / Medium / Wide chips
+    pick the sizes. The first note sounds `LQ_HL_LEAD` after the question opens so the games' music (`quiet:true`) has
+    faded.
+  - The strip is on the projector: it never names a note or a size. `speedBonus:false` stays (the sound comes after
+    the question opens). After any change to it, its `hilo` branches here, the piano files or the `lq.*.hilo` strings:
+    `node tools/live-hilo-sim.mjs` (checks.mjs 1ez runs it and pins 20,000 pairs).
 - **The two power chord quizzes differ from the rest in two ways** (Jonathan,
   2026-11-13; `checks.mjs` 1f pins both flags to `pc-find` and `pc-name`):
   - `changeAnswer:true`: a student may tap another answer while the question

@@ -3140,6 +3140,11 @@
     // "Name the power chord" (2026-11-10): the chord box is the question, so the prompt carries NO param (a {chord} would answer it).
     'lq.title.pcName':       { en: 'Name the power chord', es: 'Nombra el acorde de potencia' },
     'lq.prompt.pcName':      { en: 'Which power chord is this?', es: '¿Qué acorde de potencia es este?' },
+    // "Higher or lower?" (2026-11-24, live-hilo.js): the room hears two piano notes; each student taps Higher or Lower for the second one.
+    'lq.title.hilo':         { en: 'Higher or lower?', es: '¿Más agudo o más grave?' },
+    'lq.prompt.hilo':        { en: 'Is the second note higher or lower than the first?', es: '¿La segunda nota es más aguda o más grave que la primera?' },
+    'lq.hilo.higher':        { en: 'Higher', es: 'Más aguda' },
+    'lq.hilo.lower':         { en: 'Lower', es: 'Más grave' },
     // "Hear the Chord Change" (2026-11-20, live-changes.js): the room hears the song; each Chromebook times its own presses.
     'lq.title.changes':      { en: 'Hear the chord change', es: 'Escucha el cambio de acorde' },
     'lq.prompt.changes':     { en: 'Press the space bar every time the chord changes.', es: 'Presiona la barra espaciadora cada vez que cambie el acorde.' },

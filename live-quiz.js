@@ -196,6 +196,25 @@ const LIVE_QUIZZES = {
     teacherHint: 'Pick a song, then a section to play it on the room speakers. Students press the space bar at every chord change; the round is scored about 3 seconds after the song stops.',
     speedBonus: false,
     quiet: true      // its own song plays during a round: the games' music fades out (teacher-livemusic.js)
+  },
+  /* "Higher or lower?" (Jonathan, 2026-11-24): the console plays two piano notes on the room speakers and each student
+     taps Higher or Lower for the second one. An ordinary two-choice quiz for the student screen and the stage (so no
+     type of its own), with `hilo:true` for the three things that differ: the strip plays the notes, the APP scores it at
+     Reveal (live-hilo.js keeps the pair; it is never in the doc), and the question is not timed by default.
+     `choices` order is fixed: Higher, then Lower. */
+  'hilo': {
+    id: 'hilo',
+    hilo: true,
+    titleKey:  'lq.title.hilo',
+    promptKey: 'lq.prompt.hilo',
+    teacherHint: 'Mixed, Close, Medium and Wide set how far apart the two piano notes are. Play the notes plays them on the room speakers and Play again repeats them; students tap Higher or Lower for the second note. Press Reveal when the count stops climbing.',
+    speedBonus: false,
+    quiet: true,     // a listening question: the games' music fades out while it is open (teacher-livemusic.js)
+    limitSec: 0,
+    choices: [
+      { id:'higher', key:'lq.hilo.higher', color:'#185fa5' },
+      { id:'lower',  key:'lq.hilo.lower',  color:'#a2530b' }
+    ]
   }
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
@@ -1358,7 +1377,7 @@ function lqTSetAutoReveal(on){
   lqTArmAutoReveal();
 }
 function lqAutoRevealInputHtml(quizId){
-  if(lqType(lqQuiz(quizId)) === 'mc' || lqType(lqQuiz(quizId)) === 'changes') return '';   // changes: it reveals when the song stops
+  if((lqType(lqQuiz(quizId)) === 'mc' && !lqQuiz(quizId).hilo) || lqType(lqQuiz(quizId)) === 'changes') return '';   // changes: it reveals when the song stops; hilo is the one mc quiz the app scores
   return `<label class="lq-ctl-lbl"><input type="checkbox" id="lq-autoreveal"${lqTAutoReveal ? ' checked' : ''} onchange="lqTSetAutoReveal(this.checked)"> Reveal when time runs out</label>`;
 }
 // Called after every change to lqTSession (snapshot, preview write, exiting
@@ -1368,7 +1387,7 @@ function lqTArmAutoReveal(){
   const s = lqTSession;
   const limit = s ? Number(s.limitSec) || 0 : 0;
   const key = s ? s.sessionId + '#' + s.qIndex : null;
-  const want = !!(s && s.state === 'question' && limit && lqTAutoReveal && lqType(lqQuiz(s.quizId)) !== 'mc');
+  const want = !!(s && s.state === 'question' && limit && lqTAutoReveal && (lqType(lqQuiz(s.quizId)) !== 'mc' || lqQuiz(s.quizId).hilo));
   if(!want){ if(lqTAutoTimer){ clearTimeout(lqTAutoTimer); lqTAutoTimer = null; } lqTAutoKey = null; return; }
   if(lqTAutoTimer && lqTAutoKey === key) return;
   if(lqTAutoTimer) clearTimeout(lqTAutoTimer);
@@ -1384,6 +1403,7 @@ function lqTAutoRevealFire(){
   const type = lqType(lqQuiz(s.quizId));
   if(type === 'fret') lqTeacherRevealFret();
   else if(type === 'pcname') lqTeacherRevealPcName();
+  else if(lqQuiz(s.quizId).hilo && typeof lqTeacherRevealHilo === 'function') lqTeacherRevealHilo();
 }
 /* How many questions the game has (Jonathan, 2026-11-13: "set the total question prior to starting game"). A box in
    the strip before Start; blank or 0 = no set number. Written once, at Start, as `totalQ`. Remembered on this device
@@ -1789,10 +1809,12 @@ function lqPaintControls(){
   const fret = lqType(quiz) === 'fret';
   const pcname = lqType(quiz) === 'pcname';
   const changes = lqType(quiz) === 'changes' && typeof lqCcPickerHtml === 'function';
+  const hilo = !!quiz.hilo && typeof lqHlPickerHtml === 'function';   // "Higher or lower?" (live-hilo.js)
   if(s.state === 'lobby'){
     const opener = fret ? lqFretPickerHtml(quiz, busy)
       : pcname ? lqPcNamePickerHtml(quiz, busy)
       : changes ? lqCcPickerHtml(busy)
+      : hilo ? lqHlPickerHtml(busy)
       : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>First question</button>`;
     el.innerHTML = opener
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Cancel</button>${full}`
@@ -1807,6 +1829,8 @@ function lqPaintControls(){
       head = `<button type="button" class="lq-ctl go" onclick="lqTeacherRevealPcName()"${busy}>Reveal</button>`;
     } else if(changes){
       head = `<button type="button" class="lq-ctl go" onclick="lqTeacherCcStop()"${busy}>Stop the song</button>` + (typeof lqCcStatusHtml === 'function' ? lqCcStatusHtml() : '');
+    } else if(hilo){
+      head = lqHlQuestionHeadHtml(s, quiz, busy);
     } else {
       const picks = quiz.choices.map(c =>
         `<button type="button" class="lq-ctl mark" style="--lq-c:${c.color}" onclick="lqTeacherReveal('${c.id}')"${busy}>`
@@ -1826,6 +1850,7 @@ function lqPaintControls(){
   const opener = fret ? lqFretPickerHtml(quiz, busy)
     : pcname ? lqPcNamePickerHtml(quiz, busy)
     : changes ? lqCcPickerHtml(busy)
+    : hilo ? lqHlPickerHtml(busy)
     : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`;
   el.innerHTML = opener + lqLimitInputHtml(s.quizId) + lqAutoRevealInputHtml(s.quizId)
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}` + pv;
@@ -1907,6 +1932,7 @@ async function lqTeacherPreview(){
 function lqTeacherExitPreview(){
   if(!lqTPreview) return;
   if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
+  if(typeof lqHlStopAudio === 'function') lqHlStopAudio();
   lqTPreview = false;
   lqTSession = lqTReal;
   lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();
@@ -2090,11 +2116,12 @@ async function lqTeacherEnd(){
   if(!s) return;
   if(s.state === 'question' && !lqTPreview){   // a preview round scores nothing anyway
     const type = lqType(lqQuiz(s.quizId));
-    const howToScore = type === 'changes' ? 'press Stop the song (or let the section finish)' : type !== 'mc' ? 'press Reveal' : 'mark the correct answer';   // fret and pcname: the app scores at Reveal
+    const howToScore = type === 'changes' ? 'press Stop the song (or let the section finish)' : (type !== 'mc' || lqQuiz(s.quizId).hilo) ? 'press Reveal' : 'mark the correct answer';   // fret, pcname and hilo: the app scores at Reveal
     if(!window.confirm('This question is still open. If you end the game now, this round is thrown away and nobody gets points for it.\n\n'
       + 'To count it: Cancel, ' + howToScore + ', then End game.\n\nEnd the game now anyway?')) return;
   }
   if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
+  if(typeof lqHlStopAudio === 'function') lqHlStopAudio();
   await lqWrite({ state: 'ended', correct: null, endedAt: firebase.firestore.FieldValue.serverTimestamp(), scores: lqPublicScores(s.scores) }, 'fields');
 }
 // Takes the game off every student's screen. Scores stay in the doc — it's
@@ -2102,5 +2129,6 @@ async function lqTeacherEnd(){
 async function lqTeacherClose(){
   if(!lqTSession) return;
   if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
+  if(typeof lqHlStopAudio === 'function') lqHlStopAudio();
   await lqWrite({ state: 'off', correct: null, tally: null, scores: lqPublicScores(lqTSession.scores) }, 'fields');
 }
