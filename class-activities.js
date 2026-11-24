@@ -6564,7 +6564,7 @@ window.CLASS_ACTIVITIES = [
      card keeps the changes and drops the strumming, so the picking hand
      stays simple. The chord sections are a chord grid (each chord once, its
      count row always on, the "+" faint under Bb5 and Db5); `counts: true` is
-     now only for the single-note verses.
+     now only for the tab sections (verses, pre-choruses, interludes).
 
      THE VERSES (Jonathan, 2026-10-25: "add the very brief bit of tab for
      1st fret b and 1st fret e string for the verses … it's easy enough"):
@@ -6574,14 +6574,15 @@ window.CLASS_ACTIVITIES = [
      spots in every lap of verses 1 and 2. A rest fills beat 1 so the
      highlight lands on time (the `rest` note, see CARD above). Verse 3 on
      the record has no guitar; the card plays the verse part there too
-     (Jonathan's call). The pre-choruses (bars 21-28, 57-64, 101-108) stay
-     power chords — the record's guitar is back to the riff there.
+     (Jonathan's call). The pre-choruses (bars 21-28, 57-64, 101-108) play
+     the same two notes plucked long (Jonathan, 2026-11-24): C on beat 1, F
+     on beat 2, both ringing through the lap.
 
      THE CHORDS: the whole song is the F-Bb-Ab-Db riff (bass chroma per
      beat, 520 beats) except the two 4-bar interludes after choruses 1 and 2
      (bars 41-44, 77-80). Their bass walks F-Gb | C-Bb-A-Ab; the card plays
-     F5 Gb5 | C5 Bb5, two beats each — the least certain spot on the card;
-     check it by ear. */
+     F5 Gb5 | C5 Bb5, two beats each, with an open low E as a passing note
+     on the "+" after beat 2, between F5 and Gb5 (Jonathan, 2026-11-24). */
   {
     id:    'ca-41',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -6589,13 +6590,13 @@ window.CLASS_ACTIVITIES = [
     added: '2026-10-25',    // the Songs page's "Date added" — see LIBRARY above
     title:    '"Smells Like Teen Spirit" - Nirvana — Play Along',
     title_es: '"Smells Like Teen Spirit" - Nirvana — Toca con la canción',
-    intro:    'Play Smells Like Teen Spirit with the band: F5, Bb5, Ab5 and Db5, and two single notes in the verses.',
-    intro_es: 'Toca Smells Like Teen Spirit con la banda: F5, Bb5, Ab5 y Db5, y dos notas sueltas en las estrofas.',
+    intro:    'Play Smells Like Teen Spirit with the band: F5, Bb5, Ab5 and Db5, and single notes in the verses.',
+    intro_es: 'Toca Smells Like Teen Spirit con la banda: F5, Bb5, Ab5 y Db5, y notas sueltas en las estrofas.',
     card: {
       track: 'smells-like-teen-spirit',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      counts: true,     // Counts switch: for the single-note verses only — the chord-grid sections always show their count row
+      counts: true,     // Counts switch: for the tab sections (verses, pre-choruses, interludes) — the chord-grid sections always show their count row
       caption:    'The song in order',
       caption_es: 'La canción en orden',
       sections: [
@@ -6625,14 +6626,13 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Pre-chorus 1', label_es: 'Pre-coro 1',
-          caption: 'Pre-chorus 1 — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Pre-coro 1 — F5 Bb5 Ab5 Db5, 4 vueltas',
+          chordGrid: false,  // single notes (B string, high e), plucked long — Jonathan, 2026-11-24
+          caption: 'Pre-chorus 1 — B string fret 1 on beat 1, high e fret 1 on beat 2, 4 laps · let them ring', caption_es: 'Pre-coro 1 — cuerda Si traste 1 en el tiempo 1, cuerda mi aguda traste 1 en el tiempo 2, 4 vueltas · déjalas sonar',
           fromBar: 21, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
-            { frets: [['G', 3], ['D', 3], ['A', 1]], note: 'Bb5', midi: [58, 53, 46], beats: 2.5 },
-            { frets: [['D', 6], ['A', 6], ['E', 4]], note: 'Ab5', midi: [56, 51, 44], beats: 1.5 },
-            { frets: [['G', 6], ['D', 6], ['A', 4]], note: 'Db5', midi: [61, 56, 49], beats: 2.5 }
+            { string: 'B', fret: 1, note: 'C', midi: 60, beats: 1 },
+            { string: 'e', fret: 1, note: 'F', midi: 65, beats: 7 }
           ]
         },
         {
@@ -6649,11 +6649,13 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Interlude 1', label_es: 'Interludio 1',
-          caption: 'Interlude 1 — new chords: F5 Gb5 C5 Bb5, 2 laps', caption_es: 'Interludio 1 — acordes nuevos: F5 Gb5 C5 Bb5, 2 vueltas',
+          chordGrid: false,  // tab, not a grid: the open low E passing note is a single note (Jonathan, 2026-11-24)
+          caption: 'Interlude 1 — new chords: F5, open low E, Gb5 C5 Bb5, 2 laps', caption_es: 'Interludio 1 — acordes nuevos: F5, cuerda Mi grave al aire, Gb5 C5 Bb5, 2 vueltas',
           fromBar: 41, bars: 2, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 2 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 0.5 },
             { frets: [['D', 4], ['A', 4], ['E', 2]], note: 'Gb5', midi: [54, 49, 42], beats: 2 },
             { frets: [['G', 5], ['D', 5], ['A', 3]], note: 'C5', midi: [60, 55, 48], beats: 2 },
             { frets: [['G', 3], ['D', 3], ['A', 1]], note: 'Bb5', midi: [58, 53, 46], beats: 2 }
@@ -6673,14 +6675,13 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Pre-chorus 2', label_es: 'Pre-coro 2',
-          caption: 'Pre-chorus 2 — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Pre-coro 2 — F5 Bb5 Ab5 Db5, 4 vueltas',
+          chordGrid: false,  // single notes (B string, high e), plucked long — Jonathan, 2026-11-24
+          caption: 'Pre-chorus 2 — B string fret 1 on beat 1, high e fret 1 on beat 2, 4 laps · let them ring', caption_es: 'Pre-coro 2 — cuerda Si traste 1 en el tiempo 1, cuerda mi aguda traste 1 en el tiempo 2, 4 vueltas · déjalas sonar',
           fromBar: 57, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
-            { frets: [['G', 3], ['D', 3], ['A', 1]], note: 'Bb5', midi: [58, 53, 46], beats: 2.5 },
-            { frets: [['D', 6], ['A', 6], ['E', 4]], note: 'Ab5', midi: [56, 51, 44], beats: 1.5 },
-            { frets: [['G', 6], ['D', 6], ['A', 4]], note: 'Db5', midi: [61, 56, 49], beats: 2.5 }
+            { string: 'B', fret: 1, note: 'C', midi: 60, beats: 1 },
+            { string: 'e', fret: 1, note: 'F', midi: 65, beats: 7 }
           ]
         },
         {
@@ -6697,11 +6698,13 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Interlude 2', label_es: 'Interludio 2',
-          caption: 'Interlude 2 — F5 Gb5 C5 Bb5, 2 laps', caption_es: 'Interludio 2 — F5 Gb5 C5 Bb5, 2 vueltas',
+          chordGrid: false,  // tab, not a grid: the open low E passing note is a single note (Jonathan, 2026-11-24)
+          caption: 'Interlude 2 — F5, open low E, Gb5 C5 Bb5, 2 laps', caption_es: 'Interludio 2 — F5, cuerda Mi grave al aire, Gb5 C5 Bb5, 2 vueltas',
           fromBar: 77, bars: 2, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 2 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 0.5 },
             { frets: [['D', 4], ['A', 4], ['E', 2]], note: 'Gb5', midi: [54, 49, 42], beats: 2 },
             { frets: [['G', 5], ['D', 5], ['A', 3]], note: 'C5', midi: [60, 55, 48], beats: 2 },
             { frets: [['G', 3], ['D', 3], ['A', 1]], note: 'Bb5', midi: [58, 53, 46], beats: 2 }
@@ -6733,14 +6736,13 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Pre-chorus 3', label_es: 'Pre-coro 3',
-          caption: 'Pre-chorus 3 — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Pre-coro 3 — F5 Bb5 Ab5 Db5, 4 vueltas',
+          chordGrid: false,  // single notes (B string, high e), plucked long — Jonathan, 2026-11-24
+          caption: 'Pre-chorus 3 — B string fret 1 on beat 1, high e fret 1 on beat 2, 4 laps · let them ring', caption_es: 'Pre-coro 3 — cuerda Si traste 1 en el tiempo 1, cuerda mi aguda traste 1 en el tiempo 2, 4 vueltas · déjalas sonar',
           fromBar: 101, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
-            { frets: [['G', 3], ['D', 3], ['A', 1]], note: 'Bb5', midi: [58, 53, 46], beats: 2.5 },
-            { frets: [['D', 6], ['A', 6], ['E', 4]], note: 'Ab5', midi: [56, 51, 44], beats: 1.5 },
-            { frets: [['G', 6], ['D', 6], ['A', 4]], note: 'Db5', midi: [61, 56, 49], beats: 2.5 }
+            { string: 'B', fret: 1, note: 'C', midi: 60, beats: 1 },
+            { string: 'e', fret: 1, note: 'F', midi: 65, beats: 7 }
           ]
         },
         {

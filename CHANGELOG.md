@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-24 — Smells Like Teen Spirit: new pre-chorus and interlude parts
+
+- **The pre-choruses now play the two verse notes, plucked long:** B string fret 1 on beat 1, then high e fret 1 on
+  beat 2, both left to ring through the lap. Before, they were the power-chord riff.
+- **The interludes add an open low E as a passing note** between F5 and Gb5. These sections now show as tab, like the
+  verses.
+
 ## 2026-11-24 — New Live In-Class Game: Higher or lower?
 
 - **A new game in Live In-Class Games: two piano notes play on the room speakers, and everyone taps Higher or Lower
