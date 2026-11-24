@@ -2274,10 +2274,15 @@ function checkFabToolsThemeDrift() {
    top-level :root (in a rule, an @media :root, a [data-theme] :root) passes;
    one-offs are pinned by value, not by count, so a pinned one-off may spread;
    sizes and layers inline in .js / .html are not read; an undefined --sp-*
-   name would silently be 0 (spacing has no ratchet).
+   name would silently be 0 (spacing has no ratchet); a "/*" inside a CSS
+   string hides the declarations after it, an escaped property name
+   (font-s\ize) is not read, and in nested CSS a declaration written right
+   after a "}" is skipped (review R2-2: none occurs in the sheets today).
    ════════════════════════════════════════════════════════════════════ */
 const DESIGN_FS_NAMES = { '--fs-11': '0.6875rem', '--fs-12': '0.75rem', '--fs-13': '0.8125rem', '--fs-13-5': '0.8438rem', '--fs-14': '0.875rem', '--fs-14-5': '0.9062rem',
   '--fs-15': '0.9375rem', '--fs-16': '1rem', '--fs-17': '1.0625rem', '--fs-18': '1.125rem', '--fs-20': '1.25rem', '--fs-22': '1.375rem', '--fs-24': '1.5rem' };
+/* The four title sizes are names of names (Look A); what they point at is pinned too (review R2-1). */
+const DESIGN_T_NAMES = { '--t-page': 'var(--fs-22)', '--t-sec': 'var(--fs-18)', '--t-card': 'var(--fs-17)', '--t-label': 'var(--fs-12)' };
 const DESIGN_Z_NAMES = { '--z-header': '20', '--z-band': '50', '--z-float': '54', '--z-backdrop': '55', '--z-drawer': '60', '--z-popup': '70', '--z-screen': '120', '--z-overlay': '150', '--z-toast': '9999' };
 /* The one-offs that exist today, per file. Only ever SHRINKS (a pin-only edit when one goes away).
    0.8437rem (5 rules) and 0.9rem (2) are near-twins of --fs-13-5 and --fs-14-5 that were folded and put
@@ -2331,6 +2336,8 @@ function checkDesignValues() {
   }
   for (const [defs, f] of [[appRoot, 'styles.css'], [jRoot, 'tabs/journey-theme.css']])
     for (const n of defs.keys()) if (/^--fs-/.test(n) && !(n in DESIGN_FS_NAMES)) flag(`${f} defines ${n}, which is not one of the pinned --fs-* names: a new text size is Jonathan's call (add it to DESIGN_FS_NAMES with him)`);
+  for (const [n, v] of Object.entries(DESIGN_T_NAMES))
+    if (appRoot.get(n) !== v) flag(`styles.css :root must define ${n}:${v} (found ${appRoot.has(n) ? appRoot.get(n) : 'nothing'}): a title size moves every heading that uses it`);
   let prevZ = -Infinity;
   for (const [n, v] of Object.entries(DESIGN_Z_NAMES)) {
     if (appRoot.get(n) !== v) flag(`styles.css :root must define ${n}:${v} (found ${appRoot.has(n) ? appRoot.get(n) : 'nothing'}): moving a layer changes which one covers which`);
