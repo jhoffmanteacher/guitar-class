@@ -49,6 +49,13 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   throw in `app/cards-loop.js` -> 15 of 15 reloads caught, retried once, "15 still did not", exit 1. GitHub on
   `ci-try/w25-fix`: 5 of 5 smoke areas pass. Before: 4 of ~46 main activities walks failed. `win/w25` holds only the
   diagnostic notes (do not merge); `ci-try/w25-diag` and `ci-try/w25-fix` can be deleted.
+  **2026-11-24 (Claude on Windows, Jonathan: "look at W25"): NOT merged, parked.** `win/w25-fix` was never merged (it
+  still is one file, `tools/smoke.mjs`, +43 -3, and merges into main with no conflict). Of the 21 failed "Browser
+  tests" runs on main since 2026-11-18, 5 are the "<name> not defined" symptom (all 2026-11-18 .. 11-20, the days the
+  app was cut into parts; the last 2026-11-20 18:14 UTC, run 44790829056) and none since; the other 16 are other
+  causes already fixed or unrelated (ResizeObserver 1, Chrome install outage 1, song tiles / card keys 7, play-along
+  view switch 3, a Spanish card title 2, the practice-minutes strip 1; table in that session's scratchpad). Merge the
+  branch (rebase, `node tools/checks.mjs`, Fast) if the symptom comes back; until then leave it.
 - [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
   job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
