@@ -215,6 +215,10 @@ function pcRoundsOf(c, n){
   const ok = rs.every(r => r && Number.isInteger(r.from) && Number.isInteger(r.to) && r.from >= 0 && r.to >= r.from && r.to < n && (r.startStop === undefined || (Number.isInteger(r.startStop) && r.startStop >= 0 && r.startStop <= 3)));
   return ok ? rs : null;
 }
+/* A card with ONE round (ca-54 since 2026-11-24 "just build speed through verse and chorus") has no round or section
+   buttons and no hint: Play starts its round (pcToggle), and the song stops after each stop for the "Got it / Practice
+   again" prompt (pcLadderAsk, app/cards-loop.js). */
+function pcOneRound(L){ return !!(L && L.rounds && L.rounds.length === 1); }
 // The round tapped last (root.dataset.round), or null.
 function pcRoundNow(a, root){
   const n = a && a.card && a.card.sections ? a.card.sections.length : 0;
@@ -377,7 +381,7 @@ function pcPlayerHtml(a, L, preview){
 function pcTabHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
-  const chips = many
+  const chips = many && !pcOneRound(L)
     ? `<p class="pc-hint">${escHtml(t(L.rounds ? 'ca.roundHint' : 'ca.cardSectionHint'))}</p><div class="pc-secs">`
       + pcSecButtonsHtml(L, preview)
       + pcLoopHtml(L, preview) + `</div>`
@@ -518,7 +522,7 @@ function caCardBodyHtml(a, opts){
     + `<p class="pc-dir">${escHtml(t(L.rounds ? 'ca.roundDirections' : sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
-    + pcPlayerHtml(a, L, preview) + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
+    + pcPlayerHtml(a, L, preview) + pcLadderAskHtml(L) + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
 }
 
@@ -688,6 +692,7 @@ function pcSparePark(st){
 }
 function pcSpareReady(st){
   if(st.wholeSong && !(st.loopSi >= 0)) return false;   // a whole-song card ends at its end unless Loop this part is on
+  if(pcLadderPause(st)) return false;  // a ladder stops at the end of each stop: no spare takes the lap over
   const sp = st.spare, nx = pcLoopNext(st);
   if(nx) return !!(sp && twinSrcIs(sp, nx.src) && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStartIn(st, nx.win)) < 0.05);
   return !!(sp && sp.src === st.audio.src && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStart(st)) < 0.05);
@@ -707,7 +712,9 @@ function pcToggle(btn){
   if(songFileWaitingFor(root)){ songFileCancelWait(); return; }
   /* ROUNDS: Play plays the round tapped last again (its switches are still as the round left them: a hand-picked speed
      left a plain loop of it); before any round, the whole card from the top. */
-  const rd = pcRoundNow(pcActivity(root), root);
+  const a = pcActivity(root), L = a && pcLayout(a);
+  if(pcOneRound(L)){ pcRoundStart(root, 0, L); return; }   // a one-round card: Play is the ladder, from its bottom stop
+  const rd = pcRoundNow(a, root);
   pcStart(root, rd ? rd.from : 0);
 }
 function pcFromSection(btn, si){
@@ -718,13 +725,16 @@ function pcFromSection(btn, si){
    from a count-in at its first stop. Stay at this speed starts off. */
 function pcFromRound(btn, ri){
   const root = btn.closest('.pc');
-  const a = root && pcActivity(root), L = a && pcLayout(a), rd = L && L.rounds && L.rounds[ri];
+  if(root) pcRoundStart(root, ri);
+}
+function pcRoundStart(root, ri, L0, keepBuild){
+  const a = pcActivity(root), L = L0 || (a && pcLayout(a)), rd = L && L.rounds && L.rounds[ri];
   if(!rd) return;
   root.dataset.round = String(ri);
   pcLoopSet(root, 'loop', true);
   pcLoopSet(root, 'build', true);
   pcLoopSet(root, 'hold', false);
-  pcStart(root, rd.from);
+  pcStart(root, rd.from, 0, keepBuild);
 }
 function pcStart(root, si, rep, keepBuild){
   if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
@@ -732,6 +742,7 @@ function pcStart(root, si, rep, keepBuild){
   const a = pcActivity(root);
   const L = a && pcLayout(a);
   if(!L || !L.sections[si]) return;
+  pcLadderAskHide(root);               // a play starts: the "Got it / Practice again" prompt (app/cards-loop.js) goes
   /* Loop this part / Build up speed (app/cards-loop.js): Build starts every
      play at the slowest stop (or, after a private song loaded, the stop it
      reached: keepBuild), so the speed control is set before the file is picked. */
@@ -909,6 +920,8 @@ function pcFrame(){
     }, Math.max(0, left * 1000 - 4)));
     st.timers.push(...hand);           // pcStop still clears them with the rest
   } else if(!st.leaving && (now >= end - 0.02 || audio.ended)){
+    // A ladder (card.rounds, ca-54) plays one time through a stop, then stops and asks: Got it or Practice again.
+    if(pcLadderPause(st)){ pcLadderAsk(st); return; }
     // A whole-song card stops at the end of the song (Jonathan, 2026-10-02:
     // it used to loop back to where it started). A card that is a few bars
     // of the song (ca-10's twelve laps of the riff, ca-20's four-bar loop)

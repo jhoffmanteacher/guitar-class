@@ -2,17 +2,19 @@
 /* THE SPEED LADDER, MEASURED IN A REAL BROWSER (ca-54, "Sweet Child O' Mine — Speed Ladder", 2026-11-24).
 
    checks.mjs 1fc runs the stop logic on a fake card element; this plays the real card: headless Chrome for Testing,
-   the real audio files, real mouse clicks on the three round buttons, the page sampled every 100 ms. For each round it
-   prints, as the climb goes, every change of the speed control: the slider's stop, which FILE is playing (slow or fast),
-   the element's playbackRate, the BPM that comes to (file BPM x rate; expected 90 / 100 / 112.5 / 125), the laps counted
-   when the stop changed (pcState.laps: the laps PLAYED before this step; expected 1, 2, 3 for the three steps up from
-   the bottom, 1 and 2 for Round 3), how long the stop lasted against how long one lap should take, and the status line.
-   It fails on a wrong first stop, a wrong BPM, a stop that lasts more or less than one lap, a round that never reaches
-   125, or a page error. About 6 minutes (the audio plays in real time: Round 1 about 2 minutes, Round 2 1, Round 3 2).
+   the real audio files, real mouse clicks on Play and then on the prompt's buttons, the page sampled every 100 ms.
+   The card has ONE round (verse + chorus, 24 bars) and no round buttons (2026-11-24). Play starts it on the bottom stop;
+   after ONE time through the song stops and asks "Got it" or "Practice again" (pcLadderAsk). The run: 90, Practice
+   again (90 once more), Got it -> 100, Got it -> 112.5, Got it -> 125, then "Got it" closes the prompt. For each time
+   through it prints the slider's stop, which FILE plays (slow or fast), the playbackRate, the BPM that comes to
+   (file BPM x rate; expected 90 / 100 / 112.5 / 125), how long it played against one time through, the status line
+   and the prompt's text. It fails on a wrong stop, a wrong BPM, a pass that lasts more or less than 24 bars, a
+   prompt that does not show, shows while the song plays or names the wrong tempo, or a page error. About 6 minutes
+   (the audio plays in real time).
 
      node tools/speed-ladder-loop.mjs                    measure this checkout (CHROME=<Chrome for Testing>)
-     node tools/speed-ladder-loop.mjs --shots <dir>      also save screenshots at 1366x657 (opened, each round, the three views, Spanish)
-     node tools/speed-ladder-loop.mjs --fast             one round only (Round 2, the chorus: about 1.5 minutes)
+     node tools/speed-ladder-loop.mjs --shots <dir>      also save screenshots at 1366x657 (opened, playing, the prompt, the three views, Spanish)
+     node tools/speed-ladder-loop.mjs --fast             90, Practice again, Got it to 100: two and a half minutes
 
    Silent: Chrome is started with --mute-audio, so nothing plays out loud; the audio clock still runs in real time.
    One browser run: count it with the smoke's. It serves the checkout it runs in. Exits 0 when every line holds. */
@@ -129,63 +131,69 @@ async function main() {
     return { stop: r ? +r.value : -1, slowFlag: root.dataset.slow, rate: root.dataset.rate, playing: !!st, counting: !!(st && st.counting), laps: st ? st.laps : -1, build: root.dataset.build || '',
       file: a ? (slow ? 'slow' : 'fast') : '-', pr: a ? a.playbackRate : 0, t: a ? a.currentTime : 0,
       bpm: a ? (slow ? tr.trackBpmSlow : tr.trackBpm) * a.playbackRate : 0, status: (root.querySelector('.pc-status') || {}).textContent || '',
+      ask: (() => { const q = root.querySelector('.pc-ask'); return q && !q.hidden ? q.textContent.replace(/\\s+/g, ' ').trim() : ''; })(),
       round: root.dataset.round || '', sw: ['loop', 'build', 'hold'].map(n => { const b = root.querySelector('.pc-loop-sw[data-loop-sw="' + n + '"]'); return b ? (b.hidden ? 'h' : 's') : '-'; }).join('') }; })()`;
   // 1. Opened.
   const s0 = await E(SAMPLE);
   say(`opened: slider stop ${s0.stop}, data-slow "${s0.slowFlag}", data-rate ${s0.rate}, switches (loop build hold) ${s0.sw}, status "${s0.status}"`);
   if (s0.stop !== 0 || s0.slowFlag !== '1' || +s0.rate !== 0.9) bad(`the card should open on stop 0 (slow file, rate 0.9): ${JSON.stringify(s0)}`);
-  if (s0.sw !== 'hhh') bad(`Loop, Build and Stay should be hidden when the card opens: ${s0.sw}`);
+  if (s0.sw !== '---') bad(`a one-round card draws no Loop / Build / Stay switch: ${s0.sw}`);
+  if (s0.ask) bad(`the prompt should be hidden when the card opens: "${s0.ask}"`);
   const ticks = await E(`[...document.querySelectorAll('.ca-card[open][data-id="${ID}"] .pc-speed-x')].map(x => x.textContent).join(' ')`);
   say(`the slider reads: ${ticks}`);
-  const rb = await E(`[...document.querySelectorAll('.ca-card[open][data-id="${ID}"] .pc-round')].map(b => b.textContent.trim()).join(' | ')`);
-  say(`round buttons: ${rb}`);
+  const rb = await E(`document.querySelectorAll('.ca-card[open][data-id="${ID}"] .pc-round, .ca-card[open][data-id="${ID}"] .pc-sec').length`);
+  say(`round / section buttons: ${rb}`);
+  if (rb !== 0) bad(`the card should have no round or section buttons (Play starts the ladder): ${rb}`);
   await shot('01-opened');
 
-  // 2. The three rounds, played for real.
+  // 2. The ladder, played for real: Play, one time through at 90, the prompt; Practice again (90 once more); Got it up to 100, 112, 125.
   const tr = await E(`(() => { const t = SNIPPET_TRACKS['sweet-child-o-mine']; return { bpm: t.trackBpm, slow: t.trackBpmSlow, bpb: t.beatsPerBar }; })()`);
-  const BARS = { 0: 16, 1: 8, 2: 24 };   // one lap of each round, in bars
-  const WANT = { 0: [[0, 90], [1, 100], [2, 112.5], [3, 125]], 1: [[0, 90], [1, 100], [2, 112.5], [3, 125]], 2: [[1, 100], [2, 112.5], [3, 125]] };
-  const rounds = FAST ? [1] : [0, 1, 2];
-  for (const ri of rounds) {
-    say(`── Round ${ri + 1} ──`);
-    await E('pcStop()'); await sleep(400);
-    if (!(await click(`.pc-round[data-round="${ri}"]`))) { bad(`no round button ${ri + 1}`); continue; }
-    const seen = [];   // each distinct stop, in order: { stop, file, pr, bpm, laps, since, firstStatus }
+  const BARS = 24;   // one time through: the verse and the chorus
+  const BPMS = [90, 100, 112.5, 125];
+  // The plan: each entry is the stop that plays, then what the student presses when the prompt shows.
+  const plan = FAST ? [[0, 'again'], [0, 'got']] : [[0, 'again'], [0, 'got'], [1, 'got'], [2, 'got'], [3, 'got']];
+  await E('pcStop()'); await sleep(400);
+  if (!(await click('.pc-play'))) bad('no Play button');
+  for (let k = 0; k < plan.length; k++) {
+    const [stop, press] = plan[k];
+    say(`── time ${k + 1}: stop ${stop} (${BPMS[stop]} BPM), then "${press === 'got' ? 'Got it' : 'Practice again'}" ──`);
     const t0 = Date.now();
-    let last = null, atTop = 0, shotAfter = false;
-    const limit = (ri === 0 ? 200 : ri === 1 ? 110 : 190) * 1000;
+    let first = null, t1 = null, asked = null, tPlay = 0;
+    const limit = (BARS * tr.bpb * 60 / BPMS[stop] + 40) * 1000;
     while (Date.now() - t0 < limit) {
       await sleep(100);
       const s = await E(SAMPLE);
       if (!s) { bad('the card is gone'); break; }
-      if (s.counting || !s.playing) { if (!seen.length && Date.now() - t0 > 8000) { bad(`Round ${ri + 1} never started playing: ${JSON.stringify(s)}`); break; } continue; }
-      if (!last || s.stop !== last.stop) {
-        const now = Date.now();
-        if (seen.length) seen[seen.length - 1].held = (now - seen[seen.length - 1].at) / 1000;
-        seen.push({ stop: s.stop, file: s.file, pr: s.pr, bpm: s.bpm, laps: s.laps, at: now, status: s.status, sw: s.sw });
-        if (seen.length === 1) { await shot(`02-round${ri + 1}-first-stop`); }
-        if (seen.length === 2 && !shotAfter) { shotAfter = true; await shot(`03-round${ri + 1}-after-first-step`); }
-      }
-      last = s;
-      if (s.stop === 3) { atTop++; if (atTop === 1) { seen[seen.length - 1].held = null; } if (atTop >= 40) break; } else atTop = 0;   // 4 s at the top stop
+      if (s.playing && !s.counting) { if (!first) { first = s; tPlay = Date.now(); } if (s.ask) bad(`the prompt shows while the song plays: "${s.ask}"`); }
+      if (first && !s.playing && s.ask) { asked = s; t1 = Date.now(); break; }
     }
-    const want = WANT[ri];
-    seen.forEach(x => say(`  stop ${x.stop}: ${x.file} file at x${x.pr.toFixed ? x.pr.toFixed(4) : x.pr} = ${x.bpm.toFixed(1)} BPM · laps played so far ${x.laps}${x.held != null ? ` · held ${x.held.toFixed(1)} s` : ' · (top: keeps looping)'} · status "${x.status}" · switches ${x.sw}`));
-    if (seen.map(x => x.stop).join() !== want.map(w => w[0]).join()) bad(`Round ${ri + 1}: the stops it went through were ${seen.map(x => x.stop).join(' ')}, want ${want.map(w => w[0]).join(' ')}`);
-    seen.forEach((x, i) => {
-      const w = want[i];
-      if (w && Math.abs(x.bpm - w[1]) > 0.6) bad(`Round ${ri + 1} stop ${x.stop}: plays ${x.bpm.toFixed(2)} BPM, want ${w[1]}`);
-      // laps played when the stop changed: one per stop climbed (Round 3 starts on the second stop, lap count from 0).
-      if (i > 0 && x.laps !== i) bad(`Round ${ri + 1} stop ${x.stop}: ${x.laps} laps counted when it began, want ${i} (one lap at every stop before it)`);
-      if (x.held != null) {
-        const barSec = tr.bpb * 60 / w[1], expect = BARS[ri] * barSec;
-        if (Math.abs(x.held - expect) > 1.5) bad(`Round ${ri + 1} stop ${x.stop}: held ${x.held.toFixed(1)} s, one lap is ${expect.toFixed(1)} s (${BARS[ri]} bars at ${w[1]} BPM)`);
-      }
-    });
-    if (!seen.length || seen[seen.length - 1].stop !== 3) bad(`Round ${ri + 1} never reached the top stop (125)`);
-    if (seen.length && seen[0].status && !/BPM/.test(seen[0].status)) bad(`Round ${ri + 1}: the status line is "${seen[0].status}" — it should name the round and the BPM`);
-    await E('pcStop()'); await sleep(300);
+    if (!first) { bad(`time ${k + 1}: never started playing`); break; }
+    say(`  played ${first.file} file at x${first.pr.toFixed ? first.pr.toFixed(4) : first.pr} = ${first.bpm.toFixed(1)} BPM on slider stop ${first.stop}, status "${first.status}"`);
+    if (first.stop !== stop) bad(`time ${k + 1}: the slider is on stop ${first.stop}, want ${stop}`);
+    if (Math.abs(first.bpm - BPMS[stop]) > 0.6) bad(`time ${k + 1}: plays ${first.bpm.toFixed(2)} BPM, want ${BPMS[stop]}`);
+    if (!/BPM/.test(first.status)) bad(`time ${k + 1}: the status line is "${first.status}" — it should name the BPM`);
+    if (k === 0) await shot('02-playing-first-stop');
+    if (!asked) { bad(`time ${k + 1}: the song never stopped and asked after one time through (${(limit / 1000).toFixed(0)} s)`); break; }
+    const held = (t1 - tPlay) / 1000, expect = BARS * tr.bpb * 60 / BPMS[stop];
+    say(`  stopped after ${held.toFixed(1)} s (one time through is ${expect.toFixed(1)} s); the prompt reads: "${asked.ask}"`);
+    if (Math.abs(held - expect) > 2) bad(`time ${k + 1}: it played ${held.toFixed(1)} s, one time through is ${expect.toFixed(1)} s (${BARS} bars at ${BPMS[stop]} BPM)`);
+    const bpmWord = Math.floor(BPMS[stop] + 1e-6) + ' BPM';
+    if (!asked.ask.includes(bpmWord) || !/Got it/.test(asked.ask) || !/Practice again/.test(asked.ask)) bad(`time ${k + 1}: the prompt should name ${bpmWord}, "Got it" and "Practice again": "${asked.ask}"`);
+    if (stop < 3 && !/faster/.test(asked.ask)) bad(`time ${k + 1}: below the top the prompt should say "faster": "${asked.ask}"`);
+    if (stop === 3 && !/finish/.test(asked.ask)) bad(`the top stop's prompt should say "finish": "${asked.ask}"`);
+    if (k === 0) await shot('03-prompt-after-first-time');
+    if (press === 'got' && stop === 3) {
+      if (!(await click('.pc-ask-got'))) bad('no Got it button');
+      const e = await E(SAMPLE);
+      if (e.ask || e.playing) bad(`Got it at the top should close the prompt and stay stopped: ${JSON.stringify(e)}`);
+      break;
+    }
+    if (!(await click(press === 'got' ? '.pc-ask-got' : '.pc-ask-again'))) { bad(`no ${press} button`); break; }
+    const n = await E(SAMPLE), want = press === 'got' ? stop + 1 : stop;
+    if (n.ask) bad(`the prompt should close when a button is pressed: "${n.ask}"`);
+    if (n.stop !== want) bad(`after "${press}" the slider is on stop ${n.stop}, want ${want}`);
   }
+  await E('pcStop()'); await sleep(300);
 
   if (SHOTS) {
     // The other views and Spanish, stopped, on the first stop; the cut sheet alone.
@@ -201,7 +209,7 @@ async function main() {
     await E(`(setLang('en'), renderClassActivities(), caFocusActivity('${ID}'), true)`); await sleep(1500);
   }
   if (pageErrors.length) bad(`page errors: ${[...new Set(pageErrors)].slice(0, 4).join(' | ')}`);
-  say(problems.length ? `speed-ladder-loop: ✗ ${problems.length} problem(s)` : `speed-ladder-loop: ✓ ${rounds.length} round(s) played for real: first stop 90, every stop its BPM, one lap a stop, the top reached`);
+  say(problems.length ? `speed-ladder-loop: ✗ ${problems.length} problem(s)` : `speed-ladder-loop: ✓ ${plan.length} times through played for real: first stop 90, every stop its BPM, one time through each, the prompt after each`);
   return problems.length ? 1 : 0;
 }
 const watchdog = setTimeout(() => { console.error('speed-ladder-loop: ✗ HUNG (13 minutes)'); done(3); }, 13 * 60 * 1000);

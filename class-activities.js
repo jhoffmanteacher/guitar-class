@@ -7571,17 +7571,18 @@ window.CLASS_ACTIVITIES = [
      on the sheet, with the Chords and Tab views of ca-33's switch.
      THE LADDER: four stops, 90 · 100 · 112 · 125 BPM. The bottom stop is the slow file (100) at 0.9 (`slowestRate`),
      not the site's usual 0.8; the card opens on it (`startStop`, the one card that does not open on Normal 1x).
-     Three ROUNDS (`rounds`, app/cards.js; app/cards-loop.js): 1 the verse and 2 the chorus climb 90 -> 100 -> 112 -> 125,
-     3 the verse and chorus as one lap starts at 100 and climbs to 125. One time through at each stop (`buildLaps`: 1),
-     then it keeps looping at 125. 112 has no check of its own: every round passes through it. The third check is the
-     assessment's target, so it is a plain check, not a Level up; no Song Journey button. */
+     ONE ROUND (`rounds`, app/cards.js; app/cards-loop.js; Jonathan, 2026-11-24: "it should play once through verse at
+     each speed ... remove the separate verse and chorus parts"): the verse and chorus as one lap, Play starts it at 90 and
+     climbs 90 -> 100 -> 112 -> 125 (`buildLaps`: 1). After each time through the song STOPS and asks (pcLadderAsk):
+     "Got it" plays the next speed, "Practice again" plays the same one; at 125 "Got it" finishes. Two checks (up to 112, then record
+     speed, the assessment's target): plain checks, no Level up; no Song Journey button. */
   {
     id:    'ca-54',
     view:  'card',    // one screen: Play song + sheet + checks — see CARD above
     title:    'Sweet Child O\' Mine — Speed Ladder',
     title_es: 'Sweet Child O\' Mine — Escalera de velocidad',
-    intro:    'Climb to record speed on the verse, then the chorus, then both.',
-    intro_es: 'Sube a la velocidad de la grabación en la estrofa, luego en el coro y después en las dos.',
+    intro:    'Climb to record speed on the verse and chorus together.',
+    intro_es: 'Sube a la velocidad de la grabación en la estrofa y el coro juntos.',
     card: {
       track: 'sweet-child-o-mine',
       slowest: true,       // four-way speed control: Slowest / Slower / Slow / Normal
@@ -7596,20 +7597,16 @@ window.CLASS_ACTIVITIES = [
       caption_es: 'Letra y acordes · estrofa y coro',
       sections: null,      // ca-33's Verse 1 and Chorus 1 — joined after the array, below
       rounds: [
-        { label: '1 Verse',           label_es: '1 Estrofa',         what: 'Verse',           what_es: 'Estrofa',        from: 0, to: 0, startStop: 0 },
-        { label: '2 Chorus',          label_es: '2 Coro',            what: 'Chorus',          what_es: 'Coro',           from: 1, to: 1, startStop: 0 },
-        { label: '3 Verse + Chorus',  label_es: '3 Estrofa + coro',  what: 'Verse + Chorus',  what_es: 'Estrofa + coro', from: 0, to: 1, startStop: 1 }
+        // ONE round: the verse and chorus as one lap, climbing 90 -> 100 -> 112 -> 125 (no buttons: Play starts it).
+        { label: 'Verse + Chorus',  label_es: 'Estrofa + coro',  what: 'Verse + Chorus',  what_es: 'Estrofa + coro', from: 0, to: 1, startStop: 0 }
       ],
       checks: [
-        { label: 'Round 1 — the verse', label_es: 'Ronda 1 — la estrofa',
-          text:    'Climb the verse from 90 to record speed without stopping.',
-          text_es: 'Sube la estrofa de 90 a la velocidad de la grabación sin detenerte.' },
-        { label: 'Round 2 — the chorus', label_es: 'Ronda 2 — el coro',
-          text:    'Climb the chorus from 90 to record speed without stopping.',
-          text_es: 'Sube el coro de 90 a la velocidad de la grabación sin detenerte.' },
-        { label: 'Round 3 — verse and chorus', label_es: 'Ronda 3 — estrofa y coro',
-          text:    'Play verse and chorus together from 100 up to record speed without stopping.',
-          text_es: 'Toca estrofa y coro juntos desde 100 hasta la velocidad de la grabación sin detenerte.' }
+        { label: 'Up to 112', label_es: 'Hasta 112',
+          text:    'Play the verse and chorus one time through at 90, 100 and 112 BPM.',
+          text_es: 'Toca la estrofa y el coro una vez a 90, 100 y 112 BPM.' },
+        { label: 'Record speed', label_es: 'La velocidad de la grabación',
+          text:    'Play the verse and chorus one time through at record speed, 125 BPM.',
+          text_es: 'Toca la estrofa y el coro una vez a la velocidad de la grabación, 125 BPM.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).

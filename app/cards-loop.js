@@ -34,7 +34,12 @@
    slowest stop, after PC_BUILD_LAPS laps" above (and to the switches being on screen); it is the only card that is. Its Loop and Build switches are not shown; a round button
    (pcFromRound, app/cards.js) turns both on and starts the round, which loops the sections from..to as ONE lap (st.loopTo)
    from the round's own stop (root.dataset.round -> startStop), moving up after `card.buildLaps` laps (root.dataset.buildLaps,
-   1 there: pcBuildLaps). Stay at this speed and the take-over rule work as above. Every other card is unchanged. */
+   1 there: pcBuildLaps). Stay at this speed and the take-over rule work as above. Every other card is unchanged.
+   THE LADDER STOPS AND ASKS (Jonathan, 2026-11-24: "it should play once through verse at each speed. between each,
+   there should be a notification ... with buttons"): a rounds card does not roll into the next stop by itself. At
+   the end of ONE time through (pcFrame -> pcLadderAsk) it stops and shows the prompt under the player (.pc-ask):
+   "Got it" plays the next stop up from a count-in, "Practice again" plays the same stop again; at the top stop "Got it"
+   just closes the prompt. A one-round card (ca-54) has no round buttons: Play is the ladder from the bottom stop. */
 const PC_BUILD_LAPS = 2;
 // Laps a stop plays before Build moves up: the card's own (data-build-laps, ROUNDS above), else PC_BUILD_LAPS.
 function pcBuildLaps(root){
@@ -63,7 +68,7 @@ function pcLoopSet(root, name, on){
   root.dataset[name] = on ? '1' : '';
   const b = root.querySelector(`.pc-loop-sw[data-loop-sw="${name}"]`);
   if(b) b.setAttribute('aria-checked', on ? 'true' : 'false');
-  if(name === 'build'){ const h = root.querySelector('.pc-loop-sw[data-loop-sw="hold"]'); if(h) h.hidden = !on; if(!on) pcLoopSet(root, 'hold', false); }
+  if(name === 'build'){ const h = root.querySelector('.pc-loop-sw[data-loop-sw="hold"]'); if(h) h.hidden = !on || !!root.querySelector('.pc-ask'); if(!on) pcLoopSet(root, 'hold', false); }   // a ladder has no Stay at this speed: Practice again is it
 }
 /* The card's speed stops, slowest first: the slider's ticks, or the two-way switch's Slower / Normal. */
 function pcBuildStops(root){
@@ -116,7 +121,7 @@ function pcLoopClamp(st, bars){
 /* The lap coming up is one stop faster: { stop, slow, rate, src, win }; else null. */
 function pcLoopNext(st){
   const b = st.build;
-  if(!b || !(st.loopSi >= 0) || pcLoopFlag(st.root, 'hold') || b.laps + 1 < pcBuildLaps(st.root)) return null;
+  if(!b || !(st.loopSi >= 0) || pcLoopFlag(st.root, 'hold') || b.laps + 1 < pcBuildLaps(st.root) || pcLadderPause(st)) return null;   // a ladder moves up only when the student says so (pcLadderGo)
   const stops = pcBuildStops(st.root), nx = stops[b.stop + 1];
   if(!nx) return null;
   return { stop: b.stop + 1, slow: nx.slow, rate: nx.rate, src: snippetSrc(st.L.tr, nx.slow, st.root.dataset.guitar === '1'), win: pcWindow(st.L, nx.slow, st.root.dataset.guitar === '1') };
@@ -141,6 +146,45 @@ function pcBuildWaitStep(st, nx){
   songFileWaitThen(root, nx.src, () => pcStart(root, si, 0, keep), pcWaitUi(root));
   return true;
 }
+// The tempo of speed stop i in BPM ("90"): the file it plays times its rate.
+function pcStopBpm(root, L, i){
+  const stops = pcBuildStops(root), s = stops[Math.max(0, Math.min(stops.length - 1, i))];
+  return Math.floor((s.slow ? L.tr.trackBpmSlow : L.tr.trackBpm) * parseFloat(s.rate) + 1e-6);
+}
+/* THE LADDER STOPS AND ASKS (above). pcLadderPause: this play is a ladder's and Build is still climbing (a speed
+   picked by hand took Build off: then it is a plain loop and never asks). */
+function pcLadderPause(st){ return !!(st && st.L.rounds && st.build && st.loopSi >= 0 && st.root.querySelector('.pc-ask')); }
+function pcLadderAskHtml(L){
+  if(!(L && L.rounds)) return '';
+  return `<div class="pc-ask" role="status" aria-live="polite" hidden><p class="pc-ask-msg"></p>`
+    + `<div class="pc-ask-btns"><button type="button" class="pc-ask-btn pc-ask-got" onclick="pcLadderGo(this,false)">${escHtml(t('pc.askGot'))}</button>`
+    + `<button type="button" class="pc-ask-btn pc-ask-again" onclick="pcLadderGo(this,true)">${escHtml(t('pc.askAgain'))}</button></div></div>`;
+}
+function pcLadderAskHide(root){
+  const el = root && root.querySelector('.pc-ask');
+  if(el){ el.hidden = true; el.dataset.stop = ''; }
+}
+// The stop is over: stop the song and ask. The prompt says the tempo just played and what each button does.
+function pcLadderAsk(st){
+  const root = st.root, L = st.L, stop = st.build.stop, last = stop >= pcBuildStops(root).length - 1, bpm = pcStopBpm(root, L, stop);
+  pcStop();
+  const el = root.querySelector('.pc-ask');
+  if(!el) return;
+  el.dataset.stop = String(stop);
+  el.dataset.last = last ? '1' : '';
+  el.querySelector('.pc-ask-msg').textContent = t(last ? 'pc.askLast' : 'pc.askNext', {bpm});
+  el.hidden = false;
+  const first = el.querySelector('.pc-ask-got');
+  if(first) try { first.focus(); } catch(e) {}
+}
+// Got it (again = false): the next stop up, or, at the top, done. Practice again (again = true): this stop once more.
+function pcLadderGo(btn, again){
+  const root = btn.closest('.pc'), el = root && root.querySelector('.pc-ask');
+  if(!el || el.hidden) return;
+  const stop = parseInt(el.dataset.stop, 10) || 0;
+  if(!again && el.dataset.last === '1'){ pcLadderAskHide(root); const p = root.querySelector('.pc-play'); if(p) try { p.focus(); } catch(e) {} return; }
+  pcRoundStart(root, parseInt(root.dataset.round, 10) || 0, null, { stop: again ? stop : stop + 1, laps: 0 });
+}
 function pcLoopStatus(st){
   if(!(st.loopSi >= 0) || st.counting || pcState !== st) return;
   const b = st.build;
@@ -148,8 +192,7 @@ function pcLoopStatus(st){
   /* ROUNDS: the round and the speed in BPM ("Verse at 90 BPM"); "Round" already means a lap on the other cards. */
   const rd0 = st.L.rounds ? st.L.rounds[parseInt(st.root.dataset.round, 10)] : null, rd = rd0 && st.loopSi >= rd0.from && st.loopSi <= rd0.to ? rd0 : null;
   if(b && rd){
-    const stops = pcBuildStops(st.root), s = stops[Math.min(b.stop, stops.length - 1)];
-    txt = t('pc.roundAt', {what: tf(rd, 'what'), bpm: Math.floor((s.slow ? st.L.tr.trackBpmSlow : st.L.tr.trackBpm) * parseFloat(s.rate) + 1e-6)});
+    txt = t('pc.roundAt', {what: tf(rd, 'what'), bpm: pcStopBpm(st.root, st.L, b.stop)});
   } else if(b){
     const stops = pcBuildStops(st.root), speed = t(stops[Math.min(b.stop, stops.length - 1)].key), n = b.laps + 1, total = pcBuildLaps(st.root);
     txt = pcLoopFlag(st.root, 'hold') || b.stop >= stops.length - 1 || total < 2 ? t('pc.lapAt', {n, speed}) : t('pc.lapOf', {n, total, speed});
@@ -217,6 +260,7 @@ function pcLoopReset(scope){
   if(!scope) return;
   scope.querySelectorAll('.pc').forEach(root => {
     if(root.dataset.loop || root.dataset.build){ pcLoopSet(root, 'loop', false); pcLoopSet(root, 'build', false); }
+    pcLadderAskHide(root);
     if(root.dataset.round){ root.dataset.round = ''; root.querySelectorAll('.pc-round.cur').forEach(b => b.classList.remove('cur')); }   // ROUNDS: no round is picked when a card opens
   });
 }

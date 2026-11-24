@@ -3931,6 +3931,16 @@ span.tab-count-held{margin-left:var(--sp-4)}
 .pc-play:focus-visible,.pc-speed:focus-visible,.pc-sec:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pc-status{min-height:1.4em;margin:var(--sp-6) 0 var(--sp-2);font-size:var(--fs-14);font-weight:600;color:var(--purple-text)}
 .pc-hint{margin:0 0 var(--sp-6);font-size:var(--fs-13);color:var(--text2)}
+/* The speed ladder's prompt after each time through (pcLadderAsk, app/cards-loop.js, 2026-11-24): Got it / Practice again. */
+.pc-ask{margin:var(--sp-8) 0;padding:var(--sp-8) var(--sp-12);border:1.5px solid var(--purple-border);border-radius:var(--radius);background:var(--purple-bg2);display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-8) var(--sp-12)}
+.pc-ask[hidden]{display:none}
+.pc-ask-msg{margin:0;flex:1 1 20em;font-size:var(--fs-14);font-weight:600;color:var(--purple-text)}
+.pc-ask-btns{display:flex;flex-wrap:wrap;gap:var(--sp-8)}
+.pc-ask-btn{font-family:inherit;font-size:var(--fs-14);font-weight:700;min-height:40px;padding:var(--sp-6) var(--sp-16);border-radius:10px;cursor:pointer;border:1.5px solid var(--purple-border);background:var(--bg);color:var(--text)}
+.pc-ask-btn:hover{background:var(--bg3)}
+.pc-ask-got{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
+.pc-ask-got:hover{background:var(--brand-hover)}
+.pc-ask-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pc-secs{display:flex;flex-wrap:wrap;gap:var(--sp-6);margin-bottom:var(--sp-8)}
 .pc-sec{font-family:inherit;font-size:var(--fs-14);font-weight:600;min-height:36px;padding:0 var(--sp-14);border:1px solid var(--border2);border-radius:999px;background:var(--bg);color:var(--text);cursor:pointer}
 .pc-sec:hover{border-color:var(--purple-accent)}

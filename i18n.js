@@ -623,8 +623,15 @@
     'pc.roundAt':              { en: '{what} at {bpm} BPM', es: '{what} a {bpm} BPM' },
     'ca.roundHint':            { en: 'Tap a round to start it.',
                                  es: 'Pulsa una ronda para empezarla.' },
-    'ca.roundDirections':      { en: 'Play along as the song speeds up by itself.',
-                                 es: 'Toca con la canción mientras acelera sola.' },
+    'ca.roundDirections':      { en: 'Play along; click Got it to go faster or Practice again to repeat.',
+                                 es: 'Toca con la canción; pulsa «Lo tengo» para subir o «Practicar otra vez» para repetir.' },
+    // The prompt after each time through (pcLadderAsk, app/cards-loop.js; 2026-11-24): the card stops and asks.
+    'pc.askGot':               { en: 'Got it', es: 'Lo tengo' },
+    'pc.askAgain':             { en: 'Practice again', es: 'Practicar otra vez' },
+    'pc.askNext':              { en: 'That was {bpm} BPM. Click “Got it” to play it faster or “Practice again” to play at the same speed.',
+                                 es: 'Eso fue a {bpm} BPM. Pulsa «Lo tengo» para tocarlo más rápido o «Practicar otra vez» para tocarlo a la misma velocidad.' },
+    'pc.askLast':              { en: 'That was {bpm} BPM, record speed. Click “Got it” to finish or “Practice again” to play it once more.',
+                                 es: 'Eso fue a {bpm} BPM, la velocidad de la grabación. Pulsa «Lo tengo» para terminar o «Practicar otra vez» para tocarlo una vez más.' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
     'ca.sheetDirections':      { en: 'Press Play song, strum the way the recording does and change chords on the word under each name.',
                                  es: 'Presiona «Tocar la canción», rasguea como la grabación y cambia de acorde en la palabra bajo cada nombre.' },

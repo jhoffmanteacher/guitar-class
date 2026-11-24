@@ -315,6 +315,15 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-24 — Sweet Child speed ladder, ONE round that stops and asks (Jonathan: "it should play once through verse at each
+  speed ... a notification ... 'got it' ... 'practice again' ... remove the separate verse and chorus parts").** ca-54 has one
+  round (verse + chorus, 24 bars), no round or section buttons and no Loop / Build / Stay switch: Play starts it at 90. After
+  ONE time through `pcFrame` calls `pcLadderAsk` (`app/cards-loop.js`): the song stops and a box under the player (`.pc-ask`)
+  names the tempo; Got it plays the next stop (90, 100, 112, 125), Practice again the same one, at 125 Got it finishes; Play
+  always starts over at 90; a hand-picked speed turns Build off (plain loop, never asks). Two checks (up to 112, record speed;
+  the 2-6 rule). Other cards unchanged. checks.mjs 1fc, 1eb and 1er re-pinned; `tools/smoke.mjs` and
+  `tools/speed-ladder-loop.mjs` rewritten for it.
+
 - **2026-11-24 — Sweet Child speed ladder, ca-54 (`03807845`, `f886ef02`; work order `WORK-ORDER-sweet-child-speed-ladder`).**
   ca-33's Verse 1 and Chorus 1 on a cut lyric sheet (14 names), three round buttons, bottom stop 90 (`slowestRate` 0.9),
   opens there (`startStop`), one lap a stop (`buildLaps` 1), Round 3 from 100, no Level up. The settings sit on ca-54

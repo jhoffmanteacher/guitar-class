@@ -11421,7 +11421,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
    caOnToggle resets the switches when a card closes (pcLoopReset), so every opening starts off. Every string the
    part uses is in i18n.js in English and Spanish. The behaviour itself (laps on the bar line, the steps) is
    tools/playalong-loop.mjs's (R15) and the smoke's. */
-const EB_CARDS_WITH = 25, EB_CARDS_WITHOUT = 2;   // 2026-11-24: +1, ca-54 (the speed ladder: its Loop and Build switches are drawn hidden, 1fc)
+const EB_CARDS_WITH = 24, EB_CARDS_WITHOUT = 3;   // 2026-11-24: ca-54 (the speed ladder, ONE round) draws no section buttons and no switches (1fc)
 const EB_STRINGS = ['pc.loop', 'pc.build', 'pc.buildTitle', 'pc.hold', 'pc.holdTitle', 'pc.looping', 'pc.lapOf', 'pc.lapAt', 'pc.keys.loop'];
 function checkLoopSpeed(ctx, i18nTable) {
   head('1eb. Loop this part / Build up speed: only on cards with section buttons, off by default, nothing stored');
@@ -11438,7 +11438,8 @@ function checkLoopSpeed(ctx, i18nTable) {
       run('setLang(' + JSON.stringify(lang) + ')');
       for (const a of acts) {
         ctx.__ebCard = a;
-        const n = run('(pcLayout(caView(window.__ebCard)) || { sections: [] }).sections.length');
+        // A one-round card (ca-54) draws no section buttons and so no switches: Play starts its ladder (1fc).
+        const n = run('(() => { const L = pcLayout(caView(window.__ebCard)); return !L ? 0 : pcOneRound(L) ? 1 : L.sections.length; })()');
         for (const preview of [false, true]) {
           const html = String(run('caCardBodyHtml(window.__ebCard' + (preview ? ', { preview: true }' : '') + ')'));
           renders++;
@@ -11486,19 +11487,19 @@ function checkLoopSpeed(ctx, i18nTable) {
 /* 1fc. THE SPEED LADDER (ca-54, Jonathan, 2026-11-24): card.rounds, card.slowestRate 0.9, card.startStop 'slowest',
    card.buildLaps 1. Three decisions are pinned here, and each is the ONE exception to a rule every other card keeps:
    (1) the bottom stop is the slow file at 0.9 (90 BPM), not SLOWEST_RATE 0.8 (80); the card opens on it, not on Normal;
-   (2) a round climbs after ONE time through a stop (Build up speed's usual is PC_BUILD_LAPS, 2); (3) Round 3 starts at
-   the Slower stop (100) and its lap is the verse AND the chorus. No other card may carry any of these settings. The
+   (2) a round climbs after ONE time through a stop (Build up speed's usual is PC_BUILD_LAPS, 2) and, since 2026-11-24, STOPS and asks
+   (Got it / Practice again) instead of rolling on; (3) its ONE round's lap is the verse AND the chorus. No other card may carry any of these settings. The
    code is run, not read: the card is drawn in both languages and the real pcLoopNext / pcLoopEndBars / pcLoopStatus
    run on a fake card element built from what was drawn, so the stop ticks, the BPM each stop plays and the laps a
    stop lasts come out of the real functions. Another slowest card is drawn beside it and must be unchanged. */
-const FC_CARD = 'ca-54', FC_ASSERTS = 53;
+const FC_CARD = 'ca-54', FC_ASSERTS = 59;
 function checkSpeedLadder(ctx, i18nTable) {
-  head('1fc. The speed ladder (ca-54): bottom stop 90, opens there, one lap a stop, Round 3 from 100; no other card has these settings');
+  head('1fc. The speed ladder (ca-54): one round, bottom stop 90, opens there, stops and asks after each stop; no other card has these settings');
   let bad = 0, asserts = 0;
   const flag = m => { err('1fc: ' + m); problems++; bad++; };
   if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
-  for (const fn of ['pcLoopNext', 'pcLoopEndBars', 'pcLoopStatus', 'pcRoundsOf', 'pcRoundIn', 'pcBuildLaps', 'pcSlowestRate', 'pcBuildStops', 'pcFromRound', 'caCardBodyHtml', 'pcLayout'])
+  for (const fn of ['pcLoopNext', 'pcLoopEndBars', 'pcLoopStatus', 'pcRoundsOf', 'pcRoundIn', 'pcBuildLaps', 'pcSlowestRate', 'pcBuildStops', 'pcFromRound', 'pcLadderPause', 'pcStopBpm', 'pcLadderGo', 'caCardBodyHtml', 'pcLayout'])
     if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1fc)'); return; }
   const is = (cond, msg) => { asserts++; if (!cond) flag(msg); };
   const acts = run('(window.CLASS_ACTIVITIES || []).filter(a => a && a.card)');
@@ -11511,8 +11512,8 @@ function checkSpeedLadder(ctx, i18nTable) {
   if (!card || !other) { flag(`${FC_CARD} or ca-33 not found`); return; }
   is(card.card.slowestRate === 0.9 && card.card.startStop === 'slowest' && card.card.buildLaps === 1, `${FC_CARD}: slowestRate ${card.card.slowestRate}, startStop ${card.card.startStop}, buildLaps ${card.card.buildLaps}; pinned 0.9, 'slowest', 1`);
   const rr = JSON.stringify((card.card.rounds || []).map(r => [r.from, r.to, r.startStop]));
-  is(rr === '[[0,0,0],[1,1,0],[0,1,1]]', `${FC_CARD}: the rounds are ${rr}, pinned verse / chorus from the bottom stop and verse + chorus from the Slower stop`);
-  is(!(card.card.checks || []).some(x => x && x.levelUp) && (card.card.checks || []).length === 3, `${FC_CARD}: three plain checks and no Level up`);
+  is(rr === '[[0,1,0]]', `${FC_CARD}: the rounds are ${rr}, pinned ONE round: verse + chorus as one lap from the bottom stop (2026-11-24: no separate verse and chorus parts)`);
+  is(!(card.card.checks || []).some(x => x && x.levelUp) && (card.card.checks || []).length === 2, `${FC_CARD}: two plain checks (up to 112, record speed) and no Level up`);
   is(card.card.sections.length === 2 && card.card.sections[0] === other.card.sections.find(x => x.label === 'Verse 1') && card.card.sections[1] === other.card.sections.find(x => x.label === 'Chorus 1'), `${FC_CARD}: its sections are ca-33's Verse 1 and Chorus 1 (the same objects)`);
   // 2. pcRoundsOf refuses a malformed list (the card then draws its section chips).
   is(run('pcRoundsOf({ rounds: [{ from: 0, to: 2 }] }, 2)') === null && run('pcRoundsOf({ rounds: [{ from: 1, to: 0 }] }, 2)') === null && run('pcRoundsOf({ rounds: [{ from: 0, to: 0, startStop: 4 }] }, 2)') === null && run('pcRoundsOf({ rounds: [] }, 2)') === null && run('pcRoundsOf({}, 2)') === null && run('pcRoundsOf({ rounds: [{ from: 0, to: 1, startStop: 1 }] }, 2).length') === 1, 'pcRoundsOf accepts or refuses a rounds list the wrong way');
@@ -11534,9 +11535,10 @@ function checkSpeedLadder(ctx, i18nTable) {
         is(ticks.length === 4 && ticks.map(x => x[0] + ':' + x[1]).join(' ') === 'slowest:0.9 slower:1 slow:0.9000 normal:1', `${w}: the four stops are ${ticks.map(x => x[0] + ':' + x[1]).join(' ')}`);
         is(ticks.length === 4 && ticks.map(x => x[2].split(', ')[1]).join(' ') === '0.7× 0.8× 0.9× 1×', `${w}: the stops read ${ticks.map(x => x[2]).join(' | ')}`);
         is(/<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="0"/.test(html) && /pc-speed-tick on" style="--i:0"/.test(html), `${w}: the slider opens on its first stop`);
-        const rb = [...html.matchAll(/<button type="button" class="pc-sec pc-round" data-round="(\d)"[^>]*>.*?<\/span>([^<]*)<\/button>/g)].map(m => m[2]);
-        is(rb.length === 3 && rb.every(x => x.trim()) && !/class="pc-sec(?: cur)?" data-sec=/.test(html), `${w}: ${rb.length} round buttons (${rb.join(' | ')}) and no section chips`);
-        is(['loop', 'build', 'hold'].every(n => new RegExp('data-loop-sw="' + n + '"[^>]*hidden').test(html)), `${w}: Loop, Build and Stay are all hidden until a round starts`);
+        is(!/class="pc-sec/.test(html) && !/class="pc-secs"/.test(html) && !/class="pc-hint"/.test(html), `${w}: no round buttons, no section chips and no hint (one round: Play starts it)`);
+        is(!/pc-loop/.test(html), `${w}: no Loop / Build / Stay switch is drawn`);
+        const ask = (/<div class="pc-ask"[^>]*>[\s\S]*?<\/div><\/div>/.exec(html) || [''])[0];
+        is(/ hidden>/.test(ask) && (ask.match(/<button type="button" class="pc-ask-btn/g) || []).length === 2 && />(Got it|Lo tengo)<\/button>/.test(ask) && />(Practice again|Practicar otra vez)<\/button>/.test(ask), `${w}: the prompt is drawn hidden with its two buttons, Got it and Practice again: ${ask}`);
       }
     }
     // 3. Another slowest card is untouched.
@@ -11560,8 +11562,8 @@ function checkSpeedLadder(ctx, i18nTable) {
     };`);
     const next = (round, stop, laps, hold) => run(`(() => { const st = window.__fcMk(${round}, ${stop}, ${laps}, ${!!hold}); const n = pcLoopNext(st); return n ? { stop: n.stop, slow: n.slow, rate: n.rate } : null; })()`);
     // One lap a stop: from every stop of every round the next lap is the next stop; the top stop has none; Stay holds.
-    for (const round of [0, 1, 2]) {
-      const first = round === 2 ? 1 : 0;
+    for (const round of [0]) {
+      const first = 0;
       const got = []; for (let st = first; st <= 3; st++) { const n = next(round, st, 0); got.push(n ? n.stop : null); }
       const want = []; for (let st = first; st < 3; st++) want.push(st + 1); want.push(null);
       is(JSON.stringify(got) === JSON.stringify(want), `round ${round + 1}: the stops it climbs to are ${JSON.stringify(got)}, want ${JSON.stringify(want)} (one time through each)`);
@@ -11571,21 +11573,28 @@ function checkSpeedLadder(ctx, i18nTable) {
     // Build's usual two laps is unchanged where a card has no data-build-laps (the fake element, without it).
     is(run(`(() => { const st = window.__fcMk(0, 0, 0); delete st.root.dataset.buildLaps; return pcLoopNext(st) === null; })()`) && run(`(() => { const st = window.__fcMk(0, 0, 1); delete st.root.dataset.buildLaps; const n = pcLoopNext(st); return !!n && n.stop === 1; })()`), 'with no data-build-laps a card still climbs after TWO laps (Build up speed, unchanged)');
     // A lap is the round's sections: the verse is 16 bars, the chorus ends at bar 24 of the window, verse + chorus is 24.
-    const ends = [0, 1, 2].map(r => run(`pcLoopEndBars(window.__fcMk(${r}, 0, 0))`));
-    is(JSON.stringify(ends) === '[16,24,24]', `a lap ends at window bar ${JSON.stringify(ends)}, pinned [16,24,24] (verse, chorus, verse + chorus: the last runs to the end of the card)`);
-    is(run(`(() => { const st = window.__fcMk(0, 0, 0); delete st.loopTo; return pcLoopEndBars(st); })()`) === 16 && run(`(() => { const st = window.__fcMk(1, 0, 0); st.loopSi = 1; delete st.loopTo; return pcLoopEndBars(st); })()`) === 24, 'a loop with no loopTo (every other card) still ends at its own section');
+    const ends = [0].map(r => run(`pcLoopEndBars(window.__fcMk(${r}, 0, 0))`));
+    is(JSON.stringify(ends) === '[24]', `a lap ends at window bar ${JSON.stringify(ends)}, pinned [24] (verse + chorus: the lap runs to the end of the card)`);
+    is(run(`(() => { const st = window.__fcMk(0, 0, 0); delete st.loopTo; return pcLoopEndBars(st); })()`) === 16 && run(`(() => { const st = window.__fcMk(0, 0, 0); st.loopSi = 1; delete st.loopTo; return pcLoopEndBars(st); })()`) === 24, 'a loop with no loopTo (every other card) still ends at its own section');
     // The status line: the round and the BPM of the stop playing, in both languages.
     const status = (round, stop, lang) => { run(`setLang(${JSON.stringify(lang)})`); ctx.__fcStatus.innerHTML = ''; return run(`(() => { const st = window.__fcMk(${round}, ${stop}, 0); pcState = st; try { pcLoopStatus(st); } finally { pcState = null; } return window.__fcStatus.innerHTML; })()`); };
-    const en = [[0, 0], [0, 1], [0, 2], [0, 3], [1, 0], [2, 1], [2, 2], [2, 3]].map(([r, st]) => status(r, st, 'en'));
-    is(en.join('|') === 'Verse at 90 BPM|Verse at 100 BPM|Verse at 112 BPM|Verse at 125 BPM|Chorus at 90 BPM|Verse + Chorus at 100 BPM|Verse + Chorus at 112 BPM|Verse + Chorus at 125 BPM', `the status line reads: ${en.join(' | ')}`);
-    const es = [[0, 0], [2, 1]].map(([r, st]) => status(r, st, 'es'));
-    is(es.join('|') === 'Estrofa a 90 BPM|Estrofa + coro a 100 BPM', `the Spanish status line reads: ${es.join(' | ')}`);
-    for (const k of ['pc.roundAt', 'ca.roundHint', 'ca.roundDirections']) { const e = i18nTable && i18nTable[k]; is(!!(e && e.en && e.es), `${k} is missing in English or Spanish`); }
+    const en = [[0, 0], [0, 1], [0, 2], [0, 3]].map(([r, st]) => status(r, st, 'en'));
+    is(en.join('|') === 'Verse + Chorus at 90 BPM|Verse + Chorus at 100 BPM|Verse + Chorus at 112 BPM|Verse + Chorus at 125 BPM', `the status line reads: ${en.join(' | ')}`);
+    const es = [[0, 0], [0, 1]].map(([r, st]) => status(r, st, 'es'));
+    is(es.join('|') === 'Estrofa + coro a 90 BPM|Estrofa + coro a 100 BPM', `the Spanish status line reads: ${es.join(' | ')}`);
+    /* The stop-and-ask (pcLadderPause / pcStopBpm, app/cards-loop.js): with the prompt on the card a ladder never climbs by
+       itself (pcLoopNext null at every stop) and its prompt names the tempo just played; with Build off (a speed picked by hand)
+       it never asks. The browser tools (smoke.mjs, speed-ladder-loop.mjs) press the buttons. */
+    ctx.__fcAsk = {};
+    const paused = (stop, build) => run(`(() => { const st = window.__fcMk(0, ${stop}, 0); const q = st.root.querySelector; st.root.querySelector = sel => sel === '.pc-ask' ? window.__fcAsk : q.call(st.root, sel); ${build ? '' : 'st.build = null;'} return [pcLadderPause(st), pcLoopNext(st) === null]; })()`);
+    is(JSON.stringify([0, 1, 2, 3].map(x => paused(x, true))) === JSON.stringify([[true, true], [true, true], [true, true], [true, true]]) && paused(1, false)[0] === false, 'a ladder with its prompt on the card pauses at every stop and never climbs by itself; with Build off (a hand-picked speed) it never pauses');
+    is(JSON.stringify([0, 1, 2, 3].map(x => run(`pcStopBpm(window.__fcMk(0, ${x}, 0).root, window.__fcMk(0, ${x}, 0).L, ${x})`))) === '[90,100,112,125]', 'the prompt names the tempo just played: 90 100 112 125');
+    for (const k of ['pc.roundAt', 'ca.roundHint', 'ca.roundDirections', 'pc.askGot', 'pc.askAgain', 'pc.askNext', 'pc.askLast']) { const e = i18nTable && i18nTable[k]; is(!!(e && e.en && e.es), `${k} is missing in English or Spanish`); }
     is(rendered === 4, `rendered ${rendered} of 4 ladder cards`);
   } catch (e) { flag('running the ladder threw: ' + e.message); }
-  finally { run('setLang(' + JSON.stringify(saveLang) + ')'); run('pcState = null'); for (const k of ['__fcCard', '__fcOther', '__fcTicks', '__fcStatus', '__fcMk']) delete ctx[k]; }
+  finally { run('setLang(' + JSON.stringify(saveLang) + ')'); run('pcState = null'); for (const k of ['__fcCard', '__fcOther', '__fcTicks', '__fcStatus', '__fcMk', '__fcAsk']) delete ctx[k]; }
   if (asserts !== FC_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FC_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1fc: ${asserts} assertions on the real code — rounds, slowestRate, startStop and buildLaps are on ${FC_CARD} alone; its card draws in EN + ES (student and preview) on 90 · 100 · 112 · 125 (0.7× 0.8× 0.9× 1×), opens on the first stop, three round buttons, switches hidden; one lap a stop from every stop of the 3 rounds, Round 3 from 100; laps end at bars 16 / 24 / 24; the status line names the round and the BPM; ca-33 still opens on Normal at 0.8 with two laps`);
+  if (!bad) ok(`1fc: ${asserts} assertions on the real code — rounds, slowestRate, startStop and buildLaps are on ${FC_CARD} alone; its card draws in EN + ES (student and preview) on 90 · 100 · 112 · 125 (0.7× 0.8× 0.9× 1×), opens on the first stop, no round buttons or switches, a hidden prompt with Got it and Practice again; one lap a stop; the lap ends at bar 24 (verse + chorus); with the prompt on the card it pauses at every stop and never climbs by itself; the status line names the BPM; ca-33 still opens on Normal at 0.8 with two laps`);
 }
 function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   head('1db. Practice-card keys (Space/K, arrows, < >) and the tick pop on a check-off');
@@ -11966,7 +11975,7 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
-const ONE_LINE_2A = 426, ONE_LINE_2C = 38, DRILL_SCREENS = 138;   // 2026-11-24: +8, ca-54's intro and three check texts (EN + ES). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
+const ONE_LINE_2A = 424, ONE_LINE_2C = 38, DRILL_SCREENS = 138;   // 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
   'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth',
@@ -13212,7 +13221,8 @@ function checkCardViews(ctx, i18nTable) {
             if (drew !== shown) flag(`${where}: draws ${drew}, want ${shown}`);
             const nSecs = (mainRec ? a.card : a.recordingVersions[rec].card).sections.length;
             // A rounds card (ca-54) has one button per round where the others have one per section (1fc).
-            const nRounds = mainRec && Array.isArray(a.card.rounds) ? a.card.rounds.length : 0;
+            const nRounds = mainRec && Array.isArray(a.card.rounds) && a.card.rounds.length > 1 ? a.card.rounds.length : 0;   // ONE round: no buttons at all
+            if (mainRec && Array.isArray(a.card.rounds) && a.card.rounds.length === 1) { if (/class="pc-sec/.test(html)) flag(`${where}: a one-round card draws section buttons`); continue; }
             const chips = nRounds ? (html.match(/class="pc-sec pc-round"[^>]*data-round="\d+"|class="pc-sec pc-round" data-round="\d+"/g) || []).length : (html.match(/class="pc-sec[ "][^>]*data-sec="\d+"/g) || []).length;
             if (chips !== (nRounds || nSecs)) flag(`${where}: ${chips} ${nRounds ? 'round' : 'section'} buttons, the card has ${nRounds || nSecs}`);
           }

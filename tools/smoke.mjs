@@ -680,7 +680,7 @@ async function cardViewsWalk(page, run, events, stats, base) {
     const btns = [...sw.querySelectorAll('button')], h = btns.length ? btns[0].getBoundingClientRect().height : 0;
     return { pressed: btns.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.view),
              drew: q('.pc-sheet') ? 'lyrics' : q('.pc-tab [data-beat]') ? 'chords' : q('.pc-tab [data-seq]') ? 'tab' : 'nothing',
-             chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, secs: (L => L.rounds ? L.rounds.length : L.sections.length)(pcLayout(pcActivity(q('.pc')))),   /* a rounds card (ca-54) has a button per round */
+             chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, secs: (L => L.rounds ? (L.rounds.length > 1 ? L.rounds.length : 0) : L.sections.length)(pcLayout(pcActivity(q('.pc')))),   /* a rounds card has a button per round; ca-54's ONE round has none (Play starts it) */
              oneLine: sw.getBoundingClientRect().height <= h * 1.5, playerTop: q('.pc-player').getBoundingClientRect().top - sw.getBoundingClientRect().bottom,
              saved: localStorage.getItem('caCardViews'), playing: !!(pcState && pcState.root === q('.pc')),
              st: pcState && pcState.__smk, el: pcState && pcState.audio && pcState.audio.__smk, paused: pcState && pcState.audio ? pcState.audio.paused : null,
@@ -1734,11 +1734,13 @@ async function cardKeysWalk(page, run, events, stats, base) {
 
 /* The speed ladder (ca-54, "Sweet Child O' Mine — Speed Ladder", 2026-11-24; card.rounds, app/cards.js and
    app/cards-loop.js). Real mouse clicks at 1366x657: the card opens on its bottom stop (slider stop 0, the slow file at
-   rate 0.9) with three round buttons and Loop / Build / Stay all hidden; a click on Round 1 leaves the slider on stop 0
-   with Loop and Build on and Stay shown; Round 3 moves it to stop 1 (100); Stop, then Play plays the round tapped last
-   again; a speed picked by hand turns Build off and leaves Loop on; a reload brings the card back on stop 0 with every
-   switch off and no round picked (nothing stored); the round buttons read in Spanish. The climb itself (laps, BPM per
-   stop) is tools/speed-ladder-loop.mjs's, played for real, and checks.mjs 1fc's. A checkout without the ladder skips it. */
+   rate 0.9) with NO round or section buttons and no Loop / Build / Stay switch (one round: Play starts it); Play starts
+   the ladder on stop 0 with Loop and Build on; at the end of a time through (pcLadderAsk is called here instead of
+   waiting 64 s: tools/speed-ladder-loop.mjs plays it for real) the song stops and the prompt shows the tempo; "Got it"
+   plays the next stop up, "Practice again" the same one, at 125 "Got it" finishes; a speed picked by hand turns Build
+   off, and Play starts the ladder again from 90; a reload brings the card back on stop 0 with every switch off
+   (nothing stored); the prompt reads in Spanish. checks.mjs 1fc runs the stop logic. A checkout without the ladder
+   skips it. */
 async function speedLadderWalk(page, run, events, stats, base) {
   const ID = 'ca-54';
   await page.send('Page.navigate', { url: base + '/index.html' });
@@ -1751,7 +1753,8 @@ async function speedLadderWalk(page, run, events, stats, base) {
   const state = `(() => { const root = document.querySelector('.ca-card[open][data-id="${ID}"] .pc'); if (!root) return null; const r = root.querySelector('.pc-speed-range');
     const sw = n => { const b = root.querySelector('.pc-loop-sw[data-loop-sw="' + n + '"]'); return b ? (b.hidden ? 'hidden' : 'shown') + '/' + b.getAttribute('aria-checked') : 'none'; };
     return { stop: r ? +r.value : -1, slow: root.dataset.slow, rate: root.dataset.rate, round: root.dataset.round || '', rounds: root.querySelectorAll('.pc-round').length, chips: root.querySelectorAll('.pc-sec[data-sec]').length,
-      loop: sw('loop'), build: sw('build'), hold: sw('hold'), playing: !!(pcState && pcState.root === root), from: pcState && pcState.root === root ? pcState.loopFrom : -1,
+      loop: sw('loop'), build: sw('build'), hold: sw('hold'), flags: (root.dataset.loop || '') + '/' + (root.dataset.build || ''), secs: root.querySelectorAll('.pc-secs').length,
+      ask: (() => { const q = root.querySelector('.pc-ask'); return q && !q.hidden ? q.textContent.replace(/\\s+/g, ' ').trim() : null; })(), playing: !!(pcState && pcState.root === root), from: pcState && pcState.root === root ? pcState.loopFrom : -1,
       bstop: pcState && pcState.root === root && pcState.build ? pcState.build.stop : -1, cur: [...root.querySelectorAll('.pc-round.cur')].map(b => b.dataset.round).join(',') }; })()`;
   const click = async sel => {
     const at = await run('ladder:at:' + sel, `(() => { const b = document.querySelector('.ca-card[open][data-id="${ID}"] ${sel}'); if (!b) return null; b.scrollIntoView({ block: 'center' }); const q = b.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; })()`, 100);
@@ -1772,32 +1775,58 @@ async function speedLadderWalk(page, run, events, stats, base) {
     const s0 = await run('ladder:start', state, 10);
     if (!s0) { fail('open', `${ID} did not open`); return; }
     if (s0.stop !== 0 || s0.slow !== '1' || +s0.rate !== 0.9) fail('opens', `${ID} should open on its bottom stop (slider 0, the slow file, rate 0.9): ${JSON.stringify(s0)}`);
-    if (s0.rounds !== 3 || s0.chips !== 0) fail('buttons', `${ID} should show 3 round buttons and no section chips: ${JSON.stringify(s0)}`);
-    if (s0.loop !== 'hidden/false' || s0.build !== 'hidden/false' || s0.hold !== 'hidden/false' || s0.round !== '') fail('switches', `${ID} should open with Loop, Build and Stay hidden and off, no round picked: ${JSON.stringify(s0)}`);
-    // Round 1: bottom stop, Loop and Build on, Stay shown.
-    if (!(await click('.pc-round[data-round="0"]'))) { fail('round1', 'no Round 1 button'); return; }
-    const a1 = await run('ladder:round1', state, 10);
-    if (!a1 || !a1.playing || a1.stop !== 0 || a1.bstop !== 0 || a1.from !== 0 || a1.loop !== 'hidden/true' || a1.build !== 'hidden/true' || a1.hold !== 'shown/false' || a1.cur !== '0') fail('round1', `Round 1 should play from the verse on stop 0 with Loop and Build on (hidden) and Stay shown: ${JSON.stringify(a1)}`);
-    // Round 3: starts at 100 (stop 1), from the verse.
-    if (!(await click('.pc-round[data-round="2"]'))) { fail('round3', 'no Round 3 button'); return; }
-    const a3 = await run('ladder:round3', state, 10);
-    if (!a3 || !a3.playing || a3.stop !== 1 || a3.slow !== '1' || +a3.rate !== 1 || a3.bstop !== 1 || a3.from !== 0 || a3.cur !== '2') fail('round3', `Round 3 should start at stop 1 (100: the slow file at 1x) from the verse: ${JSON.stringify(a3)}`);
-    // Round 2: back to the bottom stop, from the chorus.
-    if (!(await click('.pc-round[data-round="1"]'))) { fail('round2', 'no Round 2 button'); return; }
-    const a2 = await run('ladder:round2', state, 10);
-    if (!a2 || !a2.playing || a2.stop !== 0 || a2.bstop !== 0 || a2.from !== 1 || a2.cur !== '1') fail('round2', `Round 2 should start at stop 0 from the chorus: ${JSON.stringify(a2)}`);
-    // Stop; a speed picked by hand turns Build off and leaves Loop on; Play plays the round tapped last again.
-    await run('ladder:stop', `(pcStop(), 1)`, 200);
+    if (s0.rounds !== 0 || s0.chips !== 0 || s0.secs !== 0) fail('buttons', `${ID} should show no round buttons and no section chips (one round: Play starts it): ${JSON.stringify(s0)}`);
+    if (s0.loop !== 'none' || s0.build !== 'none' || s0.hold !== 'none' || s0.flags !== '/' || s0.ask !== null) fail('switches', `${ID} should open with no Loop, Build or Stay switch, nothing on and no prompt: ${JSON.stringify(s0)}`);
+    // Play: the ladder from the bottom stop, Loop and Build on (data flags; no switch is drawn), no prompt.
+    if (!(await click('.pc-play'))) { fail('play', 'no Play button'); return; }
+    const a1 = await run('ladder:play1', state, 10);
+    if (!a1 || !a1.playing || a1.stop !== 0 || a1.bstop !== 0 || a1.from !== 0 || a1.flags !== '1/1' || a1.ask !== null) fail('play', `Play should start the ladder from the verse on stop 0 with Loop and Build on and no prompt: ${JSON.stringify(a1)}`);
+    // The end of a time through: the song stops and the prompt names the tempo.
+    const ask = async (w, bpm) => {
+      await run('ladder:end:' + w, `(pcLadderAsk(pcState), 1)`, 300);
+      const q = await run('ladder:asked:' + w, state, 10);
+      if (!q || q.playing || !q.ask || !q.ask.includes(bpm + ' BPM') || !/Got it/.test(q.ask) || !/Practice again/.test(q.ask)) fail('ask:' + w, `after a time through the song should stop and ask, naming ${bpm} BPM: ${JSON.stringify(q)}`);
+      return q;
+    };
+    await ask('90', 90);
+    // Got it: the next stop up (100), playing, prompt gone.
+    if (!(await click('.pc-ask-got'))) { fail('got', 'no Got it button'); return; }
+    const g1 = await run('ladder:got1', state, 10);
+    if (!g1 || !g1.playing || g1.stop !== 1 || g1.bstop !== 1 || g1.ask !== null || g1.slow !== '1' || +g1.rate !== 1) fail('got', `Got it should play the next stop (100: the slow file at 1x) with the prompt gone: ${JSON.stringify(g1)}`);
+    // Practice again: the same stop (100) once more.
+    await ask('100', 100);
+    if (!(await click('.pc-ask-again'))) { fail('again', 'no Practice again button'); return; }
+    const p0 = await run('ladder:again', state, 10);
+    if (!p0 || !p0.playing || p0.stop !== 1 || p0.bstop !== 1 || p0.ask !== null) fail('again', `Practice again should play stop 1 (100) once more: ${JSON.stringify(p0)}`);
+    // Up to the top: 112, then 125, where the prompt says finish and Got it closes it.
+    await ask('100b', 100); await click('.pc-ask-got');
+    const g2 = await run('ladder:got2', state, 10);
+    if (!g2 || !g2.playing || g2.stop !== 2 || g2.bstop !== 2 || g2.slow !== '' || +g2.rate !== 0.9) fail('got2', `the third time should be 112 (the fast file at 0.9): ${JSON.stringify(g2)}`);
+    await ask('112', 112); await click('.pc-ask-got');
+    const g3 = await run('ladder:got3', state, 10);
+    if (!g3 || !g3.playing || g3.stop !== 3 || g3.bstop !== 3) fail('got3', `the fourth time should be 125 (stop 3): ${JSON.stringify(g3)}`);
+    const top = await ask('125', 125);
+    if (top && !/finish/.test(top.ask || '')) fail('top', `the prompt at 125 should say finish: ${JSON.stringify(top.ask)}`);
+    await click('.pc-ask-got');
+    const done = await run('ladder:done-top', state, 10);
+    if (!done || done.playing || done.ask !== null) fail('top', `Got it at 125 should close the prompt and stay stopped: ${JSON.stringify(done)}`);
+    // A speed picked by hand turns Build off; Play starts the ladder again from 90.
+    await click('.pc-play');
     await run('ladder:slider', `(() => { const r = document.querySelector('.ca-card[open][data-id="${ID}"] .pc-speed-range'); r.value = '3'; pcSetSpeedTo(r); return true; })()`, 200);
     const t1 = await run('ladder:takeover', state, 10);
-    if (!t1 || t1.build !== 'hidden/false' || t1.loop !== 'hidden/true' || t1.hold !== 'hidden/false') fail('takeover', `a speed picked by hand should turn Build off and leave Loop on: ${JSON.stringify(t1)}`);
+    if (!t1 || t1.flags !== '1/' || t1.bstop !== -1) fail('takeover', `a speed picked by hand should turn Build off and leave Loop on: ${JSON.stringify(t1)}`);
+    await run('ladder:stop', `(pcStop(), 1)`, 200);
     await click('.pc-play');
-    const p1 = await run('ladder:play', state, 10);
-    if (!p1 || !p1.playing || p1.from !== 1 || p1.stop !== 3) fail('play', `Play after Round 2 and a hand-picked speed should play the chorus again at that speed (stop 3): ${JSON.stringify(p1)}`);
+    const p1 = await run('ladder:play2', state, 10);
+    if (!p1 || !p1.playing || p1.stop !== 0 || p1.bstop !== 0 || p1.flags !== '1/1') fail('play2', `Play after a hand-picked speed should start the ladder again from 90 (stop 0): ${JSON.stringify(p1)}`);
     await run('ladder:stop2', `(pcStop(), 1)`, 200);
-    // Spanish labels.
-    const es = await run('ladder:es', `(() => { setLang('es'); renderClassActivities(); caFocusActivity('${ID}'); return [...document.querySelectorAll('.ca-card[open][data-id="${ID}"] .pc-round')].map(b => b.textContent.trim()).join('|'); })()`, 900);
-    if (!/1 Estrofa/.test(es || '') || !/2 Coro/.test(es || '') || !/3 Estrofa \+ coro/.test(es || '')) fail('spanish', `the round buttons in Spanish read "${es}"`);
+    // Spanish: the prompt and its buttons.
+    await run('ladder:es', `(() => { setLang('es'); renderClassActivities(); caFocusActivity('${ID}'); return 1; })()`, 900);
+    await click('.pc-play');
+    await run('ladder:es-end', `(pcLadderAsk(pcState), 1)`, 300);
+    const eq = await run('ladder:es-ask', state, 10);
+    if (!eq || !eq.ask || !/90 BPM/.test(eq.ask) || !/Lo tengo/i.test(eq.ask) || !/Practicar otra vez/.test(eq.ask)) fail('spanish', `the prompt in Spanish reads "${eq && eq.ask}"`);
+    await run('ladder:es-stop', `(pcStop(), 1)`, 200);
     await run('ladder:en', `(setLang('en'), 1)`, 400);
     // A reload: bottom stop, every switch off, no round picked (nothing is stored).
     await page.send('Page.navigate', { url: `${base}/index.html#class-activities/${ID}` });
@@ -1806,7 +1835,7 @@ async function speedLadderWalk(page, run, events, stats, base) {
     for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'ladder:devBypass2' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
     await openCard('reload');
     const r = await run('ladder:after-reload', state, 10);
-    if (!r || r.playing || r.stop !== 0 || r.round !== '' || r.loop !== 'hidden/false' || r.build !== 'hidden/false') fail('reload', `after a reload ${ID} should open stopped on stop 0 with nothing picked: ${JSON.stringify(r)}`);
+    if (!r || r.playing || r.stop !== 0 || r.round !== '' || r.flags !== '/' || r.ask !== null) fail('reload', `after a reload ${ID} should open stopped on stop 0 with nothing picked: ${JSON.stringify(r)}`);
     else stats.speedLadder = (stats.speedLadder || 0) + 1;
     await run('ladder:done', `(caCloseOpen(), 1)`, 300);
   } finally {
