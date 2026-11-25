@@ -20,7 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
-     --reset            only the reset cases (Start over / Delete, S1-S17, and Z1-Z5: Song Journey ticks; see "the reset
+     --reset            only the reset cases (Start over / Delete, S1-S18, and Z1-Z5: Song Journey ticks; see "the reset
                         cases" below); a full default run runs them too
      --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
      --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
@@ -2330,7 +2330,8 @@ function actionCode(a){
         with no rep, then a sign-in on B; S17 as S16 with B's sign-in read failing and its retry loading the record.
         Each: B starts with an empty log, the stored log holds only B's new rep, B's copy holds nothing old.
         S15, the Start-over twin of S12: the legacy activity ticks adopted at that sign-in are kept (a Start over keeps
-        activities)
+        activities). S18 (review R1-4) the other side: a record never reset that holds no practice log still reads the
+        Chromebook's copy back (a doc that predates the field)
      S6 a deleted student signs in again on the Chromebook holding their old copies: a new student, nothing old
         re-uploaded at sign-in
      S7 THE LIMIT, documented: a page left open writes its old copy back, after a Start over and after a Delete
@@ -2767,6 +2768,28 @@ async function resetCases(){
         ["B's practice log is empty after the late load", s17.log === '{}', s17.log],
         ['the stored practice log holds only the rep made on B', onlyNewRep(doc), JSON.stringify(doc && doc.practiceLog)],
         ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))] ];
+    } };
+  });
+  /* S18 (2026-11-25, review R1-4): the other side of S14-S17. A record never reset (no startOverApplied, no marker
+     for this student) that holds no practice log predates the field: this Chromebook's copy is still read back, and the
+     next rep saves it whole (progressApplyDoc's fallback). */
+  await scenario('S18', 'a record never reset that holds no practice log (it predates the field): this Chromebook\'s copy is still read back', c => {
+    const noLog = clone(OLD); delete noLog.practiceLog;
+    seed(c.world, noLog);
+    const A = c.dev('A');
+    oldLogOn(A);
+    c.teacher(100, 'del', 'uid-someone-else');                                      // the class settings exist, with nothing for this student
+    c.boot('A', A, 1000);
+    c.at(4000, () => { c.tab('A').s18 = c.tab('A').run('JSON.stringify(practiceLog)'); });
+    c.act('A', 5000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
+    c.vis('A', 7000, true);
+    return { endMs: 12000, check: (doc, w, tabs) => {
+      const keys = o => Object.keys(o || {}).sort().join();
+      return [
+        ['both sign-in reads succeeded; the record was never reset', tabs[0].run('progressMarkers.ok') === true && tabs[0].run('progressLoadFailed') === false && tabs[0].run('progressStartOverApplied') === 0 && tabs[0].run('progressMarkers.del') === 0],
+        ["the page shows this Chromebook's copy", tabs[0].s18 === JSON.stringify(OLD.practiceLog), String(tabs[0].s18)],
+        ['the next rep saved the copy whole with the new rep', !!doc && keys(doc.practiceLog) === keys(Object.assign({ [NEW_REP]: 1 }, OLD.practiceLog)) && canon(doc.practiceLog['m6w1-s1']) === canon(OLD.practiceLog['m6w1-s1']), JSON.stringify(doc && doc.practiceLog)],
+        ['the page says nothing', !tabs[0].notice, String(tabs[0].notice)] ];
     } };
   });
   await scenario('S7', 'THE LIMIT (expected, documented): an open page writes its old copy back after a Start over and after a Delete', c => {
