@@ -12,14 +12,15 @@
    ════════════════════════════════════════════════════════════════════ */
 
 const FRET_NATURALS = [0, 2, 4, 5, 7, 9, 11];          // C D E F G A B
-// label = pure musical notation (kept as-is in every language); labelKey = a
-// real word ("Open", "All 6") that needs translation — resolved at render
-// time in fretRender(), never here (this table is built once at load).
+// labelKey = the button's text, resolved at render time in fretRender(), never
+// here (this table is built once at load). The string pairs are string NAMES,
+// so Spanish shows them in solfège like every other string name (Jonathan,
+// 2026-11-25: no letters on the Spanish buttons).
 const FRET_GAME_LEVELS = [
   { labelKey: 'games.fret.level.open', strings: [6,5,4,3,2,1], maxFret: 0 },
-  { label: 'E · A', strings: [6,5],         maxFret: 10 },
-  { label: 'D · G', strings: [4,3],         maxFret: 10 },
-  { label: 'B · e', strings: [2,1],         maxFret: 10 },
+  { labelKey: 'games.fret.level.ea', strings: [6,5],         maxFret: 10 },
+  { labelKey: 'games.fret.level.dg', strings: [4,3],         maxFret: 10 },
+  { labelKey: 'games.fret.level.be', strings: [2,1],         maxFret: 10 },
   { labelKey: 'games.fret.level.all6', strings: [6,5,4,3,2,1], maxFret: 10 }
 ];
 // String names as translation-key suffixes (games.fret.string.*) — resolved
