@@ -189,6 +189,10 @@ async function teacherSbLoad(){
       const lines = told.sort((a, b) => a.rank - b.rank).map(x => x.line), more = lines.length - SB_TOLD_MAX;
       sbNote = more > 0 ? lines.slice(0, SB_TOLD_MAX - 1).concat(`And ${more + 1} more songs with changes of yours that were not saved were changed or deleted in another tab: open each to see what it has now.`).join('\n') : lines.join('\n');
     }
+    /* The mp3 held in this tab that is no longer its draft's (another tab picked or levelled another one, and this read
+       took that tab's recording: review round 2, R2-5) is let go, so Level asks for the mp3 again. */
+    const held = sbMem.src && drafts.get(sbMem.id);
+    if(held && !(held.source && held.source.sha256 === sbMem.src.sha256)) sbMem.src = null;
     /* An edit kept above whose save is not waiting (the view was left, its save was refused or failed) is saved now; never
        from the paint, which can come before this read and would write back a draft deleted in another tab (R1-3). */
     if(teacherView === 'songbuilder') for(const [id, d] of drafts) if(d.unsaved && !d.stale && !sbSaveTimers.has(id)) sbSaveSoon(id, 1200);
@@ -829,6 +833,9 @@ onmessage = function(e){ try{
 async function sbRunLevel(keep){
   const d = sbDraft();
   if(sbBusy || !d || !sbMem.src || sbMem.id !== sbSel) return;
+  /* The mp3 held here must be the draft's (review round 2, R2-5): another tab's recording taken by a re-read is never
+     levelled from this tab's file. */
+  if(!(d.source && d.source.sha256 === sbMem.src.sha256)){ sbMem.src = null; sbNote = 'Not levelled: this song\'s recording was changed in another tab. Pick the mp3 again.'; teacherSbPaint(); return; }
   const gen = sbViewGen, id = sbSel, src = sbMem.src;
   keep = typeof keep === 'string' ? keep : '';
   sbStopSounds();
