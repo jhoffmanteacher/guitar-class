@@ -91,6 +91,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
          finishes the popup and lands back on the sign-in wall, forced to
          sign in a second time. */
       const SW_RELOAD_MAX_WAIT = 5 * 60 * 1000;
+      const SW_RELOAD_SAVE_WAIT = 4000;   // one try at sending unsaved work, as long as Sign out's
       const startedWaiting = Date.now();
       const anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
       const busyReason = () => {
@@ -137,14 +138,22 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       const reload = async () => {
         if (window.__authPopupPending) { waitMore(); return; }
         if (busyReason() && Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT) { waitMore(); return; }
-        /* A step marked done half a second ago is still inside queueSave's
-           800 ms debounce (or its retry backoff) and would simply vanish —
-           pagehide's flush is a Firestore write started during unload and is
-           not reliably delivered. Send it now, then reload either way: one
-           real attempt beats waiting on a save that may never succeed. */
-        if (_dirtyKeys.size || saveTimer) {
-          clearTimeout(saveTimer);
-          try { await flushSave(); } catch(e){ /* reload regardless — nothing better is available */ }
+        /* Work not saved yet: a step marked done half a second ago is still
+           inside queueSave's 800 ms debounce (or its retry backoff), or a
+           write is already on the wire (_flushP) with work the dirty set no
+           longer shows. A reload drops either — pagehide's flush is a
+           Firestore write started during unload and is not reliably
+           delivered. So send it and wait for it as Sign out does
+           (flushBeforeLeaving: the write in flight first, then the rest, at
+           most SW_RELOAD_SAVE_WAIT each try). A write still on the wire after
+           that (offline, a stalled connection) is waited for: the tab looks
+           again every 1.5 s, busy states included, until it lands or the 5
+           minutes run out, and then the reload takes it with it. A write the
+           server refused is not waited on: one real attempt, then reload
+           (APP-CORE-3, 2026-11-25). */
+        if (hasUnsavedWrites()) {
+          await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);
+          if (Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT && (_flushP || busyReason())) { waitMore(); return; }
         }
         /* Tell the next load this refresh was the site updating itself, so the
            wall says "Updating…" rather than walking the student back through
