@@ -165,12 +165,12 @@ function micRecStart(mode, maxSec){
       if (rec.startMin == null || startBy < rec.startMin) rec.startMin = startBy;
       const take = Math.min(x.length, rec.cap - rec.n);
       if (take > 0){ rec.bufs.push(x.slice(0, take)); rec.n += take; }
-      if (rec.n >= rec.cap) micRecTeardown(rec);   // the cap: stop listening, keep what we have
+      if (rec.n >= rec.cap) micRecCapEnd(rec);   // the cap: stop listening, keep what we have
     };
     src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
     // Belt and braces: whatever happens, the capture stops a minute after
     // its cap, 30 s unless the caller gave one (what it holds is still saved if the take finishes).
-    rec.timer = setTimeout(() => micRecTeardown(rec), (capSec + 60) * 1000);
+    rec.timer = setTimeout(() => micRecCapEnd(rec), (capSec + 60) * 1000);
     micRec = rec;
     return true;
   } catch(e){ micRecAbort(); return false; }
@@ -191,6 +191,15 @@ function micRecTeardown(rec){
   try { rec.src.disconnect(); } catch(e){}
   try { rec.proc.disconnect(); } catch(e){}
   try { rec.mute.disconnect(); } catch(e){}
+}
+/* A capture that ends on its own (the cap, or the timer after it) keeps its audio for
+   the take's finish, but the red "Recording this take" label goes now: nothing is
+   being recorded any more. Only this capture's label: a newer one draws its own. */
+function micRecCapEnd(rec){
+  micRecTeardown(rec);
+  if (micRec !== rec) return;
+  const el = document.getElementById('micrec-on');
+  if (el) el.remove();
 }
 /* Stop and hand back the capture for micRecSave (the take's own finish
    calls this BEFORE coachMicOff). Null when nothing was recording. */
