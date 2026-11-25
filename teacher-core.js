@@ -696,7 +696,7 @@ async function teacherFetchStudents(){
 async function loadAllStudents(opts){
   // auto: the minute timer or a tab return running a failed first load again (teacherRefreshStudents).
   const auto=!!(opts&&opts.auto);
-  teacherRefreshing=true; teacherPaintRefreshBar();
+  teacherRefreshing=true; teacherRosterTriedAt=Date.now(); teacherPaintRefreshBar();
   /* Pause/archive flags live in config/class, so it has to be in hand before the roster is filtered — otherwise the
      first paint shows archived students and then blinks them away. It is read here only when the copy in hand is not
      a good read (the first load, or the newest read failed): a retry that read it again replaced the copy the views on
@@ -754,10 +754,13 @@ async function loadAllStudents(opts){
    was painted for is gone. Live In-Class Games and the other tools are drawn as usual: left alone when already on
    screen (the line used to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…"
    (the console booted on one, e.g. the update reload's resume). The minute timer (teacherSyncAutoRefresh) then reads
-   again while a roster view is open and the tab is visible; renderTeacherBody reads again when a blocked view is
-   opened. A read that lands draws the view. */
+   again while a roster view is open and the tab is visible, as does a tab return, at most once every 15 s
+   (TEACHER_RETRY_GAP_MS, review R3 minor 3); renderTeacherBody reads again when a blocked view is opened. A read that
+   lands draws the view. */
 let teacherBodyDrawn=false;       // renderTeacherBody has run: the box no longer holds index.html's loading line
 let teacherRosterBoxFailed=false; // the box holds a failure line painted by teacherPaintRosterFailed, not a view
+let teacherRosterTriedAt=0;       // when the last first load (or retry of it) started
+const TEACHER_RETRY_GAP_MS=15000;
 const TEACHER_SETTINGS_VIEWS=['activities','games','manage','songs'];
 function teacherViewUsesRoster(v){ return !TEACHER_NO_REFRESH_BAR_VIEWS.includes(v) || v==='minutes'; }
 function teacherRosterDown(){ return !teacherStudentsAt && teacherRefreshFailed; }
@@ -803,7 +806,7 @@ function teacherPaintRosterNote(){
        drawn from the roster (review R2-1): each tick runs that load again.
        It reads config/class only while the newest read of it failed, and
        the progress docs only once that one is good, so a failure that lasts
-       costs one read a tick.
+       costs one read a tick, and tab returns add at most one every 15 s.
    One read at a time. A read that lands while the teacher is mid-drag,
    typing in a box, has the rename box open or is selecting text is thrown
    away rather than painted over that work; the next tick tries again. The
@@ -858,10 +861,12 @@ async function teacherRefreshStudents(opts){
   if(!manual && (document.hidden || !(TEACHER_AUTO_REFRESH_VIEWS.includes(teacherView) || (teacherRosterDown() && teacherViewUsesRoster(teacherView))))) return;
   /* The first load never landed (it painted an error) — run it again, whole: the button, and the timer or a tab return
      after a failed one (review R1-4, R2-1), so a read that lands later draws the view by itself. Not while the teacher
-     is mid-drag or typing: a view drawn from the class settings may be on screen (review R2-4); the next tick tries. */
+     is mid-drag or typing: a view drawn from the class settings may be on screen (review R2-4); the next tick tries.
+     The timer and tab returns start one at most every 15 s: a tab switched to and fro read on every return (review R3
+     minor 3: 24 reads a minute). */
   if(!teacherStudentsAt){
     if(manual) loadAllStudents();
-    else if(teacherRefreshFailed && !teacherRefreshBlocker()) loadAllStudents({auto:true});
+    else if(teacherRefreshFailed && !teacherRefreshBlocker() && Date.now()-teacherRosterTriedAt>=TEACHER_RETRY_GAP_MS) loadAllStudents({auto:true});
     return;
   }
   const why=teacherRefreshBlocker();
