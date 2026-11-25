@@ -78,7 +78,7 @@ const MODULE_MANIFEST = [
 // left in place with no caller), and the Daily 5 is switched off
 // (DAILY5_ENABLED = false in app/lesson.js). The data stays so either can come back.
 // text_es/label_es: hand-written Spanish (module-content i18n, phase 2) —
-// picked up by tf() in app/lesson.js's buildModuleRoutine and buildDaily5. Keep
+// picked up by tf() (app/boot.js) in app/lesson.js's buildModuleRoutine and buildDaily5. Keep
 // both twins on every entry so switching either one back on needs no
 // translation work.
 const WARMUP_BANK = [

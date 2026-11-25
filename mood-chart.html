@@ -68,8 +68,9 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
 .sub{color:var(--gray); font-size:.95rem; margin:0 0 26px}
 
 /* ---------- back link ----------
-   The Explore nav opens this page in a NEW tab, so browser Back is dead on
-   arrival — hence a real link home. When the app tab that spawned us is still
+   Nothing on the site links this page since 2026-10-02 (the Explore row was
+   removed), but if anything opens it in a NEW tab, browser Back is dead on
+   arrival — hence a real link home. When an app tab that opened us is still
    around, the link closes this tab instead of stacking a second copy of the
    site (see the click handler below). */
 .crumb{margin:0 0 20px}
@@ -192,7 +193,7 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
 <div class="backdrop" id="backdrop" hidden></div>
 
 <script>
-/* Back link: if the app tab that opened us is still open, hop back to it and
+/* Back link: if an app tab opened us and is still open, hop back to it and
    close this one rather than loading a second copy of the site here. */
 document.getElementById("back-link").addEventListener("click", e => {
   if (window.opener && !window.opener.closed){
