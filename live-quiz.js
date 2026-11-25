@@ -1969,6 +1969,9 @@ function lqPreviewWrite(patch, replace){
 async function lqTeacherNext(target, extra){
   const s = lqTSession;
   if(!s) return;
+  // Every opener is shown only in the lobby or after a Reveal. An opener that awaited first (the hilo piano load)
+  // must not reopen a game that Cancel / End / Clear closed meanwhile: those keep the sessionId, only the state moves.
+  if(s.state !== 'lobby' && s.state !== 'reveal') return;
   const next = s.state === 'lobby' ? 0 : Number(s.qIndex) + 1;
   if(Number(s.totalQ) > 0 && next >= Number(s.totalQ)) return;   // the set number of questions has been asked
   // The time box between questions can change the limit mid-game; each new

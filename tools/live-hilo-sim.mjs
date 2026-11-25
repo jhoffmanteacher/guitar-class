@@ -17,8 +17,8 @@
      - the console's round: Play the notes opens the next question with `target` null and NO note in the written
        patch (the doc is public), the pair is in memory before the write, Reveal marks 'higher' / 'lower' from it
        and scores through the real lqScoreRound (1000 each, no name in the public scores), a round the console has no
-       pair for does nothing at Reveal and the strip falls back to the mark buttons, and a second press while one is
-       opening does nothing;
+       pair for does nothing at Reveal and the strip falls back to the mark buttons, a game that Cancel / End / Clear
+       closed while the piano loaded stays closed, and a second press while one is opening does nothing;
      - the strip: lobby and "next" show the four level chips and Play the notes, an open question shows Play again
        and Reveal, and nothing in them names a note or an answer.
    Prints one summary line with denominators. */
@@ -249,6 +249,18 @@ const NO_NAME = 'Test Student 0';
   await G('lqTeacherOpenHilo()');
   ok(G('lqHlRound') === null, 'a write that fails leaves no pair behind');
   run(`lqWrite = (patch, replace) => { __written.push({ patch, replace }); return Promise.resolve(true); };`, 'restore');
+
+  // Cancel / End / Clear pressed while the piano loads: the game keeps its sessionId, so only its state says it closed.
+  for (const [from, closed] of [['lobby', 'off'], ['reveal', 'ended'], ['reveal', 'off']]) {
+    written.length = 0;
+    run(`lqTSession = Object.assign({}, lqTSession, { state: '${from}', qIndex: ${from === 'lobby' ? -1 : 2} }); lqHlRound = null;
+      var __loaded; lqHlLoad = () => new Promise(res => { __loaded = res; });`, 'slowload');
+    const p = G('lqTeacherOpenHilo()');
+    run(`lqTSession = Object.assign({}, lqTSession, { state: '${closed}' }); __loaded(true);`, 'closed-meanwhile');
+    await p;
+    ok(written.length === 0 && G('lqHlRound') === null, `a game closed (${from} -> ${closed}) while the piano loads stays closed (${written.length} writes)`);
+  }
+  run(`lqHlLoad = () => Promise.resolve(true);`, 'fastload');
 }
 {
   // Reveal.
