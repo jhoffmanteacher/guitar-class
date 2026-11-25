@@ -13,10 +13,10 @@
      the teacher console          today's toast only (the console is not a student's
                                   Chromebook, and the pop-up empties saved songs)
      anything else                the pop-up. "This Chromebook is full." when the page
-                                  knows it (songHelpIsFull: a QuotaExceededError saving
-                                  or loading a song, sfQuotaHit in app/songfiles.js, or
-                                  the site's storage at 95% of what Chrome allows it);
-                                  otherwise the steps in order of effort: press play
+                                  knows it (songHelpIsFull: this page has seen a
+                                  QuotaExceededError saving or loading a song, sfQuotaHit
+                                  in app/songfiles.js); otherwise the steps in order of
+                                  effort: press play
                                   again, the main button, empty Downloads, restart the
                                   Chromebook, tell the teacher.
 
@@ -36,16 +36,17 @@
    back to the same page and card. It never touches progress, sign-in,
    localStorage, or the shell cache.
 
-   A web page cannot read free disk space or the Downloads folder (Chrome's
-   quota follows the disk's size, not its free space), so the pop-up shows no
-   number: it gives the Files-app steps. */
+   A web page cannot read free disk space or the Downloads folder, and
+   navigator.storage.estimate() cannot tell a full disk either: Chrome reports
+   the quota as what the site uses plus a fixed allowance, so used / quota never
+   nears 1. So the pop-up shows no number, says "full" only after a real
+   QuotaExceededError, and gives the Files-app steps. */
 
 /* The service worker's audio caches: AUDIO_CACHE and AUDIO_HASH_CACHE in sw.js
    (AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME in tools/sw-audio-map.mjs). 1fe fails
    the push if either drifts, or if one is ever the shell cache. */
 const SONG_HELP_AUDIO_CACHES = ['guitar-class-audio-2026-10-30-ff9e913a6d', 'guitar-class-audio-hashes'];
-const SONG_HELP_FULL_RATIO = 0.95;     // storage used / quota at or over this: "This Chromebook is full."
-const SONG_HELP_WAIT_MS = 4000;        // a cache delete, an IndexedDB clear or an estimate that never answers: go on
+const SONG_HELP_WAIT_MS = 4000;        // a cache delete or an IndexedDB clear that never answers: go on
 let songHelpClosedOnce = false;        // the pop-up was closed in this page load: later failures get the toast + Help
 let songHelpBusy = false;              // the main button was pressed: the reload is on its way
 
@@ -68,14 +69,9 @@ function songHelpOtherOverlay(){
 function songHelpWithin(p, fallback){
   return Promise.race([Promise.resolve(p).catch(() => fallback), new Promise(r => setTimeout(() => r(fallback), SONG_HELP_WAIT_MS))]);
 }
-/* Does the page know this Chromebook is full? */
-async function songHelpIsFull(){
-  if(typeof sfQuotaHit !== 'undefined' && sfQuotaHit) return true;
-  try {
-    if(!(navigator.storage && navigator.storage.estimate)) return false;
-    const e = await songHelpWithin(navigator.storage.estimate(), null);
-    return !!(e && e.quota > 0 && e.usage / e.quota >= SONG_HELP_FULL_RATIO);
-  } catch(e) { return false; }
+/* Does the page know this Chromebook is full? Only from a QuotaExceededError it has seen (sfQuotaHit). */
+function songHelpIsFull(){
+  return typeof sfQuotaHit !== 'undefined' && !!sfQuotaHit;
 }
 
 /* The players call this when a song does not load: snipAudioError (app/snippets.js), pcAudioError (app/cards.js),
@@ -92,17 +88,12 @@ function songLoadFailed(code){
   const msg = t(code ? 'sf.failed' : 'ca.snipLoadFailed');
   if(route === 'toast') gateToast(msg);
   else if(route === 'toast-help') gateToast(msg, { label: t('songHelp.help'), onClick: songHelpReopen });
-  else if(route === 'popup') songHelpIsFull().then(full => {
-    /* Closed or opened again while the estimate was read: keep to the quiet rule. */
-    if(songHelpClosedOnce || songHelpOtherOverlay()){ gateToast(msg, { label: t('songHelp.help'), onClick: songHelpReopen }); return; }
-    songHelpOpen(full ? 'full' : 'unknown');
-  });
+  else if(route === 'popup') songHelpOpen(songHelpIsFull() ? 'full' : 'unknown');
   return route;
 }
 /* The toast's Help button. */
 function songHelpReopen(){
-  if(songHelpOtherOverlay()) return;
-  songHelpIsFull().then(full => { if(!songHelpOtherOverlay()) songHelpOpen(full ? 'full' : 'unknown'); });
+  if(!songHelpOtherOverlay()) songHelpOpen(songHelpIsFull() ? 'full' : 'unknown');
 }
 
 /* ── The pop-up ── */
