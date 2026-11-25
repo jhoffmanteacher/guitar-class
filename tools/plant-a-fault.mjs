@@ -177,7 +177,10 @@ export const TOOLS = {
   'shared-chromebook':  { cmd: ['tools/shared-chromebook-loop.mjs'] },
   'two-consoles':       { cmd: ['tools/two-consoles-loop.mjs', '--workers', '2'], diff: true, cleanExit: [0, 1] },
   'access-sim':         { cmd: ['tools/access-sim.mjs'] },
-  'kill-switch':        { cmd: ['tools/kill-switch/proof.mjs'] },
+  /* --no-mutations: the proof's own breakages edit start.js by exact text, so a mistake planted on one of those lines
+     made it exit 1 with "its target text occurs 0 times" and counted as caught with no assertion red (review R2-1).
+     Only the scenarios' assertions judge a mistake here. */
+  'kill-switch':        { cmd: ['tools/kill-switch/proof.mjs', '--no-mutations'] },
   'sw-audio':           { cmd: ['tools/sw-audio-proof.mjs'] },
   'tone-test':          { cmd: ['tools/tone-test.mjs'] },
   'song-files-sim':     { cmd: ['tools/song-files-sim.mjs'] },
