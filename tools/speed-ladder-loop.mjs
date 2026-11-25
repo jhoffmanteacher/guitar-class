@@ -85,7 +85,7 @@ async function main() {
   const prof = mkdtempSync(join(tmpdir(), 'gc-ladder-chrome-'));
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   const cdp = await freePort();
-  chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1',
+  chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1',
     '--autoplay-policy=no-user-gesture-required', '--mute-audio', '--no-first-run', '--disable-gpu', '--window-size=1366,657', 'about:blank'], { stdio: 'ignore' });
   let up = false;
   for (let i = 0; i < 80 && !up; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); up = true; } catch { await sleep(250); } }

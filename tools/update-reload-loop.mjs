@@ -154,7 +154,12 @@
    watchdog. Run it after any change to sw.js, the service-worker block in
    app/start.js, swResume* in app/boot.js or teacherResume* in teacher-core.js.
    Only one headless-Chrome run at a time on the machine (CLAUDE.md). The
-   network is blocked (--host-resolver-rules): nothing here needs it. Building
+   network is blocked (--host-resolver-rules, with --no-proxy-server: behind a
+   proxy, as in a cloud session with HTTPS_PROXY set, Chrome sent every request
+   to the proxy and the rules blocked nothing; the Firebase SDK then loaded,
+   its "signed out" answer came after devBypass() and signed the dev user out
+   at a random point, so 13 of 29 cases failed on a sound site, 2026-11-25):
+   nothing here needs it. Building
    version 2 runs checks.mjs once (2 to 5 minutes, slower when the machine is
    busy); the cases 17 to 52 s each (busy-others 52 s, busy-card 40 s); a full
    run of the 29 cases about 16 minutes (967 s on 2026-11-12, the build 256 s
@@ -745,7 +750,7 @@ async function runCase(cs, env) {
   cleanup.push(dropProfile);
   const cdp = await freePort();
   chromeProc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu',
-    '--autoplay-policy=no-user-gesture-required', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore' });
+    '--autoplay-policy=no-user-gesture-required', '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore' });
   let page = null;
   try {
     for (let i = 0; i < 80; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
@@ -781,6 +786,9 @@ async function runCase(cs, env) {
     await page.send('Page.reload', {});
     await sleep(300);
     await c.until('second visit: page ready', `document.readyState === 'complete' && typeof devBypass === 'function' && performance.getEntriesByType('navigation')[0].workerStart > 0`, 0);
+    /* The network block held (2026-11-25): the Firebase SDK comes from gstatic.com, so with it loaded the network is open
+       (a proxy the flags did not stop), and its late "signed out" answer signs the dev user out at a random point. */
+    if (await c.js(`typeof firebase !== 'undefined'`)) throw new Error('the network is not blocked: the Firebase SDK loaded from gstatic.com (a proxy?), so its "signed out" answer can sign the dev user out mid-case');
     const signIn = async (label) => {
       if (cs.console) {
         await c.until(`${label}: console scripts`, `typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined' && document.readyState === 'complete'`, 0);
