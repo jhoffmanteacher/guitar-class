@@ -497,7 +497,7 @@ function teacherSbLeave(){
   sbViewGen++;
   sbStopSounds();
   if(typeof sbPreviewStop === 'function') sbPreviewStop(true);   // the preview card leaves the page's activity list too
-  if(sbWorker){ try{ sbWorker.terminate(); }catch(e){} sbWorker = null; }
+  if(sbWorker){ const w = sbWorker; sbWorker = null; if(w.sbStop) w.sbStop(); else { try{ w.terminate(); }catch(e){} } }   // sbStop settles its promise (SB-3)
   if(typeof sbPdfLeave === 'function') sbPdfLeave();
   /* SB-1: the saves that wait stop with the view (a write would stop at once: sbStopped); their edits stay marked in
      memory, a re-read keeps them, and the view saves them when it shows again (renderTeacherSongBuilder). */
@@ -717,6 +717,9 @@ onmessage = function(e){ try{
     catch(e){ if(url) URL.revokeObjectURL(url); reject({ why: 'this browser could not start the encoder (' + String((e && e.message) || e) + ')' }); return; }
     sbWorker = w;
     const end = () => { try{ w.terminate(); }catch(e){} if(sbWorker === w) sbWorker = null; URL.revokeObjectURL(url); };
+    /* Leaving the view ends the encoder (teacherSbLeave). terminate() fires neither handler below, so the promise is
+       settled here (SB-3, sweep 2026-11-25): sbRunLevel then ends as stopped and frees the builder (sbBusy). */
+    w.sbStop = () => { end(); reject('stop'); };
     w.onmessage = ev => {
       const m = ev.data || {};
       if(m.p != null){ if(onProgress) onProgress(m.p); return; }

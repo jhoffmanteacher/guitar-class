@@ -2675,6 +2675,21 @@ async function sweepCases(consoleSrc, check){
       hit.length === 0 && /Not levelled: the database already holds another file/.test(run('sbNote')) && run('sbDraft().audio.id') === audB && F.S.get('songFiles/' + audC).sha256 === f64,
       JSON.stringify({ writes: hit, note: run('sbNote') }));
   }
+  /* SB-3: leaving while the encoder runs */
+  {
+    const C = await draft(), { run } = C;
+    C.box.Worker = class { postMessage(){} terminate(){ this.terminated = true; } };
+    C.box.URL = class { constructor(u, b){ this.href = String(b).replace(/[^/]*$/, '') + u; } static createObjectURL(){ return 'blob:sim'; } static revokeObjectURL(){} };
+    run('sbLevel = async (src, fs, io) => { await io.encode([new Int16Array(8)], fs); return __level(); };');
+    run('sbReadAt = Date.now(); sbStepOn = 2; sbRunLevel()');
+    for(let i = 0; i < 400 && !run('!!sbWorker'); i++) await sleep(5);
+    const during = run('sbBusy') === 'level' && run('!!sbWorker');
+    run("teacherSbLeave(); teacherView = 'students';"); await turns(60);
+    const busy = run('sbBusy'), note = run('sbNote');
+    run("sbBusy = ''; teacherView = 'songbuilder';");
+    check('SB-3: leaving the Song builder while the encoder runs ends the levelling as stopped: the builder is free again (not busy until a reload), and the line says so',
+      during && busy === '' && /Stopped: you left the Song builder/.test(note), JSON.stringify({ during, busy, note }));
+  }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
     !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));
