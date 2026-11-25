@@ -8,11 +8,12 @@
      the browser says offline     today's toast only (clearing space does not fix Wi-Fi)
      a private song's own line    the card's line only: sf.clock (wrong date), sf.limit
                                   (the month's downloads), sf.offline, sf.signIn,
-                                  sf.notAllowed, sf.notReady, and sf.failed for a
-                                  failure on Firestore's side ('server': busy, a
-                                  timeout, an internal error; emptying Downloads cannot
-                                  fix it) (app/songfiles.js knows the cause and says
-                                  it); only its 'failed' comes here
+                                  sf.notAllowed, sf.notReady, and sf.server for any
+                                  other Firestore error code ('server': busy, a
+                                  timeout, a quota, an internal error; emptying
+                                  Downloads cannot fix it) (app/songfiles.js knows the
+                                  cause and says it); only its 'failed' (no Firestore
+                                  code: a failure on this Chromebook) comes here
      the teacher console          today's toast only (the console is not a student's
                                   Chromebook, and the pop-up empties saved songs)
      anything else                the pop-up. "This Chromebook is full." when the page
@@ -40,7 +41,14 @@
    still not saved after that wait (offline, a write that failed or never
    answered) is never reloaded over, the same rule as the update reload in
    app/start.js: no reload, the button comes back, and the line under it says
-   save.notSavedYet. It never touches progress, sign-in, localStorage, or the
+   save.notSavedYet when the browser is offline ("reconnect"), else
+   songHelp.notSaved (the connection is not the cause). The caches and the
+   song copies are cleared side by side, each at most SONG_HELP_WAIT_MS, then
+   the save waits at most SONG_HELP_WAIT_MS: the whole press ends within about
+   2 x SONG_HELP_WAIT_MS (8 s) even when everything hangs. Closing the pop-up
+   cancels a press that has not reloaded yet (songHelpJob): no reload lands
+   later over what the student does next, and a pop-up opened again shows the
+   button ready. It never touches progress, sign-in, localStorage, or the
    shell cache.
 
    A web page cannot read free disk space or the Downloads folder, and
@@ -53,9 +61,10 @@
    (AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME in tools/sw-audio-map.mjs). 1fe fails
    the push if either drifts, or if one is ever the shell cache. */
 const SONG_HELP_AUDIO_CACHES = ['guitar-class-audio-2026-10-30-ff9e913a6d', 'guitar-class-audio-hashes'];
-const SONG_HELP_WAIT_MS = 4000;        // a cache delete or an IndexedDB clear that never answers: go on; the longest wait for unsaved work
+const SONG_HELP_WAIT_MS = 4000;        // the clear (all deletes side by side) and then the wait for unsaved work: each at most this long
 let songHelpClosedOnce = false;        // the pop-up was closed in this page load: later failures get the toast + Help
 let songHelpBusy = false;              // the main button was pressed and its work is not finished
+let songHelpJob = 0;                   // which press is current: a close moves it on, so an older press stops and never reloads
 
 /* What a failure shows: 'none' (the card's own line says it), 'toast', 'toast-help' or 'popup'.
    o = { code, offline, teacher, closedOnce, otherOverlay }. code: '' for an <audio> element's error, else the
@@ -111,8 +120,11 @@ function songHelpLi(key){ return `<li>${songHelpText(key)}</li>`; }
 function songHelpDownloadsHtml(type){
   return `<ol class="song-help-dl"${type ? ` type="${type}"` : ''}>${['songHelp.dl1', 'songHelp.dl2', 'songHelp.dl3', 'songHelp.dl4', 'songHelp.dl5'].map(songHelpLi).join('')}</ol>`;
 }
+/* The button as it truly is: "Clearing…" and disabled only while a press is working (a close cancels one, so a
+   pop-up opened again normally shows it ready). */
 function songHelpClearHtml(){
-  return `<div class="song-help-clear"><button type="button" class="panel-next-btn" id="song-help-clear" onclick="songHelpClearAndReload()" data-i18n="songHelp.clearBtn">${escHtml(t('songHelp.clearBtn'))}</button>${songHelpText('songHelp.keeps', 'song-help-note')}</div>`;
+  const key = songHelpBusy ? 'songHelp.clearing' : 'songHelp.clearBtn';
+  return `<div class="song-help-clear"><button type="button" class="panel-next-btn" id="song-help-clear" onclick="songHelpClearAndReload()"${songHelpBusy ? ' disabled' : ''} data-i18n="${key}">${escHtml(t(key))}</button>${songHelpText('songHelp.keeps', 'song-help-note')}</div>`;
 }
 /* state: 'full' or 'unknown'. */
 function songHelpHtml(state){
@@ -154,40 +166,51 @@ function songHelpClose(){
   document.removeEventListener('keydown', songHelpEsc);
   closeOverlay();
   songHelpClosedOnce = true;
+  /* A press still clearing or waiting for the save: cancel it, so no reload lands later over whatever the student
+     does next. What it already cleared stays cleared. */
+  if(songHelpBusy){ songHelpJob++; songHelpBusy = false; }
 }
 
 /* ── The main button ── */
-/* Delete the audio caches and the private songs' device copies. Returns what it did:
-   { caches: [names deleted], songFiles: true|false }. Never rejects; a call that throws at once counts as not done. */
+/* Delete the audio caches and the private songs' device copies, all side by side, so the whole clear takes at most
+   SONG_HELP_WAIT_MS. Returns what it did: { caches: [names deleted], songFiles: true|false }. Never rejects; a call
+   that throws at once (run inside new Promise, so the throw becomes a rejection) counts as not done and the others
+   still run. */
 async function songHelpClearSaved(){
-  const deleted = [];
-  if(typeof caches !== 'undefined' && caches && typeof caches.delete === 'function'){
-    for(const name of SONG_HELP_AUDIO_CACHES){
-      if(await songHelpWithin(new Promise(r => r(caches.delete(name))), false)) deleted.push(name);
-    }
-  }
-  const songFiles = typeof songFilesClearDevice === 'function' ? await songHelpWithin(new Promise(r => r(songFilesClearDevice())), false) : false;
-  return { caches: deleted, songFiles: songFiles === true };
+  let names = [];
+  try { if(typeof caches !== 'undefined' && caches && typeof caches.delete === 'function') names = SONG_HELP_AUDIO_CACHES; } catch(e) {}
+  const [gone, songFiles] = await Promise.all([
+    Promise.all(names.map(name => songHelpWithin(new Promise(r => r(caches.delete(name))), false))),
+    typeof songFilesClearDevice === 'function' ? songHelpWithin(new Promise(r => r(songFilesClearDevice())), false) : false
+  ]);
+  return { caches: names.filter((n, i) => gone[i]), songFiles: songFiles === true };
 }
 async function songHelpClearAndReload(){
   if(songHelpBusy) return;
   songHelpBusy = true;
+  const job = ++songHelpJob;
+  const current = () => songHelpJob === job;
   const btn = document.getElementById('song-help-clear');
   if(btn){ btn.disabled = true; btn.setAttribute('data-i18n', 'songHelp.clearing'); btn.textContent = t('songHelp.clearing'); }
   try { stopCardAudio(); } catch(e) {}
   try { await songHelpClearSaved(); } catch(e) {}
+  if(!current()) return;
   /* A step marked done a moment ago is still inside queueSave's debounce, a save may be on the wire, or a failed one
      waits for its retry: send it now and wait for it, at most SONG_HELP_WAIT_MS (flushBeforeLeaving, app/boot.js,
      the step Sign out uses). Still not saved: no reload over it (the update reload's rule, app/start.js). The button
      comes back and says so; a second press clears again (nothing is left to clear) and sends again. */
   let saved = false;
   try { saved = !hasUnsavedWrites() || await flushBeforeLeaving(SONG_HELP_WAIT_MS); } catch(e) {}
+  if(!current()) return;
   if(!saved){
     songHelpBusy = false;
     const b = document.getElementById('song-help-clear');
     if(b){ b.disabled = false; b.setAttribute('data-i18n', 'songHelp.clearBtn'); b.textContent = t('songHelp.clearBtn'); }
+    /* Offline: "reconnect first". Online (a refused write, one that never answered, a save that gave up): a line
+       that does not blame the connection. */
+    const key = typeof navigator !== 'undefined' && navigator.onLine === false ? 'save.notSavedYet' : 'songHelp.notSaved';
     const note = document.querySelector('#song-help-overlay .song-help-note');
-    if(note){ note.setAttribute('data-i18n', 'save.notSavedYet'); note.setAttribute('role', 'alert'); note.textContent = t('save.notSavedYet'); }
+    if(note){ note.setAttribute('data-i18n', key); note.setAttribute('role', 'alert'); note.textContent = t(key); }
     return;
   }
   /* Come back where the student was, as after an update (SW_UPDATE_BOOT, swResumeTake in app/boot.js). The wall

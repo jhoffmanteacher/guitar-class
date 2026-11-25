@@ -549,6 +549,11 @@
     'songHelp.teacher':        { en: 'Tell your teacher.', es: 'Dile a tu maestro.' },
     'songHelp.close':          { en: 'Close', es: 'Cerrar' },
     'songHelp.help':           { en: 'Help', es: 'Ayuda' },
+    // Under the main button when the work could not be saved and the browser is ONLINE (a refused write, a write that
+    // never answered): the connection is not the cause. Offline, save.notSavedYet says to reconnect. The saved songs
+    // were already cleared at that point; only the reload was held back.
+    'songHelp.notSaved':       { en: 'Not saved yet, so the page didn\u2019t reload. Try again in a moment.',
+                                 es: 'Todavía no se guardó, así que la página no se recargó. Inténtalo otra vez en un momento.' },
     // BUILT SONGS (app/builtsongs.js, 2026-11-14): a Play Along song the teacher adds in the console. Its card's
     // title ending, caption, directions line and section names come from here (the title, the artist and the
     // lyric lines are the teacher's own). bs.intro must stay one line at 1366x657 with its chords filled in:

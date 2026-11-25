@@ -11510,7 +11510,7 @@ function checkLoopSpeed(ctx, i18nTable) {
 }
 /* 1fe. THE SONG HELP POP-UP (app/songhelp.js, Jonathan, 2026-11-25): what a song that does not load shows, by cause.
    RUN, not read, in the 0b render context: (1) songHelpRoute on every case (10 codes x offline x teacher x closed once
-   x another dialog open = 160; 'server', a failure on Firestore's side, is the card's line only: review R1-3), its four totals pinned and the brief's named cases spelled out; (2) songLoadFailed with
+   x another dialog open = 160; 'server', any Firestore error code, is the card's line only: reviews R1-3, R2-5), its four totals pinned and the brief's named cases spelled out; (2) songLoadFailed with
    spies on gateToast and songHelpOpen: the pop-up opens 'unknown', or 'full' once the page saw a QuotaExceededError,
    the toast gets a Help button after a close, offline keeps today's toast, sf.limit shows nothing extra; (3) the
    pop-up drawn in both languages and both states, its lines in the pinned order (full: the line, the Downloads
@@ -11519,8 +11519,11 @@ function checkLoopSpeed(ctx, i18nTable) {
    sw.js and tools/sw-audio-map.mjs pin), the shell cache and anything else stay, localStorage is untouched, and the
    order is stop the audio, clear, send unsaved progress AND wait for it (a save already on the wire lands first),
    mark the reload as the update's (so the student lands back where they were), reload; a send that fails leaves the
-   work unsaved, so the button reloads NOTHING, comes back, and a later press works (never reload over unsaved work,
-   the update reload's rule in app/start.js; review R1-1); (5) the three <audio> error sites call songLoadFailed()
+   work unsaved, so the button reloads NOTHING, comes back usable (a stand-in button and note line), and the line under it
+   says songHelp.notSaved, or save.notSavedYet when offline, and a later press works (never reload over unsaved work,
+   the update reload's rule in app/start.js; reviews R1-1, R2-1, R2-6); a cache delete that throws at once still lets
+   the clear resolve and the press reload (R1-4, R2-1); a close while the press clears or waits for the save cancels it:
+   no reload, and the button is drawn ready again (R2-7); (5) the three <audio> error sites call songLoadFailed()
    and none shows the old toast itself. */
 const SH_ROUTES = { popup: 2, 'toast-help': 6, toast: 12, none: 140 };
 const SH_ORDER = {
@@ -11550,7 +11553,7 @@ async function checkSongHelp(ctx, i18nTable) {
   const R = o => { ctx.__shO = Object.assign({ code: '', offline: false, teacher: false, closedOnce: false, otherOverlay: false }, o); return run('songHelpRoute(window.__shO)'); };
   is(R({ offline: true }) === 'toast', 'offline, an <audio> error: today\'s toast only (clearing space does not fix Wi-Fi)');
   is(R({ code: 'clock' }) === 'none' && R({ code: 'limit' }) === 'none', 'sf.clock and sf.limit: their own line, no pop-up');
-  is(R({ code: 'server' }) === 'none', 'a failure on Firestore\'s side (server): the card\'s "press play again in a minute" line, no pop-up (emptying Downloads cannot fix it)');
+  is(R({ code: 'server' }) === 'none', 'a failure on Firestore\'s side (server): the card\'s "press play again later" line (sf.server), no pop-up (emptying Downloads cannot fix it)');
   is(R({}) === 'popup' && R({ code: 'failed' }) === 'popup', 'an <audio> error or a private song\'s "failed", online: the pop-up');
   is(R({ closedOnce: true }) === 'toast-help' && R({ otherOverlay: true }) === 'toast-help', 'closed once, or another dialog open: the toast with Help, never a second pop-up');
   is(R({ teacher: true }) === 'toast' && R({ teacher: true, code: 'failed' }) === 'none', 'the teacher console: today\'s toast, never the pop-up');
@@ -11616,7 +11619,18 @@ async function checkSongHelp(ctx, i18nTable) {
   is(!!shell && !names.includes(shell) && !names.some(n => /^guitar-class-\d{4}-\d{2}-\d{2}-[0-9a-f]+$/.test(n)), `the pop-up's cache names must never be the shell cache (${shell})`);
   const store = new Set([...names, shell, 'guitar-class-2026-01-01-0123456789', 'someone-else']);
   const log = [];
-  const savedR = { caches: ctx.caches, stopCardAudio: ctx.stopCardAudio, flushSave: ctx.flushSave, swResumeSave: ctx.swResumeSave, reload: ctx.location.reload };
+  const savedR = { caches: ctx.caches, stopCardAudio: ctx.stopCardAudio, flushSave: ctx.flushSave, swResumeSave: ctx.swResumeSave, reload: ctx.location.reload,
+    gid: ctx.document.getElementById, qs: ctx.document.querySelector, rel: ctx.document.removeEventListener, closeOverlay: ctx.closeOverlay, online: ctx.navigator.onLine };
+  /* Stand-ins for the pop-up's button, its note line and the overlay (review R2-1, R2-7). */
+  const shEl = () => ({ disabled: false, textContent: '', attrs: {}, setAttribute(k, v) { this.attrs[k] = String(v); }, remove() { this.removed = true; } });
+  let shBtn = shEl(), shNote = shEl(), shOv = shEl();
+  ctx.document.getElementById = id => id === 'song-help-clear' ? shBtn : id === 'song-help-overlay' ? (shOv.removed ? null : shOv) : (savedR.gid ? savedR.gid(id) : null);
+  ctx.document.querySelector = sel => sel === '#song-help-overlay .song-help-note' ? (shOv.removed ? null : shNote) : (savedR.qs ? savedR.qs(sel) : null);
+  ctx.document.removeEventListener = () => {};
+  ctx.closeOverlay = () => {};
+  const shFresh = () => { shBtn = shEl(); shNote = shEl(); shOv = shEl(); shBtn.textContent = run('t("songHelp.clearBtn")'); shNote.attrs['data-i18n'] = 'songHelp.keeps'; };
+  const defer = () => { let res; const pr = new Promise(r => { res = r; }); pr.res = res; return pr; };
+  const shSettle = async () => { for (let i = 0; i < 30; i++) await new Promise(r => setImmediate(r)); };
   ctx.caches = { delete: async n => { log.push('delete ' + n); return store.delete(n); }, keys: async () => [...store] };
   ctx.stopCardAudio = () => log.push('stop');
   /* The fake send lands (the test key is saved) unless flushFails: then it stays unsaved, as after a failed write. */
@@ -11632,11 +11646,66 @@ async function checkSongHelp(ctx, i18nTable) {
     names.forEach(n => store.add(n)); log.length = 0;
     run('songHelpBusy = false; _dirtyKeys.add("1fe-test")');
     flushFails = true;
-    await run('songHelpClearAndReload()');
-    const wantFail = ['stop', ...names.map(n => 'delete ' + n), 'flush'];
-    is(JSON.stringify(log) === JSON.stringify(wantFail) && run('songHelpBusy') === false && run('_dirtyKeys.has("1fe-test")'),
-      `a send that fails: the main button ran ${log.join(' > ')} (busy ${run('songHelpBusy')}); pinned ${wantFail.join(' > ')}, no reload over unsaved work, and the button free again`);
+    for (const online of [true, false]) {
+      names.forEach(n => store.add(n)); log.length = 0; shFresh(); ctx.navigator.onLine = online;
+      await run('songHelpClearAndReload()');
+      const wantFail = ['stop', ...names.map(n => 'delete ' + n), 'flush'];
+      is(JSON.stringify(log) === JSON.stringify(wantFail) && run('songHelpBusy') === false && run('_dirtyKeys.has("1fe-test")'),
+        `a send that fails (${online ? 'online' : 'offline'}): the main button ran ${log.join(' > ')} (busy ${run('songHelpBusy')}); pinned ${wantFail.join(' > ')}, no reload over unsaved work, and the button free again`);
+      is(shBtn.disabled === false && shBtn.attrs['data-i18n'] === 'songHelp.clearBtn' && shBtn.textContent === run('t("songHelp.clearBtn")'),
+        `a send that fails (${online ? 'online' : 'offline'}): the button must come back usable (disabled ${shBtn.disabled}, ${shBtn.attrs['data-i18n']}, "${shBtn.textContent}")`);
+      const noteKey = online ? 'songHelp.notSaved' : 'save.notSavedYet';
+      is(shNote.attrs['data-i18n'] === noteKey && shNote.attrs.role === 'alert' && shNote.textContent === run(`t(${JSON.stringify(noteKey)})`),
+        `a send that fails (${online ? 'online' : 'offline'}): the line under the button must say ${noteKey} (role alert); it says ${shNote.attrs['data-i18n']} "${shNote.textContent}"`);
+    }
+    ctx.navigator.onLine = savedR.online;
+    for (const k of ['songHelp.notSaved', 'save.notSavedYet']) { const e = i18nTable && i18nTable[k]; is(!!(e && e.en && e.es && e.en !== e.es), `${k}: missing, or the same, in English and Spanish`); }
     flushFails = false;
+    /* A cache delete that throws at once (a SecurityError): the clear still resolves, deletes the other cache, and the
+       press still reloads (review R1-4, R2-1). */
+    names.forEach(n => store.add(n)); log.length = 0; shFresh();
+    const delOk = ctx.caches.delete;
+    ctx.caches.delete = n => { if (n === names[0]) { log.push('throw ' + n); throw Object.assign(new Error('blocked'), { name: 'SecurityError' }); } return delOk(n); };
+    let thr = null, rT = null;
+    try { rT = await run('songHelpClearSaved()'); } catch (e) { thr = e; }
+    is(!thr && rT && JSON.stringify(rT.caches) === JSON.stringify(names.slice(1)) && !store.has(names[1]),
+      `a cache delete that throws at once: songHelpClearSaved must resolve and still delete the others; it ${thr ? 'rejected (' + thr.name + ')' : 'gave ' + JSON.stringify(rT && rT.caches)}`);
+    names.forEach(n => store.add(n)); log.length = 0; shFresh();
+    run('songHelpBusy = false; _dirtyKeys.add("1fe-test")');
+    await run('songHelpClearAndReload()');
+    const wantThrow = ['stop', 'throw ' + names[0], ...names.slice(1).map(n => 'delete ' + n), 'flush', 'resume 1', 'reload'];
+    is(JSON.stringify(log) === JSON.stringify(wantThrow), `a cache delete that throws at once: the main button ran ${log.join(' > ')}; pinned ${wantThrow.join(' > ')}`);
+    ctx.caches.delete = delOk;
+    run('songHelpBusy = false'); ctx.sessionStorage.removeItem('gcSwUpdating');
+    /* Closed mid-clear (review R2-7): a close while the caches are still clearing, or while the save is still being
+       waited for, cancels the press: no reload ever lands, and a pop-up opened again shows the button ready. */
+    for (const stage of ['clearing', 'saving']) {
+      names.forEach(n => store.add(n)); log.length = 0; shFresh();
+      const gate = defer();
+      if (stage === 'clearing') ctx.caches.delete = n => { log.push('delete ' + n); return gate.then(() => store.delete(n)); };
+      else ctx.flushSave = () => { log.push('flush'); return gate.then(() => run('_dirtyKeys.delete("1fe-test")')); };
+      run('_dirtyKeys.add("1fe-test")');
+      const pr = run('songHelpClearAndReload()');
+      await shSettle();
+      const working = String(run('songHelpClearHtml()'));
+      is(/ disabled /.test(working) && /data-i18n="songHelp\.clearing"/.test(working), `closed mid-clear (${stage}): while the press works, a drawing of the button must show it working (disabled, songHelp.clearing): ${working.slice(0, 160)}`);
+      run('songHelpClose()');
+      gate.res();
+      await pr; await shSettle();
+      const want = stage === 'clearing' ? ['stop', ...names.map(n => 'delete ' + n)] : ['stop', ...names.map(n => 'delete ' + n), 'flush'];
+      is(JSON.stringify(log) === JSON.stringify(want) && run('songHelpBusy') === false,
+        `closed mid-clear (${stage}): the press ran ${log.join(' > ')} (busy ${run('songHelpBusy')}); pinned ${want.join(' > ')}: no reload after a close`);
+      const again = String(run('songHelpClearHtml()'));
+      is(!/ disabled/.test(again) && /data-i18n="songHelp\.clearBtn"/.test(again), `closed mid-clear (${stage}): the pop-up opened again must show the button ready: ${again.slice(0, 160)}`);
+      ctx.caches.delete = delOk; ctx.flushSave = async () => { log.push('flush'); if (!flushFails) run('_dirtyKeys.delete("1fe-test")'); };
+      /* The reopened button works: a press reloads (and the cancelled press, done by now, adds nothing). */
+      names.forEach(n => store.add(n)); log.length = 0; shFresh(); run('songHelpClosedOnce = false');
+      run('_dirtyKeys.add("1fe-test")');
+      await run('songHelpClearAndReload()'); await shSettle();
+      const wantAgain = ['stop', ...names.map(n => 'delete ' + n), 'flush', 'resume 1', 'reload'];
+      is(JSON.stringify(log) === JSON.stringify(wantAgain), `closed mid-clear (${stage}), opened again: a press ran ${log.join(' > ')}; pinned ${wantAgain.join(' > ')}`);
+      run('songHelpBusy = false'); ctx.sessionStorage.removeItem('gcSwUpdating');
+    }
     /* A save already on the wire (_flushP) with nothing else dirty: the reload waits for it to land. */
     names.forEach(n => store.add(n)); log.length = 0;
     ctx.__shWire = () => log.push('landed');
@@ -11656,7 +11725,10 @@ async function checkSongHelp(ctx, i18nTable) {
   } finally {
     ctx.caches = savedR.caches; ctx.stopCardAudio = savedR.stopCardAudio; ctx.flushSave = savedR.flushSave; ctx.swResumeSave = savedR.swResumeSave; ctx.location.reload = savedR.reload;
     if (savedR.caches === undefined) delete ctx.caches;
-    run('songHelpBusy = false; _dirtyKeys.delete("1fe-test"); _flushP = null');
+    ctx.document.getElementById = savedR.gid; ctx.document.querySelector = savedR.qs; ctx.document.removeEventListener = savedR.rel; ctx.closeOverlay = savedR.closeOverlay; ctx.navigator.onLine = savedR.online;
+    if (savedR.rel === undefined) delete ctx.document.removeEventListener;
+    if (savedR.qs === undefined) delete ctx.document.querySelector;
+    run('songHelpBusy = false; songHelpClosedOnce = false; _dirtyKeys.delete("1fe-test"); _flushP = null');
     delete ctx.__shWire;
     ctx.sessionStorage.removeItem('gcSwUpdating'); ctx.localStorage.removeItem('1fe-keep');
   }
@@ -11670,7 +11742,7 @@ async function checkSongHelp(ctx, i18nTable) {
     const at = src.indexOf(anchor);
     is(at >= 0 && /songLoadFailed\(\)/.test(src.slice(at, at + 600)), `${f}: the <audio> error (${anchor}) no longer calls songLoadFailed()`);
   }
-  if (!bad) ok(`1fe: ${cases} route cases (${Object.entries(tally).map(([k, v]) => k + ' ' + v).join(', ')}) · songLoadFailed: 7 cases with spies (incl. the hidden aria-modal screens) · ${drawn} drawings (EN + ES, full + unknown) in the pinned order · the button: 2 audio caches deleted, the shell cache and 2 others kept, stop > clear > flush and wait (a save on the wire lands first) > update-reload mark > reload, a failed send reloads nothing and frees the button, localStorage untouched · 3 <audio> error sites · ${asserts} asserts`);
+  if (!bad) ok(`1fe: ${cases} route cases (${Object.entries(tally).map(([k, v]) => k + ' ' + v).join(', ')}) · songLoadFailed: 7 cases with spies (incl. the hidden aria-modal screens) · ${drawn} drawings (EN + ES, full + unknown) in the pinned order · the button: 2 audio caches deleted, the shell cache and 2 others kept, stop > clear > flush and wait (a save on the wire lands first) > update-reload mark > reload, a failed send reloads nothing and gives the button back with its line (songHelp.notSaved online, save.notSavedYet offline), a delete that throws at once, closed mid-clear (clearing, saving): no reload, opened again ready, localStorage untouched · 3 <audio> error sites · ${asserts} asserts`);
 }
 /* 1fc. THE SPEED LADDER (ca-54, Jonathan, 2026-11-24): card.rounds, card.slowestRate 0.9, card.startStop 'slowest',
    card.buildLaps 1. Three decisions are pinned here, and each is the ONE exception to a rule every other card keeps:
