@@ -10541,7 +10541,8 @@ function checkPracticeCards(ctx) {
        last round's check is a plain check and it has no Level up (1fc pins which cards carry rounds). */
     if (c.rounds) { if (lvl.length) flag(`${w}: a rounds card ends on its last round's check — it has no levelUp check`); }
     else if (lvl.length !== 1 || lvl[0] !== checks.length - 1) flag(`${w}: card.checks needs exactly one levelUp check, and it goes last`);
-    // `slot` pins a check's tick key (caCheckKey in app.js); two checks on one key would share a tick.
+    // `slot` pinned a check's tick key (`<id>:c<slot or index>`) while cards had checklists. Nothing reads those
+    // ticks since 2026-11-10, but saved ones stay in progress: keep two checks off one key all the same.
     const tickSlots = checks.map((x, ci) => (x && Number.isInteger(x.slot)) ? x.slot : ci);
     if (new Set(tickSlots).size !== tickSlots.length) flag(`${w}: two checks share a tick key — fix the slot numbers`);
     checks.forEach((x, ci) => {

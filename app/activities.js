@@ -1264,10 +1264,6 @@ function pcBassMarks(events, row, bpb, bass){
 }
 function caIsCard(a){ return !!(a && a.view === 'card' && a.card); }
 function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ? a.card.checks : []; }
-/* A check's tick key. Positional by default; `slot: n` pins it to the key it
-   had before earlier checks were removed, so a saved tick stays on its own
-   box (ca-25 lost its first two checks, 2026-10-07). */
-function caCheckKey(a, c, ci){ return `${a.id}:c${(c && Number.isInteger(c.slot)) ? c.slot : ci}`; }
 /* The ticks an activity counts: a ladder's steps. Every "n of m done" reader
    goes through these two so they can't disagree about what finishing means.
    A practice card counts NONE since 2026-11-10 (Jonathan: "get rid of the
