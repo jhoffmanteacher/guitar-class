@@ -17,9 +17,15 @@
 #
 # The second job runs the quick Node-only proof tools that CLAUDE.md asks for
 # after a change to their area (the save path, what a student sees, the live
-# quiz, a shared Chromebook). On GitHub they run after EVERY push, so a change
-# that touched one of those areas without its proof being run is still caught.
-# Each tool prints a replay command for any case that fails.
+# quiz, a shared Chromebook), and, since 2026-11-25, the ones nothing else ran
+# automatically: the kill switch and the update reload (kill-switch/proof.mjs),
+# the Tuning Simulator's rounds (tuning-sim-proof.mjs), the sign-in domain
+# screen (access-sim.mjs), the console's backup (backup-proof.mjs) and a
+# switch to the panel already open (stay-proof.mjs); each takes seconds.
+# (remove-one-sim and the live-changes / live-hilo / live-saw sims are not here:
+# checks.mjs runs them, in the job above.) On GitHub they run after EVERY push,
+# so a change that touched one of those areas without its proof being run is
+# still caught. Each tool prints a replay command or the case for any failure.
 #
 # The third job, lint, is the name checker (tools/lint.mjs + eslint.config.mjs):
 # ESLint, fetched by npx at a pinned version, finds names used that no script
@@ -154,6 +160,21 @@ jobs:
       - name: Two students, one Chromebook (tools/shared-chromebook-loop.mjs)
         if: always()
         run: node tools/shared-chromebook-loop.mjs
+      - name: The kill switch and the update reload (tools/kill-switch/proof.mjs)
+        if: always()
+        run: node tools/kill-switch/proof.mjs
+      - name: The Tuning Simulator's rounds (tools/tuning-sim-proof.mjs)
+        if: always()
+        run: node tools/tuning-sim-proof.mjs
+      - name: The sign-in domain screen (tools/access-sim.mjs)
+        if: always()
+        run: node tools/access-sim.mjs
+      - name: The console's backup (tools/backup-proof.mjs)
+        if: always()
+        run: node tools/backup-proof.mjs
+      - name: A switch to the panel already open stops nothing (tools/stay-proof.mjs)
+        if: always()
+        run: node tools/stay-proof.mjs
 
   lint:
     runs-on: ubuntu-latest
