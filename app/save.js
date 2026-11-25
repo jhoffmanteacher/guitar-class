@@ -402,10 +402,12 @@ function progressLoadNoticeHide(){
        activity ticks) re-uploads nothing old.
      - Every other Chromebook keeps its copies until the student signs in there.
        It then finds a doc (emptied by the Start over, or re-created after the
-       Delete), so none of the above runs; its old practice log is still never
-       read back in place of the doc's (progressDeviceLogStale, 2026-11-25). Its
-       other copies (practice minutes, the recording consent, the legacy ticks)
-       are not told apart from new ones: nothing in the doc says which are old.
+       Delete), so none of the above runs; its old practice log is not read
+       back in place of the doc's (progressDeviceLogStale, 2026-11-25), except
+       after a Delete when that sign-in's class-settings read fails: only the
+       marker says the record was re-created (review R1-7). Its other copies
+       (practice minutes, the recording consent, the legacy ticks) are not told
+       apart from new ones: nothing in the doc says which are old.
    THE LIMIT (said in the console's dialogs and in Manage): a page that is
    already open keeps its old copy and saves it again on its next save (after a
    Delete it re-creates the record, after a Start over it puts old lesson work
