@@ -3138,7 +3138,7 @@ if(args.includes('--breaks')){
     ['teacher-sb-sheet.js', 'Check it again not counted', '    await songFileCount(db, songFileCost(sh.bytes));\n    const bytes = await songFileReadPieces(db, sh.id,', '    const bytes = await songFileReadPieces(db, sh.id,'],
     ['teacher-sb-sheet.js', 'the sheet head not read again in the transaction', "if(!teacherSfHeadMatches(hs2.exists ? hs2.data() || {} : null, entry)) throw", "if(false) throw"],
     ['teacher-sb-chart.js', 'the draft\'s sheet left out of the song (Edit / Publish drop it)', "  if(d.sheet && typeof d.sheet === 'object') song.sheet =", "  if(false) song.sheet ="],
-    ['teacher-sb-publish.js', 'an imported song\'s rebuilt draft loses its sheet', "pubVer: Number(p.ver) || null, sheet: s.sheet && typeof s.sheet === 'object' ? JSON.parse(JSON.stringify(s.sheet)) : null };", "pubVer: Number(p.ver) || null, sheet: null };"],
+    ['teacher-sb-publish.js', 'an imported song\'s rebuilt draft loses its sheet', "pubVer: Number(p.ver) || null, sheet: s.sheet && typeof s.sheet === 'object' ? JSON.parse(JSON.stringify(s.sheet)) : null,", "pubVer: Number(p.ver) || null, sheet: null,"],
     ['teacher-sb-publish.js', 'Publish does not read the sheet\'s head', "      if(sh){\n        const ss = await tx.get(db.collection('songFiles').doc(sh.id));", "      if(false){\n        const ss = await tx.get(db.collection('songFiles').doc(sh.id));"],
     ['teacher-sb-publish.js', 'Delete… leaves the sheet', "p.doc && p.doc.song && p.doc.song.sheet && p.doc.song.sheet.id, d && d.sheet && d.sheet.id].filter(Boolean)", "].filter(Boolean)"],
     ['teacher-sb-publish.js', 'Export leaves the pdf out', "    if(pdf) teacherMicSaveFile(base + '.pdf',", "    if(false) teacherMicSaveFile(base + '.pdf',"],
