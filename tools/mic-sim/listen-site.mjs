@@ -60,7 +60,10 @@ const VM = `globalThis.__lb = {
   coachOut(){
     const c = coach, html = coachBody().innerHTML;
     const said = k => html.indexOf(t(k)) >= 0;
-    const overall = said('coach.report.couldntHearChords') || said('coach.report.couldntHearMelody') ? 'couldntHear'
+    /* couldntHear: either "couldn't hear" screen; the unread* lines are the one for sounds the Coach could not read as notes
+       (2026-11-25, "the notes decide"). A site from before has no such keys: t() hands back the key, which no report contains. */
+    const overall = said('coach.report.couldntHearChords') || said('coach.report.couldntHearMelody')
+      || said('coach.report.unreadChords') || said('coach.report.unreadMelody') ? 'couldntHear'
       : said('coach.overall.great') || said('coach.overall.greatHeard') ? 3 : said('coach.overall.good') ? 2 : said('coach.overall.practice') ? 1 : null;
     const crits = overall === 'couldntHear' ? null : [coachScorePitch(), coachScoreTiming(), coachScoreTempo(), coachScoreChanges(), coachScoreCompletion()].map(x => x.level);
     const skills = c.skillIds.map(sid => ({ sid, saved: games.coachSkill && games.coachSkill[sid] ? games.coachSkill[sid].level : 0,

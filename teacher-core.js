@@ -973,12 +973,13 @@ const TCK_CHECK_SVG=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"
 const TCK_WORK_SVG=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
 const TCK_MINUS_SVG=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 // games.coachSkill[id].level / .last are 1/2/3 — same three tiers coach.js
-// shows the student (coach.level.needsWork/gettingIt/great in i18n.js).
+// shows the student (coach.level.needsWork/gettingIt/great in i18n.js; level
+// 1 reads "Not yet" there, and here too since 2026-11-25).
 // Mirrored here in plain English rather than through t(): the teacher
 // dashboard has no i18n wiring anywhere else in this file (it's gated to a
 // single TEACHER_EMAIL account), so adding it just for these two tooltips
 // would be new, inconsistent scope rather than following existing pattern.
-const COACH_LEVEL_LABEL={1:'Needs work',2:'You’re getting it',3:'Great'};
+const COACH_LEVEL_LABEL={1:'Not yet',2:'You’re getting it',3:'Great'};
 function coachLevelLabel(n){ return COACH_LEVEL_LABEL[n]||null; }
 /* A "gotit" cell can mean three different things underneath — plain
    self-declared (no Coach data), a Listening Coach pass, or a checklist-gate

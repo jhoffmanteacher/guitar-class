@@ -69,17 +69,48 @@ function coachMinHeard(slotCount){
   return Math.max(Math.min(3, Math.ceil(slotCount / 2)), Math.ceil(slotCount * 0.3));
 }
 
+/* The skill this round is for still waits on the Coach: toggleSkill (app/audio-ui.js) would show the check-off gate, whose
+   "Mark it anyway" the "could not read" screen names. typeof: the gate lives in app/audio-ui.js, not in the coach parts. */
+function coachGateWaiting(){
+  if (typeof skillIsCoachGated !== 'function' || typeof coachSkillBest !== 'function') return false;
+  return (coach.skillIds || []).some(sid => skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL
+    && !(typeof progress !== 'undefined' && progress && progress[sid] === 'gotit'));
+}
+
 function coachRenderReport(){
   const slots = coach.slots;
   const matched = slots.filter(s => s.hit);
 
-  /* Too little signal → honest "couldn't hear", never a wrong verdict. */
-  if (matched.length < coachMinHeard(slots.length)){
+  /* THE NOTES DECIDE (2026-11-25; the numbers: tools/mic-sim/README.md, "The notes decide"). In a classroom a sound lands near every
+     beat whether or not the student played (recorded takes: 0 of 64 beats came back "miss"), so "On the beat" and "Played it
+     through" are Great for a round of desk taps or room noise, and two Greats made Good. Two rules about the round as a whole
+     (no slot verdict changes):
+       1. "Right notes" at Not yet is never Good on two other Greats (the line after the forgiveness floor below).
+       2. When that Not yet rests on sounds the Coach could not read, not on notes it read as wrong (wrong notes on under three
+          quarters of the beats, and more unclear beats than silent ones), the round gets the "could not read" screen below:
+          no level, nothing saved for the skill, the check-off gate as it was. A round stays Not yet, with its sentences, when
+          three quarters of the beats or more were read as wrong notes, or when the silent beats are as many as the unclear ones
+          or more (the student stopped).
+     Roll back (report card only): `|| unread` out of the test below, the "the notes decide" line, and `good > 1` back to
+     `good > 0` in coachScorePitch's quietMost branch; nothing is stored in a new shape. */
+  const pitchCrit = coachScorePitch();
+  const stateN = k => slots.filter(s => s.state === k).length;
+  const unread = pitchCrit.level === 1 && !(stateN('wrong') >= slots.length * 0.75) && stateN('dim') > stateN('miss');
+  const heardLittle = matched.length < coachMinHeard(slots.length);
+
+  /* Too little signal → honest "couldn't hear", never a wrong verdict. Two screens: too few sounds at all (the mic hint), or
+     sounds the Coach could not read as notes (rule 2 above: move closer, or mark the skill with the gate's "Mark it anyway"). */
+  if (heardLittle || unread){
     const isMac = /Mac/.test(navigator.platform || '') || /Macintosh/.test(navigator.userAgent || '');
-    const micHint = t('coach.report.micHint') + (isMac ? ' ' + t('coach.report.micHintMac') : '');
+    const chords = coach.mode === 'chords';
+    const line = heardLittle
+      ? t(chords ? 'coach.report.couldntHearChords' : 'coach.report.couldntHearMelody')
+      : t(chords ? 'coach.report.unreadChords' : 'coach.report.unreadMelody');
+    const tips = heardLittle ? [t('coach.report.micHint')] : (coachGateWaiting() ? [t('coach.report.markAnyway')] : []);
+    if (isMac) tips.push(t('coach.report.micHintMac'));
     coachBody().innerHTML =
-      `<div class="coach-note">&#x1F914; ${t(coach.mode === 'chords' ? 'coach.report.couldntHearChords' : 'coach.report.couldntHearMelody')}</div>
-       <div class="coach-tip">${micHint}</div>
+      `<div class="coach-note">&#x1F914; ${line}</div>
+       ${tips.length ? `<div class="coach-tip">${tips.join(' ')}</div>` : ''}
        ${coachStripHtml()}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="coachStartCheck()">&#x21BB; ${t('coach.tryAgain')}</button>
@@ -90,7 +121,7 @@ function coachRenderReport(){
   }
 
   const crits = [
-    coachScorePitch(),
+    pitchCrit,
     coachScoreTiming(),
     coachScoreTempo(),
     coachScoreChanges(),
@@ -120,6 +151,8 @@ function coachRenderReport(){
      once, so the same fault was charged three times. */
   const hard = applicable.filter(c => !c.soft);
   if (overallLevel < 2 && hard.length && hard.every(c => c.level >= 2)) overallLevel = 2;
+  /* The notes decide (rule 1 at the top): Good on timing and completion alone was a round of room noise. */
+  if (overallLevel === 2 && crits[0].level === 1) overallLevel = 1;
   let overall;
   /* Great can still have beats the mic missed or could not read: pitch
      leaves those out of its ratio. Then "Everything was right" is not
@@ -189,19 +222,22 @@ function coachRenderReport(){
     saveGames();
   }
 
+  /* The rows (2026-11-25): the thing to fix first on top, lowest level first ("Right notes" first on a
+     tie: crits[0] is pitch and the index breaks ties), and no row for a criterion with no level (level 0: "no chord changes in
+     this drill", "too short to judge tempo"), which says nothing about the round. */
+  const rows = crits.map((c, i) => ({ c, i })).filter(x => x.c.level > 0)
+    .sort((a, b) => a.c.level - b.c.level || a.i - b.i).map(x => x.c);
   coachBody().innerHTML =
     `<div class="coach-report"><div class="coach-overall">${overall}</div>
      ${notesHtml}
      ${compareHtml}
      ${coachStripHtml()}
      <div class="coach-crits">` +
-    crits.map(c =>
+    rows.map(c =>
       `<div class="coach-crit">
          <div class="coach-crit-top">
            <span class="coach-crit-name">${c.icon} ${escHtml(c.name)}</span>
-           ${c.level > 0
-             ? `<span class="coach-lvl lvl${c.level}">${LVL[c.level]}</span>`
-             : `<span class="coach-lvl lvl0">&mdash;</span>`}
+           <span class="coach-lvl lvl${c.level}">${LVL[c.level]}</span>
          </div>
          <div class="coach-crit-note">${escHtml(c.sentence)}</div>
        </div>`).join('') +
@@ -225,7 +261,8 @@ function coachScorePitch(){
 
   /* Mostly unclear strums: "I heard the strums but not the notes clearly ... I mostly scored your timing" at level 2 (the forgiveness floor
      in the report then lets timing decide the badge) when most slots are unclear on 3+ readings (the vote's grey zone, between 10% and 20%
-     chord tones), or when any strum was right (as melody's quietMost: one right strum never drops the line below Getting it). A sound with
+     chord tones), or when any strum was right (one right strum keeps the line at Getting it here; melody's quietMost asks for two
+     since 2026-11-25; the chord rule waits for real chord takes, tools/mic-sim/README.md). A sound with
      no pitch, or 1-2 readings off the chord, is never credited (rule A, coachToneCredit), so a round of only such sounds (desk taps, muted
      strums, typing) with nothing right is level 1 and says the chord sound gets no credit (2026-11-18; review R1-1, R1-2). */
   if (coach.mode === 'chords' && dim > slots.length * 0.6){
@@ -240,16 +277,21 @@ function coachScorePitch(){
   let level, sentence;
   const firstWrong = slots.find(s => s.state === 'wrong');
   /* When nothing was WRONG and the only losses are unheard/unclear notes,
-     the likely story is volume, not fingers — quiet plucks don't reach the
-     mic. Say that, instead of implying the student fretted them badly.
-     (Also keeps a mostly-unheard take from scoring "Nailed 2 of 12 — clean
-     run!": dim slots carry no verdict, so they're invisible to the ratio.) */
+     say that the Coach could not hear them clearly, instead of implying the
+     student fretted them badly. Not "volume" (2026-11-25): in a classroom an
+     unclear beat almost always held a sound, so the mic heard it; the
+     direction is to play firmly, close to the mic. (Also keeps a
+     mostly-unheard take from scoring "Nailed 2 of 12 — clean run!": dim
+     slots carry no verdict, so they're invisible to the ratio.)
+     Two right notes or more for level 2 (2026-11-25, "the notes decide"):
+     with nothing played, a voice or a neighbour's guitar gave a short drill
+     its one "right" note. */
   if (coach.mode === 'melody' && !firstWrong && (dim + missed) > total * 0.5){
     const key = good === 0 ? 'coach.crit.pitch.quietMostAll'
       : good === 1 ? 'coach.crit.pitch.quietMostOne'
       : 'coach.crit.pitch.quietMostMany';
-    return { name, icon, level: good > 0 ? 2 : 1,
-      sentence: t(key, { good }) };
+    return { name, icon, level: good > 1 ? 2 : 1,
+      sentence: t(key, { good, total }) };
   }
   const quietOnly = !firstWrong && (missed + dim) > 0;
   /* A clearly-wrong note caps the score at level 2 — on a short drill one
@@ -279,7 +321,7 @@ function coachScorePitch(){
   } else {
     level = 1;
     if (quietOnly){
-      sentence = t(coach.mode === 'chords' ? 'coach.crit.pitch.needsQuietChords' : 'coach.crit.pitch.needsQuietMelody');
+      sentence = t(coach.mode === 'chords' ? 'coach.crit.pitch.needsQuietChords' : 'coach.crit.pitch.needsQuietMelody', { good, total });
     } else {
       sentence = coach.mode === 'chords'
         ? t('coach.crit.pitch.needsChords')

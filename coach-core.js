@@ -10,7 +10,7 @@
 
    Flow: inline card → 4-click count-in → mic listens while the student
    plays one note/strum per beat → report card scoring FIVE criteria on a
-   three-level scale (Needs work / You're getting it / Great), one plain
+   three-level scale (Not yet / You're getting it / Great), one plain
    sentence each:
      1. Right notes (pitch)   2. On the beat (timing)   3. Steady tempo
      4. Chord changes         5. Played it through (completion)
@@ -30,8 +30,10 @@
    Honesty rules (from the Session G research): never claim a chord NAME
    from audio — chord feedback is about timing + "chord-tone" plausibility,
    hedged in the wording. A too-quiet/unclear take gets "I couldn't hear
-   that clearly", never a wrong verdict. Mic runs only while a check is
-   active, with a visible indicator; no sound is recorded or uploaded
+   that clearly", never a wrong verdict; so does a take whose sounds it
+   could not read as notes, and the notes decide the level ("Right notes"
+   at Not yet is never Good: coachRenderReport, 2026-11-25). Mic runs
+   only while a check is active, with a visible indicator; no sound is recorded or uploaded
    (scores and practice minutes are saved, so the footer says "no sound").
 
    Loaded as a plain <script> AFTER app.js and tuner.js — uses their
