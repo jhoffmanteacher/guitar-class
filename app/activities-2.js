@@ -363,7 +363,9 @@ function caOnToggle(details){
      player, which the snipStop/pcStop below can't see). */
   if(!details.open && wasOpenId === details.dataset.id){
     const closing = (window.CLASS_ACTIVITIES || []).find(x => x.id === details.dataset.id);
-    if(closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing))){
+    /* caSinceRepaint: something arrived while the card was open (a "Since your last visit" answer, a new day); the
+       list catches up now, as caCloseOpen does. */
+    if(caSinceRepaint || (closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing)))){
       stopCardAudio();
       renderClassActivities();
       return;
@@ -697,7 +699,7 @@ function caCloseOpen(){
   const paOnly = !!(closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing)));
   caSwap = null;
   caOpenId = null;
-  // caSinceRepaint: a "Since your last visit" group arrived while the card was open (caSinceRepaintNow).
+  // caSinceRepaint: something arrived while the card was open (a "Since your last visit" group, caSinceRepaintNow; a new day, the tab-return handler).
   if(hadSwap || paOnly || caSinceRepaint) renderClassActivities(); else caSyncTopbar();
   scrollPaneTop(false);
 }
@@ -1366,8 +1368,13 @@ document.addEventListener('visibilitychange', () => {
   loadClassConfig().then(() => {
     const today = caTodayStr(), newDay = today !== caSeenDay;
     caSeenDay = today;
-    if(classConfigSignature() === before && !newDay) return;
-    refreshOpenClassActivitiesScreen();
+    const moved = classConfigSignature() !== before;
+    if(!moved && !newDay) return;
+    /* Only the day changed and a card is open: the redraw would stop the song the student pressed as the tab came
+       back and reset the card's drill round. It waits for the card to close (caSinceRepaint: caCloseOpen, and
+       caOnToggle for a card closed by its title, render then). */
+    if(!moved && caOpenId) caSinceRepaint = true;
+    else refreshOpenClassActivitiesScreen();
     /* The search index holds one entry per VISIBLE activity (buildSearchIndex),
        so an activity released while the tab was away stayed unfindable — and
        an archived one stayed findable — until a language switch or reload.
@@ -1875,7 +1882,7 @@ function caOnFinishedToggle(details){
 const CA_SINCE_WINDOW_DAYS = 14;
 const CA_SINCE_RETRY_MS = 5 * 60 * 1000;
 let caSinceRead = null;      // { key: 'uid|YYYY-MM-DD', state: 'loading'|'ok'|'failed', at, last }
-let caSinceRepaint = false;  // the answer came while a card was open: repaint when it closes
+let caSinceRepaint = false;  // the answer (or a new day, the tab-return handler) came while a card was open: repaint when it closes
 /* PURE. The class days with no saved work: every date in `dates` after
    `last` and before `today`, once each, oldest first. Fewer than two → null. */
 function caSinceGap(dates, last, today){

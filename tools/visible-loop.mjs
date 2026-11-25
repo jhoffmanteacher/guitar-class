@@ -185,7 +185,9 @@
        FAILED tab-return read it keeps the old answer; a fresh load shows the new answer. During the read the page
        keeps showing the last known answer (save.js:228-238, the blank window found 2026-09-26).
        A tab left open past midnight, config unchanged: at its tab return it shows what a fresh load shows that
-       day (Today's activities, the first card, the search index; the directed midnight block, 2026-11-25).
+       day (Today's activities, the first card, the search index; the directed midnight block, 2026-11-25). With a
+       card open (and playing) at that tab return, nothing stops and the list is not redrawn under it; the page
+       catches up when the card closes (review R1-7).
    Not exercised (round-2 review R2-6): board ties on a seeded board (the writers always re-pack 1..N, so R8's
    "pos, then the legacy number, then the id" runs only on the unseeded board); a student un-marking a card.
    Still not stated, measured only: when an already-open Journey page picks up a change (journey.js has no
@@ -1557,6 +1559,29 @@ async function directedMidnight() {
   if (JSON.stringify(want) === JSON.stringify(evening)) fail('midnight', `a fresh load on ${tomorrow} shows the same Today as the evening before (${JSON.stringify(want)}): the block is mis-aimed`);
   if (JSON.stringify(back) !== JSON.stringify(want)) fail('midnight: tab back the next morning', `the open page shows ${JSON.stringify(back)}, a fresh load shows ${JSON.stringify(want)}: a tab left open past midnight keeps yesterday's In-Class Activities`);
   if (indexDropped !== true) fail('midnight: tab back the next morning', 'the search index built yesterday was kept, so a card released today stays unfindable');
+  /* The same morning with a card open and playing (review R1-7): the redraw would stop the song the student pressed as
+     the tab came back and reset the card's drill round, so it waits; "◀ All activities" then shows the new day. */
+  VNOW = eve;
+  step('midnight, a card open and playing: tab comes back the next morning');
+  const pg = await bootStudent({ storage: makeStorage() }, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+  pg.els['class-activities-screen'].hidden = false;
+  pg.run('renderClassActivities()');
+  pg.run(`caOpenId = ${JSON.stringify(a0)}; window.__r17 = { renders: 0, stops: 0 };
+    (function(){ const r = renderClassActivities; renderClassActivities = function(){ __r17.renders++; return r.apply(this, arguments); };
+      for (const n of ['stopCardAudio', 'snipStop', 'pcStop', 'stopPlaySeq']) { const f = globalThis[n]; globalThis[n] = function(){ __r17.stops++; return f.apply(this, arguments); }; } })();`);
+  VNOW = morning;
+  pg.client.plan.config.push('ok');
+  pg.ctx.document.hidden = false;
+  (pg.docListeners.visibilitychange || []).forEach(fn => fn({}));
+  await flush();
+  const during = JSON.parse(pg.run('JSON.stringify(__r17)'));
+  const heldToday = shown(pg);
+  pg.run('caCloseOpen()');
+  const afterClose = shown(pg);
+  C.midnightSteps++; C.comparisons += 2;
+  if (during.renders || during.stops) fail('midnight, a card open and playing', `the tab return redrew the list ${during.renders} time(s) and called a stopper ${during.stops} time(s) under the open card: the student's song stops and the card's round resets`);
+  if (JSON.stringify(heldToday) !== JSON.stringify(evening)) fail('midnight, a card open and playing', `the list under the open card changed at the tab return (${JSON.stringify(heldToday)}, was ${JSON.stringify(evening)})`);
+  if (JSON.stringify(afterClose) !== JSON.stringify(want)) fail('midnight, a card open: the card closes', `the page shows ${JSON.stringify(afterClose)} after "All activities", a fresh load shows ${JSON.stringify(want)}: it never catches up with the new day`);
   VNOW = DAYS[0][1];
 }
 
@@ -1626,7 +1651,7 @@ out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, 
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins (and after every tab return); JOURNEY_GATE_LOCKS read false on ${C.journeyLocks} Journey probes; ${C.routerChecks} students with an unfinished required activity asked the router for another page`);
 out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
 out.push(`  the signature, directed: ${C.sigSteps} of 14 inputs changed alone, each followed by a tab return with a good read`);
-out.push(`  a tab left open past midnight, directed: ${C.midnightSteps} of 1 tab returns compared with a fresh load (Today, the first card, the search index)`);
+out.push(`  a tab left open past midnight, directed: ${C.midnightSteps} of 2 tab returns compared with a fresh load (Today, the first card, the search index; with a card open: nothing stops, caught up at the close)`);
 out.push(`  the console after a failed config read, directed: ${C.consoleReadPaints} of 3 Games views painted (failed read, good read, failed read)`);
 out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
 out.push(`  Today's activities (R16, caTodayIds after the same render): ${C.todayChecks} sign-ins checked, ${C.todayKept} of them with a kept card dated before yesterday in Today`);
