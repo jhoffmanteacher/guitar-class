@@ -280,8 +280,8 @@ window.addEventListener('beforeprint', function(){
    downbeat in seconds, the same number as SNIPPET_TRACKS[...].anchor in
    app/snippets.js — with data-bpm / data-bpm-slow holding the COUNTED tempos (72 /
    60 there, where the files are 144 / 120; the ratio is the same, so the
-   Slow rescale doesn't move) and optional data-click-beats (default 4) for
-   the loud click on beat 1. "the cure"'s metronome files click at the
+   Slow rescale doesn't move) and optional data-click-beats (default 4),
+   clicks a bar. "the cure"'s metronome files click at the
    file's 144 BPM, twice the pulse the room counts, so the page declares no
    metronome files at all. The click is scheduled on an AudioContext a few
    ms ahead of each beat, offset by the same 80 ms output latency app/snippets.js
@@ -292,7 +292,7 @@ window.addEventListener('beforeprint', function(){
    every bar's downbeat instead (2026-10-01): data-click-bars, seconds on the
    FAST file, comma-separated, the same numbers as SNIPPET_TRACKS[...].barTimes
    in app/snippets.js (checks.mjs 1bk compares them), with data-click-beats clicks
-   spread evenly inside each bar and the loud one on the downbeat. The slow
+   spread evenly inside each bar, the first on the downbeat. The slow
    tier is the same list scaled by data-bpm / data-bpm-slow. Nothing clicks
    before the first listed downbeat or after the last. Seven Nation Army,
    Sweet Child, Watchtower and Luna work this way, so no page but Let It Be
@@ -438,14 +438,13 @@ function ensurePlayer(){
      times the track's own clickGain, copied onto the page as data-click-gain
      ("the cure": 1.5, SNIPPET_TRACKS in app/snippets.js), as the card's click is. */
   var CLICK_GAIN = Math.pow(10, 5 / 20) * (parseFloat(d.clickGain) > 0 ? parseFloat(d.clickGain) : 1);
-  /* Six clicks a bar (6/8, Luna): clicks 1 and 4 accented, as clickAccent in
-     app/cards.js does (CLICK IN SIX, Jonathan 2026-11-10); else click 1 only. */
-  var clickAccentAt = function(nb){ return clickBeats === 6 ? nb % 3 === 0 : nb % clickBeats === 0; };
-  var clickAt = function(at, accent){
+  /* Every click the same, beat 1 and (Luna, six a bar) 1 and 4 too: pcClick in
+     app/cards.js, EVERY CLICK THE SAME (Jonathan, 2026-11-25). */
+  var clickAt = function(at){
     var o = clickCtx.createOscillator(), g = clickCtx.createGain();
-    o.frequency.value = accent ? 1500 : 1000;
+    o.frequency.value = 1000;
     g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime((accent ? 0.2 : 0.13) * CLICK_GAIN, at + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.13 * CLICK_GAIN, at + 0.005);
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
     o.connect(g); g.connect(clickCtx.destination);
     o.start(at); o.stop(at + 0.1);
@@ -481,7 +480,7 @@ function ensurePlayer(){
         var cnow = clickCtx.currentTime;
         // Kept until it has sounded, so a seek, a switch or a pause can take it back (QUEUED CLICKS).
         clickQ = clickQ.filter(function(q){ return q.at > cnow; });
-        clickQ.push({ o: clickAt(at, clickAccentAt(nb)), at: at, due: cnow + Math.max(0, ahead) });
+        clickQ.push({ o: clickAt(at), at: at, due: cnow + Math.max(0, ahead) });
         lastBeat = nb;
       }
     }

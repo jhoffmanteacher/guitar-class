@@ -231,7 +231,7 @@ Two ways to declare it on `#playalong-frame`:
 - **A band that drifts, or a track with an intro at another tempo**:
   `data-click-bars` — every bar's downbeat on the fast file, the same numbers
   as `SNIPPET_TRACKS[<slug>].barTimes` — plus `data-click-beats` (clicks per
-  bar, the loud one on the downbeat). The slow tier is the list scaled by
+  bar, every click the same since 2026-11-25). The slow tier is the list scaled by
   `data-bpm / data-bpm-slow`. Nothing clicks before the first listed downbeat
   or after the last. Luna is a steady track that uses this form anyway: four
   intro bars at 120 BPM, then the vamp from `anchor`, six clicks a bar.

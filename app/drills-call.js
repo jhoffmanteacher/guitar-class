@@ -601,8 +601,8 @@ function ncReveal(st){
 }
 
 /* The click, scheduled ~120 ms ahead. Coach on: count-in only (a speaker
-   click would reach the mic). Coach off: every beat, beat 1 of each note
-   accented so the student hears the new name land. `st.ck` walks the same
+   click would reach the mic). Coach off: every beat, every click the same
+   (no accent since 2026-11-25: CLICK IN SIX, app/cards.js). `st.ck` walks the same
    segments the frame loop does; a click at the start of the NEXT note uses
    the boundary time, which a pending tempo change never moves. */
 function ncClicks(st, now){
@@ -612,7 +612,7 @@ function ncClicks(st, now){
     const ck = st.ck;
     if(st.mode !== 'answer' && ck.seg >= NC_ROUND) return;
     if(!(st.micOn && ck.seg >= 0) && ck.at >= now - 30){
-      pcClick(ctx.currentTime + Math.max(0, (ck.at - now) / 1000), ck.beat === 0);
+      pcClick(ctx.currentTime + Math.max(0, (ck.at - now) / 1000));
     }
     const inCur = ck.seg === st.idx;
     const bMs = inCur ? st.beatMs : ncNextBeatMs(st);
@@ -1085,7 +1085,7 @@ function chcCountIn(st){
   const beat = chcBeatSec(st.win, n, 0);
   const t0 = ctx.currentTime + 0.1;
   st.clicks = [];
-  for(let k = 0; k < n; k++) st.clicks.push(pcClick(t0 + k * beat, k === 0, true));
+  for(let k = 0; k < n; k++) st.clicks.push(pcClick(t0 + k * beat, true));
   st.beatMs = beat * 1000;
   st.goAt = performance.now() + (0.1 + n * beat) * 1000;
   st.timers.push(setTimeout(() => { if(chordCalls[st.key] === st && st.phase === 'play') chcGo(st); }, (0.1 + n * beat) * 1000));

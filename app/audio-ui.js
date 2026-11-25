@@ -1062,7 +1062,7 @@ function startPlaySequence(midis, bpm, btnEl, synthOnly){
   const nClicks = btnEl && btnEl.dataset ? parseInt(btnEl.dataset.clicks, 10) : 0;
   if(nClicks > 0){
     for(let k = 0; k < nClicks; k++){
-      timeouts.push(setTimeout(() => { pcClick(getAudioCtx().currentTime, false, false, STRUM_CLICK_GAIN); }, k * interval));
+      timeouts.push(setTimeout(() => { pcClick(getAudioCtx().currentTime, false, STRUM_CLICK_GAIN); }, k * interval));
     }
   }
   timeouts.push(setTimeout(() => stopPlaySeq(true), cursor));

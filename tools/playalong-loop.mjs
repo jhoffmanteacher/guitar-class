@@ -93,12 +93,12 @@
      R10 A whole-song card stops at the end of its last section. Any other card goes back to the first bar of
          the section it was started from, and carries on.
      R11 Before the song comes in the page counts one bar: as many clicks as the bar has counts (4, 3, or 6 in
-         6/8), evenly spaced, the first of the bar on the higher pitch (in 6/8 the first and the fourth), at the
+         6/8), evenly spaced, every click on one pitch (no accent on 1, or 1 and 4, since 2026-11-25), at the
          tempo of the bar the song comes in on (the first bar of the section, or of the lap tapped on a sheet), at the
          speed that is playing, within 1.5 ms a click; the song comes in one click-length
          after the last click. With the Metronome on, exactly one click on every count the song passes while it
-         plays (taken back by the page's click latency, within 6 ms of the count; 30 ms at the lap's downbeat), the
-         accented pitch being the count-in's higher one and the plain pitch its lower one; none doubled, none off its
+         plays (taken back by the page's click latency, within 6 ms of the count; 30 ms at the lap's downbeat), every
+         one on the count-in's pitch; none doubled, none off its
          count, and none where no music is playing (more than 30 ms from any audible stretch: in a silence after a
          switch, or after Stop): any of these fails its walk, whether it lands in the music or not. A click
          scheduled before a press (a switch or Stop) and sounding after it is a QUEUED click: its messages are
@@ -1794,7 +1794,7 @@ function judge(M, W, res) {
   const clicks = res.clicks.filter(c => !c.cancelled).sort((x, y) => x.at - y.at);
   const playStarts = res.starts.filter(s => !s.muted);
   const inCount = new Set(), ciPeak = new Map();
-  let accHi = null, accLo = null;
+  let ciFreq = null;   // the count-in's one pitch (every click the same since 2026-11-25)
   const quiet = clicks.filter(c => !(c.peak >= CLICK_FLOOR));
   if (quiet.length) bad(`${quiet.length} of the ${clicks.length} clicks are below the floor of hearing (peak ${+quiet[0].peak.toPrecision(3)}; the floor is ${CLICK_FLOOR})`);
   starts.forEach((s, si) => {
@@ -1820,9 +1820,8 @@ function judge(M, W, res) {
     const off = misfit(beat);
     if (off) bad(`${what}: ${off}; a count of the bar the song comes in on is ${beat.toFixed(4)} s at this speed`);
     const hi = Math.max(...mine.map(c => c.freq)), lo = Math.min(...mine.map(c => c.freq));
-    const acc = mine.map(c => c.freq === hi ? 1 : 0).join(''), wantAcc = mine.map((c, j) => (meter.sub === 3 ? j % 3 === 0 : j === 0) ? 1 : 0).join('');
-    if (acc !== wantAcc) bad(`${what}: the higher click is on ${acc.split('').map((x, j) => x === '1' ? j + 1 : '').filter(Boolean).join(', ')}; it belongs on ${wantAcc.split('').map((x, j) => x === '1' ? j + 1 : '').filter(Boolean).join(', ')}`);
-    else if (hi !== lo) { accHi = hi; accLo = lo; }
+    if (hi !== lo) bad(`${what}: the count-in clicks are not one pitch (${mine.map(c => c.freq).join(', ')} Hz): every click is the same since 2026-11-25`);
+    else ciFreq = hi;
     mine.forEach(c => ciPeak.set(c.freq, Math.max(ciPeak.get(c.freq) || 0, c.peak)));
   });
   const song = clicks.filter(c => !inCount.has(c));
@@ -1875,12 +1874,12 @@ function judge(M, W, res) {
          downbeat (and only that one) sounds that much early against its click. */
       if (offSec > (isLapBeat(nearest) ? 0.03 : 0.006)) { badClick('off', isQ(c), `a Metronome click ${(c.at).toFixed(3)} s into the walk is ${(offSec * 1000).toFixed(0)} ms ${pos < nearest ? 'before' : 'after'} the count it belongs to (count ${((nearest % meter.steps) + meter.steps) % meter.steps + 1} of bar ${Math.floor(nearest / meter.steps) + 1}; the song at ${(c.at - C.latency).toFixed(3)} s, the click less the page latency${afterSw(c)})`); continue; }
       mapped.push({ c, tau, n: nearest, sg });
-      const inBar = ((nearest % meter.steps) + meter.steps) % meter.steps, wantHi = meter.sub === 3 ? inBar % 3 === 0 : inBar === 0;
-      if (accHi != null && c.freq !== (wantHi ? accHi : accLo)) badClick('pitch', false, `the Metronome click on count ${inBar + 1} of a bar is ${c.freq} Hz; the count-in's ${wantHi ? 'accented' : 'plain'} click is ${wantHi ? accHi : accLo} Hz`);
+      const inBar = ((nearest % meter.steps) + meter.steps) % meter.steps;
+      if (ciFreq != null && c.freq !== ciFreq) badClick('pitch', false, `the Metronome click on count ${inBar + 1} of a bar is ${c.freq} Hz; the count-in's click is ${ciFreq} Hz (every click the same since 2026-11-25)`);
       if (ciPeak.has(c.freq) && c.peak < ciPeak.get(c.freq) * CLICK_VS_COUNTIN) badClick('soft', false, `the Metronome click (peak ${+c.peak.toPrecision(3)}) is less than ${CLICK_VS_COUNTIN} of the count-in click of the same pitch (${+ciPeak.get(c.freq).toPrecision(3)})`);
     }
     stats.clicks += mapped.length;
-    if (accHi == null && mapped.length > meter.steps && new Set(mapped.map(m => m.c.freq)).size < 2) bad(`all ${mapped.length} Metronome clicks are one pitch: beat 1 of the bar is not marked`);
+    if (new Set(mapped.map(m => m.c.freq)).size > 1) bad(`the ${mapped.length} Metronome clicks are on ${new Set(mapped.map(m => m.c.freq)).size} pitches: every click is the same since 2026-11-25`);
     /* No count gets two clicks. */
     mapped.sort((x, y) => x.tau - y.tau);
     for (let j = 1; j < mapped.length; j++) {

@@ -266,7 +266,7 @@ function sbScheduleClicks(a){
       const ahead = t - now;
       if(ahead > 0.1) return;
       const lat = (typeof snipLatency === 'function' ? snipLatency() : 0) - (ctx.outputLatency || ctx.baseLatency || 0);
-      bt.clicks.push(pcClick(ctx.currentTime + Math.max(0, ahead + lat), false, false, typeof PLAYALONG_CLICK_GAIN === 'number' ? PLAYALONG_CLICK_GAIN : 1));
+      bt.clicks.push(pcClick(ctx.currentTime + Math.max(0, ahead + lat), false, typeof PLAYALONG_CLICK_GAIN === 'number' ? PLAYALONG_CLICK_GAIN : 1));
       if(bt.clicks.length > 32) bt.clicks.splice(0, bt.clicks.length - 32);
       bt.lastClick = n;
     }

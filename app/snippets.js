@@ -1141,7 +1141,7 @@ function snipScheduleClick(st, now, back){
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
   const at = ctx.currentTime + Math.max(0, ahead + lat);
-  queueClick(st, pcClick(at, clickAccent(st.tr, nb), false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead), nb);
+  queueClick(st, pcClick(at, false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead), nb);
   st.lastBeat = nb;
 }
 /* QUEUED CLICKS (fixed 2026-11-12, found by tools/playalong-loop.mjs). An

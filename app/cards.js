@@ -82,8 +82,8 @@ function pcGridRows(S, bpb){
 /* COUNT IN SIX (Jonathan, 2026-11-10): a 6/8 track (countSix) draws three
    columns per big beat, every one a counted column numbered 1-6 across the
    bar, and the cursor lights each of the six (data-beat is then the eighth
-   within the pass, not the big beat). The click sounds on all six too, 1 and
-   4 accented (see CLICK IN SIX). sub = columns per beat. */
+   within the pass, not the big beat). The click sounds on all six too, every
+   click the same (see CLICK IN SIX). sub = columns per beat. */
 function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord, sub){
   sub = sub === 3 ? 3 : 2;
   const barCols = bpb * sub;
@@ -828,7 +828,7 @@ function pcCountIn(st, si){
      clicking (over the next count-in, at the old tempo). */
   st.clicks = [];
   for(let k = 0; k < n; k++){
-    st.clicks.push(pcClick(t0 + k * beat, clickAccent(st.L.tr, k), true));
+    st.clicks.push(pcClick(t0 + k * beat, true));
     st.timers.push(setTimeout(() => { if(pcState === st) pcStatus(st.root, escHtml(t('ca.cardCountIn', {n: k + 1}))); }, (0.1 + k * beat) * 1000));
   }
   st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
@@ -839,25 +839,23 @@ function pcCountIn(st, si){
 // it as pcClick's `gain`. Not the 4-click count-in, and not Note Calls
 // (ncClicks), which share pcClick and keep their old level.
 const PLAYALONG_CLICK_GAIN = Math.pow(10, 5 / 20);
-/* CLICK IN SIX (Jonathan, 2026-11-10: "it should click one through 6 ... one
-   and 4 can have a different sounding click"). On a countSix track the
-   click, and the count-in, sound every eighth, six to a bar; the big beats,
-   1 and 4, take the accented click. Any other track: one click a beat,
-   beat 1 accented. clickSub = clicks per counted beat. */
+/* CLICK IN SIX (Jonathan, 2026-11-10: "it should click one through 6"). On a
+   countSix track the click, and the count-in, sound every eighth, six to a
+   bar; any other track: one click a beat. clickSub = clicks per counted beat.
+   EVERY CLICK THE SAME (Jonathan, 2026-11-25: "no distinct beat anywhere is
+   simplist"): no click is higher, louder or longer for beat 1, or for 1 and 4
+   in 6/8 — that accent (his 2026-11-10 "one and 4 can have a different
+   sounding click") is gone, so pcClick takes no accent. */
 function clickSub(tr){ return tr && tr.countSix ? 3 : 1; }
-function clickAccent(tr, nb){
-  const sub = clickSub(tr);
-  return sub === 3 ? nb % sub === 0 : nb % tr.beatsPerBar === 0;
-}
-function pcClick(at, accent, countIn, gain){
+function pcClick(at, countIn, gain){
   const ctx = getAudioCtx();
   const o = ctx.createOscillator(), g = ctx.createGain();
-  o.frequency.value = accent ? 1500 : 1000;
+  o.frequency.value = 1000;
   // Quiet on purpose (Jonathan, 2026-09-27: the first cut was "very loud").
   // The count-in is a little louder (2026-09-29) — it plays over silence
-  // and has to be caught first time.
+  // and has to be caught first time; every click of it the same.
   // A track's clickGain lifts its in-song click where the mix buries it.
-  const peak = (accent ? 0.2 : 0.13) * (countIn ? 1.6 : 1) * (gain || 1);
+  const peak = 0.13 * (countIn ? 1.6 : 1) * (gain || 1);
   g.gain.setValueAtTime(0.0001, at);
   g.gain.exponentialRampToValueAtTime(peak, at + 0.005);
   g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
@@ -882,7 +880,7 @@ function pcScheduleClick(st, now, back){
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
   const at = ctx.currentTime + Math.max(0, ahead + lat);
   // Kept until it has sounded, so a switch or Stop can take it back — see QUEUED CLICKS (app/snippets.js).
-  queueClick(st, pcClick(at, clickAccent(st.L.tr, nb), false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead), nb);
+  queueClick(st, pcClick(at, false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead), nb);
   st.lastBeat = nb;
 }
 function pcFrame(){

@@ -15541,12 +15541,15 @@ function checkChordGridCards(ctx) {
     else { const ks = new Set(); for (let i = 0; i < 8 * 24; i++) ks.add(pcLocKey(L, pcLocate(L, i / 24)));
       if (ks.size !== 8 * 6) flag(`ca-51: ${ks.size} cursor steps over 8 bars, expected ${8 * 6} (six a bar)`); } }
   // CLICK IN SIX: the in-song click, the snippet Metronome and the count-in
-  // sound six a bar on a countSix track, 1 and 4 accented; four a bar, 1
-  // accented, on a 4/4 card (ca-36). Executed with the audio stubbed.
+  // sound six a bar on a countSix track, four a bar on a 4/4 card (ca-36),
+  // and every click of each the same (EVERY CLICK THE SAME, 2026-11-25: no
+  // accent on 1, or on 1 and 4). Executed through the real pcClick on a
+  // recording AudioContext: a = the first click's pitch, wave, peak and
+  // length; any other letter = a click unlike it.
   { const run = src => vm.runInContext(src, ctx);
-    const saved = run('({ g: getAudioCtx, c: pcClick, r: pcRate, sr: snipRate, l: snipLatency, s: pcStatus })');
+    const saved = run('({ g: getAudioCtx, r: pcRate, sr: snipRate, l: snipLatency, s: pcStatus })');
     try {
-      run('globalThis.__clk = []; getAudioCtx = () => ({ currentTime: 0, resume(){}, outputLatency: 0 }); pcClick = (at, acc) => { __clk.push(acc ? "A" : "b"); return { stop(){} }; }; pcRate = () => 1; snipRate = () => 1; snipLatency = () => 0; pcStatus = () => {};');
+      run('globalThis.__clk = []; getAudioCtx = () => ({ currentTime: 0, destination: {}, resume(){}, outputLatency: 0, createGain(){ const g = { connect(){}, gain: { pk: 0, setValueAtTime(v){ g.gain.pk = Math.max(g.gain.pk, v); }, exponentialRampToValueAtTime(v){ g.gain.pk = Math.max(g.gain.pk, v); } } }; return g; }, createOscillator(){ const o = { type: "sine", frequency: { value: 0 }, g: null, connect(x){ o.g = x; }, disconnect(){}, start(at){ o.at = at; }, stop(t){ if (o.at != null && !o.done){ o.done = true; __clk.push([o.frequency.value, o.type, o.g ? o.g.gain.pk.toFixed(5) : "", (t - o.at).toFixed(4)].join("/")); } } }; return o; } }); pcRate = () => 1; snipRate = () => 1; snipLatency = () => 0; pcStatus = () => {};');
       const pattern = (id, how) => {
         const act = acts.find(a => a.id === id); const L = act && pcLayout(act);
         if (!L) return 'no card';
@@ -15561,15 +15564,15 @@ function checkChordGridCards(ctx) {
           const f = vm.runInContext(how === 'snip' ? 'snipScheduleClick' : 'pcScheduleClick', ctx);
           for (let i = 0; i <= 2 * 480; i++) f(st, vm.runInContext('snipTimeAtBars', ctx)(win, i / 480) - 0.05);
         }
-        return run('__clk.join("")');
+        const seen = []; return run('__clk.slice()').map(k => { if (!seen.includes(k)) seen.push(k); return 'abcdefgh'[seen.indexOf(k)] || 'z'; }).join('');
       };
-      const want = { 'ca-51': ['AbbAbbAbbAbb', 'AbbAbb'], 'ca-36': ['AbbbAbbb', 'Abbb'] };
+      const want = { 'ca-51': ['aaaaaaaaaaaa', 'aaaaaa'], 'ca-36': ['aaaaaaaa', 'aaaa'] };
       for (const [id, [song, ci]] of Object.entries(want)) {
-        for (const how of ['song', 'snip']) { const got = pattern(id, how); if (!got.startsWith(song)) flag(`${id}: ${how === 'snip' ? 'snippet Metronome' : 'in-song click'} over 2 bars is "${got}", expected "${song}" (A = accented) — see CLICK IN SIX`); }
-        const got = pattern(id, 'countin'); if (got !== ci) flag(`${id}: count-in clicks "${got}", expected "${ci}" — see CLICK IN SIX`);
+        for (const how of ['song', 'snip']) { const got = pattern(id, how); if (!got.startsWith(song) || /[^a]/.test(got)) flag(`${id}: ${how === 'snip' ? 'snippet Metronome' : 'in-song click'} over 2 bars is "${got}", expected "${song}" (a letter other than a = a click unlike the first) — see CLICK IN SIX`); }
+        const got = pattern(id, 'countin'); if (got !== ci) flag(`${id}: count-in clicks "${got}", expected "${ci}" (a letter other than a = a click unlike the first) — see CLICK IN SIX`);
       }
     } catch (e) { flag(`CLICK IN SIX check could not run: ${e.message}`); }
-    finally { ctx.__saved = saved; run('getAudioCtx = __saved.g; pcClick = __saved.c; pcRate = __saved.r; snipRate = __saved.sr; snipLatency = __saved.l; pcStatus = __saved.s; delete globalThis.__saved; delete globalThis.__clk;'); }
+    finally { ctx.__saved = saved; run('getAudioCtx = __saved.g; pcRate = __saved.r; snipRate = __saved.sr; snipLatency = __saved.l; pcStatus = __saved.s; delete globalThis.__saved; delete globalThis.__clk;'); }
   }
   if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 98 chord names (one per strum) and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; the 6/8 click and count-in sound six a bar (1 and 4 accented), 4/4 four; ca-10 untouched`);
 }
@@ -20533,8 +20536,8 @@ async function checkStrumCheck() {
       if (r.queued !== 32 || r.pending !== 32 || r.beepsNow !== 0) fail(`with headphones the round queued ${r.queued} clicks (${r.pending} waiting, ${r.beepsNow} sounded at once), want 32 waiting: one per beat of 8 bars`);
       if (r.leftAfterStop !== 0) fail(`Stop left ${r.leftAfterStop} clicks queued, want 0`);
       if (r.fOn !== 32 || r.fOff !== 0 || r.flashed !== 32) fail(`the beat (dot and frame) ran ${r.fOn} times in 8 bars with the Metronome on (want 32; the dot flashed ${r.flashed}) and ${r.fOff} with it off (want 0)`);
-      if (r.pulses !== 32 || r.ones !== 8 || r.offPulses !== 0) fail(`the frame around the board pulsed ${r.pulses} times and marked the 1 ${r.ones} times in 8 bars with the Metronome on (want 32 and 8), ${r.offPulses} with it off (want 0)`);
-      for (const [way, x] of Object.entries(r.cleared)) if (x !== '3>0') fail(`after ${way === 'finish' ? 'Stop' : way} the frame keeps its beat classes (${x}: classes before > after, want 3>0)`);
+      if (r.pulses !== 32 || r.ones !== 0 || r.offPulses !== 0) fail(`the frame around the board pulsed ${r.pulses} times and marked the 1 ${r.ones} times in 8 bars with the Metronome on (want 32 and 0: every beat the same since 2026-11-25), ${r.offPulses} with it off (want 0)`);
+      for (const [way, x] of Object.entries(r.cleared)) if (x !== '2>0') fail(`after ${way === 'finish' ? 'Stop' : way} the frame keeps its beat classes (${x}: classes before > after, want 2>0)`);
       if (!r.withSwitch || !r.noSwitch) fail(`the headphones switch: with the Metronome on ${r.withSwitch} (want shown), off ${!r.noSwitch} (want not shown)`);
       if (!r.stickySwitch) fail('after a round with the Metronome on (the tool now stopped), the open check lost the beat: no headphones switch / scMetroWanted false (review R1-2: round 2 must keep it)');
       if (!/sc\.metro = scMetroWanted\(\);\s*sc\.metroSticky = sc\.metro;/.test(siteText('coach-strumcheck.js', ROOT))) fail('scStart no longer takes the round\'s beat from scMetroWanted() and keeps it on the open check');
