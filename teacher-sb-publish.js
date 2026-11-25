@@ -51,8 +51,10 @@
    keeps a song by that number), then builtSongsMeta/list loses the song (a transaction), then builtSongs/{id} is
    deleted; the draft and its copy stay (a published copy the draft no longer uses is deleted, as at 2. above).
    DELETE… (a published song): the typed title (the standing rule for deletes in the console; Jonathan, 2026-11-15),
-   then the list entry, builtSongs/{id}, the draft, and every copy the song or its draft named that nothing else on the
-   list plays. Students' songOpens counts are in their own progress and are not touched.
+   then the list entry, builtSongs/{id} and the draft in ONE transaction, only while the store holds the song, its list
+   entry and the draft as this tab read them (review round 2: else nothing is deleted and the store is read again), then
+   every copy the song or its draft named that nothing else on the list plays. Students' songOpens counts are in their
+   own progress and are not touched.
    An IMPORTED song (Manage → Built songs, teacher-builtsongs.js) has no draft. Edit and Unpublish (Jonathan,
    2026-11-16: "they should get edit/unpublish") first REBUILD one from its builtSongs doc (sbDraftFromDoc) and save
    it: title, artist, the audio entry, the sections, bars, lyric lines, level and range, the chord shapes AS THEY CAME
@@ -477,19 +479,29 @@ async function sbDeleteSong(){
   const typed = prompt(`Delete "${title}"? It comes off the Songs page for every student, and ${d ? 'the draft (chart, beat) and ' : ''}its recording${p.doc && p.doc.song && p.doc.song.sheet ? ' and lyrics sheet' : ''} are deleted from the class database. Students' counts of opening it stay. This cannot be undone; ${d ? 'Unpublish keeps everything. ' : ''}Type the title to delete it:`, '');
   if(typed === null) return;
   if(String(typed).trim() !== title){ sbNote = `Nothing was deleted: what you typed is not "${title}".`; teacherSbPaint(); return; }
-  const gen = sbViewGen;
+  const gen = sbViewGen, want = sbBaseFor(id, d), was = p.doc ? sbCanon(sbPubNorm(p.doc)) : null;
   sbStopSounds();
   sbBusy = 'delete'; sbOpGen++; sbNote = ''; sbProgress = 'Deleting…'; teacherSbPaint();
-  let step = 'list';
   try{
     await ensureDb();
-    await sbListDrop(id);
-    step = 'song';
-    await db.collection('builtSongs').doc(id).delete();
+    /* ONE transaction (review round 2, R2-6): the list entry, the song and the draft go together, and only while the store
+       holds what the typed title was given against: the song as this page drew it, still on the list, and the draft this
+       tab read (none when it read none). Another tab's Publish, Unpublish, Import, Edit or save in the gap deletes
+       nothing, and the store is read again. */
+    const ref = db.collection('builtSongsMeta').doc('list'), sref = db.collection('builtSongs').doc(id);
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref), ss = await tx.get(sref);
+      await sbDraftCheck(tx, id, want);
+      const songs = bsListOf(snap.exists ? snap.data() : null), now = ss.exists ? Object.assign({}, ss.data() || {}) : null;
+      if(now) delete now.savedAt;
+      if(!Object.prototype.hasOwnProperty.call(songs, id) || (now ? sbCanon(sbPubNorm(now)) : null) !== was){ sbReadAt = 0; throw { moved: true, why: 'this song was changed, published or unpublished in another tab (what is there now is shown)' }; }
+      delete songs[id];
+      tx.set(ref, { songs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      tx.delete(sref);
+      if(want !== null) tx.delete(db.collection('songDrafts').doc(id));
+    });
     sbPublished.delete(id); sbEditing.delete(id);
-    step = 'draft';
-    if(d){ await db.collection('songDrafts').doc(id).delete(); sbDrafts.delete(id); }
-    step = 'audio';
+    if(d) sbDrafts.delete(id);
     const ids = [...new Set([p.doc && p.doc.audio && p.doc.audio.id, d && d.audio && d.audio.id,
       p.doc && p.doc.song && p.doc.song.sheet && p.doc.song.sheet.id, d && d.sheet && d.sheet.id].filter(Boolean))];   // its recordings and its lyrics sheet
     for(const a of ids) await sbDeleteAudio(a, null);
@@ -497,9 +509,7 @@ async function sbDeleteSong(){
     sbNote = `Deleted "${title}".`;
     if(typeof builtSongsSync === 'function') builtSongsSync();
   }catch(e){
-    const where = step === 'song' ? ' It is off the Songs page list (students no longer get it); its song, draft and recording are still in the database. Press Delete again.'
-      : step === 'draft' ? ' It is off the Songs page; the draft and the recording are still here. Press Delete draft to finish.' : ' Nothing was deleted.';
-    sbNote = 'Not deleted: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.' + where;
+    sbNote = 'Not deleted: ' + (e && e.moved ? e.why : typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '. Nothing was deleted.';
   }finally{
     sbBusy = ''; sbProgress = ''; sbOpGen++;
     if(!sbStopped(gen)) teacherSbPaint();

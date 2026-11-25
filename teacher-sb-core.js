@@ -54,8 +54,9 @@
    back), and, from Publish, Unpublish and Delete (teacher-sb-publish.js), builtSongs/{id} and builtSongsMeta/list:
    never progress/{uid}, never config/class. tools/song-builder-sim.mjs runs this part against a stub
    Firestore and checks each write. "Delete draft" asks OK / Cancel (Jonathan, 2026-11-15: a draft is cheap to redo,
-   so no typed title), then removes the draft and its levelled copy; a published song's "Delete…" takes its typed
-   title (teacher-sb-publish.js).
+   so no typed title), then removes the draft and its levelled copy (in a transaction: only the draft this tab read, and
+   only while it is not published, review round 2); a published song's "Delete…" takes its typed title
+   (teacher-sb-publish.js).
 
    SAFETY. Every value read from the store or a file (a title, an artist, a file name) is escaped where it is
    drawn; buttons carry data-* only and one delegated listener acts on them. A read that started before a newer
@@ -1015,21 +1016,30 @@ async function sbDeleteDraft(){
   if(sbBusy || !d) return;
   /* A published song is never deleted by the draft's OK / Cancel: it takes the typed title (teacher-sb-publish.js). */
   if(sbPublished && sbPublished.has(sbSel)){ if(typeof sbDeleteSong === 'function') sbDeleteSong(); return; }
-  const id = sbSel, title = String(d.title || '');
+  const id = sbSel, title = String(d.title || ''), want = sbBaseFor(id, d);
   if(!confirm(`Delete the draft "${title}"? Its levelled copy in the database goes too. Your mp3 on the Mac is not touched.`)) return;
   const gen = sbViewGen;
   sbStopSounds();
   sbBusy = 'delete'; sbOpGen++; sbProgress = 'Deleting…'; teacherSbPaint();
   try{
     await ensureDb();
-    await db.collection('songDrafts').doc(id).delete();
+    /* Review round 2 (R2-6): only the draft this tab read, and only while it is not published. When another tab saved it,
+       levelled it or published it since, nothing is deleted and the store is read again, so the OK is given against what
+       is there (a published song's Delete… takes its typed title). */
+    const ref = db.collection('songDrafts').doc(id), lref = db.collection('builtSongsMeta').doc('list');
+    await db.runTransaction(async tx => {
+      const ls = await tx.get(lref);
+      await sbDraftCheck(tx, id, want);
+      if(Object.prototype.hasOwnProperty.call(bsListOf(ls.exists ? ls.data() : null), id)){ sbReadAt = 0; throw { moved: true, why: 'this song was published in another tab (its page is shown now)' }; }
+      tx.delete(ref);
+    });
     sbDrafts.delete(id);
     if(d.audio && d.audio.id) await sbDeleteAudio(d.audio.id, null);
     if(d.sheet && d.sheet.id) await sbDeleteAudio(d.sheet.id, null);   // an unpublished song's lyrics sheet (kept by Unpublish)
     sbMemFor(null); sbSel = null;
     sbNote = `Deleted the draft "${title}".`;
   }catch(e){
-    sbNote = 'Nothing was deleted: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.';
+    sbNote = 'Nothing was deleted: ' + (e && e.moved ? e.why : typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.';
   }finally{
     sbBusy = ''; sbProgress = ''; sbOpGen++;
     if(!sbStopped(gen)) teacherSbPaint();

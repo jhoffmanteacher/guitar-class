@@ -246,14 +246,15 @@ function makeDb(){
     /* Atomic, as Firestore's: the writes wait until fn resolves, and one refused write applies none of them. */
     runTransaction: async fn => {
       const ops = [];
-      const out = await fn({ get: r => r.get(), set: (r, d, o) => { ops.push([r.path, d, o]); }, update: (r, d) => { ops.push([r.path, d, { merge: true }]); } });
+      /* delete: Delete draft and Delete… (review round 2 of the sweep) delete inside their transaction. */
+      const out = await fn({ get: r => r.get(), set: (r, d, o) => { ops.push([r.path, d, o]); }, update: (r, d) => { ops.push([r.path, d, { merge: true }]); }, delete: r => { ops.push([r.path, null, null, 'delete']); } });
       await tick();
       const bad = ops.find(([p]) => st.failWrite && st.failWrite(p));
       if(bad){ const e = new Error('unavailable'); e.code = 'unavailable'; throw e; }
       /* One commit, one server time (review round 3): Firestore gives every write of a transaction the same request.time,
          so Publish's song and draft carry the same savedAt. */
       const at = st.stamp ? stampOf() : null;
-      ops.forEach(([p, d, o]) => apply('set', p, d, o, at));
+      ops.forEach(([p, d, o, op]) => { if(op === 'delete'){ if(S.has(p)) apply('delete', p); } else apply('set', p, d, o, at); });
       return out;
     } };
   return { S, st, db, stamp: stampOf };
@@ -1137,6 +1138,8 @@ async function pdfEdgeCases(consoleSrc, check){
   {
     const { P, T, url } = await delCase(ids.p, 'pub');
     run(`sbPublished.set(${JSON.stringify(ids.p)}, { title: 'Test 4 Edge P', artist: 'Nobody', ver: 1, audioId: null, doc: null, at: 0 })`);
+    /* The store holds what this tab read (Delete… deletes nothing otherwise, review round 2): the list names the song, whose doc is missing. */
+    F.S.set('builtSongsMeta/list', { songs: { [ids.p]: 1 }, updatedAt: TS });
     C.env.promptAnswer = 'Test 4 Edge P';
     run("sbDeleteSong(); teacherSbLeave(); teacherView = 'students';"); await settle();
     const away = { gone: !F.S.has('songDrafts/' + ids.p), files: run('sbPdf.files.length'), destroyed: [P.rec.destroyed, T.rec.destroyed], revoked: revoked.includes(url) };
@@ -1976,6 +1979,10 @@ async function r2Cases(consoleSrc, check){
     F.db.runTransaction = async fn => { if(armed){ armed = false; await gate; } return tx0(fn); };
     B.env.confirmAnswer = true; B.run('sbPublish()');
     for(let t = 0; t < 400 && armed; t++) await tick();
+    /* A reads first: B saved the draft (its level) before its Publish, and Delete… from an older copy deletes nothing
+       (review round 2 of the sweep, R2-6; its own case is in r2sbCases). */
+    A.run('sbReadAt = 0; teacherSbPaint()');
+    for(const t0 = Date.now(); !A.run('sbReadAt') && Date.now() - t0 < 5000;) await sleep(1);   // not settle(): B is held busy at the gate
     A.env.promptAnswer = 'Test R2 Race'; A.run("sbPubAct('delete-song', { dataset: {} })");
     await waitIdle(A, 5000);
     release(); await waitIdle(B, 5000);
