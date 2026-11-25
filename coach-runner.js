@@ -828,6 +828,11 @@ const RNW_POWER_CLARITY = [0.22, 0.45];
    loads before this file. Riff Runner's Wait Mode below is its only user: Note
    Call takes the root, the octave and the octave below, not the 5th. */
 function rnwIsPower(n){ return !!n && RNW_POWER_RE.test(n.label || ''); }
+/* What Wait Mode tells the student to play: a power chord's own name ("Play A5"),
+   otherwise the note itself. A chord label on a single-note token ('Am' on Luna's
+   open A) is chord context for the Keys-mode lane; "Play Am" would ask for a chord
+   strum that rnwTargets below does not accept. */
+function rnwSay(n){ return rnwIsPower(n) ? n.label : coachNoteName(n.midi); }
 function rnwTargets(n){
   if (!n) return null;
   return rnwIsPower(n) ? coachPowerTargets(n.midi) : [n.midi];
@@ -893,7 +898,7 @@ function rnwRender(){
      </div>
      <div class="rn-track rnw-track" id="rnw-track">${lanes.join('')}<div class="rn-hitline"></div></div>
      <div class="rnw-target" id="rnw-target">
-       <div class="rnw-target-note">${t('games.wait.playNoteHtml', {note: escHtml(cur.label || coachNoteName(cur.midi))})}</div>
+       <div class="rnw-target-note">${t('games.wait.playNoteHtml', {note: escHtml(rnwSay(cur))})}</div>
        <div class="rnw-target-where">${escHtml(rnwWhere(cur))}</div>
      </div>
      <div class="rnw-feedback" id="rnw-feedback">&nbsp;</div>
@@ -981,7 +986,7 @@ function rnwJudge(midi){
     if (w.tries === 1) w.firstTry++;
     /* No note playback: at tempo the student is already playing it, so the
        synth would clash with their own guitar. Just confirm and move on. */
-    rnwFeedback('&#x2713; ' + escHtml(n.label || coachNoteName(n.midi)), 'ok');
+    rnwFeedback('&#x2713; ' + escHtml(rnwSay(n)), 'ok');
     const el = document.getElementById('rnw-n-' + w.cur);
     if (el) el.classList.add('rnw-hit');
     /* Stored on w as well as rn.timeouts: rnwAdvance clears it, so a Skip
@@ -1002,7 +1007,7 @@ function rnwJudge(midi){
       : (plural ? 'games.wait.nearFretDownPlural' : 'games.wait.nearFretDownSingular');
     rnwFeedback(t(key, {heard: escHtml(heard), n: Math.abs(d)}), 'near');
   } else {
-    rnwFeedback(t('games.wait.nearFarOff', {heard: escHtml(heard), target: escHtml(n.label || coachNoteName(n.midi))}), 'near');
+    rnwFeedback(t('games.wait.nearFarOff', {heard: escHtml(heard), target: escHtml(rnwSay(n))}), 'near');
   }
 }
 
@@ -1027,7 +1032,7 @@ function rnwAdvance(){
   const n = w.notes[w.cur];
   const tEl = document.getElementById('rnw-target');
   if (tEl) tEl.innerHTML =
-    `<div class="rnw-target-note">${t('games.wait.playNoteHtml', {note: escHtml(n.label || coachNoteName(n.midi))})}</div>
+    `<div class="rnw-target-note">${t('games.wait.playNoteHtml', {note: escHtml(rnwSay(n))})}</div>
      <div class="rnw-target-where">${escHtml(rnwWhere(n))}</div>`;
   const hud = document.querySelector('#rn-body .sh-score');
   if (hud) hud.textContent = t('games.wait.noteOfTotal', {n: w.cur + 1, total: w.notes.length});
