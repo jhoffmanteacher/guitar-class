@@ -270,7 +270,6 @@ function sbPowerFrets(pc){
    move any power chord at the Level step ("Where the power chords sit"): its root on the low E string or the A
    string, at any spot whose frets all stay at or under the cap. Saved as chart.powerAt: { E5: 'A7' }. */
 const SB_POWER_MAX_FRET = 10;
-const SB_PC_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 /* A power chord's spots: [{ at: 'E0' | 'E12' | 'A7' …, frets }], the root on the low E or the A string, lowest first. */
 function sbPowerSpots(pc){
   const out = [];
