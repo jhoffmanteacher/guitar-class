@@ -642,7 +642,8 @@ function pcSyncBarStop(){
    ready when the lap ends (slow Wi-Fi, a file that failed, a switch in the
    last tenth of a second), pcFrame falls back to the old seek, so the worst
    case is what the card did before. A whole-song card never loops and never
-   makes one. */
+   makes one, nor does a speed ladder while it stops and asks after each stop
+   (pcLadderPause, app/cards-loop.js). */
 const PC_LAP_LEAD = 0.1, PC_SPARE_START = 0.02;
 function pcLoopStart(st){ return pcLoopStartIn(st, st.win); }
 /* The lap goes back to the section started from, or, with Loop this part on,
@@ -662,8 +663,9 @@ function pcSparePark(st){
   if(pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
   /* A whole-song card laps only while Loop this part is on. With it off (never on, or turned off) its spare is
      dropped, so the song stops at its end (Friday check 2026-11-14: Loop on, then off, left the spare parked and
-     the card lapped forever). */
-  if(st.wholeSong && !(st.loopSi >= 0)){
+     the card lapped forever). A speed ladder that stops and asks (pcLadderPause, ROUNDS in app/cards-loop.js) never
+     hands a lap to its spare either: none is made. A speed picked by hand ends the ladder, and its pcRetrack parks one. */
+  if((st.wholeSong && !(st.loopSi >= 0)) || pcLadderPause(st)){
     if(st.spare){ try { st.spare.pause(); st.spare.removeAttribute('src'); st.spare.load(); } catch(e) {} st.spare = null; }
     return;
   }
