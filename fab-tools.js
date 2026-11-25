@@ -40,35 +40,28 @@ function toolsBeep(freq,dur,gain,at,dest){
 function toolLabelHtml(icon, key){ return `${icon} <span data-i18n="${key}" translate="no" class="notranslate">${t(key)}</span>`; }
 
 /* ── Metronome ── */
-let metroRunning=false, metroInterval=null, metroMeter=4, metroBeatIdx=0;
+/* No time-signature buttons, and every click the same sound (Jonathan,
+   2026-11-25: "get rid of the metronome buttons and make each click sound the
+   same so there is no distinct first beat click sound"). The meter is picked
+   by the page instead (same day: "the click should still be in 6/8 on every
+   6"): 4 = one click per BPM beat (the default), 6 = 6/8, three clicks per
+   BPM big beat (metroClickSec). setMetroMeter takes only those two. */
+let metroRunning=false, metroInterval=null, metroMeter=4;
 function getMetroMeter(){ return metroMeter; }
 function setMetroMeter(n){
-  metroMeter = n;
-  document.querySelectorAll('#metro-popup .meter-btn').forEach(b=>{
-    const on = b.id === 'meter-'+n;
-    b.classList.toggle('sel', on);
-    b.setAttribute('aria-checked', on ? 'true' : 'false');
-    b.tabIndex = on ? 0 : -1;
-  });
+  const m = n === 6 ? 6 : 4;
+  if(m === metroMeter) return;
+  metroMeter = m;
   if(metroRunning){ stopMetro(); startMetro(); }
 }
-/* Arrow-key navigation for the 2/4-4/4-3/4-6/8 radiogroup (WAI-ARIA roving-tabindex
-   pattern): only the selected meter button is tabbable; arrows move selection
-   and focus among the other options. */
-function meterKeydown(e){
-  const nav = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
-  if(!nav.includes(e.key)) return;
-  e.preventDefault();
-  const order = [2,4,3,6];
-  const idx = order.indexOf(metroMeter);
-  let next;
-  if(e.key==='Home') next = order[0];
-  else if(e.key==='End') next = order[order.length-1];
-  else if(e.key==='ArrowRight' || e.key==='ArrowDown') next = order[(idx+1)%order.length];
-  else next = order[(idx-1+order.length)%order.length];
-  setMetroMeter(next);
-  document.getElementById('meter-'+next).focus();
+/* A page whose play-along is in 6/8 says so in its own data: the Song Journey
+   play-along frame's data-click-beats="6" (Luna). Read once at load (this
+   file is deferred, so the page is parsed); every other page stays on 4. */
+function metroMeterFromPage(){
+  const f = document.querySelector('.playalong-frame[data-click-beats]');
+  if(f && parseInt(f.dataset.clickBeats, 10) === 6) setMetroMeter(6);
 }
+metroMeterFromPage();
 /* ── Shared "selected button" ARIA helpers ──
    Several button groups on the site show which option is picked with a CSS
    class only (.active on the tuner's string locks, .sel on the timer presets)
@@ -77,9 +70,9 @@ function meterKeydown(e){
    onkeydown on the GROUP element in index.html, so they run after the button's
    own handler has bubbled and the owning script (tuner.js, the timer) needs no
    change. Both no-op on any page that doesn't have the group. */
-/* Radiogroup flavour (WAI-ARIA roving tabindex, same as the meter buttons
-   above): only the selected option is tabbable; radioGroupKeydown moves the
-   selection with the arrow keys so the others stay reachable. */
+/* Radiogroup flavour (WAI-ARIA roving tabindex): only the selected option
+   is tabbable; radioGroupKeydown moves the selection with the arrow keys so
+   the others stay reachable. */
 function syncRadioGroupAria(groupSel, itemSel, onClass){
   const g = document.querySelector(groupSel);
   if(!g) return;
@@ -128,8 +121,8 @@ function radioGroupKeydown(e, groupSel, itemSel, onClass){
    whose time has already gone rather than playing them late, so the grid
    never shifts. Every click goes through metroBus, which Stop disconnects —
    that silences the ones already queued.
-   metroBeatIdx is the place in the bar of the NEXT click to queue,
-   metroNextAt its time, metroLastAt the time of the last one queued. */
+   metroNextAt is the time of the NEXT click to queue, metroLastAt the time
+   of the last one queued. */
 const METRO_TICK_MS = 25, METRO_AHEAD = 0.2, METRO_LEAD = 0.05;
 let metroNextAt = 0, metroLastAt = 0, metroBus = null;
 const metroDotTimers = new Set();
@@ -149,7 +142,6 @@ function metroBusKill(){
 }
 function metroAdvance(){
   metroLastAt = metroNextAt;
-  metroBeatIdx = (metroBeatIdx + 1) % getMetroMeter();
   metroNextAt += metroClickSec();
 }
 function metroSchedule(){
@@ -159,15 +151,14 @@ function metroSchedule(){
   if(window.coachMicLive) metroBusKill();
   while(metroNextAt < now) metroAdvance();   // a stall past the horizon: skip, don't play late
   while(metroNextAt < now + METRO_AHEAD){
-    metroClickAt(metroNextAt, metroBeatIdx);
+    metroClickAt(metroNextAt);
     metroAdvance();
   }
 }
-/* Every click is the same tone — no louder or higher beat 1 (Jonathan,
-   2026-11-06). In 6/8 there are six clicks per bar and the BPM counts the
-   two big beats (metroClickSec). Silent while the Coach's mic is
+/* Every click is the same tone and the same dot flash — no louder or higher
+   beat 1 (Jonathan, 2026-11-06 and 2026-11-25). Silent while the Coach's mic is
    live (an audible click would be heard as a note); the dot still flashes. */
-function metroClickAt(at, idx){
+function metroClickAt(at){
   const ctx = toolsGetAudioCtx();
   if(!window.coachMicLive){
     toolsBeep(880, 0.06, 0.4, at, metroGetBus());
@@ -194,17 +185,16 @@ function getBpm(){ return parseInt(document.getElementById('bpm-slider').value);
 /* Time between clicks. In 6/8 the BPM counts the two BIG beats of the bar
    (Jonathan, 2026-10-10), each split into three clicks — so 60 means 60 big
    beats a minute, the same number the Luna page's "60, then 70, then 80"
-   targets use. Every other meter clicks once per beat. In seconds, unrounded:
-   a click time rounded to the millisecond drifts off the beat bar by bar. */
+   targets use. Otherwise one click per beat. In seconds, unrounded: a click
+   time rounded to the millisecond drifts off the beat bar by bar. */
 function metroClickSec(){ return 60 / getBpm() / (getMetroMeter() === 6 ? 3 : 1); }
 /* Retime a running click to the current BPM WITHOUT restarting it: a slider
    drag fires many input events a second, and a restart per event was a
    machine-gun burst (and, on the old timer, held the click back for the
-   whole drag). The bar keeps its place and the beat its phase — the next
-   click comes one NEW beat after the last one queued; clicks already handed
-   to Web Audio keep their times. Only when that moment has already gone (a
-   big jump faster after a long slow beat) does the next click come straight
-   away, still the next beat of the bar. The ±1/±5 buttons and the tempo
+   whole drag). The beat keeps its phase — the next click comes one NEW beat
+   after the last one queued; clicks already handed to Web Audio keep their
+   times. Only when that moment has already gone (a big jump faster after a
+   long slow beat) does the next click come straight away. The ±1/±5 buttons and the tempo
    ladder retime the same way. */
 function retimeMetro(){
   if(!metroRunning) return;
@@ -291,12 +281,11 @@ function startMetro(){
   // silent in that case (see its comment), so this just keeps the visible
   // dot/button state honest instead of the Start button silently doing nothing.
   metroRunning = true;
-  metroBeatIdx = 0;
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg>','tools.stop');
   const ctx = toolsGetAudioCtx();
   // Start is a click, so a context the browser left suspended may resume here.
   if(ctx.state === 'suspended'){ try { const p = ctx.resume(); if(p && p.catch) p.catch(()=>{}); } catch(e){} }
-  // Beat 1 straight away — METRO_LEAD only keeps it from being queued in the past.
+  // The first click straight away — METRO_LEAD only keeps it from being queued in the past.
   metroNextAt = ctx.currentTime + METRO_LEAD;
   metroLastAt = metroNextAt - metroClickSec();
   clearInterval(metroInterval);
@@ -307,7 +296,6 @@ function stopMetro(){
   clearInterval(metroInterval);
   metroInterval = null;
   metroRunning=false;
-  metroBeatIdx=0;
   metroBusKill();                          // clicks already queued go silent too
   metroDotTimers.forEach(clearTimeout);
   metroDotTimers.clear();

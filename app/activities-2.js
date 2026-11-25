@@ -724,10 +724,9 @@ function caAutoStartMetro(a){
   slider.value = bpm;
   onBpmSlider(String(bpm));
   // Every metronome card so far (ca-21) is one note per beat in 4/4. The
-  // meter is a sticky Metro setting, and 6/8 counts the BIG beats (60 BPM →
-  // 180 clicks a minute), so a student who last used 6/8 would get three
-  // clicks per note. Put it back to 4/4 first; add a `meter` field if a card
-  // ever needs another.
+  // meter is set by the page (6/8 on a 6/8 page clicks three times per big
+  // beat), so put it back to one click per beat first; add a `meter` field
+  // if a card ever needs another.
   if(typeof setMetroMeter === 'function' && typeof getMetroMeter === 'function' && getMetroMeter() !== 4) setMetroMeter(4);
   if(!metroRunning) startMetro();
 }

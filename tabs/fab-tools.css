@@ -62,9 +62,6 @@
 .timer-presets button{flex:1;min-width:44px;padding:5px var(--sp-4);border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:var(--fs-13);cursor:pointer;color:var(--text);font-family:inherit;white-space:nowrap}
 .timer-presets button:hover{background:var(--bg3)}
 .timer-presets button.sel{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
-/* Metronome meter row: four signatures share one line, so these run narrower than the timer presets (still 44px tall). */
-.meter-presets{gap:var(--sp-4);flex-wrap:nowrap}
-.timer-presets.meter-presets button{min-width:0;padding:3px var(--sp-2);font-size:var(--fs-12)}
 /* ── Tempo ladder (Metronome popup) — mirrored from styles.css, found
    missing entirely 2026-09-27 when the Journey pages' Metronome popup
    gained the ladder markup but not its CSS. ── */

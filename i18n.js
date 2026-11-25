@@ -844,7 +844,6 @@
     'tools.closeMetroAria':{ en: 'Close metronome', es: 'Cerrar el metrónomo' },
     'tools.closeTimerAria':{ en: 'Close timer', es: 'Cerrar el temporizador' },
     'tools.closeTunerAria':{ en: 'Close tuner', es: 'Cerrar el afinador' },
-    'tools.meterAria':     { en: 'Time signature', es: 'Compás' },
     'tools.bpm':           { en: 'BPM', es: 'BPM' },
     'tools.tempoBpm':      { en: 'Tempo in BPM', es: 'Tempo en BPM' },
     'tools.start':         { en: 'Start', es: 'Iniciar' },
