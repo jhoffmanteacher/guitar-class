@@ -458,15 +458,18 @@ const BS_IDB = 'gc-built-songs', BS_IDB_WAIT_MS = 4000;
    shared with saving. A sign-in always reads once. A read that failed (offline) does not start the clock. */
 const BS_RETURN_MS = 15 * 60 * 1000;
 
+/* A connection that opens after the answer was already "none" (the wait ran out, or the open was blocked and went
+   through later) is closed at once: nobody will use or close it, and an open one blocks the next version upgrade. */
 function bsIdb(){
   return new Promise(resolve => {
-    let req;
-    setTimeout(() => resolve(null), BS_IDB_WAIT_MS);
-    try { req = indexedDB.open(BS_IDB, 1); } catch(e) { resolve(null); return; }
+    let req, done = false;
+    const end = db => { if(!done){ done = true; resolve(db); } else if(db){ try { db.close(); } catch(e) {} } };
+    setTimeout(() => end(null), BS_IDB_WAIT_MS);
+    try { req = indexedDB.open(BS_IDB, 1); } catch(e) { end(null); return; }
     req.onupgradeneeded = () => { try { req.result.createObjectStore('songs', { keyPath: 'id' }); } catch(e) {} };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => resolve(null);
-    req.onblocked = () => resolve(null);
+    req.onsuccess = () => end(req.result);
+    req.onerror = () => end(null);
+    req.onblocked = () => end(null);
   });
 }
 function bsCopyDo(mode, fn){
@@ -475,7 +478,7 @@ function bsCopyDo(mode, fn){
       if(!db){ resolve(null); return; }
       let r;
       try { const tx = db.transaction('songs', mode); r = fn(tx.objectStore('songs')); tx.oncomplete = () => { try { db.close(); } catch(e) {} resolve(r && 'result' in r ? r.result : null); }; tx.onerror = tx.onabort = () => { try { db.close(); } catch(e) {} resolve(null); }; }
-      catch(e){ resolve(null); }
+      catch(e){ try { db.close(); } catch(e2) {} resolve(null); }
     })).catch(() => null),
     new Promise(r => setTimeout(() => r(null), BS_IDB_WAIT_MS)),
   ]);

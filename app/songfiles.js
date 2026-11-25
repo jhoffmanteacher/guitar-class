@@ -158,16 +158,20 @@ let sfDbOpen = null;
 function sfIdb(){
   if(sfDbOpen) return sfDbOpen;
   sfDbOpen = new Promise(resolve => {
-    let req;
+    let req, done = false;
+    /* A connection that opens after the answer was already "none" (below) is
+       closed at once: this page will not use it, and an open one blocks the
+       next version upgrade (the same as bsIdb, app/builtsongs.js). */
+    const end = db => { if(!done){ done = true; resolve(db); } else if(db){ try { db.close(); } catch(e) {} } };
     /* An open that never answers (seen when another tab holds an upgrade, or
        storage is wedged) must not leave "Loading the song… 0%" up for good:
        after SONG_FILES_IDB_WAIT_MS the page goes on with no device copy. */
-    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);
-    try { req = indexedDB.open(SONG_FILES_IDB, 1); } catch(e) { resolve(null); return; }
+    setTimeout(() => end(null), SONG_FILES_IDB_WAIT_MS);
+    try { req = indexedDB.open(SONG_FILES_IDB, 1); } catch(e) { end(null); return; }
     req.onupgradeneeded = () => { try { req.result.createObjectStore('files', { keyPath: 'id' }); } catch(e) {} };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => resolve(null);       // private window, blocked storage: no copy, the song still plays this time
-    req.onblocked = () => resolve(null);
+    req.onsuccess = () => end(req.result);
+    req.onerror = () => end(null);       // private window, blocked storage: no copy, the song still plays this time
+    req.onblocked = () => end(null);
   });
   return sfDbOpen;
 }
