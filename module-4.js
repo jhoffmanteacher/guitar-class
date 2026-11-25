@@ -1438,8 +1438,8 @@ SETS.push(
             hint: 'Name a song or a chord change, for example: "I can switch C to G without stopping."',
             hint_es: 'Nombra una canción o un cambio de acorde, por ejemplo: "puedo cambiar de C a G sin detenerme".',
             skills: [5],
-            response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t when you started — and one goal for the assessment.',
-              placeholder_es: 'Una cosa que puedes hacer ahora que no podías cuando empezaste — y una meta para la evaluación.' }
+            response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t when you started — and one thing you want to play by the end of Module 4.',
+              placeholder_es: 'Una cosa que puedes hacer ahora que no podías cuando empezaste — y una cosa que quieres tocar para el final del Módulo 4.' }
           },
             ]
           },
