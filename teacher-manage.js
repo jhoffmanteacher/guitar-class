@@ -419,14 +419,16 @@ function renderTeacherResponses(){
    issueReports (app.js submitIssueReport) is write-only from the student
    side — firestore.rules grants the teacher a read, but until now nothing
    read it back, so a filed report was only visible in the Firebase console.
-   One Firestore read per view-open; not cached, since nothing else here is. */
+   One Firestore read per view-open; not cached, since nothing else here is.
+   It reads one more than it shows, only to say so when there are older ones. */
+const TEACHER_REPORTS_SHOW = 50;
 async function renderTeacherReports(){
   const box=document.getElementById('t-grid-container');
   box.innerHTML='<div class="t-loading">Loading reports…</div>';
   let snap;
   try{
     await ensureDb();
-    snap=await db.collection('issueReports').orderBy('createdAt','desc').limit(50).get();
+    snap=await db.collection('issueReports').orderBy('createdAt','desc').limit(TEACHER_REPORTS_SHOW+1).get();
   } catch(e){
     // Same stale-view guard as the success path below — without it a failing
     // read paints this error over whichever view the teacher switched to.
@@ -441,12 +443,14 @@ async function renderTeacherReports(){
   if(!snap.empty) teacherMarkReportsSeen(snap.docs[0].data().createdAt);
   teacherPaintReportsBadge(0);
   if(snap.empty){ box.innerHTML='<div class="t-loading">No issue reports yet.</div>'; return; }
-  const rows=snap.docs.map(doc=>{
+  const more=snap.docs.length>TEACHER_REPORTS_SHOW;
+  const rows=snap.docs.slice(0, TEACHER_REPORTS_SHOW).map(doc=>{
     const d=doc.data();
     const when=(d.createdAt&&d.createdAt.toDate) ? d.createdAt.toDate().toLocaleString() : '—';
     const who=d.name||d.email||d.uid||'—';
     return `<tr><td class="nc" title="${escAttr(who)}">${escHtml(who)}</td><td>${escHtml(when)}</td><td>${escHtml(d.location||'')}</td><td>${escHtml(d.message||'')}</td></tr>`;
   }).join('');
-  box.innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>When</th><th>Where</th><th>Message</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  const note=more ? `<div class="tg-note">Only the newest ${TEACHER_REPORTS_SHOW} reports are shown here. Older ones are in a backup (Manage → Download a backup).</div>` : '';
+  box.innerHTML=`${note}<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>When</th><th>Where</th><th>Message</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
