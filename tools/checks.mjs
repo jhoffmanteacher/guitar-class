@@ -19324,9 +19324,11 @@ function checkCoachVerdicts() {
         a graded round saves once;
      E. the "could not read" screen names "Mark it anyway" exactly when the skill still waits on the Coach (gated, under the gate's
         level, not ticked): not with no skill, not once the skill passed, not once it is ticked;
+     F. a graded report draws one row per criterion that has a level (none for a level-0 criterion such as "no chord changes in this
+        drill"), lowest level first, "Right notes" first on a tie, each with its own level (read from the HTML);
    and controls, so this cannot go blind: every all-right round opens the gate, with the Great headline on the beat and Good 600 ms off
    it (the timing criteria coach, they do not fail a take). Every total is pinned. */
-const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2 };
+const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2, rows: 38608 };
 function checkCoachNotesDecide() {
   head('1fg. Listening Coach: the notes decide; "Right notes" at Not yet never opens the check-off gate, nothing read gets no level (run)');
   let bad = 0;
@@ -19337,7 +19339,7 @@ function checkCoachNotesDecide() {
   try {
     res = JSON.parse(run(`(function(){
       const keep = { coach, currentUser, games, saveGames, progress, lang: getLang() };
-      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0 }, bad = [];
+      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0, rows: 0 }, bad = [];
       try {
         setLang('en');
         const sid = SETS.flatMap(w => w.skills || []).map(s => s.id).find(id => skillIsCoachGated(id));
@@ -19366,7 +19368,12 @@ function checkCoachNotesDecide() {
           const pitch = coachScorePitch().level;
           coachRenderReport();
           const html = coachBody().innerHTML;
-          return { pitch, shown: screen(html), html, saves, saved: games.coachSkill[sid] ? games.coachSkill[sid].level : 0,
+          /* F: the rows as drawn (the criterion's level class, in order) against the criteria's own levels */
+          const drawn = [...html.matchAll(new RegExp('class="coach-crit-name">([^<]*)</span>[^<]*<span class="coach-lvl lvl([0-9])"', 'g'))].map(m => ({ name: m[1], level: +m[2] }));
+          const want = [coachScorePitch(), coachScoreTiming(), coachScoreTempo(), coachScoreChanges(), coachScoreCompletion()]
+            .map((c, i) => ({ name: c.icon + ' ' + c.name, level: c.level, i })).filter(c => c.level > 0)
+            .sort((a, b) => a.level - b.level || a.i - b.i).map(c => ({ name: c.name, level: c.level }));
+          return { pitch, shown: screen(html), html, drawn, want, saves, saved: games.coachSkill[sid] ? games.coachSkill[sid].level : 0,
             drill: Object.keys(games.coach).length, gateHolds: coachSkillBest(sid) < COACH_GATE_MIN_LEVEL };
         };
         const orders = (c) => {
@@ -19404,6 +19411,10 @@ function checkCoachNotesDecide() {
                 if (r.shown === 'unread') n.unread++;
                 if (r.saves || r.saved || r.drill) bad.push('D: ' + what + ': a "couldn\\'t hear" screen saved (saveGames ' + r.saves + ', skill level ' + r.saved + ', drill records ' + r.drill + ')');
               } else if (r.saves !== 1 || r.saved !== r.shown) bad.push('D: ' + what + ': a graded round (' + r.shown + ') saved ' + r.saves + ' time(s), skill level ' + r.saved);
+              if (!screenNoLevel){
+                n.rows += r.drawn.length;
+                if (JSON.stringify(r.drawn) !== JSON.stringify(r.want) || r.html.indexOf('coach-lvl lvl0') >= 0) bad.push('F: ' + what + ': the rows read ' + r.drawn.map(x => x.name + ' ' + x.level).join(', ') + '; want ' + r.want.map(x => x.name + ' ' + x.level).join(', ') + ' (one row per criterion with a level, lowest first, Right notes first on a tie)');
+              }
               if (!r.gateHolds) n.opened++;
               if (ok === size){
                 n.allRight++;
@@ -19433,7 +19444,7 @@ function checkCoachNotesDecide() {
   for (const b of res.bad) fail(b);
   if (res.badCount > res.bad.length) fail(`… and ${res.badCount - res.bad.length} more`);
   for (const [k, v] of Object.entries(NOTES_DECIDE_PIN)) if (res.n[k] !== v) fail(`${res.n[k]} ${k}, pinned ${v}: the check went partly blind (or the rounds changed: re-pin NOTES_DECIDE_PIN on purpose)`);
-  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" save nothing, every graded round saves once; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of 5 cases, as wanted in all 5); controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
+  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" save nothing, every graded round saves once; ${res.n.rows} report rows drawn lowest first, none without a level; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of 5 cases, as wanted in all 5); controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
