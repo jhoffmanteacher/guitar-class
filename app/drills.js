@@ -1141,7 +1141,7 @@ function erStopAll(){
    runs after the student may have started one). Under a selector, a round
    whose box is no longer on the page counts as inside: nobody can see it. */
 function dkErAbortAll(scope){
-  const inScope = box => !scope || (typeof scope === 'string' ? !box || !!box.closest(scope) : !!box && scope.contains(box));
+  const inScope = box => !scope || (typeof scope === 'string' ? !box || !!box.closest(scope) : !!box && typeof scope.contains === 'function' && scope.contains(box));
   Object.keys(deckDrills).forEach(k => {
     const st = deckDrills[k];
     if(!st || st.phase !== 'run') return;
