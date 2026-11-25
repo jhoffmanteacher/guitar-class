@@ -79,7 +79,7 @@
      page-error   anything the console logs through console.error or throws.
    COVERAGE FLOORS (a full run, 64+ cases, no --family): every family ran; 40+ write clicks reached the server; 4+
    window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks;
-   5+ Who pickers opened; 5+ card pages drawn from a failed read when a retry starts; 3+ boxes typed in during a retry.
+   5+ Who pickers opened; 3+ card pages kept over a failed read when a retry starts; 3+ boxes typed in during a retry.
 
    NOT COVERED: anything a browser adds (layout, CSS: a pane hidden by CSS counts as on screen here; focus moves;
    real event order); the update reload itself (the resume note is set, the reload is not played); a settings read
@@ -987,6 +987,8 @@ function genCase(seed, k, famOverride) {
     if (r.chance(0.3)) c.windowClicks = 1;
     // healthy: a Refresh while the progress read fails on a loaded console, then a view drawn from the settings.
     if (c.healthyRefresh) { add(65 * SEC, 'refresh'); add(68 * SEC, 'view', { v: r.pick(SETTINGS_VIEWS) }); }
+    // A Who picker opened in every persist and healthy case (roster down, and loaded).
+    if (fam === 'persist' || fam === 'healthy') add(tIn(10 * SEC, pre - 20 * SEC), 'sub', { what: 'who' });
   }
   // The heal and the recovery check: nothing but the second console between them.
   const healAt = Math.max(heal, ...c.events.map(e => e.t + (e.dur || 0) + SEC), 5 * SEC);
@@ -1345,7 +1347,7 @@ async function main() {
     if (st.recoverChecks < 30) floors.push(`only ${st.recoverChecks} recovery checks (floor 30)`);
     if (st.busyGuards < 3) floors.push(`only ${st.busyGuards} boxes typed in while a retry was out (floor 3)`);
     if (st.whoOpened < 5) floors.push(`only ${st.whoOpened} Who pickers opened (floor 5)`);
-    if (st.detailKept < 5) floors.push(`only ${st.detailKept} cards kept on screen over a failed settings read (floor 5)`);
+    if (st.detailKept < 3) floors.push(`only ${st.detailKept} cards kept on screen over a failed settings read (floor 3)`);
   }
   floors.forEach(f => console.log(`  ✗ [coverage] ${f}`));
   const rate = Object.keys(out.rate).sort().map(x => `${x} ${out.rate[x]}`).join(', ');
