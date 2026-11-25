@@ -768,7 +768,7 @@ function teacherPaintRosterNote(){
   const old=document.getElementById('t-roster-note');
   if(!show){ if(old) old.remove(); return; }
   const box=document.getElementById('t-grid-container');
-  if(!old && box) box.insertAdjacentHTML('beforebegin', '<div id="t-roster-note" class="t-loading" role="status">Student progress did not load, so this page shows no students and no counts (the class settings did load). It is read again every minute; Refresh tries now.</div>');
+  if(!old && box) box.insertAdjacentHTML('beforebegin', '<div id="t-roster-note" class="t-loading" role="status" style="padding:var(--sp-10) var(--sp-20)">Student progress did not load, so this page shows no students and no counts (the class settings did load). It is read again every minute; Refresh tries now.</div>');
 }
 
 /* ── Keeping student progress current (2026-10-12) ──────────────────────
