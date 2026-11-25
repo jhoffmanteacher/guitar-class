@@ -98,8 +98,12 @@ let teacherPeriodFilter=(function(){
    summary cards, responses, trouble spots, students list — follows. The
    Manage view is the deliberate exception: it renders from allStudentsRaw,
    because it is where you FIX a wrong period and must show everyone. */
+/* The archived list of the newest GOOD settings read (review R4): a failed read is {}, and filtering by it brought every
+   archived student back into every view (a write whose follow-up read failed, a view's own failed read). */
+let teacherArchivedKept=null;
 function teacherApplyRosterFilter(){
-  const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
+  if(teacherClassConfigReadOk) teacherArchivedKept=(teacherClassConfig&&teacherClassConfig.archived)||{};
+  const arch=teacherArchivedKept||{};
   const onRoster = teacherShowArchived ? [...allStudentsRaw] : allStudentsRaw.filter(s=>!arch[s.uid]);
   allStudents = teacherPeriodFilter==='all' ? onRoster
     : teacherPeriodFilter==='none' ? onRoster.filter(s=>!teacherStudentPeriod(s))
@@ -125,7 +129,7 @@ function teacherApplyRosterFilter(){
 function renderTeacherPeriodFilter(onRoster){
   const box=document.getElementById('t-period-filter');
   if(!box) return;
-  const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
+  const arch=(teacherClassConfigReadOk ? (teacherClassConfig&&teacherClassConfig.archived) : teacherArchivedKept)||{};
   const list=onRoster||(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]));
   const unassigned=list.filter(s=>!teacherStudentPeriod(s)).length;
   const seg=(val,label)=>`<button class="tg-seg-btn ${teacherPeriodFilter===val?'on':''}" data-set-period-filter data-period="${val}">${label}</button>`;
@@ -710,12 +714,13 @@ async function loadAllStudents(opts){
          Refuse to draw, as Games and the board do; teacherStudentsAt stays 0, so Refresh runs this whole load again. */
       if(!teacherClassConfigReadOk){
         teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
-        teacherPaintRosterFailed();
+        teacherPaintRosterMissing();
         return;
       }
-      /* A retry's read moved the copy: draw the view from it now, before the roster read, so no control drawn from the
-         older copy is left on screen meanwhile (review R3-3). Not at boot: nothing is drawn yet. */
-      if(teacherBodyDrawn && teacherRosterDown()){ readCfg=false; renderTeacherBody(); }
+      /* The read moved the copy while a view is on screen (a retry, or a view opened while the first load was out or the
+         modules loaded): draw it from the new copy now, before the roster read, so nothing drawn from an older or failed
+         copy is left on screen meanwhile (review R3-3, R4-1). At boot with nothing drawn yet, the load draws below. */
+      if(teacherBodyDrawn){ readCfg=false; renderTeacherBody(); }
     }
     const fresh=await teacherFetchStudents();
     /* An automatic retry that lands while the teacher is mid-drag or typing on a view drawn without the roster is
@@ -726,7 +731,7 @@ async function loadAllStudents(opts){
     teacherApplyRosterFilter();
   } catch(e){
     teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
-    teacherPaintRosterFailed();
+    teacherPaintRosterMissing();
     return;
   }
   teacherRefreshing=false; teacherRefreshFailed=false;
@@ -745,44 +750,61 @@ async function loadAllStudents(opts){
   teacherRefreshReportsBadge();
 }
 
-/* A first roster load that failed (review R1-4, R2-1, R2-4). A view drawn from the roster alone (the Refresh bar's
-   views, Practice minutes with its own "Could not load the student list") says what failed instead of drawing. While the
-   newest class-settings read is good, the views drawn from the class settings (TEACHER_SETTINGS_VIEWS) are still drawn,
-   with one line above them (teacherPaintRosterNote), so the day's activities can be released; while it failed none is
-   (a failed config read is never drawn as real state). What is on screen follows the two reads as they are NOW
-   (review R3-1): the box says which one failed, and a failure line painted here is drawn over again once the state it
-   was painted for is gone. Games is not one of them: its view (teacher-config.js) says "No students yet" for a roster
-   that did not load (review R3-2). Live In-Class Games and the other tools are drawn as usual: left alone when already
-   on screen (the line used to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…"
-   (the console booted on one, e.g. the update reload's resume). The minute timer (teacherSyncAutoRefresh) then reads
-   again while a roster view is open and the tab is visible, as does a tab return, at most once every 15 s
-   (TEACHER_RETRY_GAP_MS, review R3 minor 3); renderTeacherBody reads again when a blocked view is opened. A read that
-   lands draws the view. */
+/* The roster before its first load lands: still out (loading) or failed (review R1-4, R2-1, R2-4, R4-1). Nothing
+   worked out from the roster is shown as fact or offered as a write in either state: every such spot says "Loading
+   student progress…" or "did not load" instead (teacherRosterMissingLine). A view drawn from the roster alone (the
+   Refresh bar's views, Practice minutes with its own lines) says the same in place of the view. While the newest
+   class-settings read is good, the views drawn from the class settings (TEACHER_SETTINGS_VIEWS) are still drawn, with
+   one line above them once the progress read has failed (teacherPaintRosterNote), so the day's activities can be
+   released and games switched on or off; while it failed none is (a failed config read is never drawn as real state).
+   What is on screen follows the reads as they are NOW (review R3-1, R4-1): the box says which one failed or that they
+   are still out; a line painted here is drawn over once the state it was painted for is gone; a view the settings draw
+   that was drawn while the roster was still loading (its roster spots said "Loading…") is drawn again when the load
+   fails. Live In-Class Games and the other tools are drawn as usual: left alone when already on screen (the line used
+   to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…" (the console booted on
+   one, e.g. the update reload's resume). After a failure the minute timer (teacherSyncAutoRefresh) reads again while
+   a roster view is open and the tab is visible, as does a tab return, at most once every 15 s (TEACHER_RETRY_GAP_MS,
+   review R3 minor 3); renderTeacherBody reads again when a blocked view is opened. A read that lands draws the view. */
 let teacherBodyDrawn=false;       // renderTeacherBody has run: the box no longer holds index.html's loading line
-let teacherRosterBoxFailed=false; // the box holds a failure line painted by teacherPaintRosterFailed, not a view
+let teacherBodyDrawnDown=false;   // ...and the view on screen was drawn while the roster was already down (not loading)
+let teacherRosterBoxFailed=false; // the box holds a line painted by teacherPaintRosterMissing, not a view
 let teacherRosterTriedAt=0;       // when the last first load (or retry of it) started
 const TEACHER_RETRY_GAP_MS=15000;
-const TEACHER_SETTINGS_VIEWS=['activities','manage','songs'];
+const TEACHER_SETTINGS_VIEWS=['activities','games','manage','songs'];
 function teacherViewUsesRoster(v){ return !TEACHER_NO_REFRESH_BAR_VIEWS.includes(v) || v==='minutes'; }
+function teacherRosterMissing(){ return !teacherStudentsAt; }
 function teacherRosterDown(){ return !teacherStudentsAt && teacherRefreshFailed; }
-/* What the views drawn while the roster is down show in place of a roster fact (review R3-2): an empty roster read
-   as "No students yet", "0 of 0 done" and lists with buttons computed from nobody. */
+/* What a roster spot shows while the roster is missing (review R3-2, R4-1): an empty roster read as "No students yet",
+   "0 of 0 done" and lists with buttons computed from nobody. */
 const TEACHER_ROSTER_DOWN_LINE='Student progress did not load, so no students are shown here. It is read again every minute.';
-// The Who picker's student list (the board's picker and its open toggle above): nobody to tick while the roster is down.
+const TEACHER_ROSTER_LOADING_LINE='Loading student progress…';
+function teacherRosterMissingLine(){ return teacherRosterDown() ? TEACHER_ROSTER_DOWN_LINE : TEACHER_ROSTER_LOADING_LINE; }
+// The Who picker's student list (the board's picker and its open toggle above): nobody to tick while the roster is missing.
 function teacherWhoListHtml(a, cfg){
-  return teacherRosterDown() ? `<div class="t-who-note">${TEACHER_ROSTER_DOWN_LINE}</div>` : teacherWhoBoxesHtml(a, cfg);
+  return teacherRosterMissing() ? `<div class="t-who-note">${teacherRosterMissingLine()}</div>` : teacherWhoBoxesHtml(a, cfg);
 }
-function teacherRosterBlocks(v){ return teacherRosterDown() && teacherViewUsesRoster(v) && !(teacherClassConfigReadOk && TEACHER_SETTINGS_VIEWS.includes(v)); }
-function teacherPaintRosterFailed(){
+function teacherRosterBlocks(v){ return teacherRosterMissing() && teacherViewUsesRoster(v) && !(teacherClassConfigReadOk && TEACHER_SETTINGS_VIEWS.includes(v)); }
+function teacherPaintRosterMissing(){
   teacherSyncAutoRefresh();
-  if(!teacherRosterBlocks(teacherView)){ if(teacherBodyDrawn && !teacherRosterBoxFailed) teacherPaintRosterNote(); else renderTeacherBody(); return; }
+  if(!teacherRosterBlocks(teacherView)){
+    // A view the settings draw, drawn while the roster was still loading, is stale once the load has failed: emptied and drawn again (R4-1).
+    const stale=teacherBodyDrawn && !teacherBodyDrawnDown && teacherRosterDown() && TEACHER_SETTINGS_VIEWS.includes(teacherView);
+    if(teacherBodyDrawn && !teacherRosterBoxFailed && !stale){ teacherPaintRosterNote(); return; }
+    const bx=stale && document.getElementById('t-grid-container');
+    if(bx) bx.innerHTML='';
+    renderTeacherBody();
+    return;
+  }
   teacherPaintRosterNote();
   if(teacherView==='minutes'){ renderTeacherMinutes(); return; }
   const box=document.getElementById('t-grid-container');
   if(box){
-    box.innerHTML = !teacherClassConfigReadOk
+    // Which read failed, or that the reads are still out (no settings read yet is loading, not a failure).
+    box.innerHTML = !teacherClassConfigReadOk && teacherClassConfigLoaded
       ? '<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>'
-      : '<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
+      : teacherRosterDown() && teacherClassConfigReadOk
+        ? '<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>'
+        : '<div class="t-loading">Loading student data…</div>';
     teacherRosterBoxFailed=true;
   }
 }
@@ -924,10 +946,12 @@ function teacherRepaintActivityStudents(id){
   const box=document.getElementById('t-grid-container');
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!box || !a) return;
-  /* Drawn while the roster was down, the tab holds one line (teacherDetailFrameHtml, review R3-2): once a roster is in
-     hand its boxes go back, in renderTeacherActivityDetail's order, and are filled below. */
+  /* Drawn while the roster was missing, the tab holds one line (teacherDetailFrameHtml, review R3-2): once a roster is
+     in hand its boxes go back, in renderTeacherActivityDetail's order, and are filled below. Not from a failed settings
+     read (its Clear buttons would be worked out from nothing: review R4): what is on screen stays. */
+  if(!teacherClassConfigReadOk) return;
   const downLine=box.querySelector('[data-ta-roster-down]');
-  if(downLine && !teacherRosterDown()){
+  if(downLine && !teacherRosterMissing()){
     downLine.insertAdjacentHTML('beforebegin', `<div class="tg-note" data-ta-live="${a.kind==='check'?'note':'place'}"></div><div data-ta-live="counts"></div><div data-ta-live="optional"></div><div data-ta-live="grid"></div>`);
     downLine.remove();
   }
@@ -944,7 +968,7 @@ function teacherRepaintActivityStudents(id){
 /* Start or stop the once-a-minute timer to match the view and the tab's
    visibility, and repaint the bar. Called from renderTeacherBody (every view
    change goes through it), from the visibilitychange listener and from a
-   failed first load (teacherPaintRosterFailed). */
+   failed first load (teacherPaintRosterMissing). */
 function teacherSyncAutoRefresh(){
   // Also any roster view while the first load has failed (review R2-1): its tick runs that load again.
   const want = (teacherView==='activities' || (teacherRosterDown() && teacherViewUsesRoster(teacherView))) && !document.hidden;
@@ -1051,6 +1075,8 @@ function teacherPaintReportsBadge(n){
 }
 
 function renderTeacherSummary(){
+  // No roster yet: "Students 0 · All done 0 …" would be counts of nobody (review R4, M2).
+  if(teacherRosterMissing()){ const el=document.getElementById('t-summary'); if(el) el.innerHTML=''; return; }
   const w=SETS.find(x=>x.id===teacherSetId); if(!w||!w.skills||!w.skills.length) return;
   const total=allStudents.length;
   const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id]==='gotit')).length;
@@ -1486,13 +1512,14 @@ function renderTeacherBody(){
      view, fills it like the student site (site-fill.js, Jonathan 2026-11-16). Before the view paints. */
   if(typeof siteFillStage==='function') siteFillStage(teacherView==='livequiz');
   teacherSyncAutoRefresh();   // the progress timer runs on Class activities, and on a roster view after a failed first load
-  teacherBodyDrawn=true; teacherRosterBoxFailed=false;
-  /* The first roster read failed: a view drawn from it would say "No student data yet". Say what failed and read
-     again; one that lands draws this view (review R1-4). The views drawn from the class settings are drawn after a
-     failed progress read, with the line above them (review R2-4). */
+  teacherBodyDrawn=true; teacherRosterBoxFailed=false; teacherBodyDrawnDown=teacherRosterDown();
+  /* No roster yet (still loading, or the first read failed): a view drawn from it would say "No student data yet".
+     Say what is going on instead; after a failure read again, and one that lands draws this view (review R1-4, R4-1).
+     While loading the first load is already on its way (or starts once the modules are in). The views drawn from the
+     class settings are drawn while those are good, with the line above them once the roster failed (review R2-4). */
   if(teacherRosterBlocks(teacherView)){
-    teacherPaintRosterFailed();
-    if(!teacherRefreshing) loadAllStudents();
+    teacherPaintRosterMissing();
+    if(teacherRosterDown() && !teacherRefreshing) loadAllStudents();
     return;
   }
   teacherPaintRosterNote();

@@ -266,8 +266,8 @@ function teacherActivityCtlKit(cfg, activities){
   // (loadAllStudents) — no second Firestore read path for completion data.
   const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
   const doneSummary=a=>{
-    // The roster did not load: no done line at all (the note above the page says why), not "No student data yet" (R3-2).
-    if(teacherRosterDown()) return '';
+    // No roster yet (loading, or it did not load): no done line at all, not "No student data yet" (R3-2, R4-1).
+    if(teacherRosterMissing()) return '';
     const isCheck=a.kind==='check';
     const forIt=doneSummaryRoster.filter(s=>teacherActivityForStudent(a,s.uid,cfg));
     const groups=[['4','P4'],['7','P7'],['CAS','CAS'],['','Unassigned']]
@@ -899,8 +899,8 @@ function teacherActivityRowHtml(r){
   let bar='';
   // Counted here, for the rows actually drawn — not for every card on every
   // keystroke of a search.
-  // No bar while the roster is down: "0/0 done" would be a count of nobody (review R3-2).
-  if(r.assignedCounts && !teacherRosterDown()){
+  // No bar while the roster is missing: "0/0 done" would be a count of nobody (review R3-2, R4-1).
+  if(r.assignedCounts && !teacherRosterMissing()){
     const c=teacherActivityDoneCounts(r.a, teacherClassConfig), pct=c.total?Math.round(c.done/c.total*100):0;
     bar=`<span class="ta-row-done"><span class="ta-bar" aria-hidden="true"><i style="width:${pct}%"></i></span>${c.done}/${c.total} ${r.isCheck?'turned in':'done'}</span>`;
   }
@@ -958,7 +958,8 @@ function teacherActivityListHeadHtml(){
    new filter or search is a new list; a repaint after a write is not. */
 function teacherPaintActivityList(top){
   const body=document.querySelector('#t-grid-container [data-ta-list-body]');
-  if(!body) return false;
+  // Not from a failed settings read ({}: every card "Not assigned"; review R4): the rows on screen stay.
+  if(!body || !teacherClassConfigReadOk) return false;
   const y=body.scrollTop;
   // One model for the rows and the sidebar tree: they cannot disagree.
   const model=teacherActivityListModel(teacherClassConfig);
@@ -1064,7 +1065,7 @@ function teacherSetDetailTab(tab, focus){
 }
 /* The Students tab's count: done (or turned in) / the students it is for. */
 function teacherStudentsTabLabelHtml(a){
-  if(teacherRosterDown()) return 'Students';   // no count while the roster is down (review R3-2)
+  if(teacherRosterMissing()) return 'Students';   // no count while the roster is missing (review R3-2, R4-1)
   const c=teacherActivityDoneCounts(a, teacherClassConfig);
   return `Students <span class="ta-tab-count">${c.done}/${c.total}</span>`;
 }
@@ -1073,7 +1074,7 @@ function teacherStudentsTabLabelHtml(a){
    (caSteps) but not marked done. Nothing records a card being opened, so
    the third count is "Not started", not "not opened". */
 function teacherActivityCountsHtml(a){
-  if(teacherRosterDown()) return '';
+  if(teacherRosterMissing()) return '';
   const c=teacherActivityDoneCounts(a, teacherClassConfig);
   const chip=(n,label,cls)=>`<span class="ta-count ${cls}"><b>${n}</b> ${label}</span>`;
   if(a.kind==='check'){
@@ -1210,9 +1211,9 @@ function teacherDetailFrameHtml(a, back, panes){
   const cfg=teacherClassConfig;
   const tab=activityDetailTab;
   const tabBtn=(k,label)=>`<button type="button" role="tab" class="ta-tab${k===tab?' on':''}" id="ta-tab-${k}" data-ta-tab="${k}" aria-selected="${k===tab}" aria-controls="ta-pane-${k}" tabindex="${k===tab?0:-1}">${label}</button>`;
-  /* The Students tab is the roster: while it is down, one line instead of "No student data yet" and 0 counts
-     (review R3-2). teacherRepaintActivityStudents puts the tab's boxes back once a roster lands. */
-  if(teacherRosterDown()) panes=Object.assign({}, panes, {students:`<div class="t-loading" data-ta-roster-down>${TEACHER_ROSTER_DOWN_LINE}</div>`});
+  /* The Students tab is the roster: while it is missing, one line instead of "No student data yet" and 0 counts
+     (review R3-2, R4-1). teacherRepaintActivityStudents puts the tab's boxes back once a roster lands. */
+  if(teacherRosterMissing()) panes=Object.assign({}, panes, {students:`<div class="t-loading" data-ta-roster-down>${teacherRosterMissingLine()}</div>`});
   const pane=k=>`<div class="ta-pane" role="tabpanel" id="ta-pane-${k}" aria-labelledby="ta-tab-${k}" data-ta-pane="${k}"${k===tab?'':' hidden'}>${panes[k]}</div>`;
   return back
     +`<div class="ta-dhead" data-ta-head data-id="${escAttr(a.id)}">${teacherActivityHeadHtml(a,cfg)}</div>`
@@ -1233,6 +1234,16 @@ function teacherSoftRepaintDetail(){
   const host=teacherDetailHost();
   if(!host || !activityDetailId) return;
   const head=host.querySelector('[data-ta-head]');
+  /* Never from a failed settings read: it is {}, so every setting would be drawn unset and every button worked out
+     from nothing (review R1-5, R4: a write whose follow-up read failed redrew the page from it). A page on screen stays
+     as it is; one not drawn yet says why, with its way back. */
+  if(!teacherClassConfigReadOk){
+    if(!head || head.dataset.id!==activityDetailId){
+      const back=(teacherView==='activities' && teacherActivityScreen()==='split') ? '' : `<button type="button" class="stu-back" data-back-to-activities>&#x2190; Back</button>`;
+      host.innerHTML=back+'<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so this activity is not shown.</div>';
+    }
+    return;
+  }
   if(!head || head.dataset.id!==activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
   const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===activityDetailId);
   if(!raw) return;
@@ -1267,11 +1278,10 @@ function teacherRenderActivityScreen(screen, opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
   if(screen==='detail'){
-    if(!box.querySelector(`[data-ta-head][data-id="${CSS.escape(activityDetailId)}"]`)) renderTeacherActivityDetail(activityDetailId);
-    else teacherSoftRepaintDetail();
+    // Drawn whole the first time, else repainted; after a failed read ({}) kept as it is (teacherSoftRepaintDetail, review R1-5, R4).
+    teacherSoftRepaintDetail();
     teacherPaintSideTree();
-    // A failed read is {} (review R1-5): keep what is on screen rather than draw every setting as unset.
-    if(!cached) teacherReadConfigAndRoster().then(cfg=>{ if(cfg && teacherClassConfigReadOk && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
+    if(!cached) teacherReadConfigAndRoster().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
     return;
   }
   if(!(window.CLASS_ACTIVITIES||[]).length){

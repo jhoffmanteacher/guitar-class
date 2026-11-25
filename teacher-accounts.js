@@ -181,11 +181,13 @@ function teacherAccessBlockHtml(){
   const btn = (label, attr, uid, on) => `<button class="tg-seg-btn${on ? ' on' : ''}" ${attr} data-uid="${escAttr(uid)}"${teacherAccessBusy ? ' disabled' : ''}>${label}</button>`;
   const lines = [];
   const rosterAt = (typeof teacherStudentsAt !== 'undefined' && teacherStudentsAt) ? new Date(teacherStudentsAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
-  /* The roster did not load (the first load failed): its counts, its accounts and the allowed accounts "not in the
-     roster" would all be worked out from nobody (every allowed account offered for Remove: review R3-2). The requests
-     come from their own read and are shown as usual. */
-  const rosterDown = typeof teacherRosterDown === 'function' && teacherRosterDown();
-  if(rosterDown) lines.push('Student progress did not load, so the roster’s accounts are not listed or counted here. Requests to join are below. Refresh below tries again.');
+  /* No roster yet (still loading, or the first load failed): its counts, its accounts and the allowed accounts "not in
+     the roster" would all be worked out from nobody (every allowed account offered for Remove: review R3-2, R4-1). The
+     requests come from their own read and are shown as usual. */
+  const rosterMissing = typeof teacherRosterMissing === 'function' && teacherRosterMissing();
+  if(rosterMissing) lines.push(typeof teacherRosterDown === 'function' && teacherRosterDown()
+    ? 'Student progress did not load, so the roster’s accounts are not listed or counted here. Requests to join are below. Refresh below tries again.'
+    : 'Loading student progress… The roster’s accounts are listed and counted here once it is in. Requests to join are below.');
   else {
     lines.push(`${m.total} roster account${m.total === 1 ? '' : 's'}: ${m.school} @seq.org, ${m.outside} not. Of those ${m.outside}: ${m.outsideAllowed} allowed, ${m.lockedOut} would be locked out once the rules let in only school accounts.`);
     lines.push(` <span>(Roster as of ${escHtml(rosterAt || 'the console\'s first load')}. Refresh below reads the roster and the lists again.)</span>`);
@@ -200,8 +202,8 @@ function teacherAccessBlockHtml(){
         + `<td><div class="tg-seg">${btn('Allow', 'data-access-decide data-state="allowed"', r.uid, false)}${btn('Decline', 'data-access-decide data-state="declined"', r.uid, false)}${btn('Delete', 'data-access-del', r.uid, false)}</div></td></tr>`).join('') + `</tbody></table>`
     : '<div>Nobody is waiting.</div>';
   if(m.waiting.length >= TEACHER_ACCESS_REQ_MAX) html += `<div>Showing ${TEACHER_ACCESS_REQ_MAX} of the waiting requests: answer some and press Refresh for the rest.</div>`;
-  /* 2. roster accounts that are not @seq.org (none to list while the roster is down) */
-  if(!rosterDown){
+  /* 2. roster accounts that are not @seq.org (none to list while the roster is missing) */
+  if(!rosterMissing){
     html += `<h4>Already using the site, not @seq.org (${m.rows.length})</h4>`;
     if(m.rows.length){
       html += m.casToAllow.length ? `<div>${btn(`Allow all ${m.casToAllow.length} in CAS`, 'data-access-allow-cas', '', false)} The period is what the student picked (or your correction): check the names before you allow them.</div>` : '';
@@ -219,7 +221,7 @@ function teacherAccessBlockHtml(){
         + `<td><div class="tg-seg">${btn('Allowed', 'data-access-decide data-state="allowed"', r.uid, on)}${btn('Declined', 'data-access-decide data-state="declined"', r.uid, !on)}${btn('Delete', 'data-access-del', r.uid, false)}</div></td></tr>`;
     }).join('') + `</tbody></table>`;
   }
-  if(m.strays.length && !rosterDown){
+  if(m.strays.length && !rosterMissing){
     html += `<h4>Allowed, not in the roster (${m.strays.length})</h4><div>Accounts on the allow list that have not saved anything yet (a test account, say).</div><table class="tg-table"><tbody>`
       + m.strays.map(u => `<tr><td>${idCell(u)}</td><td>${btn('Remove', 'data-access-set data-state="off"', u, false)}</td></tr>`).join('') + `</tbody></table>`;
   }

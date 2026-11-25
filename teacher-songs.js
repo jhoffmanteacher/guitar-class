@@ -65,8 +65,8 @@ function renderTeacherSongs(){
       }
       return `<div class="t-board-card t-songs-row${(isHidden||retired)?' t-board-dim':''}">`
         +`<div class="t-board-row"><span class="t-songs-name">${escHtml(name(a))}</span> <button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this song" aria-label="Rename ${escAttr(name(a))}">&#x270E;</button><span class="t-songs-id">${escHtml(a.id)}</span>`
-        /* No done line while the roster is down: the note above the view says so (review R3-2). */
-        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:teacherRosterDown()?'':'No student data yet'}</span>`
+        /* No done line while the roster is missing (loading, or the note above says it did not load: review R3-2, R4-1). */
+        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:teacherRosterMissing()?'':'No student data yet'}</span>`
         +(roster.length?`<span class="t-songs-pop" title="Students who opened this song from the Songs page, and how many times in all (since Nov 1, 2026)">Opened: ${popTxt}</span>`:'')+`</div>`
         +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
         +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
@@ -119,9 +119,17 @@ function renderTeacherViewSongs(){
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='tsongs') return;   // switched views mid-flight
     if(!cfg) return;                     // superseded by a newer read
+    const raw=songs.find(a=>a.id===teacherViewSongId);
+    /* A failed read is {}: every song would show "Teacher only" with its two buttons worked out from nothing (review
+       R4, M4). A card already up keeps playing; only its share row says so. */
+    if(!teacherClassConfigReadOk){
+      const line='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing below would be accurate, so it isn\'t shown.</div>';
+      const up=box.querySelector('[data-tvs]'), ctl=up && up.dataset.tvs===raw.id && box.querySelector('[data-tvs-ctl]');
+      if(ctl) ctl.innerHTML=line; else box.innerHTML=line;
+      return;
+    }
     // Sharing a teacher-only song moves it on or off the board: the tree's counts follow.
     teacherPaintSideTree();
-    const raw=songs.find(a=>a.id===teacherViewSongId);
     const a=typeof caView==='function'?caView(raw):raw;
     const picker=songs.length>1
       ? `<div class="tg-seg" style="margin-bottom:12px">${songs.map(x=>`<button class="tg-seg-btn ${x.id===raw.id?'on':''}" data-tvs-pick data-id="${escAttr(x.id)}">${escHtml(teacherActivityTitle(x,cfg))}</button>`).join('')}</div>`

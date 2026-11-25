@@ -57,11 +57,11 @@ function renderTeacherManage(){
     const pausedCount=allStudentsRaw.filter(s=>paused[s.uid]).length;
     // One section at a time: these three, and `head` + the roster as Students (teacher-manage-layout.js).
     const panes={backup:teacherBackupPanelHtml(), songs:'<div id="t-songfiles-block"></div><div id="t-builtsongs-block"></div>', accounts:'<div id="t-access-block"></div>'};
-    /* The roster did not load (the first load failed; it is read again every minute): the student list and Open
-       everyone through are worked out from it, so neither is drawn, and the list's place says why. An empty roster
-       read as "No students yet", and Open for all as "Everyone is already open" (review R3-2). */
-    const rosterDown=teacherRosterDown();
-    const openAll=rosterDown ? '' : `
+    /* No roster yet (still loading, or the first load failed; then it is read again every minute): the student list
+       and Open everyone through are worked out from it, so neither is drawn, and the list's place says why. An empty
+       roster read as "No students yet", and Open for all as "Everyone is already open" (review R3-2, R4-1). */
+    const rosterMissing=teacherRosterMissing();
+    const openAll=rosterMissing ? '' : `
       <div class="tg-class">
         <div class="tg-class-lbl">Open everyone through</div>
         <div class="tg-seg">
@@ -90,7 +90,7 @@ function renderTeacherManage(){
         </div>
       </div>${openAll}
       <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way.${CLASS_OPEN_THROUGH>1?` <strong>Class-wide:</strong> every student is already open through Module ${CLASS_OPEN_THROUGH} and starts there (CLASS_OPEN_THROUGH in config-main.js), so Auto means Module ${CLASS_OPEN_THROUGH}.`:''} This list always shows everyone, whatever the period filter above is set to.</div>`;
-    if(allStudentsRaw.length===0){ box.innerHTML=teacherManageLayoutHtml(panes, head+`<div class="t-loading">${rosterDown?TEACHER_ROSTER_DOWN_LINE:'No students yet — they’ll appear here once they sign in.'}</div>`); teacherAccessMount(); teacherSongFilesMount(); teacherBuiltSongsMount(); return; }
+    if(allStudentsRaw.length===0){ box.innerHTML=teacherManageLayoutHtml(panes, head+`<div class="t-loading">${rosterMissing?teacherRosterMissingLine():'No students yet — they’ll appear here once they sign in.'}</div>`); teacherAccessMount(); teacherSongFilesMount(); teacherBuiltSongsMount(); return; }
     const nameOf=s=>(s.name||s.email||s.uid);
     const byLast=teacherManageNameBy==='last';
     const shownName=s=>{ const p=byLast&&teacherNameParts(s); return p?`${p.last}, ${p.first}`:(s.name||s.email||s.uid.slice(0,8)+'…'); };
