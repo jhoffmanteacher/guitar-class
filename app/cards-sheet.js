@@ -666,9 +666,11 @@ function pcSheetStarted(st){
   const where = st.root.querySelector('.pc-sheet-where');
   if(where) where.textContent = pcSheetWhere(st.L, st.loopFrom, st.fromRep);
   if(!sh || !sh.ok) return;
-  const first = sh.map.tok[st.loopFrom][st.fromRep][0];
+  // -1 = no chord has sounded yet (a song that starts on a rest): mark the first chord, as the draw path does.
+  const first = Math.max(0, sh.map.tok[st.loopFrom][st.fromRep][0]);
   const line = pcSheetMark(paper, first, false);
-  st.sheetLit = sh.model.toks[first].y0;
+  const T = sh.model.toks[first];
+  st.sheetLit = T ? T.y0 : null;
   // A start brings its line on screen and no further: the card's own controls stay in view for the count-in.
   pcSheetScroll(st, paper, pcFollowPlan(line, true), false);
 }
