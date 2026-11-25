@@ -5429,9 +5429,6 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-banner-btn{flex:none;font-family:inherit;font-size:var(--fs-14);font-weight:700;
   padding:7px var(--sp-16);border-radius:999px;border:0;background:#fff;color:#2f2159;cursor:pointer}
 .lq-banner-btn:hover{background:#e9e6f7}
-/* The rail item only appears while a game is on (live-quiz.js lqSyncNav),
-   so it gets the one accent nothing else in the list uses. */
-
 /* ── Teacher stage (projector) ── */
 .lq-shell{display:flex;flex-direction:column;gap:var(--sp-14)}
 .lq-stage{background:var(--bg);border:1px solid var(--border);border-radius:16px;
