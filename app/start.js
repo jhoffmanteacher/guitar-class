@@ -86,10 +86,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 
          Waits, but not forever: a drill left open on an abandoned Chromebook
          would otherwise pin that tab to the old build for the rest of the
-         day. The sign-in popup is the one unbounded case — reloading the
+         day. The sign-in popup is unbounded — reloading the
          opener destroys the pending signInWithPopup promise, so the student
          finishes the popup and lands back on the sign-in wall, forced to
-         sign in a second time. */
+         sign in a second time — and so is unsaved work (in reload, below). */
       const SW_RELOAD_MAX_WAIT = 5 * 60 * 1000;
       const SW_RELOAD_SAVE_WAIT = 4000;   // one try at sending unsaved work, as long as Sign out's
       const startedWaiting = Date.now();
@@ -137,23 +137,35 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       const waitMore = () => { if (!askedWhileWaiting) { askedWhileWaiting = true; askForRest(); } setTimeout(reload, 1500); };
       const reload = async () => {
         if (window.__authPopupPending) { waitMore(); return; }
-        if (busyReason() && Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT) { waitMore(); return; }
-        /* Work not saved yet: a step marked done half a second ago is still
-           inside queueSave's 800 ms debounce (or its retry backoff), or a
-           write is already on the wire (_flushP) with work the dirty set no
-           longer shows. A reload drops either — pagehide's flush is a
-           Firestore write started during unload and is not reliably
-           delivered. So send it and wait for it as Sign out does
-           (flushBeforeLeaving: the write in flight first, then the rest, at
-           most SW_RELOAD_SAVE_WAIT each try). A write still on the wire after
-           that (offline, a stalled connection) is waited for: the tab looks
-           again every 1.5 s, busy states included, until it lands or the 5
-           minutes run out, and then the reload takes it with it. A write the
-           server refused is not waited on: one real attempt, then reload
-           (APP-CORE-3, 2026-11-25). */
+        const inTime = Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT;
+        if (busyReason() && inTime) { waitMore(); return; }
+        /* Work not saved yet (hasUnsavedWrites: a category inside queueSave's
+           800 ms debounce or its retry backoff, or a write on the wire,
+           _flushP) holds the reload with NO time limit: a student's unsaved
+           work outranks a prompt update (2026-11-25, APP-CORE-3). A reload
+           drops it — pagehide's flush is a Firestore write started during
+           unload and is not reliably delivered. A tick still in the debounce
+           is sent now (flushBeforeLeaving, the step Sign out uses, at most
+           SW_RELOAD_SAVE_WAIT); a write on the wire, or a retry flushSave has
+           scheduled, is left to the save code, and the tab looks again every
+           1.5 s, busy states included, until it lands (offline: Firestore
+           sends it when the connection is back).
+           The one exception, so a write that can never land does not pin the
+           tab forever: flushSave has given up ("Not saving", after
+           SAVE_MAX_AUTO_RETRIES failed tries) while the device is online.
+           Nothing re-sends those categories until the student's next save,
+           so they hold the reload like the busy states above: until 5
+           minutes after the takeover, then one last try, then the reload.
+           Offline they are not given up on: the "online" listener
+           (app/shell.js) re-arms them, and the tab waits for it. */
         if (hasUnsavedWrites()) {
+          const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES && navigator.onLine !== false;
+          if (!gaveUp) {
+            if (!_flushP && !_saveFailCount && await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT)) return reload();
+            waitMore(); return;
+          }
+          if (inTime) { waitMore(); return; }
           await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);
-          if (Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT && (_flushP || busyReason())) { waitMore(); return; }
         }
         /* Tell the next load this refresh was the site updating itself, so the
            wall says "Updating…" rather than walking the student back through
