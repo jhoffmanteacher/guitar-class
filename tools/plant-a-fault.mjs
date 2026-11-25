@@ -103,7 +103,8 @@ export const REGIONS = [
     why: "the progress save: a fault here loses a student's work (CLAUDE.md danger zone; the save-loop header names these writers)",
     targets: [
       { file: 'app/save.js', fns: ['swap45MapId', 'swap45Keys', 'swap45Marked', 'swap45Remap', 'swap45Canon', 'swap45Patch', 'swap45Commit',
-        'swap45OnLoad', 'resetLoadedProgress', 'loadProgress', 'onResponseChange', 'onStepMcSelect', 'withTimeout', 'queueSave', 'flushSave',
+        'swap45OnLoad', 'resetLoadedProgress', 'loadProgress', 'progressApplyDoc', 'progressDeviceLogStale', 'progressStartOverAtSignIn',
+        'onResponseChange', 'onStepMcSelect', 'withTimeout', 'queueSave', 'flushSave',
         'onCompleteChange', 'onClassActivityChange', 'onCaStepChange', 'bumpPracticeStreak'] },
       { file: 'app/drills.js', fns: ['logPracticeRep'] },
       { file: 'app/activities-2.js', fns: ['ecSubmit', 'flushOnHide'] },
