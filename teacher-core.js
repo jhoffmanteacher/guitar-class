@@ -700,18 +700,16 @@ async function loadAllStudents(){
        Refuse to draw, as Games and the board do; teacherStudentsAt stays 0, so Refresh runs this whole load again. */
     if(!teacherClassConfigReadOk){
       teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
-      teacherRosterFailHtml='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>';
-      teacherPaintRosterFailed();
+      document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>';
       return;
     }
     teacherApplyRosterFilter();
   } catch(e){
     teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
-    teacherRosterFailHtml='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
-    teacherPaintRosterFailed();
+    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
     return;
   }
-  teacherRefreshing=false; teacherRefreshFailed=false; teacherRosterFailHtml='';
+  teacherRefreshing=false; teacherRefreshFailed=false;
   teacherStudentsAt=Date.now();
   // Rendering is deliberately OUTSIDE the fetch try/catch above — a bug in
   // renderTeacherBody/renderTeacherSummary shouldn't be reported to the
@@ -725,19 +723,6 @@ async function loadAllStudents(){
   }
   teacherPaintRefreshBar();
   teacherRefreshReportsBadge();
-}
-
-/* A first roster load that failed says so only on a view drawn from the roster (review R1-4): the Refresh bar's views
-   and Practice minutes (its own Refresh, its own "Could not load the student list"). Live In-Class Games and the
-   other tools keep their screen: the line used to replace #lq-stage, and the stage then stopped painting.
-   renderTeacherBody reads the roster again when such a view is opened, so a read that lands repaints it. */
-let teacherRosterFailHtml='';
-function teacherViewUsesRoster(v){ return !TEACHER_NO_REFRESH_BAR_VIEWS.includes(v) || v==='minutes'; }
-function teacherPaintRosterFailed(){
-  if(!teacherViewUsesRoster(teacherView)) return;
-  if(teacherView==='minutes'){ renderTeacherMinutes(); return; }
-  const box=document.getElementById('t-grid-container');
-  if(box) box.innerHTML=teacherRosterFailHtml || '<div class="t-loading">Could not load student data.</div>';
 }
 
 /* ── Keeping student progress current (2026-10-12) ──────────────────────
@@ -804,9 +789,8 @@ async function teacherRefreshStudents(opts){
   const manual=!!(opts&&opts.manual);
   if(teacherRefreshing) return;
   if(!manual && (document.hidden || !TEACHER_AUTO_REFRESH_VIEWS.includes(teacherView))) return;
-  // The first load never landed (it painted an error) — run it again, whole: the button, and the timer or a tab return
-  // after a failed one (review R1-4), so a read that lands later repaints the view by itself.
-  if(!teacherStudentsAt){ if(manual || teacherRefreshFailed) loadAllStudents(); return; }
+  // The first load never landed (it painted an error) — run it again, whole.
+  if(!teacherStudentsAt){ if(manual) loadAllStudents(); return; }
   const why=teacherRefreshBlocker();
   if(why){ if(manual) teacherNoteRefreshHeld(why); return; }
   teacherRefreshing=true; teacherPaintRefreshBar();
@@ -1406,13 +1390,6 @@ function renderTeacherBody(){
      view, fills it like the student site (site-fill.js, Jonathan 2026-11-16). Before the view paints. */
   if(typeof siteFillStage==='function') siteFillStage(teacherView==='livequiz');
   teacherSyncAutoRefresh();   // the progress timer runs on Class activities only
-  /* The first roster read failed: a view drawn from it would say "No student data yet". Say what failed and read
-     again; one that lands repaints this view (review R1-4). */
-  if(!teacherStudentsAt && teacherRefreshFailed && teacherViewUsesRoster(teacherView)){
-    teacherPaintRosterFailed();
-    if(!teacherRefreshing) loadAllStudents();
-    return;
-  }
   if(teacherView==='games') renderTeacherGames();
   else if(teacherView==='responses') renderTeacherResponses();
   else if(teacherView==='trouble') renderTeacherTrouble();
