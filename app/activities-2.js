@@ -1310,6 +1310,15 @@ function classConfigSignature(){
     songLibraryIds, classSongIds,   // a Move to Songs / Move to Class activities changes which cards show
     gamesAccessOn]);   // the free-play hero's Games button follows it
 }
+/* The local day this page last brought In-Class Activities and the search
+   index up to date (its load, then each tab return). "Today" is read only at
+   render time (caTodayStr: the release-date gate and Today's activities), so
+   a tab left open overnight came back to an unchanged signature and kept
+   yesterday's Today, missing a card dated for the new day, until a reload. A
+   new day now counts as a change on the next tab return. Not inside
+   classConfigSignature(): `before` is taken after midnight too. A tab that
+   stays visible across midnight catches up at its next tab return. */
+let caSeenDay = caTodayStr();
 document.addEventListener('visibilitychange', () => {
   /* The snippet loop is closed by rAF (snipTick), and rAF stops firing in a
      hidden tab while an <audio> element keeps playing — so a backgrounded tab
@@ -1345,12 +1354,14 @@ document.addEventListener('visibilitychange', () => {
   if(!currentUser || IS_TEACHER_MODE || accessLocked) return;   // accessLocked: the access screen, not the app (app/boot.js)
   const before = classConfigSignature();
   loadClassConfig().then(() => {
-    if(classConfigSignature() === before) return;
+    const today = caTodayStr(), newDay = today !== caSeenDay;
+    caSeenDay = today;
+    if(classConfigSignature() === before && !newDay) return;
     refreshOpenClassActivitiesScreen();
     /* The search index holds one entry per VISIBLE activity (buildSearchIndex),
        so an activity released while the tab was away stayed unfindable — and
        an archived one stayed findable — until a language switch or reload.
-       Drop it; ensureSearchIndex() rebuilds on the next search, and an open
+       A new day releases cards the same way. Drop it; ensureSearchIndex() rebuilds on the next search, and an open
        search re-runs what is in the box. */
     searchIndex = null;
     const input = document.getElementById('search-input');

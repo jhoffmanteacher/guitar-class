@@ -184,6 +184,8 @@
        its classConfigSignature moves whenever that answer moved, or the open screen is not repainted); after a
        FAILED tab-return read it keeps the old answer; a fresh load shows the new answer. During the read the page
        keeps showing the last known answer (save.js:228-238, the blank window found 2026-09-26).
+       A tab left open past midnight, config unchanged: at its tab return it shows what a fresh load shows that
+       day (Today's activities, the first card, the search index; the directed midnight block, 2026-11-25).
    Not exercised (round-2 review R2-6): board ties on a seeded board (the writers always re-pack 1..N, so R8's
    "pos, then the legacy number, then the id" runs only on the unseeded board); a student un-marking a card.
    Still not stated, measured only: when an already-open Journey page picks up a change (journey.js has no
@@ -970,7 +972,7 @@ function genWorld(rng, today) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
-const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, todayChecks: 0, todayKept: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
+const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, midnightSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, todayChecks: 0, todayKept: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
   marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, namedRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
@@ -1511,6 +1513,53 @@ async function directedSignature() {
   }
 }
 
+/* R12 + the day, directed (2026-11-25, sweep APP-ACTIVITIES-1): a tab left open past midnight with no config change
+   shows what a fresh load shows. "Today" is read at render time only (caTodayStr), so the tab-return handler must
+   count a new day as a change; classConfigSignature() alone cannot see it. The open page renders In-Class Activities
+   at 23:59 (one card dated today, one dated tomorrow), its tab comes back at 08:00 the next day with the config doc
+   unchanged and a good read, and WITHOUT any render by the tool its Today (caTodayIds) and first card (caStartHereId)
+   must equal a fresh sign-in's on that morning, and the search index must be dropped (it is built from caIsVisible).
+   Fixed, not seeded. */
+async function directedMidnight() {
+  const uid = 'stu-alpha';
+  CUR = { seed: SEED, idx: 'midnight', label: 'directed midnight block' };
+  step('directed midnight block');
+  const eve = DAYS[1][1], morning = LA(2026, 11, 12, 8, 0, 0, 8);
+  VNOW = eve;
+  const today = modelToday(eve), tomorrow = modelAddDays(today, 1);
+  if (modelToday(morning) !== tomorrow) { fail('setup', `the morning ${modelToday(morning)} is not the day after ${today}`); return; }
+  const plain = ACTS.filter(a => !mIsSongCard(a) && a.teacherOnly !== true && a.optional !== true && a.kind !== 'check' && a.view !== 'card');
+  if (plain.length < 2) { fail('setup', `needs 2 plain cards, found ${plain.length}`); return; }
+  const [a0, a1] = plain.slice(0, 2).map(a => a.id);
+  const d = { activityBoardSeeded: true, activityBoard: { [a0]: { module: 1, pos: 1 }, [a1]: { module: 1, pos: 2 } }, activityDates: { [a0]: today, [a1]: tomorrow }, configVersion: 1 };
+  const prog = { name: NAMES[uid], email: 'stu1@example.test', period: '4', classActivities: {}, migrations: { swap45: true } };
+  const store = new Store();
+  store.put('config/class', d);
+  store.put('progress/' + uid, prog);
+  const shown = page => JSON.parse(page.run(`JSON.stringify({ today: caTodayIds.slice().sort(), first: caStartHereId })`));
+  const page = await bootStudent({ storage: makeStorage() }, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+  page.els['class-activities-screen'].hidden = false;
+  page.run('renderClassActivities()');
+  const evening = shown(page);
+  page.run(`searchIndex = ['built yesterday']`);
+  VNOW = morning;
+  step('midnight: tab comes back the next morning, config unchanged');
+  page.client.plan.config.push('ok');
+  page.ctx.document.hidden = false;
+  (page.docListeners.visibilitychange || []).forEach(fn => fn({}));
+  await flush();
+  const back = shown(page);
+  const indexDropped = page.run('searchIndex === null');
+  const fresh = await bootStudent({ storage: makeStorage() }, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+  fresh.run('renderClassActivities()');
+  const want = shown(fresh);
+  C.midnightSteps++; C.comparisons += 3;
+  if (JSON.stringify(want) === JSON.stringify(evening)) fail('midnight', `a fresh load on ${tomorrow} shows the same Today as the evening before (${JSON.stringify(want)}): the block is mis-aimed`);
+  if (JSON.stringify(back) !== JSON.stringify(want)) fail('midnight: tab back the next morning', `the open page shows ${JSON.stringify(back)}, a fresh load shows ${JSON.stringify(want)}: a tab left open past midnight keeps yesterday's In-Class Activities`);
+  if (indexDropped !== true) fail('midnight: tab back the next morning', 'the search index built yesterday was kept, so a card released today stays unfindable');
+  VNOW = DAYS[0][1];
+}
+
 /* ── Directed: the console after a FAILED read of config/class (2026-11-14, plant-a-fault 635dbb41db) ──
    teacher-config.js renderTeacherGames: "A failed read leaves cfg = {} ... renders as all-defaults with nothing to
    say so ... do the same here rather than show a confident wrong answer" (and the comment above
@@ -1557,6 +1606,7 @@ for (const i of indices) {
 }
 if (ONE_CASE === null) {
   try { await directedSignature(); } catch (e) { fail('harness (signature block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
+  try { await directedMidnight(); } catch (e) { fail('harness (midnight block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
   try { await directedConsoleRead(); } catch (e) { fail('harness (console read block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
 }
 clearInterval(watchdog);
@@ -1576,6 +1626,7 @@ out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, 
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins (and after every tab return); JOURNEY_GATE_LOCKS read false on ${C.journeyLocks} Journey probes; ${C.routerChecks} students with an unfinished required activity asked the router for another page`);
 out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
 out.push(`  the signature, directed: ${C.sigSteps} of 14 inputs changed alone, each followed by a tab return with a good read`);
+out.push(`  a tab left open past midnight, directed: ${C.midnightSteps} of 1 tab returns compared with a fresh load (Today, the first card, the search index)`);
 out.push(`  the console after a failed config read, directed: ${C.consoleReadPaints} of 3 Games views painted (failed read, good read, failed read)`);
 out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
 out.push(`  Today's activities (R16, caTodayIds after the same render): ${C.todayChecks} sign-ins checked, ${C.todayKept} of them with a kept card dated before yesterday in Today`);
