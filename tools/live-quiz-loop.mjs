@@ -164,7 +164,9 @@
        lobby shows the title, the join line, the count and the players' names sorted by name. The control strip
        during a question shows Reveal (fret / Name) or the six plain choice names (mc), End game, Full screen and
        the hint, nothing else. At Reveal the stage names the answer (a positive control so the matcher is not blind)
-       and its leaderboard (top 3, at each Reveal and at the end) is the points order, ties by name. One tag parser reads every
+       and its leaderboard (top 3, at each Reveal and at the end) is the points order, ties by name; everyone tied with
+       the 3rd row is kept at the same place, up to 4 rows, and a longer tie at the cut is 3 rows and one "+N tied" row
+       (2026-11-25, Jonathan: "Show everyone tied"; the tie-at-the-cut-* cases). One tag parser reads every
        attribute in all four forms (name="v", name='v', name=v, bare). Before Reveal: the stage carries no attribute
        outside STAGE_Q_ATTRS and its elements come in today's count and order (STAGE_Q_SEQ); the strip no attribute
        outside STRIP_Q_ATTRS; a student's screen, outside the answer buttons, no attribute outside STUDENT_Q_ATTRS (all
@@ -772,6 +774,15 @@ function modelRank(scores, names) {
   rows.sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
   return rows.map(r => ({ ...r, rank: 1 + rows.filter(x => x.pts > r.pts).length }));
 }
+/* The stage's Top 3 (2026-11-25, Jonathan: "Show everyone tied"): every player on the 3rd row's points is kept, at
+   the same place, up to TOP_ROWS rows; a longer tie at the cut is the first 3 rows and one "+N tied" row carrying the
+   tie's place and points. Returns rows; a tie row is { rank, tied: N, pts }. */
+const TOP_ROWS = 4;
+function modelTop(rows) {
+  const cut = rows.length > 3 ? rows[2].rank : Infinity;
+  const top = rows.filter(r => r.rank <= cut);
+  return top.length <= TOP_ROWS ? top : [...top.slice(0, 3), { rank: cut, tied: top.length - 3, pts: rows[2].pts }];
+}
 class Model {
   constructor(bank, tIn, mode) { this.bank = bank; this.tIn = tIn; this.mode = mode; this.sid = null; this.names = {}; this.reset(); }
   reset() { this.lastQ = -1; this.q = {}; this.scores = {}; this.ans = new Map(); this.first = new Map(); this.tabSeen = new Map(); this.scored = {}; this.reveals = {}; }
@@ -880,7 +891,7 @@ const COVERAGE = [
   ['R8endq', 'R8 games ended with a question open'], ['R9order', 'R9 questions opened in order'], ['R9mc', 'R9 mc reveals'], ['R9fret', 'R9 fret reveals'],
   ['R9find', 'R9 Find-the-power-chord reveals'], ['R9name', 'R9 Name-the-power-chord reveals'], ['R10yes', 'R10 "Correct! +N" verdicts'], ['R10no', 'R10 "Not this time" verdicts'],
   ['R10none', 'R10 "You didn\'t answer" verdicts'], ['R10late', 'R10 "too late" verdicts'], ['R10end', 'R10 end screens'], ['R11q', 'R11 question stages'],
-  ['R11lobby', 'R11 lobby stages'], ['R11strip', 'R11 control strips'], ['R11reveal', 'R11 Reveal answer lines'], ['R11lb', 'R11 leaderboards'],
+  ['R11lobby', 'R11 lobby stages'], ['R11strip', 'R11 control strips'], ['R11reveal', 'R11 Reveal answer lines'], ['R11lb', 'R11 leaderboards'], ['R11tie', 'R11 leaderboards past 3 rows (a tie at the cut)'],
   ['R11student', 'R11 student screens before Reveal'], ['R11clear', 'R11 cleared boards'], ['R12stage', 'R12 stage countdown repaints'],
   ['R12student', 'R12 student countdown repaints'], ['R12off', 'R12 buttons off after time-up'], ['R13', 'R13 tabs loaded'],
   ['Pwrites', 'P events checked during a preview (no write from that console)'], ['Pstudents', 'P student screens compared during a preview'],
@@ -1523,14 +1534,16 @@ class World {
     if (hidden) {
       /* Names hidden: each row is its place and "N points", nothing else, in the rules' points order. */
       const rows = ol ? [...ol[1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => textsOf(m[1]).join(' | ')) : [];
-      const want = modelRank(this.model.scores, this.model.names).slice(0, k).map(r => `${r.rank} | ${this.tIn('lq.points', 'en', { n: r.pts })}`);
-      this.cover('R11lb');
+      const want = modelTop(modelRank(this.model.scores, this.model.names)).map(r => r.tied
+        ? `${r.rank} | ${this.tIn('lq.stageTied', 'en', { n: r.tied })} | ${this.tIn('lq.points', 'en', { n: r.pts })}`
+        : `${r.rank} | ${this.tIn('lq.points', 'en', { n: r.pts })}`);
+      this.cover('R11lb'); if (want.length > 3) this.cover('R11tie');
       this.check('H names hidden', JSON.stringify(rows) === JSON.stringify(want), () => `${where}, names hidden: leaderboard ${JSON.stringify(rows)}, want ${JSON.stringify(want)}`);
       return;
     }
     const rows = ol ? [...ol[1].matchAll(/<span class="lq-lb-rank">([^<]*)<\/span><span class="lq-lb-name">([^<]*)<\/span><span class="lq-lb-pts">([^<]*)<\/span>/g)].map(m => `${m[1]}. ${unesc(m[2])} ${m[3]}`) : [];
-    const want = modelRank(this.model.scores, this.model.names).slice(0, k).map(r => `${r.rank}. ${r.name || '—'} ${r.pts}`);
-    this.cover('R11lb');
+    const want = modelTop(modelRank(this.model.scores, this.model.names)).map(r => r.tied ? `${r.rank}. ${this.tIn('lq.stageTied', 'en', { n: r.tied })} ${r.pts}` : `${r.rank}. ${r.name || '—'} ${r.pts}`);
+    this.cover('R11lb'); if (want.length > 3) this.cover('R11tie');
     /* With a known student's points off, the board must still be in its own points order, and equal to the rules once
        that student's row is out (ranks aside). */
     const boardWithout = name => {
@@ -2103,6 +2116,25 @@ const NAMED = {
     { plans: [{ r: 2000 }] },
     { plans: [{ r: 3000, right: false }] }
   ], [{ revealAfter: 6000, hold: 6000, pick: 0.5 }], { hide: { setup: true, end: [false, true] }, note: 'Name the power chord with names hidden from before Start to the end.' }),
+  /* Ties at the Top 3's cut (2026-11-25): flat scoring, so every right answer is 1000. tie-at-the-cut-six: six players
+     right on question 1 share 1st (3 rows and "+3 tied"); question 2 splits them. tie-at-the-cut-four: two tied for 3rd
+     (4 rows), names hidden at the end. */
+  'tie-at-the-cut-six': () => namedSpec('tie-at-the-cut-six', 'string-id', false, [10, 10], [
+    { plans: [{ r: 1500 }, { r: 1500 }] },
+    { plans: [{ r: 1800 }, { r: 2000 }] },
+    { plans: [{ r: 2100 }, { r: 2500, right: false }] },
+    { plans: [{ r: 2400 }, { r: 1900, right: false }] },
+    { plans: [{ r: 2700 }, { answer: false }] },
+    { plans: [{ r: 3000 }, { r: 2200 }] },
+    { plans: [{ r: 3300, right: false }, { r: 2800 }] }
+  ], [{ revealAfter: 11000, hold: 6000, pick: 0.3 }, { revealAfter: 11000, hold: 6000, pick: 0.6 }], { note: 'flat scoring: six of seven right on question 1 tie for 1st.' }),
+  'tie-at-the-cut-four': () => namedSpec('tie-at-the-cut-four', 'string-id', false, [10, 10], [
+    { plans: [{ r: 1500 }, { r: 1500 }] },
+    { plans: [{ r: 1800 }, { r: 2000 }] },
+    { plans: [{ r: 2100 }, { r: 2500, right: false }] },
+    { plans: [{ r: 2400, right: false }, { r: 1900 }] },
+    { plans: [{ answer: false }, { answer: false }] }
+  ], [{ revealAfter: 11000, hold: 6000, pick: 0.3 }, { revealAfter: 11000, hold: 6000, pick: 0.6 }], { hide: { end: [false, true] }, note: 'flat scoring: after question 2 two players tie for 3rd; names hidden on the final scores.' }),
   'end-during-question': () => namedSpec('end-during-question', 'string-id', true, [10, 10], [
     { plans: [{ r: 2000 }, { r: 2000 }] },
     { plans: [{ r: 3000, right: false }, { r: 2500 }] }
@@ -2454,12 +2486,14 @@ const NOV13_FAULTS = [
 ];
 /* H: "Hide names on the projector" (2026-11-13). */
 const HIDE_FAULTS = [
-  { id: 'h-final-leaks-one', why: 'H: with names hidden, the final scores still name the third row', from: "  const board = rows.slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');", to: "  const board = rows.slice(0, 3).map((r, i) => i === 2 ? lqLbRowHtml(r) : lqStageLbRowHtml(r)).join('');" },
+  { id: 'h-final-leaks-one', why: 'H: with names hidden, the final scores still name the third row', from: "  const board = lqStageTopHtml(rows);", to: "  const board = rows.slice(0, 3).map((r, i) => i === 2 ? lqLbRowHtml(r) : lqStageLbRowHtml(r)).join('');" },
   { id: 'h-lobby-chips', why: 'H: with names hidden, the lobby still draws the name chips', from: "const chips = lqTHideNames ? '' : here.map", to: "const chips = here.map" },
   { id: 'h-no-repaint', why: 'H: ticking the box does not repaint the stage (the names stay until the next snapshot)', from: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n  lqPaintStage();\n", to: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n" },
   { id: 'h-default-on', why: 'H: the box is ticked on a device that never set it', from: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') === '1';", to: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') !== '0';" },
   { id: 'h-uid-attr', why: 'H: a hidden row carries the uid in an attribute', from: "  return `<li><span class=\"lq-lb-rank\">", to: "  return `<li data-u=\"${escAttr(r.uid)}\"><span class=\"lq-lb-rank\">" },
-  { id: 'h-reveal-shown', why: 'H: the mc Reveal ignores the box (names stay on the Top 3)', from: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'h-reveal-shown', why: 'H: the mc Reveal ignores the box (names stay on the Top 3)', from: "  const board = lqStageTopHtml(lqRankedNamed(s));\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'tie-cut-dropped', why: 'the Top 3 drops players tied with the 3rd row again (before 2026-11-25)', from: '  const top = rows.filter(r => r.rank <= cut);', to: '  const top = rows.slice(0, 3);' },
+  { id: 'tie-no-cap', why: 'a long tie at the cut is drawn whole, past the stage\'s room', from: 'const LQ_STAGE_TOP_ROWS = 4;', to: 'const LQ_STAGE_TOP_ROWS = 99;' },
   { id: 'h-strip-box-gone', why: 'H: the strip loses the box during a question', from: "  const full = lqHideNamesInputHtml() + `", to: "  const full = (s && s.state === 'question' ? '' : lqHideNamesInputHtml()) + `" },
   { id: 'h-wrong-points', why: 'H: a hidden row shows the place twice and no points', from: "escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))", to: "escHtml(tIn('lq.points', 'en', { n: r.rank }))" }
 ];
@@ -2481,7 +2515,7 @@ const R3_FAULTS = [
   { id: 'r3-p6-correct-midq', why: 'R3-1: the answer written into the public doc 400 ms into the question (correct)', from: '  lqTAutoKey = key;\n', to: "  lqTAutoKey = key;\n  setTimeout(() => { const q = lqQuiz(s.quizId); if(lqTSession && lqTSession.state === 'question') lqWrite({ correct: lqType(q) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(q, s.target)[0] }, 'fields'); }, 400);\n" },
   { id: 'r3-p2b-new-field', why: 'R3-1: the answer in a NEW doc field (autoAnswer) during the question', from: '  lqTAutoKey = key;\n', to: "  lqTAutoKey = key;\n  setTimeout(() => { const q = lqQuiz(s.quizId); if(lqTSession && lqTSession.state === 'question') lqWrite({ autoAnswer: lqType(q) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(q, s.target)[0] }, 'fields'); }, 400);\n" },
   { id: 'r3-p1-locked-frets', why: 'R3-2: the right frets under the student\'s "Locked in" pick', from: '<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>`', to: '<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>` + `<p class="lq-note">${escHtml(lqTargetIds(quiz, s.target).join(\' \'))}</p>`' },
-  { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s).slice(0, 3); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = rk.map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqStageTopHtml(lqRankedNamed(s));\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = lqStageTopHtml(rk);\n  return lqBilingualParams('lq.stageAnswerLabel'" },
   { id: 'r3-p3-exit-writes', why: 'R3-5: Exit preview writes to the real doc', from: '  lqTPreview = false;\n  lqTSession = lqTReal;\n', to: "  lqTPreview = false;\n  lqTSession = lqTReal;\n  lqDoc().set({ lastPreview: { quizId: lqTPickedQuizId } }, { merge: true });\n" }
 ];
 /* Round 4 (the Fable check of 4175ee9, 2026-11-12): the reviewer's plants and the ones its brief asked for. */

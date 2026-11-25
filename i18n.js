@@ -3106,6 +3106,7 @@
     'lq.noAnswer':           { en: "You didn't answer this one", es: 'No respondiste esta' },
     'lq.answerIs':           { en: 'Answer: {answer}', es: 'Respuesta: {answer}' },
     'lq.points':             { en: '{n} points', es: '{n} puntos' },
+    'lq.stageTied':          { en: '+{n} tied', es: '+{n} empatados' },
     'lq.rank':               { en: 'Place {n} of {total}', es: 'Lugar {n} de {total}' },
     'lq.student':            { en: 'Student', es: 'Estudiante' },
     'lq.finalTitle':         { en: 'Final scores', es: 'Puntajes finales' },

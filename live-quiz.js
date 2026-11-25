@@ -1149,6 +1149,21 @@ function lqStageLbRowHtml(r){
   if(!lqTHideNames) return lqLbRowHtml(r);
   return `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-pts">${escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))}</span></li>`;
 }
+/* The stage's Top 3 rows, from lqRankedNamed (Jonathan 2026-11-25: "Show everyone tied"): every player on the same
+   points as the 3rd row stays on, at the same place. LQ_STAGE_TOP_ROWS caps it so a Reveal keeps its height on the
+   projector: a longer tie at the cut is the first three rows and one "+N tied" row (the tie's place and points, no
+   name). Every Top 3 on the stage (each Reveal, the final scores) goes through this. */
+const LQ_STAGE_TOP_ROWS = 4;
+function lqStageTopHtml(rows){
+  const cut = rows.length > 3 ? rows[2].rank : Infinity;
+  const top = rows.filter(r => r.rank <= cut);
+  if(top.length <= LQ_STAGE_TOP_ROWS) return top.map(r => lqStageLbRowHtml(r)).join('');
+  const pts = rows[2].pts || 0;
+  const ptsText = lqTHideNames ? tIn('lq.points', 'en', { n: pts }) : String(pts);
+  return top.slice(0, 3).map(r => lqStageLbRowHtml(r)).join('')
+    + `<li><span class="lq-lb-rank">${cut}</span><span class="lq-lb-name">${escHtml(tIn('lq.stageTied', 'en', { n: top.length - 3 }))}</span>`
+    + `<span class="lq-lb-pts">${escHtml(ptsText)}</span></li>`;
+}
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
@@ -1665,7 +1680,7 @@ function lqStageRightCountHtml(s){
 }
 function lqStagePcNameRevealHtml(s, quiz){
   const answer = s.correct ? `<div class="lq-st-answer">${escHtml(s.correct)}</div>` : '';
-  const lb = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
+  const lb = lqStageTopHtml(lqRankedNamed(s));
   if(quiz.countOnly) return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqPcNameBoxHtml(s.target, 'lq-pcbox-stage')}<div>${lqStageRightCountHtml(s)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1687,7 +1702,7 @@ function lqStageRevealBodyHtml(s, quiz){
   if(lqType(quiz) === 'changes') return typeof lqCcStageRevealHtml === 'function' ? lqCcStageRevealHtml(s) : '';
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
-  const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
+  const board = lqStageTopHtml(lqRankedNamed(s));
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
@@ -1723,7 +1738,7 @@ function lqStageFretRevealHtml(s, quiz){
   if(box) board = `<div class="lq-st-pcwrap">${board}<div class="lq-pcbox lq-pcbox-side">${box}</div></div>`;
   const saw = typeof lqSawBandHtml === 'function' ? lqSawBandHtml(s, quiz) : '';   // Saw chase (live-saw.js): '' with its switch off
   if(saw) board = `<div class="lq-st-boardcol">${board}${saw}</div>`;
-  const lb = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
+  const lb = lqStageTopHtml(lqRankedNamed(s));
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${board}<div>${quiz.countOnly ? lqStageRightCountHtml(s) : lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1731,7 +1746,7 @@ function lqStageFretRevealHtml(s, quiz){
 
 function lqStageEndedHtml(s){
   const rows = lqRankedNamed(s);
-  const board = rows.slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
+  const board = lqStageTopHtml(rows);
   return lqBilingual('lq.finalTitle', 'lq-st-title') + `<ol class="lq-lb lq-lb-stage">${board}</ol>`;
 }
 

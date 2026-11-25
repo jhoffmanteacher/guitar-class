@@ -126,7 +126,8 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   does not end by itself.
 - **"Hide names on the projector"** (Jonathan, 2026-11-13): a box in the control strip, in every state, OFF
   by default. Ticked, the stage is BUILT with no player name (never hidden with CSS): the lobby keeps only its
-  count, a Top 3 / final row (Top 3 everywhere since 2026-11-19) is its place and "N points" (`lqStageLbRowHtml`). It is the teacher's display
+  count, a Top 3 / final row (Top 3 everywhere since 2026-11-19; since 2026-11-25 everyone tied with the 3rd row stays on at the
+  same place, up to 4 rows, and a longer tie is 3 rows and one "+N tied" row: `lqStageTopHtml`, `LQ_STAGE_TOP_ROWS`) is its place and "N points" (`lqStageLbRowHtml`). It is the teacher's display
   choice, kept on the console's device (`gc-lq-hidenames`, so a console reload does not bring the names back):
   never in `liveQuiz/current`, and no student's screen changes. A new list of names on the stage must go
   through it. `checks.mjs` 1di paints every stage state both ways; the loop's `hide-names-*` cases click it in

@@ -626,7 +626,7 @@ function lqCcStageQuestionHtml(s){
 function lqCcStageRevealHtml(s){
   const tl = s.tally || {};
   const pct = Number(tl.changes) > 0 ? Math.round(100 * Number(tl.caught) / Number(tl.changes)) : 0;
-  const lb = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
+  const lb = lqStageTopHtml(lqRankedNamed(s));
   const name = lqCcRoundName(s.target, 'en');
   return lqBilingualParams('lq.cc.stageRound', 'lq-st-qnum', { n: Number(s.qIndex) + 1 }, { n: Number(s.qIndex) + 1 })
     + (name ? `<div class="lq-st-title">${escHtml(name)}</div>` : '')
