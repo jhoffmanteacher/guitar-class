@@ -436,6 +436,9 @@ function ensurePlayer(){
   /* +5 dB (10^(5/20), 2026-10-30), the same constant as PLAYALONG_CLICK_GAIN
      in app/cards.js — this page has no app.js, so it is a hand-kept copy. */
   var CLICK_GAIN = Math.pow(10, 5 / 20);
+  /* Six clicks a bar (6/8, Luna): clicks 1 and 4 accented, as clickAccent in
+     app/cards.js does (CLICK IN SIX, Jonathan 2026-11-10); else click 1 only. */
+  var clickAccentAt = function(nb){ return clickBeats === 6 ? nb % 3 === 0 : nb % clickBeats === 0; };
   var clickAt = function(at, accent){
     var o = clickCtx.createOscillator(), g = clickCtx.createGain();
     o.frequency.value = accent ? 1500 : 1000;
@@ -476,7 +479,7 @@ function ensurePlayer(){
         var cnow = clickCtx.currentTime;
         // Kept until it has sounded, so a seek, a switch or a pause can take it back (QUEUED CLICKS).
         clickQ = clickQ.filter(function(q){ return q.at > cnow; });
-        clickQ.push({ o: clickAt(at, nb % clickBeats === 0), at: at, due: cnow + Math.max(0, ahead) });
+        clickQ.push({ o: clickAt(at, clickAccentAt(nb)), at: at, due: cnow + Math.max(0, ahead) });
         lastBeat = nb;
       }
     }
