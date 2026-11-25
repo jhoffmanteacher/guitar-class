@@ -521,14 +521,26 @@ async function lqCcRun(st){
     await new Promise(res => { if(!st.audio.paused && st.audio.readyState >= 3) res(); else { st.audio.addEventListener('playing', res, { once: true }); setTimeout(res, 3000); } });
     await lqCcSleep(300);
     const t0 = await lqCcMeasureT0(st);
-    if(t0 == null || !lqCcCurrent(st)) return;
+    if(t0 == null || !lqCcCurrent(st)){ lqCcLeftBehind(st); return; }
     await lqCcWrite(st, { t0 });
-    if(!lqCcCurrent(st) || st.stopped) return;   // the round ended during the write: no watch for it
+    if(!lqCcCurrent(st) || st.stopped){ lqCcLeftBehind(st); return; }   // the round ended during the write: no watch for it
     st.timer = setInterval(() => lqCcWatch(st), 100);
   } catch(e){
     console.warn('[live-quiz] chord-change round: the song did not play', e);
-    if(lqTCc === st){ st.error = (e && e.message) || 'no sound'; lqPaintControls(); }
+    // A Stop pressed while play() was pending rejects it (AbortError): that is the teacher's stop, not a failure.
+    if(lqTCc === st && !st.stopped){ st.error = (e && e.message) || 'no sound'; lqPaintControls(); }
   }
+}
+// The song is playing but its round stopped being current before the watch began (another console ended or cleared
+// the game, or a real game replaced a Preview): no watch will ever silence it, so silence it here. Same test as lqCcWatch.
+function lqCcLeftBehind(st){
+  if(lqTCc === st && !lqCcCurrent(st)) lqCcStopAudio();
+}
+// The stage's progress bar, 0 to 100: full once the song is over or stopped.
+function lqCcProgressPct(st){
+  if(st.stopped) return 100;
+  const p = (st.audio.currentTime - st.plan.start) / Math.max(0.1, lqCcEnd(st.cc) - st.plan.start);
+  return Math.max(0, Math.min(100, p * 100)) || 0;
 }
 // While the song plays: the stage's progress bar, and the end.
 function lqCcWatch(st){
@@ -536,10 +548,7 @@ function lqCcWatch(st){
   if(!lqCcCurrent(st)){ clearInterval(st.timer); st.timer = null; if(lqTCc === st) lqCcStopAudio(); return; }
   const a = st.audio, end = lqCcEnd(st.cc);
   const bar = document.getElementById('lq-cc-prog');
-  if(bar){
-    const p = (a.currentTime - st.plan.start) / Math.max(0.1, end - st.plan.start);
-    bar.style.width = Math.max(0, Math.min(100, p * 100)).toFixed(1) + '%';
-  }
+  if(bar) bar.style.width = lqCcProgressPct(st).toFixed(1) + '%';
   if(a.ended || a.currentTime >= end + LQ_CC_TAIL) lqCcFinish(st);
 }
 // The song is over (or stopped): silence, then Reveal once every Chromebook has had time to send.
@@ -604,10 +613,13 @@ function lqCcStageQuestionHtml(s){
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const name = lqCcRoundName(s.target, 'en');
+  // The stage is rebuilt on every answers snapshot: carry the bar's width over, or it drops back to empty.
+  const st = lqTCc;
+  const pct = lqCcCurrent(st) && st.key === s.sessionId + '#' + s.qIndex ? lqCcProgressPct(st) : 0;
   return lqStageQNumHtml(s)
     + (name ? `<div class="lq-st-title">${escHtml(name)}</div>` : '')
     + lqBilingual('lq.prompt.changes', 'lq-st-prompt')
-    + `<div class="lq-cc-progress"><span id="lq-cc-prog"></span></div>`
+    + `<div class="lq-cc-progress"><span id="lq-cc-prog" style="width:${pct.toFixed(1)}%"></span></div>`
     + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
     + `${lqBilingual('lq.stageAnswered', 'lq-st-cap')}</div>`;
 }

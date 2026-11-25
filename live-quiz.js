@@ -1507,6 +1507,9 @@ function lqTeacherListen(){
       if(lqTPreview){
         if(!lqTRealIsLive()) return;          // keep previewing; the real doc waits in lqTReal
         lqTPreview = false;                   // a real game went live: it wins the console
+        // The preview's song or notes must not play on over the real game (lqTeacherExitPreview's stops).
+        if(typeof lqCcStopAudio === 'function') lqCcStopAudio();
+        if(typeof lqHlStopAudio === 'function') lqHlStopAudio();
       }
       const prev = lqTSession;
       lqTSession = lqTReal;
