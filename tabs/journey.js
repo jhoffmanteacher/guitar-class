@@ -434,8 +434,10 @@ function ensurePlayer(){
     return lo * clickBeats + Math.ceil((t - clickBars[lo]) / step - 1e-6);
   };
   /* +5 dB (10^(5/20), 2026-10-30), the same constant as PLAYALONG_CLICK_GAIN
-     in app/cards.js — this page has no app.js, so it is a hand-kept copy. */
-  var CLICK_GAIN = Math.pow(10, 5 / 20);
+     in app/cards.js — this page has no app.js, so it is a hand-kept copy —
+     times the track's own clickGain, copied onto the page as data-click-gain
+     ("the cure": 1.5, SNIPPET_TRACKS in app/snippets.js), as the card's click is. */
+  var CLICK_GAIN = Math.pow(10, 5 / 20) * (parseFloat(d.clickGain) > 0 ? parseFloat(d.clickGain) : 1);
   /* Six clicks a bar (6/8, Luna): clicks 1 and 4 accented, as clickAccent in
      app/cards.js does (CLICK IN SIX, Jonathan 2026-11-10); else click 1 only. */
   var clickAccentAt = function(nb){ return clickBeats === 6 ? nb % 3 === 0 : nb % clickBeats === 0; };
