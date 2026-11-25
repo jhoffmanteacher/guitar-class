@@ -879,7 +879,16 @@ async function sbRunLevel(keep){
     if(next.beat && !next.beat.fromImport && (!d.audio || d.audio.sha256 !== sha)) next.beat = Object.assign({}, next.beat, { driftOff: null, driftFor: null });
     sbBusy = '';
     const saved = await sbWriteDraft(id, next);
-    if(!saved) return;
+    if(!saved){
+      /* Refused (another tab saved the draft in the gap) or failed: the copy this run uploaded is named by nothing, so it
+         goes, as a replaced copy does (review round 2, R2-4), unless the view was left or the stored draft names it. */
+      if(!stored && !sbStopped(gen)){
+        sbBusy = 'level';
+        const s = await db.collection('songDrafts').doc(id).get().catch(() => null), sa = s && s.exists && (s.data() || {}).audio;
+        if(s && !(sa && sa.id === audioId)) await sbDeleteAudio(audioId, gen);
+      }
+      return;
+    }
     sbMem.level = { bytes: lv.bytes, sha256: sha, chans: level, fs: src.fs, mono: sbMono(level), durationSec, url: null, E: null };
     if(old) await sbDeleteAudio(old, gen);
     sbNote = `Levelled: ${audio.gainDb >= 0 ? '+' : ''}${audio.gainDb.toFixed(1)} dB, ${sbMb(audio.bytes)} ${stored ? 'already stored (the same copy: not uploaded again)' : `saved in ${w.n} piece${w.n === 1 ? '' : 's'}`}.`;
