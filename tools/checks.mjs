@@ -8283,6 +8283,7 @@ function renderCheck() {
   checkStorageNamespaces(sets, buildSet, ctx);
   checkSetParts(sets, buildSet, ctx);
   checkInlineHandlersParse(sets, buildSet, ctx);
+  checkTypedResponsesOff(sets, buildSet, ctx);
   return { sets, ctx };
 }
 
@@ -8588,6 +8589,116 @@ function checkInlineHandlersParse(sets, buildSet, ctx) {
     problems++; bad++;
   }
   if (!bad) ok(`${handlers} inline handlers across ${sets.length} sets × EN/ES all parse; all ${ytButtons} YouTube ▶ buttons pass their own label and an entity-free url; ${LABELS.length} hostile labels × 2 reach ytLinksToButtons()'s handlers as written`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ff. TYPED ANSWERS IN MODULE STEPS STAY SWITCHED OFF (2026-11-25).
+   Jonathan: "remove the typed responses in all modules." app/lesson.js's
+   TYPED_RESPONSES_ENABLED = false stops stepsHtml() drawing a step's
+   `response:{type:'short'}` box; the data stays (switched off, never
+   deleted, like DAILY5_ENABLED). This renders every set through the real
+   buildSet(), English and Spanish, and fails when:
+   - the switch is missing or not false;
+   - any rendered step draws a typed box (textarea.step-resp-input, or any
+     oninput that calls onResponseChange), or a step that carries a short
+     response is not found in the render (the check went blind);
+   - the data's short responses are not exactly TYPED_DATA_PIN (fewer means
+     one was deleted; more means one was added that no student can see);
+   - a rendered step (label, text, folds) still tells the student to type or
+     to write in the box (TYPED_TEXT_RE, EN and ES), except a step listed in
+     TYPED_TEXT_PENDING, which prints a warning every run until its wording
+     is settled, and fails once it no longer matches (remove the entry).
+   ════════════════════════════════════════════════════════════════════ */
+const TYPED_DATA_PIN = 79;
+const TYPED_VISIBLE_FLOOR = 20;   // steps with a short response the ladder shows; 26 on 2026-11-25
+const TYPED_TEXT_RE = [
+  // "the box" alone is also the pentatonic shape, and lower-case "abajo," a down-strum: neither is matched.
+  /\btyp(?:e|ed|es|ing)\b(?! of\b)/i, /\bbox (?:below|above)\b/i, /\bwhat you (?:wrote|typed)\b/i,
+  /(?:^|[.:]\s*)Below,\s/, /\(or type\b/i,
+  /\ben el (?:cuadro|recuadro)\b/i, /\bcuadro de (?:abajo|arriba)\b/i, /\bescrib\w*\b[^.]{0,80}\babajo\b/i, /\banót\w*/i,
+  /(?:^|[.:]\s*)Abajo,\s/, /\blo que (?:escribiste|tecleaste)\b/i, /\bteclea\w*/i, /\(o escribe\b/i,
+];
+// NEEDS-LEAD (2026-11-25): Module 9 Set 3 is the TAB-writing set; its Challenge 2 is writing TAB into the box and
+// Challenge 4 plays back, a day later, what was typed there. No task is left without typing: Jonathan decides.
+const TYPED_TEXT_PENDING = {
+  'm9w3-c-sec1-0': 'Challenge 2 — write "Seven Nation Army" as TAB in the box (writing IS the task)',
+  'm9w3-c-sec3-0': 'Challenge 4 — play back what you typed in Challenge 2 a day later',
+};
+function checkTypedResponsesOff(sets, buildSet, ctx) {
+  head('1ff. Typed answers in module steps stay switched off');
+  const on = vm.runInContext('typeof TYPED_RESPONSES_ENABLED === "boolean" ? TYPED_RESPONSES_ENABLED : null', ctx);
+  const setLang = vm.runInContext('typeof setLang === "function" ? setLang : null', ctx);
+  const storageSections = vm.runInContext('typeof storageSections === "function" ? storageSections : null', ctx);
+  const visibleSteps = vm.runInContext('typeof visibleSteps === "function" ? visibleSteps : null', ctx);
+  const isRenderableSection = vm.runInContext('typeof isRenderableSection === "function" ? isRenderableSection : null', ctx);
+  if (on === null) { err('app.js: TYPED_RESPONSES_ENABLED not found — 1ff cannot tell whether module steps draw a typed box (renamed? update this check with it)'); problems++; return; }
+  if (!setLang || !storageSections || !visibleSteps || !isRenderableSection) { err('1ff cannot run — setLang / storageSections / visibleSteps / isRenderableSection not found (renamed? update this check with it)'); problems++; return; }
+  let bad = 0;
+  if (on !== false) { err(`app.js: TYPED_RESPONSES_ENABLED is ${on} — typed answers in module steps are switched off (Jonathan, 2026-11-25: "remove the typed responses in all modules")`); problems++; bad++; }
+
+  // The data: every short response, rendered or not; and the keys of the ones the ladder shows.
+  let dataCount = 0;
+  const shown = [];
+  for (const w of sets) for (const st of ['b', 'c']) {
+    const stn = w.stations && w.stations[st]; if (!stn) continue;
+    for (const sec of stn.sections || []) for (const s of sec.steps || []) if (s && s.response && s.response.type === 'short') dataCount++;
+    for (const s of stn.steps || []) if (s && s.response && s.response.type === 'short') dataCount++;
+    if (w.comingSoon || !stn.sections) continue;
+    for (const { sec, gi } of storageSections(stn, w.moduleNum)) {
+      if (!isRenderableSection(sec, w.moduleNum)) continue;
+      for (const { idx } of visibleSteps(sec, w.moduleNum)) {
+        const s = sec.steps[idx];
+        if (s && s.response && s.response.type === 'short') shown.push(`${w.id}-${st}-sec${gi}-${idx}`);
+      }
+    }
+  }
+  if (dataCount !== TYPED_DATA_PIN) {
+    err(`the module data has ${dataCount} short responses, pinned at ${TYPED_DATA_PIN} — ${dataCount < TYPED_DATA_PIN ? 'one was deleted: typed answers are switched off, never deleted (the response object keeps the old answers readable in the console)' : 'one was added, and no student can see it while typed answers are off: make the step a played task with a "You\'ve got it when" line'}`);
+    problems++; bad++;
+  }
+  if (shown.length < TYPED_VISIBLE_FLOOR) { err(`1ff sees only ${shown.length} visible steps with a short response (floor ${TYPED_VISIBLE_FLOOR}) — the walk over storageSections/visibleSteps changed and the box test is going blind; update this check`); problems++; bad++; }
+
+  const boxes = [], missing = [], wording = [], pendingSeen = new Set();
+  let steps = 0;
+  try {
+    for (const lang of ['en', 'es']) {
+      setLang(lang);
+      const found = new Set();
+      for (const w of sets) {
+        if (w.comingSoon) continue;
+        let html = '';
+        try { html = buildSet(w); } catch { continue; /* 0b already reported the throw */ }
+        const starts = [...html.matchAll(/<li class="step[ "][^>]*data-key="([^"]*)"/g)];
+        starts.forEach((m, k) => {
+          const end = k + 1 < starts.length ? starts[k + 1].index : html.length;
+          let li = html.slice(m.index, end);
+          // Up to its own Mark done button: what follows is the next section or another panel.
+          const done = li.indexOf('class="step-done-row"');
+          if (done > 0) li = li.slice(0, done);
+          const key = m[1];
+          steps++; found.add(key);
+          if (/step-resp-input|<textarea\b|\soninput="[^"]*onResponseChange\(/.test(li)) boxes.push(`${key} (${lang})`);
+          const plain = decodeHtmlEntities(li.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
+          const hit = TYPED_TEXT_RE.map(re => re.exec(plain)).find(Boolean);
+          if (!hit) return;
+          if (TYPED_TEXT_PENDING[key]) { pendingSeen.add(key); return; }
+          wording.push(`${key} (${lang}): "…${plain.slice(Math.max(0, hit.index - 40), hit.index + 50).trim()}…"`);
+        });
+      }
+      for (const key of shown) if (!found.has(key)) missing.push(`${key} (${lang})`);
+    }
+  } finally { setLang('en'); }
+  for (const b of boxes.slice(0, 8)) err(`a module step draws a typed box — ${b}; typed answers are switched off (TYPED_RESPONSES_ENABLED, app/lesson.js)`);
+  if (boxes.length > 8) err(`…and ${boxes.length - 8} more`);
+  for (const m of missing.slice(0, 8)) err(`1ff did not find the step ${m} in the rendered set — the step markup changed and the box test is blind there; update this check`);
+  for (const w of wording.slice(0, 12)) err(`a module step still tells the student to type — ${w}: reword it to say it out loud or play it`);
+  if (wording.length > 12) err(`…and ${wording.length - 12} more`);
+  if (boxes.length || missing.length || wording.length) { problems++; bad++; }
+  for (const [key, why] of Object.entries(TYPED_TEXT_PENDING)) {
+    if (pendingSeen.has(key)) warn(`1ff pending (Jonathan decides the wording): ${key} — ${why}`);
+    else { err(`TYPED_TEXT_PENDING lists ${key}, but its rendered text no longer asks for typing (or it is gone) — remove the entry`); problems++; bad++; }
+  }
+  if (!bad) ok(`TYPED_RESPONSES_ENABLED is false: ${steps} rendered steps across ${sets.length} sets × EN/ES draw no typed box; all ${shown.length} visible steps with a short response found in both languages; ${dataCount} short responses kept in the data (pinned); ${Object.keys(TYPED_TEXT_PENDING).length} pending wording, no other step asks for typing`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
