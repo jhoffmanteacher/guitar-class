@@ -59,19 +59,27 @@
      D4  Publish never sends a recording other than the one he picked last for that song
      D5  a published song's audio head is never written 'uploading' over a stored file that already matches it
      D6  every write passes the rules (the stub store's rules check), and no timer or promise throws
+     D7  (two tabs) a recording another tab levelled the song to is never replaced by the one it replaced, in the draft
+         or on the Songs page, the title this tab typed is stored, and no levelled copy is left that nothing names
+   TWO TABS (review round 1 of the sweep, 2026-11-25, R1-1): after the 30 schedules, one scripted schedule with two
+   consoles on the one store and clock, its timings seeded: X3, tab A types a title on the published song, tab B picks
+   another mp3 for it and levels it (copy Y over A's copy X), then A (with or without its 15 s re-read due, a repaint or
+   not) presses Next, again if the line says the song changed in another tab, and Publish. Tag REVIEW-SB-R1-1.
    KNOWN (open findings of the 2026-11-25 sweep; counted under their id, and still failing):
      TEACHER-SB-1  the 15 s re-read (or a switch / leave within 1.2 s) drops edits waiting to be saved; the beat's save
                    timer then retries every 600 ms (D1, D2, D4)
      TEACHER-SB-2  "Level it again" on a published song writes its own audio head 'uploading' (D5)
      TEACHER-SB-3  leaving during the encode leaves sbBusy 'level' for good (D3; the edits it then refuses, D1/D2)
+     REVIEW-SB-R1-1  two tabs on one song: a recording the other tab levelled is written back or published over (D7)
    NEW (found by this loop 2026-11-25, not yet a finding id, so it counts as "new"): a beat nudge made while a save is
    in flight (sbBeatAct has no sbBusy check) is lost when that save lands, because sbWriteDraft puts the copy it wrote
    in memory; D1 says "while a save was in flight". Seed 1 does not reach it; --seed=6 does (schedule 20 there).
+   Closed on fix/r1-sb-2026-11-25 (2e5e32d: the copy in memory is kept when it changed during the write).
    "All green" (the three fixed) prints, seed 1:
      sb-draft-loop: ✓ 30 of 30 schedules hold (seed 1) · failing by finding: TEACHER-SB-1 ×0, TEACHER-SB-2 ×0, TEACHER-SB-3 ×0; new 0
    When a finding is fixed its line stays in KNOWN (×0 is the proof); take it out once the fix is on main.
 
-   WHAT IT DOES NOT COVER: two consoles at once; a write that fails or is refused (every write lands); the Lyrics sheet
+   WHAT IT DOES NOT COVER: two consoles at once beyond the scripted X3; a write that fails or is refused (every write lands); the Lyrics sheet
    row, Unpublish, Delete and Import (song-builder-sim.mjs's scripted cases); the meter buttons, taps and pins; the
    Preview card (no student app here); a reload of the console between actions; the levelling's measurements
    (sb-dsp-test.mjs). The made-up records are 10.5-12 s long. */
@@ -106,6 +114,7 @@ const KNOWN = {
   'TEACHER-SB-1': 'the 15 s re-read (or a switch or leave within 1.2 s) drops edits waiting to be saved',
   'TEACHER-SB-2': '"Level it again" on a published song writes its audio head \'uploading\'',
   'TEACHER-SB-3': 'leaving during the encode leaves the builder busy for good',
+  'REVIEW-SB-R1-1': 'two tabs on one song: a recording the other tab levelled is written back or published over',
 };
 const pick = (r, a) => a[Math.floor(r() * a.length)];
 const P = 'sb-pubsong0001', D1 = 'sb-draftone001', D2 = 'sb-drafttwo002';
@@ -125,6 +134,28 @@ function pdfFile(name, lines){
 }
 const FAKE_PDFJS = { getDocument({ data }){ const lines = PDF_LINES.get(sha(data)); if(!lines) return { promise: Promise.reject(Object.assign(new Error('Invalid PDF structure.'), { name: 'InvalidPDFException' })) };
   return { promise: Promise.resolve({ numPages: 1, async getPage(){ return { getViewport: () => ({ convertToViewportPoint: (x, y) => [x, y], width: 612, height: 792 }), getTextContent: async () => tcOf(lines) }; }, destroy(){} }) }; } };
+
+/* The store at the start (see the header), written through console C (its sbSongOf makes the published song). */
+function seedWorld(F, C){
+  const { run, box } = C;
+  const pubDraft = { v: 1, title: 'Test Pub', artist: 'Test Band', step: 7, source: sourceOf('A'), audio: audioOf(P, 'A'), volume: VOLUME, pitch: { cents: 0, peaks: 10 },
+    beat: { meter: '4/4', bpm: 120, anchor: 0.5, pins: [], trackBpm: 120, trackSub: 1, driftOff: 0, driftFor: sha(LEVELLED.A), pinsNeeded: 2 },
+    chart: { text: '', meter: '4/4', fmt: 'bar lines', sections: [{ name: 'verse', n: null, label: 'Verse', bars: ['G', 'D', 'G'], lyrics: null }], left: [], kept: [], edited: true, powerAt: null },
+    level: { versions: 'full', start: null, range: null }, pubVer: 1, sheet: null, capo: null, imported: null };
+  box.__pd = pubDraft;
+  const song = JSON.parse(JSON.stringify(run('sbSongOf(__pd)')));
+  F.S.set('songDrafts/' + P, Object.assign(JSON.parse(JSON.stringify(pubDraft)), { savedAt: TS }));
+  F.S.set('builtSongs/' + P, { v: 1, title: pubDraft.title, artist: pubDraft.artist, audio: pubDraft.audio, song, savedAt: TS });
+  F.S.set('builtSongsMeta/list', { songs: { [P]: 1 }, updatedAt: TS });
+  putCopy(F, copyId(P, 'A'), LEVELLED.A, SRC_SEC.A);
+  F.S.set('songDrafts/' + D1, { v: 1, title: 'Test One', artist: 'Test Band', step: 4, source: sourceOf('C'), audio: audioOf(D1, 'C'), volume: VOLUME, pitch: { cents: 0, peaks: 10 },
+    beat: { meter: '4/4', bpm: 100, anchor: 0.4, pins: [], trackBpm: 100, trackSub: 1, driftOff: 0, driftFor: sha(LEVELLED.C), pinsNeeded: 2 },
+    chart: { text: '', meter: '4/4', fmt: 'bar lines', sections: [{ name: 'chorus', n: null, label: 'Chorus', bars: ['Am', 'F', 'C'], lyrics: null }], left: [], kept: [], edited: true, powerAt: null },
+    level: { versions: 'full', start: null, range: null }, pubVer: null, sheet: null, capo: null, imported: null, savedAt: TS });
+  putCopy(F, copyId(D1, 'C'), LEVELLED.C, SRC_SEC.C);
+  F.S.set('songDrafts/' + D2, { v: 1, title: 'Test Two', artist: '', step: 1, source: null, audio: null, volume: null, pitch: null, beat: null, chart: { text: '[Verse]\n| G | C |' },
+    level: { versions: 'full', start: null, range: null }, pubVer: null, sheet: null, capo: null, imported: null, savedAt: TS });
+}
 
 /* ═══ one schedule ═══ */
 async function runSchedule(idx){
@@ -154,24 +185,7 @@ async function runSchedule(idx){
   const C = makeConsole(ROOT, { db: F.db, clock, seed: mix(SEED, idx + 5), encodeMs: () => 1500 + Math.floor(r() * 4500) });
   const { run, box, quiesce } = C;
   box.pcSheetLoadPdfjs = async () => FAKE_PDFJS;
-  /* the store at the start */
-  const pubDraft = { v: 1, title: 'Test Pub', artist: 'Test Band', step: 7, source: sourceOf('A'), audio: audioOf(P, 'A'), volume: VOLUME, pitch: { cents: 0, peaks: 10 },
-    beat: { meter: '4/4', bpm: 120, anchor: 0.5, pins: [], trackBpm: 120, trackSub: 1, driftOff: 0, driftFor: sha(LEVELLED.A), pinsNeeded: 2 },
-    chart: { text: '', meter: '4/4', fmt: 'bar lines', sections: [{ name: 'verse', n: null, label: 'Verse', bars: ['G', 'D', 'G'], lyrics: null }], left: [], kept: [], edited: true, powerAt: null },
-    level: { versions: 'full', start: null, range: null }, pubVer: 1, sheet: null, capo: null, imported: null };
-  box.__pd = pubDraft;
-  const song = JSON.parse(JSON.stringify(run('sbSongOf(__pd)')));
-  F.S.set('songDrafts/' + P, Object.assign(JSON.parse(JSON.stringify(pubDraft)), { savedAt: TS }));
-  F.S.set('builtSongs/' + P, { v: 1, title: pubDraft.title, artist: pubDraft.artist, audio: pubDraft.audio, song, savedAt: TS });
-  F.S.set('builtSongsMeta/list', { songs: { [P]: 1 }, updatedAt: TS });
-  putCopy(F, copyId(P, 'A'), LEVELLED.A, SRC_SEC.A);
-  F.S.set('songDrafts/' + D1, { v: 1, title: 'Test One', artist: 'Test Band', step: 4, source: sourceOf('C'), audio: audioOf(D1, 'C'), volume: VOLUME, pitch: { cents: 0, peaks: 10 },
-    beat: { meter: '4/4', bpm: 100, anchor: 0.4, pins: [], trackBpm: 100, trackSub: 1, driftOff: 0, driftFor: sha(LEVELLED.C), pinsNeeded: 2 },
-    chart: { text: '', meter: '4/4', fmt: 'bar lines', sections: [{ name: 'chorus', n: null, label: 'Chorus', bars: ['Am', 'F', 'C'], lyrics: null }], left: [], kept: [], edited: true, powerAt: null },
-    level: { versions: 'full', start: null, range: null }, pubVer: null, sheet: null, capo: null, imported: null, savedAt: TS });
-  putCopy(F, copyId(D1, 'C'), LEVELLED.C, SRC_SEC.C);
-  F.S.set('songDrafts/' + D2, { v: 1, title: 'Test Two', artist: '', step: 1, source: null, audio: null, volume: null, pitch: null, beat: null, chart: { text: '[Verse]\n| G | C |' },
-    level: { versions: 'full', start: null, range: null }, pubVer: null, sheet: null, capo: null, imported: null, savedAt: TS });
+  seedWorld(F, C);
   /* the watched re-read */
   const reads = [];
   box.__readLanded = () => reads.push(clock.now);
@@ -275,7 +289,9 @@ async function runSchedule(idx){
       MARK = null;
       if(!(await toStep(4))) return 'picked B; the Chart step did not open';
       const n = run('sbChartBars(sbDraft().chart.sections)'), c = pick(r, ['C', 'Em', 'Am']);
-      run(`sbChartAct('chart-view', { dataset: { sbV: 'grid' } }); sbChFor(sbSel).sel = null; sbChartAct('bar-pick', { dataset: { sbG: '${n - 1}' } }); sbChartAct('bar-chord', { dataset: { sbChord: '${c}' } })`);
+      /* act, not run (review round 1): the model books this chart change on the published song (the action may have
+         started on another song, so its "before" is taken here); with run it expected the grid from before it. */
+      act(`sbChartAct('chart-view', { dataset: { sbV: 'grid' } }); sbChFor(sbSel).sel = null; sbChartAct('bar-pick', { dataset: { sbG: '${n - 1}' } }); sbChartAct('bar-chord', { dataset: { sbChord: '${c}' } })`);
       await advance(1500);
       if(!(await toStep(3))) return 'picked B, changed the chart; the Beat step did not open';
       await advance(500);
@@ -374,6 +390,50 @@ async function runSchedule(idx){
   return { fails, log, nActs, reads: reads.length };
 }
 
+/* ═══ two tabs on one store: X3 (see the header, TWO TABS) ═══ */
+async function runTwoTabX3(){
+  const r = rng(mix(SEED, 9001)), clock = new VClock(), fails = [], log = [];
+  const fail = (tag, where, msg) => { fails.push({ tag, where, msg }); log.push(`  ✗ ${where}: ${msg}${tag ? ' [' + tag + ']' : ''}`); };
+  const t = () => (clock.now / 1000).toFixed(2) + ' s', say = s => { if(VERBOSE) log.push(`  ${t()} ${s}`); };
+  const X = copyId(P, 'A'), Y = copyId(P, 'B');
+  let afterY = false;
+  const onWrite = (op, path, next) => {
+    if(op !== 'set' || !next || !next.audio) return;
+    if(path === 'songDrafts/' + P && next.audio.id === Y) afterY = true;
+    else if(afterY && path === 'songDrafts/' + P && next.audio.id === X) fail('REVIEW-SB-R1-1', 'D7', `${t()}: the draft was written back to the recording ${X} after the other tab levelled it to ${Y}`);
+    if(afterY && path === 'builtSongs/' + P && next.audio.id === X) fail('REVIEW-SB-R1-1', 'D7', `${t()}: Publish sent the recording ${X}, which the other tab had replaced with ${Y}`);
+  };
+  const F = makeDb({ clock, delay: () => 20 + Math.floor(r() * 380), onWrite });
+  const tab = k => makeConsole(ROOT, { db: F.db, clock, seed: mix(SEED, 9002 + k), encodeMs: () => 1500 + Math.floor(r() * 4500) });
+  const A = tab(0), B = tab(1), note = K => K.run('sbNote') ? ' — ' + String(K.run('sbNote')).slice(0, 110) : '';
+  seedWorld(F, A);
+  const advance = ms => clock.advance(ms, async () => { await A.quiesce(); await B.quiesce(); });
+  for(const K of [A, B]){ K.run('renderTeacherSongBuilder()'); await advance(900); K.run(`sbOpen(${JSON.stringify(P)})`); await advance(300); K.run('sbEditAt(1)'); await advance(900); }
+  const title = 'Test Title ' + Math.floor(r() * 1000);
+  A.run(`sbStepOn = 1; sbInput({ target: { matches: q => q === '[data-sb-field]', dataset: { sbField: 'title' }, value: ${JSON.stringify(title)} } })`);
+  say(`tab A typed the title "${title}" (not saved)`);
+  B.box.__f = fileOf(...FILES.B); B.run('sbPickFile(__f)'); await advance(300);
+  B.run('sbSaveUpload()'); await advance(12000);
+  say(`tab B picked mp3 B, pressed Next, and Volume levelled it: its draft names ${B.run('sbDraft() && sbDraft().audio && sbDraft().audio.id') === Y ? 'Y' : 'not Y'}` + note(B));
+  await advance(pick(r, [0, 300, 4000, 16000]));
+  if(r() < 0.5){ A.run('teacherSbPaint()'); await advance(pick(r, [200, 1500])); say('tab A repainted' + note(A)); }
+  for(let k = 0; k < 2 && A.run('!!(sbDraft() && sbDraft().dirty)'); k++){ A.run('sbGoStep(2)'); await advance(3000); say('tab A pressed Next' + note(A)); }
+  if(A.run('sbStepOn') !== 6){ A.run('sbGoStep(6)'); await advance(300); }
+  A.run('sbPublish()'); await advance(3000); say('tab A pressed Publish' + note(A));
+  await advance(20000);
+  const st = F.S.get('songDrafts/' + P) || {}, live = F.S.get('builtSongs/' + P) || {};
+  if(!afterY) fail(null, 'D7', 'tab B\'s level never named its copy Y: the schedule did not run as written');
+  if(st.title !== title) fail('REVIEW-SB-R1-1', 'D1', `tab A's title "${title}" is not stored (stored "${st.title}")`);
+  if(!st.audio || st.audio.id !== Y) fail('REVIEW-SB-R1-1', 'D7', `at the end the draft names ${st.audio ? st.audio.id : 'no recording'}, not tab B's ${Y}`);
+  const named = new Set([st.audio && st.audio.id, live.audio && live.audio.id, copyId(D1, 'C')]);
+  [...F.S.keys()].filter(k => /^songFiles\/[^/]+$/.test(k) && !named.has(k.slice(10))).forEach(k => fail('REVIEW-SB-R1-1', 'D7', `the levelled copy ${k.slice(10)} is left with nothing naming it`));
+  for(const [n, K] of [['A', A], ['B', B]]) if(K.run('sbBusy')) fail(null, 'D3', `tab ${n} is still busy ('${K.run('sbBusy')}') 20 s after the last action`);
+  if(clock.pending()) fail(null, 'D2', `${clock.pending()} timer(s) still waiting 20 s after the last action (delays ${[...new Set(clock.q.map(x => x.delay))].join(', ')} ms)`);
+  F.st.violations.forEach(v => fail(null, 'D6', 'a write the rules refuse: ' + v));
+  clock.errors.forEach(e => fail(null, 'D6', 'a timer threw: ' + (e && e.stack || String(e)).split('\n').slice(0, 2).join(' | ')));
+  return { fails, log };
+}
+
 /* ═══ main ═══ */
 async function main(){
   const t0 = Date.now();
@@ -395,10 +455,22 @@ async function main(){
     console.log(`    replay: node tools/sb-draft-loop.mjs --seed=${SEED} --case=${idx} --cases=${N} --verbose${opt('root', null) ? ' --root=' + ROOT : ''}`);
   }
   for(const k of Object.keys(shown)) if(shown[k] > 3 && !VERBOSE) console.log(`  … ${shown[k] - 3} more schedule(s) with ${k} not printed (--verbose prints all)`);
+  /* the two-tab schedule (not with --case) */
+  let two = '', twoFailed = 0;
+  if(SINGLE == null){
+    const res = await runTwoTabX3(), tags = [...new Set(res.fails.map(f => f.tag || 'new'))];
+    tags.forEach(t => { byTag[t] = (byTag[t] || 0) + 1; });
+    twoFailed = res.fails.length ? 1 : 0;
+    two = `, two tabs: ${1 - twoFailed} of 1 (X3)`;
+    if(res.fails.length || VERBOSE){
+      console.log(`${res.fails.length ? '✗ FAIL' : '✓'} two-tab schedule X3 (seed ${SEED})${res.fails.length ? ': ' + tags.join(', ') : ''}`);
+      for(const l of VERBOSE ? res.log : res.log.filter(l => /✗/.test(l))) console.log('  ' + l.trim());
+    }
+  }
   const known = Object.keys(KNOWN).map(k => `${k} ×${byTag[k] || 0}`).join(', ');
-  console.log(`sb-draft-loop: ${failed ? '✗' : '✓'} ${idxs.length - failed} of ${idxs.length} schedules hold (seed ${SEED}) · failing by finding: ${known}; new ${byTag.new || 0}`);
+  console.log(`sb-draft-loop: ${failed + twoFailed ? '✗' : '✓'} ${idxs.length - failed} of ${idxs.length} schedules hold (seed ${SEED})${two} · failing by finding: ${known}; new ${byTag.new || 0}`);
   console.log(`sb-draft-loop: ${idxs.length} schedules, ${acts} actions, ${reads} re-reads landed`);
   console.error(`sb-draft-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
-  return failed ? 1 : 0;
+  return failed + twoFailed ? 1 : 0;
 }
 main().then(c => process.exit(c), e => { console.error('sb-draft-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
