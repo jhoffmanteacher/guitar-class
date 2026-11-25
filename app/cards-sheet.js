@@ -10,7 +10,8 @@
        the next chord;
      - "This bar" counts 1 + 2 + 3 + 4 + and marks where each chord starts
        (a "+" cell too, never lit), lighting the beat cell only, sticky at
-       the top of the sheet so it stays on screen;
+       the top of the sheet so it stays on screen; a 6/8 track (countSix)
+       counts 1-6 and lights all six, as its chord grid does (COUNT IN SIX);
      - the page follows the line being played, keeping it as high as it can
        go (THE SHEET'S TOP, pcSheetFollow).
    Where the chords are is read from the PDF's TEXT, never typed into code:
@@ -400,7 +401,8 @@ function pcSheetHtml(a, L, preview){
   const chips = many && !oneRound
     ? `<div class="pc-secs">` + pcSecButtonsHtml(L, preview) + pcLoopHtml(L, preview) + `</div>`
     : '';
-  const cells = ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2)
+  // A 6/8 track counts its bar 1-6, as the chord grid and the click do (COUNT IN SIX, app/cards.js).
+  const cells = (L.tr.countSix ? ['1', '2', '3', '4', '5', '6'] : ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2))
     .map(n => `<span class="pc-strip-cell"><span class="pc-strip-ch"></span><span class="pc-strip-n">${n}</span></span>`).join('');
   const title = (c.caption && tf(c, 'caption')) || '';
   return `<div class="pc-sheet" data-sheet="${escAttr(c.sheet)}">`
@@ -607,23 +609,28 @@ function pcSheetStrip(st, loc, barsIn){
      one frame (ca-45 at Slowest, with PC_LEAD 0; at a lap's or a section's
      start, and past the song's end, too). */
   const beat = Math.max(0, Math.min(Math.round(S.bars * bpb) - 1, Math.floor(local + 1e-6)));
-  const bar = Math.floor(beat / bpb);
+  /* Cells per beat: two ("1 +"), or on a 6/8 track three, every one counted and lit (COUNT IN SIX, app/cards.js):
+     the eighth and its bar then rounded as pcLocate rounds its e8. */
+  const sub = st.L.tr.countSix ? 3 : 2;
+  const e8 = sub === 3 ? Math.max(0, Math.min(Math.round(S.bars * bpb * 3) - 1, Math.floor(local * 3 + 1e-6))) : -1;
+  const bar = sub === 3 ? Math.floor(e8 / (bpb * 3)) : Math.floor(beat / bpb);
   const key = loc.si + ':' + bar;
   if(st.stripKey !== key){
     st.stripKey = key;
     // One name per chord CHANGE, on the cell it lands in (a "+" cell too): the strumming is not shown.
     const marks = [];
     pcChordGrid(S.notes, bpb).forEach(ev => {
-      if(!ev.rest && ev.bar === bar) marks[Math.round((ev.start - bar * bpb) * 2)] = ev.name;
+      if(!ev.rest && ev.bar === bar) marks[Math.round((ev.start - bar * bpb) * sub)] = ev.name;
     });
     cells.forEach((c, i) => { c.classList.toggle('strum', !!marks[i]); c.querySelector('.pc-strip-ch').textContent = marks[i] || ''; });
   }
   /* Lit on the BEAT only: no "+" cell is ever lit. The cell stays .now through its "+", but it SHOWS lit only as
      long as the sheet's dot stays filled (Jonathan, 2026-11-19: the box lit for the whole beat while the dot went
      hollow halfway, so the two never looked like one flash). The same length, pcSheetSolidSec, restarted on every
-     new beat, in the same frame as the dot's (pcFrame paints the dot, then this). */
-  const now = (beat - bar * bpb) * 2;
-  const beatKey = loc.si + ':' + loc.rep + ':' + beat;
+     new beat, in the same frame as the dot's (pcFrame paints the dot, then this). On a 6/8 track each of the six is a
+     "beat" here, restarted on every eighth with that same length. */
+  const now = sub === 3 ? e8 - bar * bpb * 3 : (beat - bar * bpb) * 2;
+  const beatKey = loc.si + ':' + loc.rep + ':' + (sub === 3 ? e8 : beat);
   const fresh = st.stripBeat !== beatKey;
   st.stripBeat = beatKey;
   if(fresh){
