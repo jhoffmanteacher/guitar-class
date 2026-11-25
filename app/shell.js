@@ -775,6 +775,15 @@ window.addEventListener('online', function(){
   if(p) p.then(()=>{ if(currentUser === user && _dirtyKeys.size) queueSave(); });
 });
 
+/* A Play tab / Play strum line (playSequence) runs on timeouts and plays on in
+   a set panel that is hidden by CSS. A set switch or a lesson/checklist switch
+   stops it, but only when its button sits in a set panel: not stopCardAudio(),
+   which would also cut a song on In-Class Activities when showApp's boot-time
+   catch-up calls activateSet(). */
+function stopSetPanelSeq(){
+  if(typeof playSeqState === 'undefined' || !playSeqState || !playSeqState.btn) return;
+  if(playSeqState.btn.closest && playSeqState.btn.closest('.week-panel') && typeof stopPlaySeq === 'function') stopPlaySeq();
+}
 function activateSet(id, opts){
   // opts.peek: open a locked set read-only instead of bouncing off the gate
   // (renderPills' locked-pill onclick uses this). A peek must leave nothing
@@ -810,6 +819,7 @@ function activateSet(id, opts){
   // is simpler than tracking which set each key belongs to.
   if(typeof sdAbortAll === 'function') sdAbortAll();
   if(typeof dkErAbortAll === 'function') dkErAbortAll();   // the Card Deck and Ear Spark rounds too
+  stopSetPanelSeq();
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   // Module Review row lives outside .wpill now (see renderPills) — keep its
   // active/aria-current in step with every other set-switch, same as the loop above.

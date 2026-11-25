@@ -42,6 +42,7 @@ function switchTabById(wid, tab, keepScroll){
   if(typeof coachClose === 'function') coachClose();
   if(typeof sdAbortAll === 'function') sdAbortAll();
   if(typeof dkErAbortAll === 'function') dkErAbortAll();
+  stopSetPanelSeq();   // a Play tab line in the panel we are leaving (app/shell.js)
   wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   panel.classList.add('active');
   /* The set band carries the lesson's chrome now (pill, "Step n of m", the
