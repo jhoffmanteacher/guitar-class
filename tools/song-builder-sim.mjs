@@ -3043,6 +3043,41 @@ async function r1Cases(consoleSrc, check){
     check('R1-5 P14: a re-read that lands while the Beat step reads the beats (its first 30 ms) does not lose the drift check measured then: it is saved, on this copy',
       order.swapped && order.measuring && Number.isFinite(b.driftOff) && b.driftFor === run('sbDraft().audio.sha256'), JSON.stringify(Object.assign(order, { driftOff: b.driftOff, driftFor: String(b.driftFor).slice(0, 8) })));
   }
+  /* An edit made while a save of the same draft is in flight (the known limit of review round 1, closed 2026-11-25): the
+     draft write is held at a gate on the store's transaction while the edit is made, then let go. */
+  const gated = async (C, start) => {
+    let release, held = 0; const gate = new Promise(r => { release = r; }), tx0 = C.F.db.runTransaction;
+    C.F.db.runTransaction = async fn => { held++; await gate; return tx0(fn); };
+    C.run(start);
+    for(let t = 0; t < 200 && !held; t++) await sleep(5);
+    return { busy: C.run('sbBusy'), held: () => held, go: () => { C.F.db.runTransaction = tx0; release(); } };
+  };
+  {
+    const C = await draft(), { run, F } = C;
+    run(grid120 + ' sbDraft().unsaved = true; sbSaveSoon(sbSel, 0);'); await waitSaves();
+    run('sbBtFor(sbSel).view = sbMainView(sbDraft().beat, sbDraft().audio.durationSec);');
+    run("sbBeatAct('a+half', { dataset: {} })");
+    const dg = dragOf(C), ok = dg.down(1.25);
+    const g = await gated(C, '0');
+    dg.up(1.4);
+    const during = run('sbDraft().beat.anchor');
+    g.go(); await waitSaves(); await sleep(150); await settle();
+    const mine = run('sbDraft().beat.anchor'), st = F.S.get('songDrafts/' + C.id).beat.anchor;
+    check('R1 in flight: bar 1 dragged to 1.4 s and released while the save of the edit before it (½ beat, 1.25 s) is in flight: when that save lands the screen keeps 1.4 s, and its own save stores it',
+      ok && g.busy === 'save' && g.held() >= 1 && near(during, 1.4) && near(mine, 1.4) && near(st, 1.4), JSON.stringify({ busy: g.busy, during, mine, stored: st }));
+  }
+  {
+    const C = await draft(), { run, F } = C;
+    run('sbReadAt = Date.now(); sbStepOn = 1; ' + typeTitle('Test 0 first'));
+    const g = await gated(C, 'sbGoStep(2)');
+    run(typeTitle('Test 0 second'));
+    g.go(); await waitSaves(); await sleep(100); await settle();
+    const first = { stored: F.S.get('songDrafts/' + C.id).title, mine: run('sbDraft().title'), dirty: run('!!sbDraft().dirty') };
+    run('sbGoStep(1); sbGoStep(2);'); await settle(200); await waitSaves();
+    check('R1 in flight: a title typed again while Next\'s save (a copy made before it) is in flight is kept on screen, still marked, and the next Next stores it',
+      g.busy === 'save' && first.stored === 'Test 0 first' && first.mine === 'Test 0 second' && first.dirty && F.S.get('songDrafts/' + C.id).title === 'Test 0 second',
+      JSON.stringify(Object.assign(first, { busy: g.busy, stored2: F.S.get('songDrafts/' + C.id).title })));
+  }
   /* SB-7's note: the Beat step sets a grid exactly when the validator's bpm rule takes the song it makes (the song's bpm is
      the grid's, rounded: a typed 260 can fit to more, and a pin or a moved bar 1 changes it). Grids near both bounds,
      with a pin (the pins give the tempo) and without (beat.bpm, rounded to 4 places first). */

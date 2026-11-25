@@ -717,12 +717,24 @@ async function sbWriteDraft(id, d){
     await ensureDb();
     if(sbStopped(gen)) throw 'stop';
     const doc = sbDraftDoc(d), want = sbBaseFor(id, d), ref = db.collection('songDrafts').doc(id);
+    const cur0 = sbDrafts && sbDrafts.get(id), start = cur0 ? sbBaseOf(cur0) : null, text0 = cur0 && cur0.chartText;
     await db.runTransaction(async tx => {
       await sbDraftCheck(tx, id, want);
       tx.set(ref, Object.assign({}, doc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
     });
     if(!sbDrafts) sbDrafts = new Map();
-    sbDrafts.set(id, Object.assign(doc, { savedAt: Date.now(), base: sbBaseOf(doc) }));
+    /* An edit made while this write was in flight (a drag of bar 1 released during it) is in the copy in memory, not in
+       the doc written: that copy is not replaced. Written from itself, it stays as it is; written from a copy made before
+       (Next, Level), its parts changed during the write are kept over the doc (sbDraftMerge). Its own save follows. */
+    const cur = sbDrafts.get(id), base = sbBaseOf(doc), during = !!cur && cur === cur0 && sbUnsaved(cur) && (sbBaseOf(cur) !== start || cur.chartText !== text0);
+    if(!during) sbDrafts.set(id, Object.assign(doc, { savedAt: Date.now(), base }));
+    else if(cur === d) Object.assign(cur, { savedAt: Date.now(), base });
+    else {
+      const m = sbDraftMerge(Object.assign({}, cur, { base: start, chartText: undefined }), Object.assign(doc, { savedAt: Date.now(), base })).d;
+      if(cur.chartText !== text0){ m.chartText = cur.chartText; m.dirty = true; }
+      sbDrafts.set(id, m);
+    }
+    if(during && sbDrafts.get(id).unsaved && !sbSaveTimers.has(id)) sbSaveSoon(id, 1200);
     sbNote = sbNote && /New file|same mp3|in another tab, so/.test(sbNote) ? sbNote : '';   // the line a re-read's merge said (teacherSbLoad) stays
     return true;
   }catch(e){
