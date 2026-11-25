@@ -2752,6 +2752,10 @@ async function sweepCases(consoleSrc, check){
     const bar = run('sbDraft().chart.sections[0].bars[0]'), parts = run("JSON.stringify(bsBarParts(sbDraft().chart.sections[0].bars[0], BS_METERS['6/8'], { D: 1, E: 1, A: 1 }))");
     await waitSaves();
     check('SB-5: a new chord in a bar written in thirds (an imported 6/8 song\'s "A:1/3 E:5/3") keeps its thirds ("D:1/3 E:5/3"), a bar the validator takes', bar === 'D:1/3 E:5/3' && Array.isArray(JSON.parse(parts)), JSON.stringify({ bar, parts }));
+    /* Review R1-6: the "Which part" buttons of that bar say its thirds as the chart writes them, not 0.3333333333333333. */
+    const btns = [...run('sbBarPanelHtml(sbDraft(), 0)').matchAll(/data-sb-act="bar-part"[^>]*>([^<]*)</g)].map(m => m[1]);
+    check('R1-6: the "Which part" buttons of a bar in thirds read "D · 1/3" and "E · 5/3" (the chart\'s own way of writing thirds)',
+      btns.length === 2 && btns[0] === 'D · 1/3' && btns[1] === 'E · 5/3', JSON.stringify(btns));
   }
   /* SB-7: the Beat step's bound is the validator's */
   {
