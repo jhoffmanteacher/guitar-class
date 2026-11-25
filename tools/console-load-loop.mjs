@@ -7,7 +7,7 @@
    and the student-progress read (the progress collection) fail and come back on a schedule, while a teacher clicks
    views, hides the tab, types, drags, and a second console writes config/class.
 
-     node tools/console-load-loop.mjs                       96 cases, seed 1 (about 60-120 s)
+     node tools/console-load-loop.mjs                       96 cases, seed 1 (about 10-15 s)
      node tools/console-load-loop.mjs --seed S --cases N     another seed / count
      node tools/console-load-loop.mjs --case K --verbose     replay ONE case: every event, read, write and check
      --family F     only that family (names below)            --root DIR    another site folder (a break-it copy)
@@ -31,22 +31,27 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Eight families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Nine families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
-   booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; and a
-   click 1-120 ms after each background settings read lands), storm (an outage, the tab hidden and shown every 5 s for
-   a minute), healthy (a good boot, outages from 90 s), empty (a GOOD class with no students and no settings doc, or
-   an empty one), live (booted on Live In-Class Games mid-game after an update reload, during an outage). Each case
-   also draws the view it boots on (all 16, and the three Class activities screens), views clicked, the tab hidden
-   and shown, a box typed in or a card dragged for 10-90 s, the second console's writes (dates, Hidden, Optional,
-   Play Along, Keep in Today, pins, games, periods, pauses, Open through, Who, gate clears), and write clicks on
-   whatever write control is on screen. The network always heals at the end, and the 130 s after the heal have no
-   click, no hidden tab and no typing (the recovery check below).
+   booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
+   1-120 ms after each background settings read lands; a box typed in while the first retry after the heal is out),
+   storm (an outage, the tab hidden every 5 s and shown 2.5 s later, for a minute), healthy (a good boot, outages from
+   90 s), empty (a GOOD class with no students and no settings doc, or an empty one), live (booted on Live In-Class
+   Games mid-game after an update reload, during an outage), detail (a card's page from the update reload's note,
+   progress down; a Hidden click lands on top of the other console's change and its follow-up settings read fails, so
+   the page is drawn from the failed copy; a tab return then starts the retry, with a click right after its read).
+   Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
+   board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
+   a card dragged for 10-90 s, the second console's writes (dates, Hidden, Optional, Play Along, Keep in Today, pins,
+   games, periods, pauses, Open through, Who, gate clears), and write clicks on whatever write control is on screen.
+   The network always heals at the end, and the 130 s after the heal have no click, no hidden tab and no typing (the
+   recovery check below). Events a read or a commit queues (the clicks right after a read) run at their time.
 
    WHAT IS ASSERTED (each failure carries its finding id; the brief's invariants 1-5):
      R3-1  the screen matches the reads (checked whenever no read is out): no "Could not read the class settings" line
-           while the console's newest settings read was good; no roster line ("Could not load student data" / "the
+           while the console's newest settings read was good; "Could not load student data" only after a progress read
+           failed (not when the settings read failed first); no roster line ("Could not load student data" / "the
            student list") and no "Student progress did not load" note while the roster is loaded; a note that says
            the class settings loaded only while they did. And recovery: 125 s after the heal, with no click, a view
            that reads the roster (or the class settings) shows the roster loaded, no failure line and no note; a tool
@@ -67,12 +72,14 @@
            most, one read each, plus one redraw read when the settings come back) and NONE while hidden; never two
            progress reads, nor two first-load settings reads, out at once; while the roster is down on a view that
            reads it, with the tab visible, the minute timer is running or a read is out (the retry never stops).
+     R2-busy   a retry that lands while the teacher types is thrown away: the box typed in is never drawn over.
      R1-dead   no view left on a "Loading…" line with nothing left to run.
      R1-empty  a GOOD but empty class never shows a failure line or the note.
      R1-live   on Live In-Class Games the stage (#lq-stage) is always there and is never replaced while the view stays.
      page-error   anything the console logs through console.error or throws.
    COVERAGE FLOORS (a full run, 64+ cases, no --family): every family ran; 40+ write clicks reached the server; 4+
-   window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks.
+   window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks;
+   5+ Who pickers opened; 5+ card pages drawn from a failed read when a retry starts; 3+ boxes typed in during a retry.
 
    NOT COVERED: anything a browser adds (layout, CSS: a pane hidden by CSS counts as on screen here; focus moves;
    real event order); the update reload itself (the resume note is set, the reload is not played); a settings read
