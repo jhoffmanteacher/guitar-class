@@ -29,12 +29,15 @@
                 reach another's dialog (R2-3); the note names exactly the kinds that can be ticked and are not (R3 m5)
      minutes    Practice minutes unticked: nothing under minutes/ is touched, the private Top 5 tag included (R2-3); a
                 stop in the minutes step keeps the tag when it stops before it, and offers the kind for it when it
-                stops at it or a reload cuts the run off there (the console cannot read the tag; R1-6, R2-5)
+                stops at it or a reload cuts the run off there (the console cannot read the tag; R1-6, R2-5), and
+                never after a stop at a later kind, in the tab or after a reload (R3 minor 2)
      start over one write, the progressStartOver marker in config/class; nothing else in the store changes; no
                 write to progress/, minutes/ or anything else
      download   one file, nothing written; it decodes back to that student's documents (N of N)
      confirm    the typed name: exact, other case, extra spaces → yes; another name, a part of it, empty → no
      escape     a hostile student name is escaped in every dialog the console draws
+     reload hold   app/start.js's busyReason (cut out and run against the real dialog) holds the update reload while a
+                Delete or a Start over runs, and only then (R2-2, R3 minor 1)
      status     Manage's line from the roster and config/class: "Started over <date>" (+ "not applied yet"), "Deleted <date> ·
                 has a record again"; the dialogs' warning and backup sentences */
 import { readFileSync } from 'node:fs';
@@ -414,6 +417,20 @@ console.log('tag');
   ok(c2.run('trm').result.ok && !pathsOf(S, U[0]).length, `the re-run: ${c2.run('trm').result.text} The tag is gone, nothing of Test 0's left (${pathsOf(S, U[0]).join(', ') || 'none'})`);
 }
 {
+  /* A stop at a LATER kind (review R3 minor 2): the minutes step ran whole, the tag went with it, so nothing may offer
+     the tag again — in this tab, and after a reload (the record keeps where it stopped). */
+  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: `micTakes/${U[0]}-coach/chunks/`, op: 'delete', once: true }] }), open = dialogOn(c, [[U[0], 'Test 0']]);
+  await open(U[0]); c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  const r = c.run('trm').result, mins = pathsOf(S, U[0]).filter(k => k.startsWith('minutes/'));
+  const rec = JSON.parse(c.session.getItem('gc-trm-stopped:' + U[0]) || 'null');
+  ok(!r.ok && r.at === 'Mic recordings' && !mins.length && rec && rec.at === 'recordings',
+    `a stop at Mic recordings: the minutes and the tag are gone (${mins.length} left) and the record says where it stopped (${JSON.stringify(rec && rec.at)})`);
+  const t1 = await open(U[0]), L1 = c.fn('trmKindLines')(t1.inv, U[0]);
+  const c2 = makeConsole(S, {}, c.session), t2 = await dialogOn(c2, [[U[0], 'Test 0']])(U[0]), L2 = c2.fn('trmKindLines')(t2.inv, U[0]);
+  ok([[t1, L1], [t2, L2]].every(([t, L]) => L.minutes.n === 0 && t.ticks.minutes === false && L.minutes.text === 'no practice minutes saved'),
+    `reopened, and after a reload: no tag is offered (${L1.minutes.n} / ${L2.minutes.n}: ${L2.minutes.text})`);
+}
+{
   // The update reload cuts the run off at the tag (its 5-minute wait ran out): the page never hears how it ended.
   const S = makeStore(), c = makeConsole(S), open = dialogOn(c, [[U[0], 'Test 0']]);
   c.run('teacherRemoveDeleteBoardTag = function(){ return new Promise(function(){}); };');
@@ -512,6 +529,38 @@ console.log('warnings, names');
   ok(!/Last saved/.test(hd + ho), 'no "Last saved" line (the console has no trustworthy last-activity value)');
   ok(/sign in on the main site/.test(ho) && /Song Journey page on its own does not do it/.test(ho), 'Start over says it happens at their next sign-in on the main site, not on a Song Journey page alone');
   ok(c.fn('trmNameOf')({ uid: 'x-uid', name: '', email: '' }) === 'x-uid' && c.fn('trmNameOf')({ uid: 'x', name: '', email: 'e@x.test' }) === 'e@x.test', 'a row with no name confirms with its email, or its uid');
+}
+
+/* ── the update reload waits while a Delete or a Start over runs: app/start.js's busyReason (review R2-2), run here
+   against the real dialog (review R3 minor 1: deleting its line left every tool green) ── */
+console.log('reload hold');
+{
+  const start = readFileSync(join(ROOT, 'app', 'start.js'), 'utf8'), head = 'const busyReason = () => ';
+  const i = start.indexOf(head);
+  let j = i < 0 ? -1 : start.indexOf('{', i + head.length), depth = 0;
+  for(; j >= 0 && j < start.length; j++){ if(start[j] === '{') depth++; else if(start[j] === '}'){ depth--; if(!depth) break; } }
+  const found = i >= 0 && j > i && j < start.length;
+  ok(found, `busyReason is in app/start.js (${found ? j - i : 0} characters)`);
+  const S = makeStore(), c = makeConsole(S), open = dialogOn(c, [[U[0], 'Test 0']]);
+  // The page's other busy states, idle: here only the dialog can hold the reload. A second script, as teacher-remove.js loads after start.js.
+  c.run(`var window = {}; var recState = {}, shuffleDrills = {}, deckDrills = {}, earDrills = {}, ecRuns = {}, ncLive = false, chcLive = false, pcState = null;
+    var anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
+    var __busy = ${found ? start.slice(i + head.length, j + 1).replace(/^/, '() => ') : '() => "not found"'};`);
+  const B = () => { try { return c.run('__busy()'); } catch(e) { return 'threw: ' + e.message; } };
+  const seen = [['no dialog open', B(), null]];
+  await open(U[0]); seen.push(['the Delete dialog ready', B(), null]);
+  c.run(`var __rel = null; const __rec = TRM_STEPS.recordings; TRM_STEPS.recordings = function(u, inv){ return new Promise(function(res){ __rel = function(){ res(__rec(u, inv)); }; }); };`);
+  c.run(`trm.typed = 'Test 0';`); const del = c.fn('trmGo')(); await new Promise(r => setTimeout(r, 0));
+  seen.push(['a Delete running', B(), 'delete']);
+  c.run('__rel()'); await del; seen.push(['the Delete done', B(), null]);
+  await open(U[0], 'over');
+  c.run(`var __rel2 = null; const __wm = trmWriteMarker; trmWriteMarker = function(f, u){ return new Promise(function(res){ __rel2 = function(){ res(__wm(f, u)); }; }); };`);
+  c.run(`trm.typed = 'Test 0';`); const over = c.fn('trmGo')(); await new Promise(r => setTimeout(r, 0));
+  seen.push(['a Start over running', B(), 'delete']);
+  c.run('__rel2()'); await over; seen.push(['the Start over done', B(), null]);
+  c.fn('teacherRemoveClose')(); seen.push(['the dialog closed', B(), null]);
+  const good = seen.filter(([, got, want]) => got === want);
+  ok(good.length === seen.length, `the update reload waits while a Delete or a Start over runs, and only then (${good.length} of ${seen.length}): ${seen.map(([l, g]) => l + ' → ' + JSON.stringify(g)).join(', ')}`);
 }
 
 console.log(`remove-one-sim: ${passes} passed, ${fails} failed`);
