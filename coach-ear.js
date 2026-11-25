@@ -861,19 +861,11 @@ function fzPickCard(){
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function fzShuffle(arr){
-  for (let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-  }
-  return arr;
-}
-
 function fzOptions(correct){
   const pool = fzUniverse().filter(n => n !== correct);
-  const opts = fzShuffle(pool.slice()).slice(0, 3);
+  const opts = cbShuffle(pool.slice()).slice(0, 3);
   opts.push(correct);
-  return fzShuffle(opts);
+  return cbShuffle(opts);
 }
 
 function fzNext(){

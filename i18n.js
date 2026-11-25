@@ -2489,7 +2489,7 @@
       es: 'La misma secuencia que va creciendo — pero respondes en tu guitarra de verdad. El micrófono escucha cada nota del Patrón 1.' },
     'games.psg.legend': { en: 'Your six notes — Pattern 1 starting at fret 5.',
       es: 'Tus seis notas — el Patrón 1 empezando en el traste 5.' },
-    'games.psg.padPos': { en: '{string} · fret {fret}',
+    'games.psg.padPos': { en: '{string} string · fret {fret}',
       es: 'cuerda {string} · traste {fret}' },
     'games.psg.startButton': { en: 'Start — guitar in hand',
       es: 'Empezar — guitarra en mano' },
