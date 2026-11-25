@@ -333,6 +333,38 @@ console.log('reload');
   ok(t3.ticks.progress === true, 'after a run that ended ok, the next reload starts from the usual list');
 }
 
+/* ── two students: one student's kept unticks never reach another's dialog (review R2-3) ── */
+console.log('two students');
+{
+  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: 'songRequests/', op: 'delete', once: true }] });
+  const both = [[U[0], 'Test 0'], [U[1], 'Test 1']], open = dialogOn(c, both);
+  await open(U[0]); c.run(`trm.ticks.progress = false; trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  ok(!c.run('trm').result.ok, 'Test 0: a delete with saved work unticked stops: ' + c.run('trm').result.text);
+  const usual = (c1, t) => Object.keys(ALL).every(k => t.ticks[k] === true) && !/Ticked as in the delete that stopped/.test(c1.fn('trmBodyHtml')());
+  const b = await open(U[1]);
+  ok(usual(c, b), `Test 1's dialog starts from the usual list: every kind ticked, no note (${Object.keys(b.ticks).filter(k => b.ticks[k]).join(', ')})`);
+  const c2 = makeConsole(S, {}, c.session), open2 = dialogOn(c2, both);
+  const b2 = await open2(U[1]);
+  ok(usual(c2, b2), 'after a reload too, Test 1 starts from the usual list');
+  const a2 = await open2(U[0]);
+  ok(a2.ticks.progress === false && /Ticked as in the delete that stopped/.test(c2.fn('trmBodyHtml')()), "and Test 0's own unticks are still kept");
+}
+
+/* ── Practice minutes unticked: nothing under minutes/ is touched, the private Top 5 tag included (review R2-3) ── */
+console.log('untick minutes');
+{
+  const S = makeStore(), before = new Map([...S].map(([k, v]) => [k, clone(v)])), c = makeConsole(S);
+  const inv = await c.fn('teacherRemoveRead')(U[0]);
+  const r = await c.fn('teacherRemoveRun')(U[0], inv, { ...ALL, minutes: false });
+  ok(r.ok && r.total === 6, 'result: ' + r.text);
+  const mins = [...before.keys()].filter(k => k.startsWith(`minutes/${U[0]}/`));
+  const same = mins.filter(k => S.has(k) && canon(S.get(k)) === canon(before.get(k)));
+  const wrote = c.log.filter(w => w.path.startsWith(`minutes/${U[0]}/`));
+  ok(mins.length === 5 && same.length === 5 && !wrote.length, `the minutes are byte-identical, the tag included (${same.length} of ${mins.length} docs; ${wrote.length} writes under minutes/: ${wrote.map(w => w.path).join(', ') || 'none'})`);
+  const rest = pathsOf(S, U[0]).filter(k => !k.startsWith('minutes/'));
+  ok(!rest.length, `everything else of Test 0's is gone (${rest.length} left)`);
+}
+
 /* ── a failure at the private Top 5 tag: the minutes kind is offered again and the tag goes (review R1-6) ── */
 console.log('tag');
 {
