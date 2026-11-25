@@ -153,10 +153,17 @@ function makeStore(name0){
 }
 const pathsOf = (S, uid) => [...S.keys()].filter(k => k.includes(uid)).sort();
 
-function makeConsole(S, plan = {}){
+/* The tab's sessionStorage. Pass one console's `session` to the next makeConsole: that is a reload of the same tab
+   (sessionStorage survives it, the page's memory does not); a fresh one is a new tab. */
+function makeSession(){
+  const m = new Map();
+  return { m, getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => { m.set(k, String(v)); }, removeItem: k => { m.delete(k); } };
+}
+function makeConsole(S, plan = {}, session = makeSession()){
   const { db, log } = makeDb(S, plan);
   const saved = [], alerts = [];
   const ctx = { console, setTimeout, clearTimeout, Promise, Blob: globalThis.Blob, Date, Math, JSON,
+    sessionStorage: session,
     alert: m => alerts.push(String(m)),
     URL: { createObjectURL: blob => { saved.push({ blob }); return 'blob:' + saved.length; }, revokeObjectURL(){} },
     document: { createElement: () => ({ click(){ const l = saved[saved.length - 1]; if(l) l.name = this.download; }, remove(){} }), body: { appendChild(){} }, getElementById: () => null, querySelector: () => null },
@@ -167,7 +174,12 @@ function makeConsole(S, plan = {}){
   for(const f of ['teacher-config.js', 'teacher-backup.js', 'teacher-remove.js']) vm.runInContext(SRC(f), ctx, { filename: f });
   ctx.__db = db; vm.runInContext('db = __db;', ctx);
   const run = code => vm.runInContext(code, ctx);
-  return { ctx, log, saved, alerts, run, fn: n => run(n) };
+  return { ctx, log, saved, alerts, session, run, fn: n => run(n) };
+}
+/* The Delete dialog on one console, its painter silenced: open it for a student and read what it ticked. */
+function dialogOn(c, students){
+  c.run(`allStudentsRaw = ${JSON.stringify(students.map(([uid, name]) => ({ uid, name, email: uid + '@example.test' })))}; trmPaint = function(){};`);
+  return async (uid, mode = 'delete') => { c.fn('teacherRemoveClose')(); c.fn('teacherRemoveOpen')(uid); await c.fn('trmChoose')(mode); return c.run('trm'); };
 }
 const ALL = { minutes: true, recordings: true, songRequests: true, join: true, live: true, settings: true, progress: true };
 /* Everything but the target student's cells, the marker and the version: config/class must be byte-identical there. */
@@ -298,6 +310,27 @@ console.log('stopped, reopened');
     `the second run: ${T().result.text} Saved work and the new live answer kept, the song requests gone`);
   c.fn('teacherRemoveClose')(); c.fn('teacherRemoveOpen')(U[0]); await c.fn('trmChoose')('delete');
   ok(T().ticks.progress === true && T().ticks.live === true, 'after a delete that ended ok, the next one starts from the usual list (everything with data ticked)');
+}
+
+/* ── a console reload keeps the unticks: written before a run starts, kept in the tab's sessionStorage (review R2-2) ── */
+console.log('reload');
+{
+  const S = makeStore(), c = makeConsole(S), open = dialogOn(c, [[U[0], 'Test 0']]);
+  // The page dies while the run is out (the update reload after its 5-minute wait): the run never ends.
+  c.run(`var __atStart = null; teacherRemoveRun = function(u){ __atStart = sessionStorage.getItem('gc-trm-stopped:' + u); return new Promise(function(){}); };`);
+  await open(U[0]);
+  c.run(`trm.ticks.progress = false; trm.typed = 'Test 0';`); c.fn('trmGo')(); await new Promise(r => setTimeout(r, 0));
+  const at = c.run('__atStart'), keys = [...c.session.m.keys()];
+  ok(at !== null && (JSON.parse(at).k || []).join() === 'minutes,recordings,songRequests,join,live,settings', `the ticks are in the tab's sessionStorage when the run starts (${at})`);
+  ok(keys.length === 1 && keys[0] === 'gc-trm-stopped:' + U[0] && !/Test 0|example\.test/.test(c.session.m.get(keys[0]) || ''), `one key, named with the uid; its value holds kind ids only, no name or email (${keys.join(', ') || 'none'})`);
+  const c2 = makeConsole(S, {}, c.session), open2 = dialogOn(c2, [[U[0], 'Test 0']]);
+  const t = await open2(U[0]);
+  ok(t.ticks.progress === false && t.ticks.minutes === true && /Ticked as in the delete that stopped/.test(c2.fn('trmBodyHtml')()),
+    `after the reload: saved work stays unticked, the rest ticked, and the dialog says why (${Object.keys(t.ticks).filter(k => t.ticks[k]).join(', ')})`);
+  c2.run(`trm.typed = 'Test 0';`); await c2.fn('trmGo')();
+  ok(c2.run('trm').result.ok && S.has('progress/' + U[0]) && !c2.session.m.size, `the run after the reload: ${c2.run('trm').result.text} Saved work kept; the key is gone (${c2.session.m.size} left)`);
+  const t3 = await dialogOn(makeConsole(S, {}, c2.session), [[U[0], 'Test 0']])(U[0]);
+  ok(t3.ticks.progress === true, 'after a run that ended ok, the next reload starts from the usual list');
 }
 
 /* ── a failure at the private Top 5 tag: the minutes kind is offered again and the tag goes (review R1-6) ── */

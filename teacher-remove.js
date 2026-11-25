@@ -76,9 +76,31 @@ const TRM_UID_FIELDS = ['paused', 'archived', 'periodOverrides', 'moduleOpenThro
 let trm = null;     // the open dialog: {uid, name, mode:'menu'|'over'|'delete', phase, inv, ticks, typed, result, gen}
 let trmGen = 0;
 /* The ticks of a Delete that STOPPED, by uid, until a Delete for that student ends ok (review R1-1). A failed re-read,
-   Close and opening the dialog again must not tick again what the teacher unticked (saved work included). In this
-   tab's memory only: a console reload starts from the usual all-ticked list, which the teacher reads before typing. */
+   Close and opening the dialog again must not tick again what the teacher unticked (saved work included). Kept in this
+   tab's memory and in its sessionStorage, written BEFORE a run starts (review R2-2): the console reloads itself for a
+   new version (app/start.js holds that reload while a run is out, at most 5 minutes), and a reload must not tick saved
+   work again either. The stored value is kind ids only, under a key named with the uid: no name. Sign-out, or another
+   account signing in on this tab, clears sessionStorage (signOut, app/start.js); a NEW tab starts from the usual list. */
 const trmStoppedTicks = {};
+const TRM_STOPPED_KEY = 'gc-trm-stopped:';   // + uid, in sessionStorage
+function trmKeptGet(uid){
+  if(trmStoppedTicks[uid]) return trmStoppedTicks[uid];
+  try{
+    const v = JSON.parse(sessionStorage.getItem(TRM_STOPPED_KEY + uid) || 'null');
+    if(!v || !Array.isArray(v.k)) return null;
+    const ticks = {};
+    TRM_KINDS.forEach(k=>{ ticks[k.id] = v.k.includes(k.id); });
+    return (trmStoppedTicks[uid] = ticks);
+  }catch(e){ return null; }
+}
+function trmKeptSet(uid, ticks){
+  trmStoppedTicks[uid] = ticks;
+  try{ sessionStorage.setItem(TRM_STOPPED_KEY + uid, JSON.stringify({k: TRM_KINDS.filter(k=>ticks[k.id]).map(k=>k.id)})); }catch(e){ /* storage blocked: this tab's memory still has them */ }
+}
+function trmKeptDrop(uid){
+  delete trmStoppedTicks[uid];
+  try{ sessionStorage.removeItem(TRM_STOPPED_KEY + uid); }catch(e){ /* storage blocked */ }
+}
 
 function trmStudent(uid){ return (allStudentsRaw||[]).find(s=>s.uid===uid) || null; }
 // The name typed to confirm: the roster's name, else the email, else the uid (a row with neither: review m6).
@@ -336,7 +358,7 @@ function teacherRemoveClose(){
 }
 async function trmChoose(mode){
   // After a Delete that stopped (this dialog's "Read again and finish", or a reopen): only what was ticked then.
-  const keep = mode==='delete' ? (trmStoppedTicks[trm.uid] || null) : null;
+  const keep = mode==='delete' ? trmKeptGet(trm.uid) : null;
   trm.mode = mode; trm.phase = 'reading'; trm.typed = ''; trm.result = null; trm.note = '';
   const gen = trm.gen;
   trmPaint();
@@ -365,8 +387,10 @@ async function trmGo(){
     if(!trmAnyTicked()) return;
     trm.phase = 'running'; trmPaint();
     const ticks = Object.assign({}, trm.ticks);
+    // Kept before the run (review R2-2): a reload while it runs keeps them; a run that ends ok forgets them.
+    trmKeptSet(uid, ticks);
     const r = await teacherRemoveRun(uid, trm.inv, ticks);
-    if(r.ok) delete trmStoppedTicks[uid]; else trmStoppedTicks[uid] = ticks;
+    if(r.ok) trmKeptDrop(uid);
     if(!trm || trm.gen!==gen) return;
     trm.phase = 'done'; trm.result = r; trmPaint();
     if(r.done && typeof teacherRefreshStudents==='function') teacherRefreshStudents({manual: true});

@@ -126,6 +126,9 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         // 40%" (sfWait), or any private file in flight (sfInflight, a lyric sheet too). A reload throws the download
         // away and the song counts against the month again: its "counted once" record lasts one page.
         if ((typeof sfWait !== 'undefined' && sfWait) || (typeof sfInflight !== 'undefined' && sfInflight.size)) return 'song';
+        // The console's Delete or Start over for one student, while it runs (teacher-remove.js, a console part loaded on
+        // demand): a reload cuts it off between two kinds of data.
+        if (typeof trm !== 'undefined' && trm && trm.phase === 'running') return 'delete';
         return null;
       };
       /* While this tab waits, the new worker holds only the shell. Ask it for
