@@ -698,7 +698,7 @@ async function chartCases(consoleSrc, check){
   run('renderTeacherSongBuilder()'); await settle();
   run(`sbOpen(${JSON.stringify(id)})`); await settle();
   const stored = () => F2.S.get('songDrafts/' + id), nW = () => F2.st.writes.length;
-  const flush = async () => { run('if(sbCh){ clearTimeout(sbCh.saveTimer); } sbWriteDraft(sbSel, sbDraft())'); await settle(); };
+  const flush = async () => { run('clearTimeout(sbSaveTimers.get(sbSel)); sbSaveTimers.delete(sbSel); sbWriteDraft(sbSel, sbDraft())'); await settle(); };   // the draft's waiting save (sbSaveSoon), made now
   const act = (a, ds) => run(`sbChartAct(${JSON.stringify(a)}, { dataset: ${JSON.stringify(ds || {})} })`);
   run('sbGoStep(4)'); await settle();
   check('chart: step 4 opens with nothing read (the paste box); Level waits for a chart', run('sbStepOn') === 4 && /data-sb-charttext/.test(run('sbChartPaneHtml(sbDraft())')) && !run('sbStepReady(sbDraft(), 5)') && run('sbStepReady(sbDraft(), 4)'), 'step ' + run('sbStepOn'));
