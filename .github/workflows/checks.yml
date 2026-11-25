@@ -21,7 +21,8 @@
 # automatically: the kill switch and the update reload (kill-switch/proof.mjs),
 # the Tuning Simulator's rounds (tuning-sim-proof.mjs), the sign-in domain
 # screen (access-sim.mjs), the console's backup (backup-proof.mjs) and a
-# switch to the panel already open (stay-proof.mjs); each takes seconds.
+# switch to the panel already open (stay-proof.mjs) and a recorded take's clock
+# (mic-sim/micrec-clock.mjs); each takes seconds.
 # (remove-one-sim and the live-changes / live-hilo / live-saw sims are not here:
 # checks.mjs runs them, in the job above.) On GitHub they run after EVERY push,
 # so a change that touched one of those areas without its proof being run is
@@ -175,6 +176,9 @@ jobs:
       - name: A switch to the panel already open stops nothing (tools/stay-proof.mjs)
         if: always()
         run: node tools/stay-proof.mjs
+      - name: A recorded take's clock (tools/mic-sim/micrec-clock.mjs)
+        if: always()
+        run: node tools/mic-sim/micrec-clock.mjs
 
   lint:
     runs-on: ubuntu-latest

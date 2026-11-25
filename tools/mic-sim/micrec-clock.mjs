@@ -35,7 +35,7 @@ const ROOT = opt('root') ? resolve(opt('root')) : join(import.meta.dirname, '..'
 const src = siteSource('coach.js', ROOT);
 
 /* The recording code as the site has it. Functions that a site may not have (an older one) are left out. */
-const NEED = ['micRecStart', 'micRecTeardown', 'micRecStop', 'micRecAbort', 'micRecStartPerf', 'micRecSaveNow', 'micRecPcm16', 'micRecMicName', 'micRecTrackSettings'];
+const NEED = ['micRecStart', 'micRecTeardown', 'micRecCapEnd', 'micRecStop', 'micRecAbort', 'micRecStartPerf', 'micRecSaveNow', 'micRecPcm16', 'micRecMicName', 'micRecTrackSettings'];
 const OPTIONAL = ['micRecStartPerfV1'];
 const fns = NEED.map(n => (src.includes('async function ' + n + '(') ? 'async ' : '') + extract(src, n)).concat(OPTIONAL.filter(n => src.includes('function ' + n + '(')).map(n => extract(src, n)));
 const consts = src.split('\n').filter(l => /^const MICREC_(MAX_SEC|RATE|CHUNK|SETTING_KEYS)\b/.test(l)).join('\n');
