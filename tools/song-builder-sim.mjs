@@ -2723,6 +2723,15 @@ async function sweepCases(consoleSrc, check){
     check('SB-4 drag: dragging bar 1 one beat later (1.0 → 1.5 s) moves every bar line one beat, as "1 beat ▶" does (bar 5 9.5 s, bar 10 19.5 s, 120 BPM); a drag under half a beat (30 ms) moves bar 1 alone (the pins stay)',
       g1 && g2 && near(big.b5, 9.5) && near(big.b10, 19.5) && near(big.bpm, 120) && near(small.a, 1.53) && near(small.b10, 19.5), JSON.stringify({ big, small }));
   }
+  /* SB-5: a new chord in a bar written in thirds */
+  {
+    const C = await draft(), { run } = C;
+    run("sbReadAt = Date.now(); sbStepOn = 4; (() => { const d = sbDraft(); d.chart = { text: '', meter: '6/8', fmt: 'the imported song', sections: [{ name: 'verse', label: 'Verse', n: null, bars: ['A:1/3 E:5/3', 'A'], lyrics: null }], left: [], kept: [], edited: true }; })();"
+      + " sbChFor(sbSel).sel = 0; sbChFor(sbSel).part = 0; sbChartAct('bar-chord', { dataset: { sbChord: 'D' } });");
+    const bar = run('sbDraft().chart.sections[0].bars[0]'), parts = run("JSON.stringify(bsBarParts(sbDraft().chart.sections[0].bars[0], BS_METERS['6/8'], { D: 1, E: 1, A: 1 }))");
+    await waitSaves();
+    check('SB-5: a new chord in a bar written in thirds (an imported 6/8 song\'s "A:1/3 E:5/3") keeps its thirds ("D:1/3 E:5/3"), a bar the validator takes', bar === 'D:1/3 E:5/3' && Array.isArray(JSON.parse(parts)), JSON.stringify({ bar, parts }));
+  }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
     !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));

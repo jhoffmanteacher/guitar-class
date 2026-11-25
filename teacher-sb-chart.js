@@ -393,6 +393,12 @@ function sbGridSwap(sections, from, to){
 }
 /* A bar string → [{ name ('' = rest), beats }], and back. */
 function sbBarRead(bar, meter){ const m = SB_METER[meter] || SB_METER['4/4']; return String(bar).indexOf(':') < 0 ? [{ name: bar === '-' ? '' : bar, beats: m.bpb }] : String(bar).split(/\s+/).map(tk => { const p = tk.split(':'); return { name: p[0] === '-' ? '' : p[0], beats: bsBeats(p[1]) }; }); }   // bsBeats: '2', '1.5' and an imported song's '1/3'
+/* A part's beats as the format writes them (bsBeats, app/builtsongs.js: '2', '1.5', or thirds as '1/3', '5/3'). A bar of
+   an imported 6/8 song can hold thirds: written as a number (0.3333333333333333) the validator refuses it (SB-5). */
+function sbBeatsText(b){
+  const t = Math.round(b * 3);
+  return Math.abs(b - Math.round(b)) < 1e-6 ? String(Math.round(b)) : Math.abs(b * 3 - t) < 1e-6 && t % 3 ? t + '/3' : String(Math.round(b * 1000) / 1000);
+}
 function sbBarWrite(parts, meter){
   if(parts.length === 1 || parts.every(p => p.name === parts[0].name)) return parts[0].name || '-';
   return parts.map(p => (p.name || '-') + ':' + p.beats).join(' ');
@@ -759,7 +765,7 @@ function sbChartAct(act, b){
     const beats = b.dataset.sbSplit.split('+').map(Number);
     const next = beats.map((bt, i) => ({ name: (parts[i] || parts[parts.length - 1]).name, beats: bt }));
     st.part = Math.min(part, next.length - 1);
-    sbChartEdit(d, sbGridSetBar(ch.sections, sel, next.length === 1 ? (next[0].name || '-') : next.map(p => (p.name || '-') + ':' + p.beats).join(' ')), null);
+    sbChartEdit(d, sbGridSetBar(ch.sections, sel, next.length === 1 ? (next[0].name || '-') : next.map(p => (p.name || '-') + ':' + sbBeatsText(p.beats)).join(' ')), null);
     return true;
   }
   if(act === 'bar-chord' || act === 'bar-other'){
@@ -771,7 +777,7 @@ function sbChartAct(act, b){
       if(!sbChartChords(ch.sections).includes(name) && sbChartChords(ch.sections).length >= BS_MAX_CHORDS){ sbNote = `A card takes ${BS_MAX_CHORDS} different chords at most.`; teacherSbPaint(); return true; }
     }
     parts[part] = { name, beats: parts[part].beats };
-    sbChartEdit(d, sbGridSetBar(ch.sections, sel, parts.length === 1 ? (name || '-') : parts.map(p => (p.name || '-') + ':' + p.beats).join(' ')), null);
+    sbChartEdit(d, sbGridSetBar(ch.sections, sel, parts.length === 1 ? (name || '-') : parts.map(p => (p.name || '-') + ':' + sbBeatsText(p.beats)).join(' ')), null);
     return true;
   }
   if(act === 'bar-add'){ if(sbChartBars(ch.sections) >= BS_MAX_BARS) return true; st.sel = sel + 1; sbChartEdit(d, sbGridAddBar(ch.sections, sel), `Bar ${sel + 2} added: every later bar moved one on.`); return true; }
