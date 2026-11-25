@@ -75,6 +75,10 @@ const TRM_BATCH = 400;
 const TRM_UID_FIELDS = ['paused', 'archived', 'periodOverrides', 'moduleOpenThrough', 'gameOverrides', 'activityClears'];
 let trm = null;     // the open dialog: {uid, name, mode:'menu'|'over'|'delete', phase, inv, ticks, typed, result, gen}
 let trmGen = 0;
+/* The ticks of a Delete that STOPPED, by uid, until a Delete for that student ends ok (review R1-1). A failed re-read,
+   Close and opening the dialog again must not tick again what the teacher unticked (saved work included). In this
+   tab's memory only: a console reload starts from the usual all-ticked list, which the teacher reads before typing. */
+const trmStoppedTicks = {};
 
 function trmStudent(uid){ return (allStudentsRaw||[]).find(s=>s.uid===uid) || null; }
 // The name typed to confirm: the roster's name, else the email, else the uid (a row with neither: review m6).
@@ -323,8 +327,8 @@ function teacherRemoveClose(){
   if(o) o.remove();
 }
 async function trmChoose(mode){
-  // "Read again and finish" after a Delete that stopped: keep what the teacher had unticked (saved work included).
-  const keep = mode==='delete' && trm.mode==='delete' && trm.phase==='done' && trm.result && !trm.result.ok ? trm.ticks : null;
+  // After a Delete that stopped (this dialog's "Read again and finish", or a reopen): only what was ticked then.
+  const keep = mode==='delete' ? (trmStoppedTicks[trm.uid] || null) : null;
   trm.mode = mode; trm.phase = 'reading'; trm.typed = ''; trm.result = null; trm.note = '';
   const gen = trm.gen;
   trmPaint();
@@ -338,7 +342,10 @@ async function trmChoose(mode){
   if(!trm || trm.gen!==gen) return;
   trm.inv = inv; trm.phase = 'ready';
   const lines = trmKindLines(inv, trm.uid);
+  /* A kind with nothing to delete then was unticked then, so with keep it stays unticked even if it has data now
+     (the note says so): nothing is ticked that the teacher did not tick. */
   trm.ticks = {}; TRM_KINDS.forEach(k=>{ trm.ticks[k.id] = lines[k.id].n > 0 && (!keep || keep[k.id]===true); });
+  if(keep) trm.note = 'Ticked as in the delete that stopped. A kind you unticked, or one with nothing to delete then, stays unticked: tick it to delete it too.';
   trmPaint();
 }
 function trmConfirmed(){ return !!trm && trmNorm(trm.typed)!=='' && trmNorm(trm.typed)===trmNorm(trm.name); }
@@ -349,7 +356,9 @@ async function trmGo(){
   if(trm.mode==='delete'){
     if(!trmAnyTicked()) return;
     trm.phase = 'running'; trmPaint();
-    const r = await teacherRemoveRun(uid, trm.inv, trm.ticks);
+    const ticks = Object.assign({}, trm.ticks);
+    const r = await teacherRemoveRun(uid, trm.inv, ticks);
+    if(r.ok) delete trmStoppedTicks[uid]; else trmStoppedTicks[uid] = ticks;
     if(!trm || trm.gen!==gen) return;
     trm.phase = 'done'; trm.result = r; trmPaint();
     if(r.done && typeof teacherRefreshStudents==='function') teacherRefreshStudents({manual: true});
@@ -402,7 +411,7 @@ function trmBodyHtml(){
   const title = isDel ? `Delete ${n}’s data` : `Start ${n} over`;
   const who = trmWhoHtml(t);
   if(t.phase==='reading') return `<h2 class="trm-title" id="trm-title">${title}</h2>${who}<p class="trm-p">Reading what this student has…</p><div class="trm-actions">${close}</div>`;
-  if(t.phase==='readFailed') return `<h2 class="trm-title" id="trm-title">${title}</h2><p class="trm-p trm-err" role="alert">${escHtml(t.note)}</p><div class="trm-actions">${close}</div>`;
+  if(t.phase==='readFailed') return `<h2 class="trm-title" id="trm-title">${title}</h2><p class="trm-p trm-err" role="alert">${escHtml(t.note)}</p><div class="trm-actions"><button type="button" class="tg-seg-btn" data-trm-act="${t.mode}">Read again</button>${close}</div>`;
   let body = '';
   if(isDel){
     const lines = trmKindLines(t.inv, t.uid);

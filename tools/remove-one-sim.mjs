@@ -272,6 +272,34 @@ console.log('failure');
   othersSame(before, S, U[0], 'failure + re-run');
 }
 
+/* ── the teacher's unticks survive a stopped delete, a failed re-read, Close and a reopen (review R1-1) ── */
+console.log('stopped, reopened');
+{
+  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: 'songRequests/', op: 'delete', once: true }] });
+  S.delete(`liveQuiz/current/answers/${U[0]}`);
+  c.run(`allStudentsRaw = [{uid:'${U[0]}', name:'Test 0', email:'test0@example.test'}]; trmPaint = function(){};
+    const __read = teacherRemoveRead; var __readFail = 0;
+    teacherRemoveRead = async function(u){ if(__readFail){ __readFail--; const e = new Error('planted read failure'); e.code = 'unavailable'; throw e; } return __read(u); };`);
+  const T = () => c.run('trm');
+  c.fn('teacherRemoveOpen')(U[0]); await c.fn('trmChoose')('delete');
+  c.run(`trm.ticks.progress = false; trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  ok(T().phase === 'done' && !T().result.ok && T().result.at === 'Song requests', 'a delete with saved work unticked stops at Song requests: ' + T().result.text);
+  c.run('__readFail = 1;'); await c.fn('trmChoose')('delete');
+  const failed = c.fn('trmBodyHtml')();
+  ok(T().phase === 'readFailed' && failed.includes('data-trm-act="delete">Read again</button>'), `"Read again and finish" whose read fails: the screen offers Read again (${T().phase})`);
+  S.set(`liveQuiz/current/answers/${U[0]}`, { uid: U[0], choice: 'B' });
+  c.fn('teacherRemoveClose')(); c.fn('teacherRemoveOpen')(U[0]); await c.fn('trmChoose')('delete');
+  const t1 = { ...T().ticks };
+  ok(t1.progress === false && t1.songRequests === true && t1.live === false && t1.settings === true,
+    `closed and opened again: saved work stays unticked, a kind with nothing then (live answer) is not ticked now, the rest as before (${Object.keys(t1).filter(k => t1[k]).join(', ')})`);
+  ok(/Ticked as in the delete that stopped/.test(c.fn('trmBodyHtml')()), 'the dialog says the ticks are the ones from the delete that stopped');
+  c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  ok(T().result.ok && S.has('progress/' + U[0]) && S.has(`liveQuiz/current/answers/${U[0]}`) && !S.has(`songRequests/${U[0]}_2026-W45`),
+    `the second run: ${T().result.text} Saved work and the new live answer kept, the song requests gone`);
+  c.fn('teacherRemoveClose')(); c.fn('teacherRemoveOpen')(U[0]); await c.fn('trmChoose')('delete');
+  ok(T().ticks.progress === true && T().ticks.live === true, 'after a delete that ended ok, the next one starts from the usual list (everything with data ticked)');
+}
+
 /* ── start over ── */
 console.log('start over');
 {
