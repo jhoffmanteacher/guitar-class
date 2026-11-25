@@ -3226,7 +3226,7 @@ async function r2sbCases(consoleSrc, check){
       n0 === 8 && away.stored === 8 && away.readAt === 0 && back === 9 && !A.run('!!sbDraft().unsaved') && !/another tab/.test(A.run('sbNote')), JSON.stringify({ n0, away, back, note: A.run('sbNote').slice(0, 80) }));
   }
 
-  /* S7 (R2-4): tab A's Level waits on its encode while tab B saves a title; A's draft write is then refused. */
+  /* S7 (R2-4): tab A's Level waits on its encode while tab B saves a title; A's draft write is then refused. The copy A uploaded is left alone (R3-1). */
   {
     const F = store(), A = fast(await draft(F));
     const B = await tab(F); B.run(`sbOpen(${JSON.stringify(A.id)});`); await settle();
@@ -3241,8 +3241,8 @@ async function r2sbCases(consoleSrc, check){
     const gated = A.box.__atGate && A.run('sbBusy') === 'level';
     go(); await settle(300); await sleep(100); await settle();
     const Yb = A.id + '-' + sha(LEVELLED.get('b')).slice(0, 8), st = F.S.get('songDrafts/' + A.id), orphans = heads(F).filter(h => !(st.audio && st.audio.id === h));
-    check('R2-4 S7 (two tabs): a Level whose draft write is refused (another tab saved the draft during the encode) deletes the copy it just uploaded: no copy is left that nothing names, the draft keeps its copy, and the line says the song changed in another tab',
-      gated && st.title === 'Test 0 from B' && st.audio && st.audio.id !== Yb && heads(F).includes(st.audio.id) && !F.S.has('songFiles/' + Yb) && !orphans.length && /^The draft was not saved: this song was changed in another tab/.test(A.run('sbNote')),
+    check('R2-4 S7 (two tabs): a Level whose draft write is refused (another tab saved the draft during the encode) deletes NOTHING: the copy it uploaded stays (named by its contents, the next Level of that mp3 reuses it; deleting it could take the copy another tab is uploading or has just named: review round 3, R3-1), the draft keeps its own copy, and the line says the song changed in another tab',
+      gated && st.title === 'Test 0 from B' && st.audio && st.audio.id !== Yb && heads(F).includes(st.audio.id) && F.S.has('songFiles/' + Yb) && /^The draft was not saved: this song was changed in another tab/.test(A.run('sbNote')),
       JSON.stringify({ newCopyStored: F.S.has('songFiles/' + Yb), orphans, note: A.run('sbNote').slice(0, 90) }));
   }
 
