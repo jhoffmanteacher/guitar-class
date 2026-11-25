@@ -993,16 +993,18 @@ async function sbClearStep(which){
   if(!confirm(q)) return;
   const id = sbSel, gen = sbViewGen;
   sbStopSounds();
-  const bt = typeof sbBtFor === 'function' ? sbBtFor(id) : null;
+  const bt = typeof sbBtFor === 'function' ? sbBtFor(id) : null, st = which === 'chart' && typeof sbChFor === 'function' ? sbChFor(id) : null;
   clearTimeout(sbSaveTimers.get(id)); sbSaveTimers.delete(id);   // the write below stores the draft's other edits with it
-  if(bt){ bt.taps = []; bt.fit = null; bt.drift = null; }
   const old = which === 'volume' && d.audio ? d.audio.id : null;
-  if(which === 'chart' && typeof sbChFor === 'function'){ const st = sbChFor(id); st.view = 'paste'; st.sel = null; st.undo = []; st.text = null; }
   const next = which === 'volume' ? Object.assign({}, d, { audio: null, volume: null, pitch: null, step: 2 })
     : which === 'chart' ? Object.assign({}, d, { chart: d.chart && d.chart.text ? { text: d.chart.text } : null, level: null, step: 4 })
     : Object.assign({}, d, { beat: null, step: 3 });
   const ok = await sbWriteDraft(id, next);
   if(!ok) return;
+  /* The step's own state (taps, the chart's view and undo) goes once the draft is cleared, never before (review round 2,
+     R2-7: a refused Clear left the Chart step on its paste view over a draft that still has its bars). */
+  if(bt){ bt.taps = []; bt.fit = null; bt.drift = null; }
+  if(st){ st.view = 'paste'; st.sel = null; st.undo = []; st.text = null; }
   if(which === 'volume'){ if(sbMem.id === id){ sbMem.level = null; sbMem.failed = null; } sbStepOn = 2; }
   if(old) await sbDeleteAudio(old, gen);
   if(which === 'chart') sbStepOn = 4;
