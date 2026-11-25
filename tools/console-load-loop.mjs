@@ -556,7 +556,7 @@ class FakeServer {
     const c0 = docs['config/class'] || {};
     this.history = [{ v: Number(c0.configVersion) || 0, by: 'seed', changed: [] }];
     this.commits = []; this.events = []; this.violations = [];
-    this.onRead = null; this.onCommit = null;
+    this.onRead = null; this.onCommit = null; this.onIssue = null;
   }
   latency() { const r = this.rng(); return r < 0.85 ? 8 + Math.floor(this.rng() * 70) : 120 + Math.floor(this.rng() * 480); }
   log(text) { this.events.push({ t: this.clock.now, text }); }
@@ -584,6 +584,7 @@ class FakeServer {
   async query(prefix, who, filters) {
     const rec = { i: this.reads.length, kind: prefix === 'progress' ? 'prog' : 'col', path: prefix, t0: this.clock.now, t1: null, ok: null, load: who.load, done: false };
     this.reads.push(rec); this.inflight++;
+    if (this.onIssue) this.onIssue(rec);
     if (rec.kind === 'prog') { this.progInflight++; this.maxProgInflight = Math.max(this.maxProgInflight, this.progInflight); }
     try {
       await this.clock.sleep(this.latency(), { kind: 'server' });
@@ -870,7 +871,7 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail'];
 const MIN = 60000, SEC = 1000;
 const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true } };
 const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
@@ -893,8 +894,9 @@ function genCase(seed, k, famOverride) {
   else if (fam === 'healthy') { heal = 5 * MIN; for (let t = 90 * SEC; t < heal; t += 30 * SEC) { const x = r(); slot(t, t + 30 * SEC, x < 0.35 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
   else if (fam === 'empty') { heal = 0; }
   else if (fam === 'live') { heal = r.int(3, 5) * MIN; boot = 'livequiz'; slot(0, heal, ST[r.pick(['prog', 'cfg', 'both'])]); }
+  else if (fam === 'detail') { heal = 4 * MIN; boot = 'activities'; slot(0, heal, ST.prog); c.windowClicks = 2; c.outageOnCommit = true; }
   c.boot = boot;
-  c.bootSub = boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
+  c.bootSub = fam === 'detail' ? 'detail' : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
   c.heal = heal;
   // Before the heal: a teacher at work.
   const pre = Math.max(heal, 3 * MIN);
@@ -905,12 +907,23 @@ function genCase(seed, k, famOverride) {
     add(tIn(80 * SEC, 110 * SEC), 'B', { cells: 'all' });
     add(tIn(125 * SEC, 170 * SEC), 'write', {});
     if (r.chance(0.5)) add(tIn(180 * SEC, 200 * SEC), 'view', { v: r.pick(SETTINGS_VIEWS) });
+    c.typeOnRetry = true;
   } else if (fam === 'r31') {
     if (r.chance(0.5)) add(tIn(150 * SEC, 200 * SEC), 'view', { v: r.pick(VIEWS) });
     if (r.chance(0.5)) add(tIn(20 * SEC, 280 * SEC), 'B', { cells: r.pick(['dates', 'mix']) });
   } else if (fam === 'storm') {
-    for (let i = 0; i < 6; i++) { add(60 * SEC + i * 10 * SEC, 'hide'); add(65 * SEC + i * 10 * SEC, 'show'); }
+    for (let i = 0; i < 12; i++) { add(60 * SEC + i * 5 * SEC, 'hide'); add(62.5 * SEC + i * 5 * SEC, 'show'); }
     if (r.chance(0.5)) add(tIn(10 * SEC, 50 * SEC), 'view', { v: r.pick(VIEWS.filter(usesRoster)) });
+  } else if (fam === 'detail') {
+    // A card's page (the update reload's note) while progress is down. The other console changes the dates; this one
+    // clicks Hidden, which lands on top and reads the settings again, and that read fails (the outage starts at the
+    // commit): the page is drawn again from the failed copy. A tab return then starts the retry, whose settings read
+    // must redraw the page before anything on it is clicked (a click 1-120 ms after that read lands).
+    add(r.int(15, 25) * SEC, 'B', { cells: 'dates' });
+    add(r.int(30, 35) * SEC, 'write', { prefer: 'hidden' });
+    add(50 * SEC, 'hide'); add(54 * SEC, 'show');
+    add(r.int(70, 80) * SEC, 'B', { cells: 'all' });
+    add(r.int(90, 100) * SEC, 'write', {});
   } else if (fam === 'live') {
     add(tIn(30 * SEC, 80 * SEC), 'view', { v: r.pick(VIEWS.filter(usesRoster)) });
     add(tIn(100 * SEC, 140 * SEC), 'view', { v: 'livequiz' });
@@ -918,7 +931,7 @@ function genCase(seed, k, famOverride) {
   } else {
     const views = r.int(1, 4), subs = r.int(0, 2), writes = r.int(1, 3), bs = r.int(1, 2);
     for (let i = 0; i < views; i++) add(tIn(5 * SEC, pre - 10 * SEC), 'view', { v: r.chance(0.5) ? r.pick(SETTINGS_VIEWS) : r.pick(VIEWS) });
-    for (let i = 0; i < subs; i++) add(tIn(5 * SEC, pre - 10 * SEC), 'sub', { what: r.pick(['board', 'list', 'pick', 'songs-detail']) });
+    for (let i = 0; i < subs; i++) add(tIn(5 * SEC, pre - 10 * SEC), 'sub', { what: r.pick(['board', 'list', 'pick', 'songs-detail', 'who', 'who']) });
     for (let i = 0; i < writes; i++) add(tIn(10 * SEC, pre - 5 * SEC), 'write', {});
     for (let i = 0; i < bs; i++) add(tIn(5 * SEC, pre - 5 * SEC), 'B', { cells: r.pick(['dates', 'mix', 'all']) });
     if (r.chance(0.3)) add(tIn(10 * SEC, pre - 10 * SEC), 'refresh');
@@ -989,7 +1002,7 @@ async function runCase(seed, k, o) {
   const c = genCase(seed, k, o.family);
   const r = makeRng(seed, k, 11);
   const clock = new VClock();
-  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0 } };
+  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0 } };
   W.server = new FakeServer({ clock, rng: makeRng(seed, k, 2), docs: seedDocs(c.empty, c.emptyKind), netAt: c.netAt });
   if (c.boot === 'livequiz' || c.fam === 'live') W.server.docs.set('liveQuiz/current', { state: 'question', quizId: 'string-id', qIndex: 0, sessionId: 'sess-1', limitSec: 20, scores: {}, mode: 'class' });
   const verbose = o.verbose;
@@ -1012,21 +1025,31 @@ async function runCase(seed, k, o) {
     if (rec.kind === 'cfg' && rec.load && rec.ok && c.windowClicks > 0 && !c.empty) {
       c.windowClicks--;
       const at = clock.now + 1 + r.int(0, 119);
-      queue.push({ t: at, kind: 'write', window: true }); queue.sort((a, b) => a.t - b.t);
+      queue.push({ t: at, kind: 'write', window: true, injected: true }); queue.sort((a, b) => a.t - b.t);
+    }
+  };
+  W.server.onIssue = rec => {
+    if (c.typeOnRetry && !W.typedOnRetry && rec.kind === 'prog' && rec.load && clock.now >= c.healAt) {
+      W.typedOnRetry = true;
+      queue.push({ t: clock.now + 1 + r.int(0, 39), kind: 'type', dur: 15 * SEC, guard: true, injected: true }); queue.sort((a, b) => a.t - b.t);
     }
   };
   W.server.onCommit = cm => {
     if (cm.by !== 'A') return;
     W.stats.committed++;
+    if (c.outageOnCommit && !W.outageDone) { W.outageDone = true; const cur = c.netAt(clock.now); c.slots.push({ from: clock.now, to: clock.now + 5 * SEC, cfg: true, prog: cur.prog }); say('the settings go down for 5 s, starting at this commit'); }
     if (!cm.ctrl || !cm.ctrl.born) return;
     // R3-3 (b): this write's control was drawn from version bornV; a second-console change after that, to a cell it writes, must refuse it.
     const mine = new Set(); cm.patch.forEach(pt => leaves(pt).forEach((v, path) => mine.add(path)));
     const hit = W.server.history.filter(h => h.by === 'B' && h.v > cm.ctrl.bornV && h.v <= cm.readCV).flatMap(h => h.changed.filter(p => mine.has(p) || [...mine].some(m => p.startsWith(m + '.') || m.startsWith(p + '.'))));
     if (hit.length) fail('R3-3', `a write from a control drawn at v${cm.ctrl.bornV} (${cm.ctrl.sel}) committed over the other console's later change to ${clip([...new Set(hit)].join(', '), 120)} — a healthy console refuses it ("Nothing was saved")`);
   };
+  // Up to T, or to an event a read or a commit has just queued (a click right after a read must happen then, not later).
   const advanceTo = async T => {
     for (;;) {
       await flushMicrotasks(); pollCopy();
+      const injected = queue.reduce((m, e) => e.injected && e.t < m ? e.t : m, Infinity);
+      if (injected < T) T = Math.max(clock.now, injected);
       const next = clock.q[0];
       if (!next || next.at > T) { clock.now = Math.max(clock.now, T); await flushMicrotasks(); pollCopy(); return; }
       clock.q.shift();
@@ -1068,6 +1091,8 @@ async function runCase(seed, k, o) {
       if (noteEl && p.studentsAt) fail('R3-1', `${p.view}: the "student progress did not load" note while the roster is loaded`);
       if (noteEl && /class settings did load/.test(noteTxt) && lastCfg && !lastCfg.ok) fail('R3-1', `${p.view}: the note says the class settings loaded, while the newest settings read (${mmss(lastCfg.t1)}) failed`);
       if (/Could not load (student data|the student list)/.test(text) && p.studentsAt) fail('R3-1', `${p.view}: a roster failure line while the roster is loaded`);
+      const lastProg = newestDone('prog');
+      if (/Could not load student data/.test(text) && (!lastProg || lastProg.ok)) fail('R3-1', `${p.view}: "Could not load student data" while ${lastProg ? 'the newest progress read (' + mmss(lastProg.t1) + ') was good' : 'no progress read was made (the settings read failed first)'}`);
       if (/^Loading/.test(text) && !clock.q.some(t => t.meta.kind !== 'interval')) fail('R1-dead', `${p.view}: left on "${clip(text, 60)}" with nothing left to run`);
     }
     // R3-2: nothing from the roster while it has failed to load.
@@ -1085,6 +1110,8 @@ async function runCase(seed, k, o) {
     }
     // R2-reads: the retry never stops while the roster is down, visible, on a view that reads it.
     if (quiet && rosterDown && !hidden && usesRoster(p.view) && !p.timer && !p.refreshing) fail('R2-reads', `${p.view}: the roster is down and nothing will read it again (no minute timer, no read out)`);
+    // R2-busy: a retry that lands while the teacher types is thrown away, never drawn over the box (review R2-4).
+    if (W.guard && !W.guard.isConnected) { fail('R2-busy', `${p.view}: a retry drew the view over the box being typed in`); W.guard = null; }
     // R1-empty / R1-live.
     if (c.empty && quiet && (/Could not (read|load)/.test(text) || noteEl)) fail('R1-empty', `${p.view}: a failure line in a good, empty class ("${clip(text, 80)}")`);
     if (p.view === 'livequiz') {
@@ -1098,6 +1125,7 @@ async function runCase(seed, k, o) {
     const root = app(); if (!root) return;
     let els = root.querySelectorAll(WRITE_SEL).filter(el => el.isConnected && !el.disabled && !el.closest('#t-side'));
     if (ev.prefer === 'date') { const d = els.filter(el => el.matches('input[data-set-activity-date], [data-publish-activity]')); if (d.length) els = d; }
+    if (ev.prefer === 'hidden') { const d = els.filter(el => el.matches('[data-set-activity-hidden]')); if (d.length) els = d; }
     if (!els.length) { W.stats.noControl++; say('write click: no write control on screen'); return; }
     const el = r.pick(els), info = ctrlInfo(el);
     if (ev.window) { W.stats.windowClicks++; if (staleVsBg(el)) fail('R3-3', `a click ${ev.window ? 'right after' : 'after'} a first-load / retry read moved the copy to v${W.bgCopy.v} landed on a control drawn from an older copy (${info.sel})`); }
@@ -1117,7 +1145,10 @@ async function runCase(seed, k, o) {
     queue.sort((a, b) => a.t - b.t);
     const ev = queue.shift();
     if (!ev) break;
+    if (ev.injected) ev.injected = false;
     await advanceTo(ev.t);
+    // A read or a commit during that advance queued an earlier event: put this one back and take that first.
+    if (queue.some(e => e.injected && e.t < ev.t)) { queue.push(ev); continue; }
     const sb = A.doc.getElementById('t-side');
     switch (ev.kind) {
       case 'view': { const b = sb && sb.querySelector(`[data-view="${ev.v}"]`); say(`click: ${ev.v}`); if (b) A.fire(b, 'click'); break; }
@@ -1126,22 +1157,35 @@ async function runCase(seed, k, o) {
         if (ev.what === 'board') t = g && g.querySelector('[data-ta-board-open]');
         else if (ev.what === 'list') t = g && g.querySelector('[data-ta-board-back]');
         else if (ev.what === 'pick') { const rows = g ? g.querySelectorAll('[data-ta-pick]') : []; t = rows.length ? r.pick(rows) : null; }
-        else if (ev.what === 'songs-detail') { const b = sb && sb.querySelector('[data-view="songs"]'); if (b) { A.fire(b, 'click'); await advanceTo(clock.now + 2 * SEC); } const pv = grid() && grid().querySelectorAll('[data-open-activity]'); t = pv && pv.length ? r.pick(pv) : null; }
-        say(`click: ${ev.what}${t ? '' : ' (not on screen)'}`); if (t) A.fire(t, 'click'); break;
+        else if (ev.what === 'songs-detail') { const b = !ev.stay && sb && sb.querySelector('[data-view="songs"]'); if (b) { A.fire(b, 'click'); await advanceTo(clock.now + 2 * SEC); } const pv = grid() && grid().querySelectorAll('[data-open-activity]'); t = pv && pv.length ? r.pick(pv) : null; }
+        else if (ev.what === 'tab') { const tabs = g ? g.querySelectorAll('[data-ta-tab]') : []; t = tabs.length ? r.pick(tabs) : null; }
+        else if (ev.what === 'who') {
+          // Open a Who picker: the shell's toggle listener fills its student list.
+          if (A.peek().view !== 'activities') { const b = sb && sb.querySelector('[data-view="activities"]'); if (b) { A.fire(b, 'click'); await advanceTo(clock.now + 2 * SEC); } }
+          let pk = grid() ? grid().querySelectorAll('details[data-board-who]') : [];
+          if (!pk.length) { const bo = grid() && grid().querySelector('[data-ta-board-open]'); if (bo) { A.fire(bo, 'click'); await advanceTo(clock.now + 2 * SEC); pk = grid() ? grid().querySelectorAll('details[data-board-who]') : []; } }
+          if (pk.length) { const d = r.pick(pk); d.open = true; W.stats.whoOpened++; say('click: open a Who picker'); A.fire(d, 'toggle'); }
+          else say('click: who (no picker on screen)');
+          break;
+        }
+        say(`click: ${ev.what}${t ? '' : ' (not on screen)'}`); if (t) A.fire(t, 'click');
+        if (ev.stay && t) { await advanceTo(clock.now + 2 * SEC); const q = A.peek(); if (q.screen === 'detail' && !q.ok) { W.stats.detailKept++; say('the card stays on screen over a failed settings read (R1-5)'); } }
+        break;
       }
       case 'refresh': { const b = A.doc.querySelector('[data-refresh-students]'); say('click: Refresh'); if (b) A.fire(b, 'click'); break; }
       case 'hide': hidden = true; A.doc.hidden = true; A.doc.visibilityState = 'hidden'; say('the tab is hidden'); A.fire(A.doc, 'visibilitychange'); break;
-      case 'show': hidden = false; A.doc.hidden = false; A.doc.visibilityState = 'visible'; say('the tab is back'); A.fire(A.doc, 'visibilitychange'); break;
+      case 'show': { const q = A.peek(); if (c.fam === 'detail' && q.screen === 'detail' && !q.ok) { W.stats.detailKept++; say('a card page drawn from a failed settings read is on screen (its controls too)'); } }
+        hidden = false; A.doc.hidden = false; A.doc.visibilityState = 'visible'; say('the tab is back'); A.fire(A.doc, 'visibilitychange'); break;
       case 'type': {
         const g = grid(); const boxes = g ? g.querySelectorAll('input, select, textarea').filter(el => !el.matches('[data-ta-search]')) : [];
-        if (boxes.length) { const el = r.pick(boxes); A.doc.activeElement = el; busy = 'type'; say(`typing in ${ctrlInfo(el).sel} for ${Math.round(ev.dur / 1000)} s`); queue.push({ t: ev.t + ev.dur, kind: 'unbusy' }); }
+        if (boxes.length) { const el = r.pick(boxes); A.doc.activeElement = el; busy = 'type'; if (ev.guard) { W.guard = el; W.stats.busyGuards++; } say(`typing in ${ctrlInfo(el).sel} for ${Math.round(ev.dur / 1000)} s${ev.guard ? ' (started while a retry is out)' : ''}`); queue.push({ t: ev.t + ev.dur, kind: 'unbusy' }); }
         else say('typing: no box on screen'); break;
       }
       case 'drag': {
         if (grid() && grid().querySelector('.t-board')) { A.ctx.__setDrag('ca-1'); busy = 'drag'; say(`dragging a card for ${Math.round(ev.dur / 1000)} s`); queue.push({ t: ev.t + ev.dur, kind: 'unbusy' }); }
         else say('dragging: no board on screen'); break;
       }
-      case 'unbusy': if (busy === 'drag') A.ctx.__setDrag(null); A.doc.activeElement = A.doc.body; say(`the ${busy} ends`); busy = null; break;
+      case 'unbusy': if (W.guard && !W.guard.isConnected) fail('R2-busy', 'a retry drew the view over the box being typed in'); W.guard = null; if (busy === 'drag') A.ctx.__setDrag(null); A.doc.activeElement = A.doc.body; say(`the ${busy} ends`); busy = null; break;
       case 'B': W.server.external(bPatch(r, W.server.docs.get('config/class') || {}, ev.cells)); say(`the second console writes (${ev.cells})`); break;
       case 'write': clickWrite(ev); break;
       case 'heal': W.rosterAtHeal = !!A.peek().studentsAt; say(`the network is healthy from here on${W.rosterAtHeal ? ' (the roster is loaded: no recovery to check)' : ''}`); break;
@@ -1163,7 +1207,7 @@ async function runCase(seed, k, o) {
     // Let the reads the event started land before looking (up to 3 s, never past the next event).
     const nextT = queue.length ? Math.min(...queue.map(e => e.t)) : c.end;
     const until = Math.min(clock.now + 3 * SEC, nextT - 1);
-    while (W.server.inflight && clock.now < until) await advanceTo(Math.min(until, clock.now + 50));
+    while (W.server.inflight && clock.now < until && !queue.some(e => e.injected && e.t <= clock.now)) await advanceTo(Math.min(until, clock.now + 50));
     check(ev.kind);
   }
   await advanceTo(c.end);
@@ -1200,7 +1244,7 @@ async function main() {
   const t0 = Date.now();
   SITE = compileSite(resolve(opt('--root', REPO)));
   const ks = only !== null ? [Number(only)] : Array.from({ length: n }, (_, i) => i);
-  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0 }, rate: {} };
+  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0 }, rate: {} };
   for (const k of ks) {
     heartbeat(`case ${k}`, true);
     const { c, W } = await runCase(seed, k, { verbose: flag('--verbose'), family });
@@ -1224,10 +1268,13 @@ async function main() {
     if (st.windowClicks < 4) floors.push(`only ${st.windowClicks} clicks right after a background read (floor 4)`);
     if (st.downChecks < 200) floors.push(`only ${st.downChecks} checks with the roster down (floor 200)`);
     if (st.recoverChecks < 30) floors.push(`only ${st.recoverChecks} recovery checks (floor 30)`);
+    if (st.busyGuards < 3) floors.push(`only ${st.busyGuards} boxes typed in while a retry was out (floor 3)`);
+    if (st.whoOpened < 5) floors.push(`only ${st.whoOpened} Who pickers opened (floor 5)`);
+    if (st.detailKept < 5) floors.push(`only ${st.detailKept} cards kept on screen over a failed settings read (floor 5)`);
   }
   floors.forEach(f => console.log(`  ✗ [coverage] ${f}`));
   const rate = Object.keys(out.rate).sort().map(x => `${x} ${out.rate[x]}`).join(', ');
-  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.recoverChecks} recovery checks; most reads in a quiet minute: ${rate || '—'}`;
+  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry; most reads in a quiet minute: ${rate || '—'}`;
   process.stderr.write(`console-load-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s\n`);
   if (out.failed.length || floors.length) {
     console.log(`console-load-loop: ✗ ${out.failed.length} of ${ks.length} cases failed (${Object.keys(out.byTag).sort().map(t => t + ' ' + out.byTag[t]).join(', ') || 'coverage'}) — ${detail}`);
