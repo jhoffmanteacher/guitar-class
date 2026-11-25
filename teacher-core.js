@@ -697,31 +697,39 @@ async function loadAllStudents(opts){
   // auto: the minute timer or a tab return running a failed first load again (teacherRefreshStudents).
   const auto=!!(opts&&opts.auto);
   teacherRefreshing=true; teacherPaintRefreshBar();
+  /* Pause/archive flags live in config/class, so it has to be in hand before the roster is filtered — otherwise the
+     first paint shows archived students and then blinks them away. It is read here only when the copy in hand is not
+     a good read (the first load, or the newest read failed): a retry that read it again replaced the copy the views on
+     screen were drawn from without drawing them again, so a click on the older screen passed the version check and
+     overwrote another console's change (review R3-3). The same one read is all a retry costs while the settings fail. */
+  let readCfg=!teacherClassConfigReadOk;
   try{
-    // Pause/archive flags live in config/class, so it has to be in hand
-    // before the roster is filtered — otherwise the first paint shows
-    // archived students and then blinks them away. Read FIRST (review R2-1):
-    // while it keeps failing, each retry costs one read, not the roster's.
-    await loadTeacherClassConfig();
-    /* A failed read is {} (no archived list): filtering by it would bring archived students back into every view.
-       Refuse to draw, as Games and the board do; teacherStudentsAt stays 0, so Refresh runs this whole load again. */
-    if(!teacherClassConfigReadOk){
-      teacherRefreshing=false; teacherRefreshFailed=true; teacherRosterFail='settings'; teacherPaintRefreshBar();
-      teacherPaintRosterFailed();
-      return;
+    if(readCfg){
+      await loadTeacherClassConfig();
+      /* A failed read is {} (no archived list): filtering by it would bring archived students back into every view.
+         Refuse to draw, as Games and the board do; teacherStudentsAt stays 0, so Refresh runs this whole load again. */
+      if(!teacherClassConfigReadOk){
+        teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
+        teacherPaintRosterFailed();
+        return;
+      }
+      /* A retry's read moved the copy: draw the view from it now, before the roster read, so no control drawn from the
+         older copy is left on screen meanwhile (review R3-3). Not at boot: nothing is drawn yet. */
+      if(teacherBodyDrawn && teacherRosterDown()){ readCfg=false; renderTeacherBody(); }
     }
     const fresh=await teacherFetchStudents();
     /* An automatic retry that lands while the teacher is mid-drag or typing on a view drawn without the roster is
-       thrown away, as a refresh's is; the next tick tries again. */
-    if(auto && teacherRefreshBlocker()){ teacherRefreshing=false; teacherPaintRefreshBar(); return; }
+       thrown away, as a refresh's is; the next tick tries again. Not when this load read the settings and has not
+       drawn them yet (the first load): the views must be drawn from the copy now in hand. */
+    if(auto && !readCfg && teacherRefreshBlocker()){ teacherRefreshing=false; teacherPaintRefreshBar(); return; }
     allStudentsRaw=fresh;
     teacherApplyRosterFilter();
   } catch(e){
-    teacherRefreshing=false; teacherRefreshFailed=true; teacherRosterFail='progress'; teacherPaintRefreshBar();
+    teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
     teacherPaintRosterFailed();
     return;
   }
-  teacherRefreshing=false; teacherRefreshFailed=false; teacherRosterFail='';
+  teacherRefreshing=false; teacherRefreshFailed=false;
   teacherStudentsAt=Date.now();
   // Rendering is deliberately OUTSIDE the fetch try/catch above — a bug in
   // renderTeacherBody/renderTeacherSummary shouldn't be reported to the
@@ -738,37 +746,44 @@ async function loadAllStudents(opts){
 }
 
 /* A first roster load that failed (review R1-4, R2-1, R2-4). A view drawn from the roster alone (the Refresh bar's
-   views, Practice minutes with its own "Could not load the student list") says what failed instead of drawing. After a
-   failed PROGRESS read the views drawn from the class settings (TEACHER_SETTINGS_VIEWS) are still drawn, with one line
-   above them (teacherPaintRosterNote), so the day's activities can be released; after a failed SETTINGS read none
-   is (a failed config read is never drawn as real state). Live In-Class Games and the other tools are drawn as usual:
-   left alone when already on screen (the line used to replace #lq-stage), drawn when the box still holds
-   index.html's "Loading student data…" (the console booted on one, e.g. the update reload's resume). The minute timer
-   (teacherSyncAutoRefresh) then reads again while a roster view is open and the tab is visible; renderTeacherBody
-   reads again when a blocked view is opened. A read that lands draws the view. */
-let teacherRosterFail='';       // why the first roster load failed: 'settings' or 'progress'; '' once one lands
-let teacherBodyDrawn=false;     // renderTeacherBody has run: the box no longer holds index.html's loading line
+   views, Practice minutes with its own "Could not load the student list") says what failed instead of drawing. While the
+   newest class-settings read is good, the views drawn from the class settings (TEACHER_SETTINGS_VIEWS) are still drawn,
+   with one line above them (teacherPaintRosterNote), so the day's activities can be released; while it failed none is
+   (a failed config read is never drawn as real state). What is on screen follows the two reads as they are NOW
+   (review R3-1): the box says which one failed, and a failure line painted here is drawn over again once the state it
+   was painted for is gone. Live In-Class Games and the other tools are drawn as usual: left alone when already on
+   screen (the line used to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…"
+   (the console booted on one, e.g. the update reload's resume). The minute timer (teacherSyncAutoRefresh) then reads
+   again while a roster view is open and the tab is visible; renderTeacherBody reads again when a blocked view is
+   opened. A read that lands draws the view. */
+let teacherBodyDrawn=false;       // renderTeacherBody has run: the box no longer holds index.html's loading line
+let teacherRosterBoxFailed=false; // the box holds a failure line painted by teacherPaintRosterFailed, not a view
 const TEACHER_SETTINGS_VIEWS=['activities','games','manage','songs'];
 function teacherViewUsesRoster(v){ return !TEACHER_NO_REFRESH_BAR_VIEWS.includes(v) || v==='minutes'; }
 function teacherRosterDown(){ return !teacherStudentsAt && teacherRefreshFailed; }
-function teacherRosterBlocks(v){ return teacherRosterDown() && teacherViewUsesRoster(v) && !(teacherRosterFail==='progress' && TEACHER_SETTINGS_VIEWS.includes(v)); }
+function teacherRosterBlocks(v){ return teacherRosterDown() && teacherViewUsesRoster(v) && !(teacherClassConfigReadOk && TEACHER_SETTINGS_VIEWS.includes(v)); }
 function teacherPaintRosterFailed(){
   teacherSyncAutoRefresh();
-  if(!teacherRosterBlocks(teacherView)){ if(teacherBodyDrawn) teacherPaintRosterNote(); else renderTeacherBody(); return; }
+  if(!teacherRosterBlocks(teacherView)){ if(teacherBodyDrawn && !teacherRosterBoxFailed) teacherPaintRosterNote(); else renderTeacherBody(); return; }
+  teacherPaintRosterNote();
   if(teacherView==='minutes'){ renderTeacherMinutes(); return; }
   const box=document.getElementById('t-grid-container');
-  if(box) box.innerHTML = teacherRosterFail==='settings'
-    ? '<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>'
-    : '<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
+  if(box){
+    box.innerHTML = !teacherClassConfigReadOk
+      ? '<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>'
+      : '<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
+    teacherRosterBoxFailed=true;
+  }
 }
 /* The line above a view drawn from the class settings while the progress read is failing (review R2-4). A sibling of
-   #t-grid-container, so the view's own repaints keep it; gone once a read lands or another view is opened. */
+   #t-grid-container, so the view's own repaints keep it; gone once a read lands or another view is opened. It says
+   nothing about the class settings: the view's own read can fail after it is painted, and says so itself (R3-1). */
 function teacherPaintRosterNote(){
-  const show=teacherRosterDown() && teacherRosterFail==='progress' && TEACHER_SETTINGS_VIEWS.includes(teacherView);
+  const show=teacherRosterDown() && !teacherRosterBlocks(teacherView) && TEACHER_SETTINGS_VIEWS.includes(teacherView);
   const old=document.getElementById('t-roster-note');
   if(!show){ if(old) old.remove(); return; }
   const box=document.getElementById('t-grid-container');
-  if(!old && box) box.insertAdjacentHTML('beforebegin', '<div id="t-roster-note" class="t-loading" role="status" style="padding:var(--sp-10) var(--sp-20)">Student progress did not load, so this page shows no students and no counts (the class settings did load). It is read again every minute; Refresh tries now.</div>');
+  if(!old && box) box.insertAdjacentHTML('beforebegin', '<div id="t-roster-note" class="t-loading" role="status" style="padding:var(--sp-10) var(--sp-20)">Student progress did not load, so this page shows no students and no counts. It is read again every minute; Refresh tries now.</div>');
 }
 
 /* ── Keeping student progress current (2026-10-12) ──────────────────────
@@ -785,9 +800,10 @@ function teacherPaintRosterNote(){
        up during class. The timer stops on every other view and while the
        tab is hidden;
      - and, while the FIRST load has failed, about once a minute on any view
-       drawn from the roster (review R2-1): each tick runs that load again,
-       one config/class read first, so a failure that lasts costs about one
-       or two reads a minute.
+       drawn from the roster (review R2-1): each tick runs that load again.
+       It reads config/class only while the newest read of it failed, and
+       the progress docs only once that one is good, so a failure that lasts
+       costs one read a tick.
    One read at a time. A read that lands while the teacher is mid-drag,
    typing in a box, has the rename box open or is selecting text is thrown
    away rather than painted over that work; the next tick tries again. The
@@ -1450,7 +1466,7 @@ function renderTeacherBody(){
      view, fills it like the student site (site-fill.js, Jonathan 2026-11-16). Before the view paints. */
   if(typeof siteFillStage==='function') siteFillStage(teacherView==='livequiz');
   teacherSyncAutoRefresh();   // the progress timer runs on Class activities, and on a roster view after a failed first load
-  teacherBodyDrawn=true;
+  teacherBodyDrawn=true; teacherRosterBoxFailed=false;
   /* The first roster read failed: a view drawn from it would say "No student data yet". Say what failed and read
      again; one that lands draws this view (review R1-4). The views drawn from the class settings are drawn after a
      failed progress read, with the line above them (review R2-4). */
