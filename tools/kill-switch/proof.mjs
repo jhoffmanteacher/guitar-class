@@ -24,6 +24,16 @@
                                keeps every track and record, serves a stored
                                track from the cache with no request and the shell
                                from the cache
+     the open pages            the page's half (the service-worker block of
+                               app/start.js, run on the takeovers above): the
+                               kill switch reloads a returning tab, a first-visit
+                               tab, a hard-reloaded tab and a tab claimed while it
+                               loaded exactly once each, and its held message alone
+                               reloads a tab it took over before the page's script
+                               ran; a first visit is not
+                               reloaded by its own worker; the real worker coming
+                               back reloads a tab opened under the kill switch once
+                               (APP-CORE-1, 2026-11-25)
      names and tools           the kept names are the pinned ones
                                (tools/sw-audio-map.mjs) and the ones the real
                                worker executes; `checks.mjs --live` reads
@@ -35,7 +45,7 @@
    breakage to turn at least one assertion red. --verbose prints the first red
    assertion of every breakage.
 
-   usage: node tools/kill-switch/proof.mjs [path/to/kill-sw.js] [--real path/to/sw.js] [--verbose] [--no-mutations]
+   usage: node tools/kill-switch/proof.mjs [path/to/kill-sw.js] [--real path/to/sw.js] [--page path/to/app/start.js] [--verbose] [--no-mutations]
    Last line:
      kill-switch-proof: <assertions> assertions in <scenarios> scenarios, <caught> of <mutations> mutations caught
    Exit 0 only when every assertion holds and every mutation is caught.
@@ -50,13 +60,20 @@ import { AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from '../sw-a
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const args = process.argv.slice(2);
-const realAt = args.indexOf('--real');
+const realAt = args.indexOf('--real'), pageAt = args.indexOf('--page');
 const realPath = realAt >= 0 ? args[realAt + 1] : join(ROOT, 'sw.js');
-const killPath = args.find((a, i) => !a.startsWith('--') && !(realAt >= 0 && i === realAt + 1)) || join(HERE, 'kill-sw.js');
+const pagePath = pageAt >= 0 ? args[pageAt + 1] : join(ROOT, 'app', 'start.js');
+const killPath = args.find((a, i) => !a.startsWith('--') && !(realAt >= 0 && i === realAt + 1) && !(pageAt >= 0 && i === pageAt + 1)) || join(HERE, 'kill-sw.js');
 const VERBOSE = args.includes('--verbose');
 const lf = s => s.replace(/\r\n/g, '\n');
 const KILL_SRC = lf(readFileSync(killPath, 'utf8'));
 const REAL_SRC = lf(readFileSync(realPath, 'utf8'));
+/* The page's half: the service-worker block of app/start.js, up to the hash router (empty if either end moved). */
+const PAGE_SRC = (() => {
+  const s = lf(readFileSync(pagePath, 'utf8'));
+  const a = s.indexOf("if ('serviceWorker' in navigator"), b = s.indexOf('/* ── The hash router listens');
+  return a >= 0 && b > a ? s.slice(a, b) : '';
+})();
 const BASE = 'https://class.test/guitar-class/';
 
 /* ── stand-ins for the browser ─────────────────────────────────────────── */
@@ -159,6 +176,53 @@ function boot(src, storage) {
   };
 }
 
+/* One open page running the real service-worker block of app/start.js, as the browser holds it when that block runs:
+   its controller, the navigation's workerStart (0 = no worker served it) and the registration's active worker (a hard
+   reload: no controller while the site's worker is active). A worker is one ServiceWorker object per page, as in a
+   browser. Nothing unsaved and nothing busy, so the reload goes straight through (what it waits for:
+   tools/update-reload-loop.mjs in a browser). */
+const tick = () => new Promise(r => setTimeout(r, 0));
+function openPage(pageSrc, { controller = null, workerStart = 0, active = null } = {}) {
+  const listeners = {}, objects = new Map();
+  let reloads = 0;
+  const sw = w => {
+    if (!w) return null;
+    if (!objects.has(w)) objects.set(w, { asked: [], postMessage(m) { this.asked.push(m); } });
+    return objects.get(w);
+  };
+  const container = {
+    controller: sw(controller),
+    addEventListener: (t, f) => { (listeners[t] = listeners[t] || []).push(f); },
+    register: async () => ({}),
+    getRegistration: async () => (active ? { active: sw(active) } : undefined),
+  };
+  const ctx = vm.createContext({ Promise, Date, Object, Set, setTimeout, clearTimeout, console,
+    navigator: { serviceWorker: container }, location: { protocol: 'https:', reload: () => { reloads++; } },
+    performance: { getEntriesByType: () => [{ workerStart }] },
+    window: { addEventListener() {} }, document: { readyState: 'complete', hidden: false, addEventListener() {} },
+    sessionStorage: { setItem() {} }, swResumeSave() {},
+    hasUnsavedWrites: () => false, flushBeforeLeaving: async () => true, _flushP: null, _dirtyKeys: new Set(), saveTimer: null, flushSave: async () => {},
+    recState: {}, shuffleDrills: {}, deckDrills: {}, earDrills: {}, ecRuns: {}, ncLive: null, chcLive: null, pcState: null });
+  vm.runInContext(pageSrc, ctx, { filename: 'app/start.js' });
+  const tell = w => { for (const m of w.posted.slice(0, 1)) for (const f of listeners.message || []) f({ type: 'message', data: m }); };
+  return {
+    sw, get reloads() { return reloads; },
+    /* Worker w takes over: a page its registration already controls gets "controllerchange" as w activates, one it
+       does not control only through w's claim(); then the message w posted to its windows, which reaches only a page
+       it now controls. */
+    async takeover(w) {
+      if (container.controller || w.events.includes('claim')) {
+        container.controller = sw(w);
+        for (const f of listeners.controllerchange || []) f({ type: 'controllerchange' });
+        tell(w);
+      }
+      await tick();
+    },
+    /* The message of a takeover that came before the block ran, held by the browser until the page could hear it. */
+    async heldMessage(w) { tell(w); await tick(); },
+  };
+}
+
 /* ── the scenarios ─────────────────────────────────────────────────────── */
 async function runScenarios(killSrc) {
   const out = [];
@@ -243,8 +307,9 @@ async function runScenarios(killSrc) {
   }
 
   scenario = 'the real worker comes back';
+  let realBack = null;
   {
-    const real2 = boot(REAL_SRC, st);
+    const real2 = realBack = boot(REAL_SRC, st);
     let bad = null;
     try { await real2.install(); await real2.activate(); } catch (e) { bad = e; }
     check('it installs and activates over the kill switch', !bad && real2.events.includes('skipWaiting') && real2.events.includes('claim'));
@@ -260,6 +325,45 @@ async function runScenarios(killSrc) {
     check('...and for a Range request (what <audio> sends)', rangeHit.handled && rangeHit.res.status === 200 && real2.calls.length === n);
     const page = await real2.get('index.html', { mode: 'navigate' });
     check('the shell is served from the cache again', page.handled && (await page.res.text()) === 'net:index.html');
+  }
+
+  /* BREAK-GLASS.md (b): open tabs reload once when the kill switch takes over, and once more when the real worker comes
+     back. That is app/start.js's half, run here on the takeovers above (each worker's own claim and message). */
+  scenario = 'the open pages';
+  {
+    let runs = !!PAGE_SRC;
+    try { if (runs) openPage(PAGE_SRC); } catch { runs = false; }
+    check('the service-worker block of app/start.js is found and runs', runs);
+    if (runs) {
+      const returning = openPage(PAGE_SRC, { controller: real1, workerStart: 12 });
+      /* A first visit (or cleared site data, a guest session): no worker, no registration. */
+      const first = openPage(PAGE_SRC);
+      /* A hard reload (Ctrl+Shift+R) bypasses the worker: no controller, though the real worker is active. */
+      const hard = openPage(PAGE_SRC, { active: real1 });
+      /* Claimed by the first worker while it still loaded (start.js, review R2-2): a controller, but no worker served it. */
+      const claimedEarly = openPage(PAGE_SRC, { controller: real1, workerStart: 0 });
+      await tick();
+      await first.takeover(real1);
+      await claimedEarly.heldMessage(real1);
+      check('a first visit: its own worker taking over does not reload it', first.reloads === 0);
+      check('...and that worker is asked for the rest of its files (gc-precache-rest)', first.sw(real1).asked.some(m => m && m.type === 'gc-precache-rest'));
+      check('a page claimed while it loaded: that worker\'s held message does not reload it', claimedEarly.reloads === 0);
+      for (const p of [returning, first, hard, claimedEarly]) await p.takeover(kill);
+      check('the kill switch reloads a returning student\'s tab exactly once (two signals, one reload)', returning.reloads === 1);
+      check('...a first-visit tab exactly once: a later worker is a new version (APP-CORE-1)', first.reloads === 1);
+      check('...a hard-reloaded tab exactly once: the first worker to take it over is already a new version', hard.reloads === 1);
+      check('...a tab claimed while it loaded exactly once', claimedEarly.reloads === 1);
+      /* Served by the real worker, and the kill switch took over before the block ran: its "controllerchange" came before
+         any listener, so the held message is the only signal (why sw.js posts it). */
+      const beaten = openPage(PAGE_SRC, { controller: kill, workerStart: 12 });
+      await beaten.heldMessage(kill);
+      check('a takeover that came before the page\'s script ran: its held message alone reloads the tab once', beaten.reloads === 1);
+      /* Opened while the kill switch was live: no fetch handler, so no worker served it (workerStart 0), yet it controls it. */
+      const underKill = openPage(PAGE_SRC, { controller: kill, workerStart: 0 });
+      await tick();
+      if (realBack) await underKill.takeover(realBack);
+      check('the real worker coming back reloads a tab opened under the kill switch exactly once', underKill.reloads === 1);
+    }
   }
 
   scenario = 'names and tools';

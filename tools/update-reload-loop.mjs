@@ -772,8 +772,9 @@ async function runCase(cs, env) {
       if (!(await caches.keys()).includes(${JSON.stringify(V1)})) return false;
       const have = new Set((await (await caches.open(${JSON.stringify(V1)})).keys()).map(r => new URL(r.url).pathname));
       return ${JSON.stringify(want1)}.every(p => have.has(p)); })()`, 0, 300);
-    /* A first visit never reloads for an update (start.js hadController): the worker taking control of a page it did not
-       load is not a new version. Counted from the first navigation to here (review R1-7). */
+    /* A first visit does not reload for its own worker (start.js hadController / ownWorker): the worker taking control of
+       a page it did not load is not a new version (a LATER worker is, and reloads: tools/kill-switch/proof.mjs, "the open
+       pages"). Counted from the first navigation to here (review R1-7). */
     check('first visit did not reload', navs === 1 && asked === 0, `${navs} committed, ${asked} asked for, ${docs} document request(s) on the first visit`);
     // 2. Come back: now the page was controlled when it loaded, as a returning student's is.
     c.step('second visit to version 1');
