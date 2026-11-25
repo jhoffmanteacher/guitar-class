@@ -187,7 +187,7 @@ async function loadProgress(){
   progressLoadFailed = false;
   progressLoadDenied = false;
   swap45Done = false;
-  progressDocFound = false; progressStartOverApplied = 0;   // Start over (progressStartOverAtSignIn)
+  progressDocFound = false; progressStartOverApplied = 0; progressDocHasLog = false;   // Start over (progressStartOverAtSignIn)
   try{
     await ensureDb();
     const doc = await db.collection('progress').doc(currentUser.uid).get();
@@ -222,10 +222,13 @@ function progressApplyDoc(doc){
       // practiceLog (per-skill rep history): Firestore is the source of truth
       // when signed in; fall back to the localStorage copy for older docs that
       // predate the field, then mirror back so the offline copy stays fresh.
+      // Not for a doc the teacher emptied (progressDeviceLogStale): the copy
+      // here is then the old log, so it is dropped and the mirror overwrites it.
       // (That local fallback is NOT swap45-remapped: nothing records which
       // numbering a device copy was written in, and remapping a copy this
       // code already wrote would swap it back.)
-      practiceLog   = data.practiceLog || loadLocalPracticeLog();
+      progressDocHasLog = !!data.practiceLog;
+      practiceLog   = data.practiceLog || (progressDeviceLogStale() ? {} : loadLocalPracticeLog());
       savePracticeLogLocal();
       songReady     = data.songReady || {};
       songReadyAt   = data.songReadyAt || {};
@@ -397,6 +400,12 @@ function progressLoadNoticeHide(){
        student's work are cleared, so the new-student start (resetLoadedProgress
        reads the local practice log and place, caAdoptLocalTicks the legacy
        activity ticks) re-uploads nothing old.
+     - Every other Chromebook keeps its copies until the student signs in there.
+       It then finds a doc (emptied by the Start over, or re-created after the
+       Delete), so none of the above runs; its old practice log is still never
+       read back in place of the doc's (progressDeviceLogStale, 2026-11-25). Its
+       other copies (practice minutes, the recording consent, the legacy ticks)
+       are not told apart from new ones: nothing in the doc says which are old.
    THE LIMIT (said in the console's dialogs and in Manage): a page that is
    already open keeps its old copy and saves it again on its next save (after a
    Delete it re-creates the record, after a Start over it puts old lesson work
@@ -417,6 +426,7 @@ const START_OVER_CLEARS = ['lessons'];
 const PROGRESS_START_OVER_FIELDS = START_OVER_CLEARS.flatMap(g => START_OVER_GROUPS[g]);
 let progressDocFound = false;          // this load's progress read found a doc
 let progressStartOverApplied = 0;      // that doc's startOverApplied (0 = never)
+let progressDocHasLog = false;         // that doc held a practiceLog (progressDeviceLogStale)
 let progressMarkers = { over: 0, del: 0, ok: false };   // this load's config/class read: this student's markers
 let progressResetNotice = '';          // 'over' | 'del': showApp says it once (showProgressResetNotice)
 function progressMarkersOf(d, uid){
@@ -438,6 +448,16 @@ function progressClearDevice(del){
   }catch(e){ /* storage unavailable: nothing kept there either */ }
   return n;
 }
+/* A doc with no practiceLog falls back to this Chromebook's copy (progressApplyDoc: a doc that predates the field).
+   Not when the teacher emptied the record: the doc says a Start over was applied (startOverApplied), or this load's
+   class settings hold a Delete for the student (the doc is then one re-created since). The copy is then the old log
+   another Chromebook kept, and reading it back would upload it whole with the next rep (sweep APP-CORE-2; Jonathan,
+   2026-11-25: "ignore the old device copy"). The price: reps made on this Chromebook after the reset whose save never
+   landed are dropped with it, as a sign-in with no doc after a Delete already drops them (progressClearDevice).
+   A doc that never had the field and was never reset keeps the fallback. */
+function progressDeviceLogStale(){
+  return progressDocFound && !progressDocHasLog && (progressStartOverApplied > 0 || (progressMarkers.ok && progressMarkers.del > 0));
+}
 /* Called once per sign-in, after loadProgress() and loadClassConfig() (app/start.js). Never throws. */
 async function progressStartOverAtSignIn(){
   if(!currentUser || IS_TEACHER_MODE || isDevBypassUser() || progressLoadFailed || !progressMarkers.ok) return;
@@ -454,6 +474,9 @@ async function progressStartOverAtSignIn(){
     }
     return;
   }
+  /* A Delete is known only now (the class settings are read after the doc), so progressApplyDoc kept this
+     Chromebook's practice log for a doc re-created since with none: drop it here. Nothing is on screen or queued yet. */
+  if(progressDeviceLogStale() && Object.keys(practiceLog || {}).length){ practiceLog = {}; savePracticeLogLocal(); }
   const T = progressMarkers.over;
   // A Delete pressed after the Start over replaces it: the record now is a new student's (review R3-1).
   if(!T || !(T > progressStartOverApplied) || progressMarkers.del > T) return;
@@ -472,7 +495,8 @@ async function progressStartOverAtSignIn(){
       applied = true;
     });
     if(currentUser !== user) return;
-    progressClearDevice(false);              // before the read below: a doc with no practiceLog falls back to the local copy
+    // This Chromebook's place, Keep-it-sharp picks and practice log (the read below would not read the log back either).
+    progressClearDevice(false);
     clearTimeout(saveTimer); _dirtyKeys.clear();
     await loadProgress();                    // the emptied doc (another tab's apply counts the same)
     if(applied) progressResetNotice = 'over';
