@@ -537,15 +537,18 @@ DATA.moods.forEach((m, i) => {
 /* popover */
 let pop = null, openBtn = null;
 
-function closePop(){
+/* Focus goes back to the word whose popover closes, unless another word is
+   opening (openPop): then it stays on that word. A listener passes an event,
+   so only an explicit false skips the refocus. */
+function closePop(refocus){
   if (pop) pop.remove();
   pop = null;
   backdrop.hidden = true;
-  if (openBtn){ openBtn.setAttribute("aria-expanded","false"); openBtn.focus(); openBtn = null; }
+  if (openBtn){ openBtn.setAttribute("aria-expanded","false"); if (refocus !== false) openBtn.focus(); openBtn = null; }
 }
 
 function openPop(btn){
-  closePop();
+  closePop(false);
   const cat = btn.dataset.cat, word = btn.dataset.word;
   let def = tdef(cat, word);
   def = def.charAt(0).toUpperCase() + def.slice(1);
