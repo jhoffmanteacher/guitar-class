@@ -432,8 +432,8 @@ function scScheduleClicks(s){
   return n;
 }
 /* Beat j is due (scLoop, the first frame at or after scBeatAt): while the Metronome was on at Start, whether or not the click sounds,
-   the beat dot (the Metronome tool's .metro-dot, .sc-beat-dot) flashes and the frame around the board pulses, stronger on the 1 of
-   each bar (sc-pulse sc-pulse-1) than on beats 2-4 (sc-pulse). An outline and a shadow, never the border: nothing moves. At most one
+   the beat dot (the Metronome tool's .metro-dot, .sc-beat-dot) flashes and the frame around the board pulses (sc-pulse), the same on
+   every beat (Jonathan, 2026-11-25: "no distinct beat anywhere"; the 1 was stronger before). An outline, never the border: nothing moves. At most one
    pulse a beat (125 BPM: about 2 a second). With prefers-reduced-motion the frame holds a steady outline for the round instead
    (styles.css) and only the dot changes. Every exit clears both (scClearBoard). */
 function scBeat(s, j){
@@ -442,10 +442,9 @@ function scBeat(s, j){
   if (dot){ dot.classList.add('flash'); s.timeouts.push(setTimeout(() => dot.classList.remove('flash'), 90)); }
   const f = s.board;
   if (f){
-    f.classList.remove('sc-pulse', 'sc-pulse-1');
+    f.classList.remove('sc-pulse');
     f.classList.add('sc-pulse');
-    if (j % 4 === 0) f.classList.add('sc-pulse-1');
-    s.timeouts.push(setTimeout(() => f.classList.remove('sc-pulse', 'sc-pulse-1'), 120));
+    s.timeouts.push(setTimeout(() => f.classList.remove('sc-pulse'), 120));
   }
   return true;
 }
@@ -457,7 +456,7 @@ function scClearBoard(){
     el.classList.remove('sc-now', 'sc-ok', 'sc-bad');
     el.querySelectorAll('.sc-mark').forEach(m => m.remove());
   });
-  if (sc.board) sc.board.classList.remove('sc-frame', 'sc-pulse', 'sc-pulse-1');
+  if (sc.board) sc.board.classList.remove('sc-frame', 'sc-pulse');
 }
 
 /* One start at a time (review: a second click while the mic prompt is open ran it twice, phase still 'ready'). */
@@ -789,7 +788,7 @@ function scFinish(complete){
   coachMicOff();
   scLock(false);
   if (s.cells[s.cur]) s.cells[s.cur].classList.remove('sc-now');
-  if (s.board) s.board.classList.remove('sc-frame', 'sc-pulse', 'sc-pulse-1');
+  if (s.board) s.board.classList.remove('sc-frame', 'sc-pulse');
   s.phase = 'report';
   scButtonLabel(s, false);
   scRenderReport();

@@ -3770,15 +3770,13 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 /* The beat dot in the row: the Metronome tool's dot at its own size (the frame around the board carries the beat too). */
 .metro-dot.sc-beat-dot{display:block;box-sizing:border-box;width:22px;height:22px;min-width:22px;margin:0;flex:none}
 .metro-dot.sc-beat-dot.flash{transform:none}   /* the row clips: a colour flash only, no grow */
-/* The frame around the board pulses on each beat while the Metronome was on at Start (scBeat): an outline and a soft shadow, never the
-   border (nothing moves), stronger on the 1 of the bar. With prefers-reduced-motion: a steady outline for the round, no pulse. */
-.strum-board.sc-frame{outline:2px solid transparent;outline-offset:3px;border-radius:var(--radius-sm);transition:outline-color 0.06s,box-shadow 0.06s}
-.strum-board.sc-frame.sc-pulse{outline-color:var(--blue-text)}
-.strum-board.sc-frame.sc-pulse:not(.sc-pulse-1){outline-color:color-mix(in srgb,var(--blue-text) 45%,transparent)}
-.strum-board.sc-frame.sc-pulse-1{box-shadow:0 0 0 6px color-mix(in srgb,var(--blue-text) 22%,transparent)}
+/* The frame around the board pulses on each beat while the Metronome was on at Start (scBeat): an outline, never the border (nothing
+   moves), the same on every beat (2026-11-25). With prefers-reduced-motion: a steady outline for the round, no pulse. */
+.strum-board.sc-frame{outline:2px solid transparent;outline-offset:3px;border-radius:var(--radius-sm);transition:outline-color 0.06s}
+.strum-board.sc-frame.sc-pulse{outline-color:color-mix(in srgb,var(--blue-text) 45%,transparent)}
 @media(prefers-reduced-motion:reduce){
   .metro-dot.sc-beat-dot,.metro-dot.sc-beat-dot.flash{transition:none;transform:none}
-  .strum-board.sc-frame,.strum-board.sc-frame.sc-pulse,.strum-board.sc-frame.sc-pulse:not(.sc-pulse-1){transition:none;outline-color:var(--blue-text);box-shadow:none}
+  .strum-board.sc-frame,.strum-board.sc-frame.sc-pulse{transition:none;outline-color:var(--blue-text);box-shadow:none}
 }
 .sc-rounds--done{color:var(--green-text)}
 /* During a strum-pattern check round (scLock) the step's tempo slider and Play clicks, and the Metronome's Start/Stop and tempo, are
