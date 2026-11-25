@@ -88,12 +88,7 @@ let sbPv = null;                       // { id, key, node, act } the preview car
 const sbEditing = new Set();           // published songs whose steps are open in this tab (Edit)
 
 /* ── The song a draft makes, and comparing it with what is published ── */
-/* JSON with sorted keys: a doc read back from the store compares equal to the one the draft makes. */
-function sbCanon(v){
-  if(Array.isArray(v)) return '[' + v.map(sbCanon).join(',') + ']';
-  if(v && typeof v === 'object') return '{' + Object.keys(v).filter(k => v[k] !== undefined).sort().map(k => JSON.stringify(k) + ':' + sbCanon(v[k])).join(',') + '}';
-  return JSON.stringify(v === undefined ? null : v);
-}
+/* (sbCanon, JSON with sorted keys, is in teacher-sb-core.js: the draft writer compares with it too.) */
 function sbHash(s){ let h = 0x811c9dc5; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16).padStart(8, '0'); }
 const SB_AUDIO_KEYS = ['id', 'bytes', 'sha256', 'durationSec', 'centsOff', 'gainDb', 'sourceSha256'];
 /* The builtSongs doc this draft publishes (savedAt aside), or null while it has no song or no copy yet. */
@@ -367,7 +362,7 @@ async function sbPublish(){
        this commits makes Firestore run the transaction again, which then finds it gone and writes nothing (read
        before the transaction, the song could be listed with its audio deleted). */
     let ver = 0;
-    const draftDoc = sbDraftDoc(d);
+    const draftDoc = sbDraftDoc(d), want = sbBaseFor(id, d);
     await db.runTransaction(async tx => {
       step = 'check';
       const snap = await tx.get(ref), hs = await tx.get(head);
@@ -378,6 +373,9 @@ async function sbPublish(){
         const ss = await tx.get(db.collection('songFiles').doc(sh.id));
         if(!teacherSfHeadMatches(ss.exists ? ss.data() || {} : null, { bytes: sh.bytes, sha256: sh.sha256 })) throw { why: 'the song\'s lyrics sheet is missing from the database. Add it again on the published song\'s page (Lyrics sheet), or remove it there' };
       }
+      /* The draft as this tab last read or wrote it, still (review R1-1): another tab's save, "Level it again" or Unpublish
+         in the gap refuses, so a recording another tab replaced is never published from here. */
+      await sbDraftCheck(tx, id, want);
       step = 'song';
       const songs = bsListOf(snap.exists ? snap.data() : null);
       if(!songs[id] && Object.keys(songs).length >= BS_MAX_SONGS) throw { why: `the Songs page list already holds ${BS_MAX_SONGS} built songs, the most it can` };
@@ -396,7 +394,7 @@ async function sbPublish(){
     const now = Date.now();
     if(!sbPublished) sbPublished = new Map();
     sbPublished.set(id, { title: doc.title, artist: doc.artist, ver, audioId: doc.audio.id, doc: JSON.parse(JSON.stringify(doc)), at: now });
-    d.savedAt = now;
+    d.savedAt = now; d.base = sbBaseOf(draftDoc);
     sbEditing.delete(id);
     if(was && was.doc && was.doc.audio && was.doc.audio.id !== doc.audio.id) await sbDeleteAudio(was.doc.audio.id, null);
     const ws = was && was.doc && was.doc.song && was.doc.song.sheet;

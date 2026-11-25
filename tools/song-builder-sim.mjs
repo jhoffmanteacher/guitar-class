@@ -70,7 +70,12 @@
    THE SWEEP CASES (2026-11-25; sweepCases): the Song builder findings SB-1 to SB-7 of the 2026-11-25 sweep, each case red
    on the code before its fix: edits kept through the 15-s re-read, a song switch and leaving the view; "Level it again"
    on a published song; leaving while the encoder runs; ◀ 1 beat ▶ and the drag of bar 1; a bar in thirds; the BPM bound.
-   Their comment above sweepCases says more. */
+   Their comment above sweepCases says more.
+
+   THE REVIEW-ROUND-1 CASES (2026-11-25; r1Cases): two console tabs on one store (a draft saved, levelled again, published
+   or deleted in one tab while the other has edits not saved yet: nothing is written over the other tab's work, no old
+   recording goes back or goes live, and the line says what happened to the edit), this tab's own Import, five planted
+   faults no case caught before, and the Beat step's BPM bound on the grid itself. Their comment above r1Cases says more. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -560,6 +565,7 @@ async function runCases(consoleSrc, sheetSrc){
   await r3Cases(consoleSrc, check);
   await sheetCases(consoleSrc, check, sheetSrc);
   await sweepCases(consoleSrc, check);
+  await r1Cases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -1682,9 +1688,15 @@ async function fixCases(consoleSrc, check){
     B.run('sbDraft().pubVer = null');
     await listenAll(B);
     await sleep(1100);
+    /* Since review R1-1 (2026-11-25) B's copy, read before A's Unpublish wrote the draft, cannot publish: nothing is
+       written and the line says so. After its next read, its copy without the last number publishes. */
+    const w0 = F8.st.writes.length;
     B.env.confirmAnswer = true; B.run('sbPublish()'); await settle(200);
+    const refused = F8.st.writes.length === w0 && /changed in another tab/.test(B.run('sbNote'));
+    const reread = B.run('sbPublished.has(' + JSON.stringify(id) + ')') === false;
+    B.run('sbDraft().pubVer = null; sbStepOn = 7; sbPublish()'); await settle(200);
     const v = (F8.S.get('builtSongsMeta/list').songs || {})[id];
-    check('R1-3: a Publish from another tab after an Unpublish (its draft without the last number) still takes a number never used before', freshVer(v, used) && v !== used, JSON.stringify({ used, v }));
+    check('R1-3: a Publish from another tab after an Unpublish (its draft without the last number) still takes a number never used before (and, since review R1-1, its copy read before the Unpublish publishes nothing)', refused && reread && freshVer(v, used) && v !== used, JSON.stringify({ refused, reread, used, v, note: B.run('sbNote').slice(0, 60) }));
   }
   /* R1-8: the preview card's key holds the page's language, so Español makes the card again */
   {
@@ -2742,6 +2754,209 @@ async function sweepCases(consoleSrc, check){
   }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
+    !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));
+}
+
+/* ── REVIEW ROUND 1 of the sweep (2026-11-25; r1Cases). Two console tabs on ONE store (review R1-1, R1-3, R1-4; the
+   reviewer's scenarios X2, X3, X4, X6, X7): each two-tab case is red on 7728eea. A copy of a draft in memory carries the
+   draft as it was last read or written (base): a write goes through only while the store still holds it, and a re-read
+   under an edit not saved yet keeps this tab's parts only where the other tab did not save that part. Then the planted
+   faults no case caught (R1-5: P4 the save's stale check, P7 pins moved by bar 1's beat, P8 trunc for round, P13 the
+   drag's and P14 the 30-ms measure's draft "as it is now"), and the Beat step's BPM bound on the grid itself (SB-7's
+   note: a grid the validator refuses is never set). Timers run 20 times faster, as in sweepCases, unless a case says. ── */
+async function r1Cases(consoleSrc, check){
+  const stores = [];
+  const fast = C => { C.retries = 0; C.box.setTimeout = (f, ms) => { if(ms === 600) C.retries++; return setTimeout(f, Math.ceil((Number(ms) || 0) / 20)); }; return C; };
+  const tab = async F => { const C = fast(makeConsole(consoleSrc, F)); C.run('renderTeacherSongBuilder()'); await settle(); return C; };
+  const draft = async F => { const C = await sweepDraft(consoleSrc, F); stores.push(C.F); return C; };
+  const waitSaves = async () => { await settle(); await sleep(150); await settle(); };
+  const due = 'sbReadAt = Date.now() - 20000;';   // the 15-s re-read is due: the next paint reads the store again
+  const reread = async C => { C.run(due + ' teacherSbPaint();'); await settle(); await sleep(30); await settle(); };
+  const typeTitle = v => `sbInput({ target: { matches: s => s === '[data-sb-field]', dataset: { sbField: 'title' }, value: ${JSON.stringify(v)} } });`;
+  const chart4 = "sbReadAt = Date.now(); sbStepOn = 4; sbChartDoRead(sbDraft(), '[Verse]\\nG C D G\\n[Chorus]\\nC D G G')";
+  const chord = (bar, name) => `sbChFor(sbSel).sel = ${bar}; sbChFor(sbSel).part = 0; sbChartAct('bar-chord', { dataset: { sbChord: ${JSON.stringify(name)} } });`;
+  const verse = (F, id) => F.S.get('songDrafts/' + id).chart.sections[0].bars.join(' ');
+  const heads = F => [...F.S.keys()].filter(k => /^songFiles\/[^/]+$/.test(k)).map(k => k.slice(10));
+  const near = (x, y) => Math.abs(x - y) < 1e-3;
+  /* A song tab A publishes first (its levelled copy X, of mp3 C), then tab B levels it again from the same mp3 to other
+     bytes (copy Y). Returns the store, the two tabs, X and Y. editLevel: A first opens Edit and saves a change to the level. */
+  const relevelled = async (aTyped, editLevel) => {
+    const F = makeDb(); F.st.stamp = true; stores.push(F);
+    const id = 'sb-r1pubdraft01', LVC = LEVELLED.get('c'), X = id + '-' + sha(LVC).slice(0, 8);
+    F.S.set('songFiles/' + X, { file: X + '.mp3', bytes: LVC.length, sha256: sha(LVC), pieces: Math.ceil(LVC.length / 900000), pieceBytes: 900000, durationSec: 15, state: 'ready', uploadedAt: TS });
+    for(let i = 0; i * 900000 < LVC.length; i++) F.S.set(`songFiles/${X}/pieces/${i}`, { i, data: new FakeBytes(LVC.subarray(i * 900000, (i + 1) * 900000)) });
+    const chart = { text: '', meter: '4/4', fmt: 'chords', sections: [{ name: 'intro', label: 'Intro', n: null, bars: ['G'], lyrics: null },
+      { name: 'verse', label: 'Verse 1', n: 1, bars: ['G', 'C'], lyrics: null }, { name: 'chorus', label: 'Chorus', n: null, bars: ['D', 'G:2 C:2'], lyrics: null }], left: [], kept: [], edited: true };
+    F.S.set('songDrafts/' + id, { v: 1, title: 'Test 0', artist: 'The Test Band', step: 5,
+      source: { name: 'test-c.mp3', bytes: SRC_C.length, sha256: sha(SRC_C), durationSec: 15, sampleRate: 44100, channels: 1, kbps: 192 },
+      audio: { id: X, bytes: LVC.length, sha256: sha(LVC), durationSec: 15, centsOff: 2, gainDb: 1.5, sourceSha256: sha(SRC_C) },
+      volume: { before: -14, after: -12.5, samplePeak: -1.2, truePeak: -1.1, ceilingDb: -1, encodes: 1 }, pitch: { cents: 2, peaks: 10 },
+      beat: { meter: '4/4', bpm: 96, anchor: 0.5, pins: [], trackBpm: 96, trackSub: 2, driftOff: 0, pinsNeeded: 2 }, chart, level: { versions: 'full', start: null, range: null }, pubVer: null, savedAt: TS });
+    const A = await tab(F);
+    A.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    A.env.confirmAnswer = true; A.run('sbPublish()'); await settle(200);
+    const live0 = (F.S.get('builtSongs/' + id) || {}).audio;
+    if(editLevel){
+      A.run("sbPubAct('edit-step', { dataset: { sbV: '5' } })"); await settle(200);
+      A.run("sbChartSet(sbDraft(), { level: { versions: 'both', start: 'full', range: null } }, null, true)"); await settle(200);
+    }
+    if(aTyped) A.run('sbStepOn = 1; ' + typeTitle(aTyped));
+    const B = await tab(F);
+    B.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    B.run('sbStepOn = 1;'); box_set(B, '__f', fileOf('test-c.mp3', SRC_C, 15)); B.run('sbPickFile(__f)'); await settle();
+    box_set(B, '__levelNext', 'b'); B.run('sbStepOn = 2; sbRunLevel()'); await settle(300);
+    return { F, id, A, B, X, Y: B.run('sbDraft().audio.id'), live0: live0 && live0.id };
+  };
+  const XY = (r, a) => a === r.Y ? 'Y' : a === r.X ? 'X' : String(a);
+  /* X3: tab A typed a title (not saved); tab B levelled the song again; A re-reads twice, presses Next, then Publish. */
+  {
+    const r = await relevelled('Test 0 Renamed'), { F, id, A } = r;
+    await reread(A); await reread(A);
+    const seen = { audio: XY(r, A.run('sbDraft().audio.id')), title: A.run('sbDraft().title'), dirty: A.run('!!sbDraft().dirty'), note: A.run('sbNote') };
+    A.run('sbGoStep(2)'); await settle(200);
+    const st = F.S.get('songDrafts/' + id);
+    A.env.confirmAnswer = true; A.run('sbStepOn = 7; sbPublish()'); await settle(200);
+    const live = F.S.get('builtSongs/' + id), dr = F.S.get('songDrafts/' + id), orphans = heads(F).filter(h => h !== live.audio.id && !(dr.audio && dr.audio.id === h));
+    check('R1-1 X3 (two tabs): tab A has a title typed, not saved; tab B levels the published song again (copy Y): A\'s re-read takes Y, keeps the title and says so; Next stores both; the old copy X never goes live again under the new title, and no copy is left unnamed',
+      r.Y !== r.X && r.live0 === r.X && seen.audio === 'Y' && seen.title === 'Test 0 Renamed' && seen.dirty && /changed in another tab/.test(seen.note) && /title that was not saved is kept/.test(seen.note)
+      && XY(r, st.audio.id) === 'Y' && st.title === 'Test 0 Renamed' && !(live.audio.id === r.X && live.title === 'Test 0 Renamed') && !orphans.length,
+      JSON.stringify({ seen: Object.assign(seen, { note: seen.note.slice(0, 160) }), stored: [XY(r, st.audio.id), st.title], live: [XY(r, live.audio.id), live.title], orphans: orphans.map(h => XY(r, h)) }));
+  }
+  /* X3, Next at once: no re-read between B's level and A's Next. */
+  {
+    const r = await relevelled('Test 0 Renamed'), { F, id, A } = r, w0 = F.st.writes.length;
+    A.run('sbReadAt = Date.now(); sbGoStep(2)'); await settle(200);
+    const first = { writes: F.st.writes.slice(w0).filter(w => w.path === 'songDrafts/' + id).length, stored: XY(r, F.S.get('songDrafts/' + id).audio.id), note: A.run('sbNote'), mem: XY(r, A.run('sbDraft().audio.id')), title: A.run('sbDraft().title') };
+    A.run('sbGoStep(2)'); await settle(200);
+    const st = F.S.get('songDrafts/' + id);
+    check('R1-1 X3, Next at once (two tabs): tab A presses Next on its typed title right after tab B levelled the song again: nothing is written over B\'s copy Y and the line says the song changed in another tab; A\'s copy then names Y with the title kept, and the next Next stores both',
+      first.writes === 0 && first.stored === 'Y' && /changed in another tab/.test(first.note) && first.mem === 'Y' && first.title === 'Test 0 Renamed' && XY(r, st.audio.id) === 'Y' && st.title === 'Test 0 Renamed',
+      JSON.stringify(Object.assign(first, { note: first.note.slice(0, 120), stored2: [XY(r, st.audio.id), st.title] })));
+  }
+  /* X3, Publish from an older copy: tab A edits the level (saved), tab B levels the song again, A presses Publish. */
+  {
+    const r = await relevelled(null, true), { F, id, A } = r;
+    const w0 = F.st.writes.length, live0 = JSON.stringify(F.S.get('builtSongs/' + id)), list0 = JSON.stringify(F.S.get('builtSongsMeta/list'));
+    const could = A.run('sbPublishWhy(sbDraft(), sbSel).length === 0 && sbPubChanged(sbDraft(), sbPublished.get(sbSel))');
+    A.env.confirmAnswer = true; A.run('sbReadAt = Date.now(); sbStepOn = 7; sbPublish()'); await settle(200);
+    const ws = F.st.writes.slice(w0).map(w => w.op + ' ' + w.path.replace(id, '<id>'));
+    check('R1-1 X3, Publish from an older copy (two tabs): tab A\'s Publish of its level change, after tab B levelled the song again, writes nothing (students keep the song, the draft keeps Y) and says the song changed in another tab; A then shows Y',
+      could && !ws.length && JSON.stringify(F.S.get('builtSongs/' + id)) === live0 && JSON.stringify(F.S.get('builtSongsMeta/list')) === list0 && XY(r, F.S.get('songDrafts/' + id).audio.id) === 'Y'
+      && /^Not published: this song was changed in another tab/.test(A.run('sbNote')) && XY(r, A.run('sbDraft().audio.id')) === 'Y',
+      JSON.stringify({ could, writes: ws, draft: XY(r, F.S.get('songDrafts/' + id).audio.id), note: A.run('sbNote').slice(0, 90), mem: XY(r, A.run('sbDraft().audio.id')) }));
+  }
+  /* X3, the Lyrics sheet's Add from an older copy (the third writer of a draft, teacher-sb-sheet.js): its transaction
+     writes the draft too, so it must not write tab A's copy (X) back over tab B's (Y). The pdf's check is stood in for. */
+  {
+    const r = await relevelled(null, false), { F, id, A } = r;
+    const pdf = new Uint8Array(3000).fill(37); pdf.set(new TextEncoder().encode('%PDF-1.4 Test'), 0);
+    A.box.__pdf = pdf;
+    A.run(`sbSh.id = sbSel; sbSh.reading = false; sbSh.file = { name: 'test.pdf', bytes: __pdf, sha256: ${JSON.stringify(sha(pdf))}, stored: false }; sbSh.res = { ok: true, key: sbSheetKey(sbPublished.get(sbSel).doc, ${JSON.stringify(sha(pdf))}) };`);
+    const live0 = JSON.stringify(F.S.get('builtSongs/' + id)), w0 = F.st.writes.length;
+    A.env.confirmAnswer = true; A.run("sbReadAt = Date.now(); sbSheetAct('sheet-add')"); await settle(300);
+    const ws = F.st.writes.slice(w0).filter(w => !w.path.startsWith('songFiles/sheet-')).map(w => w.op + ' ' + w.path.replace(id, '<id>'));
+    check('R1-1 X3, the Lyrics sheet from an older copy (two tabs): tab A\'s Add of a lyrics sheet, after tab B levelled the song again, writes neither the song nor the draft (the draft keeps Y) and says the song changed in another tab',
+      !ws.length && JSON.stringify(F.S.get('builtSongs/' + id)) === live0 && XY(r, F.S.get('songDrafts/' + id).audio.id) === 'Y' && /^Not added: this song was changed in another tab/.test(A.run('sbNote')),
+      JSON.stringify({ writes: ws, draft: XY(r, F.S.get('songDrafts/' + id).audio.id), note: A.run('sbNote').slice(0, 90) }));
+  }
+  /* X4: a typed title left unsaved while tab A opens another song; tab B sets bar 1 = Em; A re-reads 3 times. */
+  {
+    const F = makeDb(); F.st.stamp = true;
+    const other = 'sb-sweepother0001';
+    F.S.set('songDrafts/' + other, { v: 1, title: 'Test 1', artist: '', step: 2, source: { name: 'test-c.mp3', bytes: SRC_C.length, sha256: sha(SRC_C), durationSec: 15, sampleRate: 44100, channels: 1, kbps: 192 },
+      audio: null, volume: null, pitch: null, beat: null, chart: null, level: null, pubVer: null, savedAt: TS });
+    const A = await draft(F), key = JSON.stringify(A.id);
+    A.run(chart4); await settle(200); await waitSaves();
+    A.run('sbStepOn = 1; ' + typeTitle('Test 0 typed'));
+    A.run(`sbOpen(${JSON.stringify(other)})`); await settle();
+    const B = await tab(F);
+    B.run(`sbOpen(${key}); sbStepOn = 4;`); await settle();
+    B.run(chord(0, 'Em')); await waitSaves();
+    const seen = [];
+    for(let i = 0; i < 3; i++){ await reread(A); seen.push(A.run(`sbDrafts.get(${key}).chart.sections[0].bars[0]`)); }
+    const note = A.run('sbNote'), title = A.run(`sbDrafts.get(${key}).title`);
+    A.run(`sbOpen(${key})`); await settle();
+    A.run('sbGoStep(2)'); await settle(200);
+    const st = F.S.get('songDrafts/' + A.id);
+    check('R1-1 X4 (two tabs): tab A left a typed title on a song and opened another; tab B set bar 1 = Em there: each of A\'s 3 re-reads shows Em with the title kept, the line names the song, and A\'s Next stores both',
+      seen.join() === 'Em,Em,Em' && title === 'Test 0 typed' && /"Test 0 typed" was changed in another tab/.test(note) && st.chart.sections[0].bars[0] === 'Em' && st.title === 'Test 0 typed',
+      JSON.stringify({ seen, title, note: note.slice(0, 120), stored: [st.chart.sections[0].bars[0], st.title] }));
+  }
+  /* X2: both tabs change the chart. B saves bar 1 = Em; A then sets bar 4 = Am: with A's 15-s re-read due, and without. */
+  for(const isDue of [true, false]){
+    const F = makeDb(); F.st.stamp = true;
+    const A = await draft(F);
+    A.run(chart4); await settle(200); await waitSaves();
+    const B = await tab(F);
+    B.run(`sbOpen(${JSON.stringify(A.id)}); sbStepOn = 4;`); await settle();
+    B.run(chord(0, 'Em')); await waitSaves();
+    A.run((isDue ? due : 'sbReadAt = Date.now();') + ' ' + chord(3, 'Am')); await waitSaves(); await sleep(100); await settle();
+    const st = verse(F, A.id), mine = A.run("sbDraft().chart.sections[0].bars.join(' ')"), note = A.run('sbNote');
+    check(`R1-1 X2 (two tabs, ${isDue ? 'the re-read due' : 'no re-read due: the save is refused'}): tab B saved bar 1 = Em, then tab A set bar 4 = Am: B's saved chart stays stored, A shows it, and A's line says A's chart change was dropped (never a silent loss)`,
+      st === 'Em C D G' && mine === st && /changed in another tab/.test(note) && /chart that was not saved is dropped/.test(note), JSON.stringify({ stored: st, onScreen: mine, note: note.slice(0, 140) }));
+  }
+  /* X2, other parts: B saves a new title; A sets bar 4 = Am. Both are kept. */
+  for(const isDue of [true, false]){
+    const F = makeDb(); F.st.stamp = true;
+    const A = await draft(F);
+    A.run(chart4); await settle(200); await waitSaves();
+    const B = await tab(F);
+    B.run(`sbOpen(${JSON.stringify(A.id)});`); await settle();
+    B.run('sbStepOn = 1; ' + typeTitle('Test 0 from B') + ' sbGoStep(2);'); await settle(200); await waitSaves();
+    A.run((isDue ? due : 'sbReadAt = Date.now();') + ' ' + chord(3, 'Am')); await waitSaves(); await sleep(150); await settle();
+    const st = F.S.get('songDrafts/' + A.id), note = A.run('sbNote');
+    check(`R1-1 X2, other parts (two tabs, ${isDue ? 'the re-read due' : 'no re-read due'}): tab B saved a new title, then tab A set bar 4 = Am: the store keeps both, A shows both, and A's line says its chart change is kept`,
+      st.title === 'Test 0 from B' && verse(F, A.id) === 'G C D Am' && A.run('sbDraft().title') === 'Test 0 from B' && /chart that was not saved is kept/.test(note) && !A.run('!!sbDraft().unsaved'),
+      JSON.stringify({ stored: [st.title, verse(F, A.id)], mine: A.run('sbDraft().title'), note: note.slice(0, 140) }));
+  }
+  /* X7 (R1-3): tab A makes an edit and leaves the view at once; tab B deletes the draft; A comes back within 15 s. */
+  {
+    const F = makeDb(); F.st.stamp = true;
+    const A = await draft(F), aud = A.run('sbDraft().audio.id');
+    A.run(chart4); await settle(200); await waitSaves();
+    A.run("sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} }); teacherSbLeave(); teacherView = 'students';");
+    const B = await tab(F);
+    B.run(`sbOpen(${JSON.stringify(A.id)})`); await settle();
+    B.env.confirmAnswer = true; B.run('sbDeleteDraft()'); await settle(200); await sleep(100); await settle();
+    const gone = !F.S.has('songDrafts/' + A.id) && !F.S.has('songFiles/' + aud), w0 = F.st.writes.length;
+    A.run("teacherView = 'songbuilder'; renderTeacherSongBuilder();"); await waitSaves(); await sleep(100); await settle();
+    const ws = F.st.writes.slice(w0).map(w => w.op + ' ' + w.path.replace(A.id, '<id>'));
+    check('R1-3 X7 (two tabs): tab A left the view with an edit waiting; tab B deleted the draft; A comes back within 15 s of its last read: the draft is not written back (nothing names a deleted copy), it leaves A\'s list, and A\'s line says it was deleted in another tab',
+      gone && !ws.length && !F.S.has('songDrafts/' + A.id) && !A.run(`sbDrafts.has(${JSON.stringify(A.id)})`) && /deleted in another tab/.test(A.run('sbNote')),
+      JSON.stringify({ gone, writes: ws, note: A.run('sbNote').slice(0, 100) }));
+  }
+  /* One tab, as SB-1's leave case but coming back with no re-read due: the read that leaving asks for saves the edit. */
+  {
+    const F = makeDb(); F.st.stamp = true;
+    const A = await draft(F);
+    A.run(chart4); await settle(200); await waitSaves();
+    A.run("sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} }); teacherSbLeave(); teacherView = 'students';"); await waitSaves();
+    const away = barsOf(F.S.get('songDrafts/' + A.id));
+    A.run("teacherView = 'songbuilder'; renderTeacherSongBuilder();"); await waitSaves(); await sleep(100); await settle();
+    check('R1-3, one tab: "+ Bar", the view left at once and shown again within 15 s of the last read: nothing is written while away, the edit is stored on the way back (8 bars → 9), and no line says another tab',
+      away === 8 && barsOf(F.S.get('songDrafts/' + A.id)) === 9 && A.run('sbDraft().chart.sections.reduce((n, s) => n + s.bars.length, 0)') === 9 && !/another tab/.test(A.run('sbNote')),
+      JSON.stringify({ away, stored: barsOf(F.S.get('songDrafts/' + A.id)), note: A.run('sbNote').slice(0, 80) }));
+  }
+  /* X6 (R1-4): this tab's own Import of the song as stored, over an edit not saved yet (the view left at once). */
+  {
+    const F = makeDb(); F.st.stamp = true;
+    const A = await draft(F);
+    A.run(chart4); await settle(200); await waitSaves();
+    A.run("sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbBeatFromBpm(96, null);"); await waitSaves();
+    const doc = A.run('sbDocOf')(JSON.parse(JSON.stringify(F.S.get('songDrafts/' + A.id))));
+    A.run(chord(0, 'Em') + " teacherSbLeave(); teacherView = 'manage';");
+    F.S.set('builtSongs/' + A.id, Object.assign(JSON.parse(JSON.stringify(doc)), { savedAt: F.stamp() }));
+    F.S.set('builtSongsMeta/list', { songs: { [A.id]: 7 }, updatedAt: TS });
+    A.box.__doc = doc; A.run(`teacherSbImported(${JSON.stringify(A.id)}, __doc, 7)`);
+    A.run("teacherView = 'songbuilder'; renderTeacherSongBuilder();"); await waitSaves(); await sleep(100); await settle();
+    const s1 = A.run('!!sbDraft().stale');
+    await reread(A);
+    check('R1-4 X6: this tab imports the song as its draft stores it, over an edit not saved yet: after the next read the draft is not stale (no "imported again", Publish and Edit work from it) and holds the stored song, not the dropped edit',
+      !s1 && !A.run('!!sbDraft().stale') && !A.run('!!sbDraft().unsaved') && A.run('sbDraft().chart.sections[0].bars[0]') === 'G' && verse(F, A.id) === 'G C D G',
+      JSON.stringify({ staleAfterReturn: s1, staleAfterReread: A.run('!!sbDraft().stale'), unsaved: A.run('!!sbDraft().unsaved'), bar1: A.run('sbDraft().chart.sections[0].bars[0]') }));
+  }
+  const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
+  check('r1: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
     !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));
 }
 

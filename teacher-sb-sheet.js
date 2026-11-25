@@ -276,7 +276,9 @@ async function sbSheetWrite(kind){
     if(sbStopped(gen)) throw 'stop';
     let ver = 0;
     const ref = db.collection('builtSongsMeta').doc('list'), sref = db.collection('builtSongs').doc(id);
+    const dd = d ? sbDraftDoc(Object.assign({}, d, { sheet })) : null, want = d ? sbBaseFor(id, d) : null;
     await db.runTransaction(async tx => {
+      if(d) await sbDraftCheck(tx, id, want);   // the draft this page read, still (review R1-1, teacher-sb-core.js)
       const snap = await tx.get(ref), ss = await tx.get(sref);
       if(sheet){
         const hs2 = await tx.get(db.collection('songFiles').doc(sheet.id));
@@ -294,12 +296,12 @@ async function sbSheetWrite(kind){
       tx.set(ref, { songs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       /* The draft in the same commit, as Publish: Edit and a later Publish keep the sheet, and its server time is the
          song's (sbDraftStale). */
-      if(d) tx.set(db.collection('songDrafts').doc(id), Object.assign({}, sbDraftDoc(Object.assign({}, d, { sheet })), { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
+      if(d) tx.set(db.collection('songDrafts').doc(id), Object.assign({}, dd, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
     });
     step = 'done';
     const t = Date.now();
     sbPublished.set(id, Object.assign({}, p, { ver, doc: JSON.parse(JSON.stringify(doc)), at: t }));
-    if(d){ d.sheet = sheet ? JSON.parse(JSON.stringify(sheet)) : null; d.savedAt = t; }
+    if(d){ d.sheet = sheet ? JSON.parse(JSON.stringify(sheet)) : null; d.savedAt = t; d.base = sbBaseOf(dd); }
     if(cur && !(sheet && sheet.id === cur.id)) await sbDeleteAudio(cur.id, null);
     sbSh.file = null; sbSh.res = null; sbSh.epoch++;
     sbNote = kind === 'add' ? `Added the lyrics sheet to "${p.title}" (${teacherBsVerText(ver)}). Students get a Chords / Lyrics switch on its card at their next sign-in or tab return.`

@@ -160,12 +160,31 @@ async function teacherSbLoad(){
   if(!err){
     /* A draft older than its published song, and not that song (review R2-1, teacher-sb-publish.js sbDraftStale). */
     if(typeof sbDraftStale === 'function') for(const [id, d] of drafts) if(sbDraftStale(d, pub.get(id))) d.stale = true;
+    for(const [, s] of drafts) s.base = sbBaseOf(s);
     /* SB-1 (sweep 2026-11-25): a draft with edits this tab has not saved yet (sbUnsaved: a typed title, a new mp3, pdf
        text, a Beat or Chart edit waiting for its save) keeps this tab's copy, or the read would throw the edits away.
-       Not when the song was imported over it (the stored draft is stale, judged on server times only): the import wins
-       (review R3-2). Not when the draft is gone from the store (deleted in another tab). */
-    if(sbDrafts) for(const [id, mine] of sbDrafts){ const s = drafts.get(id); if(s && !s.stale && sbUnsaved(mine)){ mine.savedAt = s.savedAt; drafts.set(id, mine); } }
+       Not when the song was imported over it (the stored draft is stale, judged on server times only, or this tab's own
+       Import marked the copy stale, review R1-4): the import wins (review R3-2). Not when the draft is gone from the store
+       (deleted in another tab, review R1-3). And only while the store still holds the draft this copy was worked out
+       from (review R1-1): when another tab saved it since, its saved parts win and the parts only this tab changed are
+       kept (sbDraftMerge), and the line says which. */
+    let told = '';
+    if(sbDrafts) for(const [id, mine] of sbDrafts){
+      if(!sbUnsaved(mine) || mine.stale) continue;
+      const s = drafts.get(id), name = id === sbSel ? 'This song' : `"${String(mine.title || 'Untitled')}"`;
+      if(!s){ told = `${name} was deleted in another tab, so your change to it that was not saved is gone.`; continue; }
+      if(s.stale) continue;
+      if(mine.base === s.base){ mine.savedAt = s.savedAt; drafts.set(id, mine); continue; }
+      const m = sbDraftMerge(mine, s), list = a => a.length < 2 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+      drafts.set(id, m.d);
+      told = `${name} was changed in another tab, so its saved changes are shown here.`
+        + (m.lost.length ? ` Your change to ${list(m.lost)} that was not saved is dropped.` : '') + (m.kept.length ? ` Your change to ${list(m.kept)} that was not saved is kept.` : '');
+    }
     sbDrafts = drafts; sbPublished = pub;
+    if(told) sbNote = told;
+    /* An edit kept above whose save is not waiting (the view was left, its save was refused or failed) is saved now; never
+       from the paint, which can come before this read and would write back a draft deleted in another tab (R1-3). */
+    if(teacherView === 'songbuilder') for(const [id, d] of drafts) if(d.unsaved && !d.stale && !sbSaveTimers.has(id)) sbSaveSoon(id, 1200);
   }
   teacherSbPaint();
   if(teacherView === 'manage' && typeof teacherSfPaint === 'function') teacherSfPaint();
@@ -200,8 +219,6 @@ function renderTeacherSongBuilder(){
   if(steps && sbStepOn === 6 && typeof sbPreviewMounted === 'function') sbPreviewMounted(root);
   else if(typeof sbPreviewStop === 'function') sbPreviewStop(true);
   if(!sbBusy && (!sbDrafts || Date.now() - sbReadAt > 15000) && !sbReadErr) teacherSbLoad();
-  /* SB-1: an edit whose save was waiting when the view was left (teacherSbLeave) is saved now that it shows again. */
-  if(sbSaveAfterLeave){ sbSaveAfterLeave = false; if(sbDrafts) for(const [id, d] of sbDrafts) if(d.unsaved) sbSaveSoon(id, 1200); }
 }
 function teacherSbPaint(){ if(teacherView === 'songbuilder') renderTeacherSongBuilder(); }
 /* With a pdf shown beside the chart (teacher-sb-pdf.js) the song list gives its column to it. */
@@ -500,9 +517,9 @@ function teacherSbLeave(){
   if(sbWorker){ const w = sbWorker; sbWorker = null; if(w.sbStop) w.sbStop(); else { try{ w.terminate(); }catch(e){} } }   // sbStop settles its promise (SB-3)
   if(typeof sbPdfLeave === 'function') sbPdfLeave();
   /* SB-1: the saves that wait stop with the view (a write would stop at once: sbStopped); their edits stay marked in
-     memory, a re-read keeps them, and the view saves them when it shows again (renderTeacherSongBuilder). */
+     memory. Coming back reads the store first (sbReadAt = 0, review R1-3), and that read saves them (teacherSbLoad). */
   for(const t of sbSaveTimers.values()) clearTimeout(t);
-  sbSaveTimers.clear(); sbSaveAfterLeave = true;
+  sbSaveTimers.clear(); sbReadAt = 0;
 }
 function sbStopSounds(){
   sbStopTen();
@@ -639,6 +656,58 @@ function sbDraftDoc(d){
   out.v = 1;
   return JSON.parse(JSON.stringify(out));      // plain values only (no undefined, no Infinity: those become null)
 }
+/* JSON with sorted keys: a doc read back from the store compares equal to the one written (Firestore keeps no key order). */
+function sbCanon(v){
+  if(Array.isArray(v)) return '[' + v.map(sbCanon).join(',') + ']';
+  if(v && typeof v === 'object') return '{' + Object.keys(v).filter(k => v[k] !== undefined).sort().map(k => JSON.stringify(k) + ':' + sbCanon(v[k])).join(',') + '}';
+  return JSON.stringify(v === undefined ? null : v);
+}
+/* Review R1-1 (2026-11-25): two console tabs on one song. A copy of a draft in memory carries `base` (never stored): the
+   draft as stored when this tab last read or wrote it, as one string. Every write of a draft (sbWriteDraft, Publish, the
+   Lyrics sheet) goes through only while the store still holds that draft (sbDraftCheck): when another tab saved,
+   levelled, published or deleted it since, nothing is written, the line says so, and the next paint reads the store,
+   where sbDraftMerge keeps this tab's edits that were not saved yet, part by part. So an old recording is never written
+   back over a new one, nor published. */
+function sbBaseOf(d){ return sbCanon(sbDraftDoc(d)); }
+/* What the store must hold for a write of `d` (draft `id`): the draft its copy was worked out from; a copy made fresh (a
+   new song, a draft rebuilt from a published song) replaces the one in memory, and a new song's must not exist yet. */
+function sbBaseFor(id, d){
+  if(d && typeof d.base === 'string') return d.base;
+  const was = sbDrafts && sbDrafts.get(id);
+  return was && typeof was.base === 'string' ? was.base : null;
+}
+const SB_MOVED_WHY = 'this song was changed in another tab (its saved version is shown now)';
+/* Inside a transaction that writes draft `id`: refuses (writes nothing) when the stored draft is not `want`. */
+async function sbDraftCheck(tx, id, want){
+  const s = await tx.get(db.collection('songDrafts').doc(id));
+  if((s.exists ? sbBaseOf(s.data() || {}) : null) === want) return;
+  sbReadAt = 0;                                // the next paint reads the store again
+  throw { moved: true, why: SB_MOVED_WHY };
+}
+/* The parts of a draft that change together (a re-level sets the copy, the measurements and the pitch; the beat is
+   measured on the copy). Every other field is a part of its own. chartText: the step-1 chart box, not saved yet. */
+const SB_DRAFT_PARTS = [['the title', ['title', 'artist']], ['the recording', ['source', 'audio', 'volume', 'pitch']], ['the beat', ['beat']], ['the chart', ['chart', 'level', 'chartText']]];
+/* `mine` has edits not saved yet and another tab saved `s` (as read) since mine.base: each part the other tab changed is
+   its, and each part only this tab changed is mine. The beat goes with a recording the other tab changed. Returns the
+   merged copy and the names of this tab's changed parts that were dropped (lost) and kept. */
+function sbDraftMerge(mine, s){
+  const was = typeof mine.base === 'string' ? JSON.parse(mine.base) : null, d = Object.assign({}, s), lost = [], kept = [];
+  const S = sbDraftDoc(s), M = Object.assign(sbDraftDoc(mine), { chartText: typeof mine.chartText === 'string' ? mine.chartText : null });
+  const own = SB_DRAFT_PARTS.flatMap(p => p[1]), parts = SB_DRAFT_PARTS.concat(Object.keys(S).filter(k => !own.includes(k)).map(k => ['', [k]]));
+  const val = (o, keys) => o ? sbCanon(keys.map(k => o[k] === undefined ? null : o[k])) : null;
+  let newRec = false, keepAny = false, mineRec = false;
+  for(const [name, keys] of parts){
+    const b = val(was, keys), t = val(S, keys), m = val(M, keys);
+    const theirs = (b !== t || (name === 'the beat' && newRec)) && t !== m;
+    if(name === 'the recording' && theirs) newRec = true;
+    if(theirs){ if(b !== m && name) lost.push(name); continue; }
+    keys.forEach(k => { if(k in mine) d[k] = mine[k]; });
+    if(t !== m){ keepAny = true; if(name) kept.push(name); if(name === 'the recording') mineRec = true; }
+  }
+  if(keepAny){ if(mine.dirty) d.dirty = true; if(mine.unsaved) d.unsaved = true; }
+  if(mineRec && mine.replaced) d.replaced = true;
+  return { d, lost, kept };
+}
 async function sbWriteDraft(id, d){
   const gen = sbViewGen;
   if(!sbIsDraftId(id)){ sbNote = 'That draft id is not one the database takes.'; teacherSbPaint(); return false; }
@@ -647,14 +716,18 @@ async function sbWriteDraft(id, d){
   try{
     await ensureDb();
     if(sbStopped(gen)) throw 'stop';
-    const doc = sbDraftDoc(d);
-    await db.collection('songDrafts').doc(id).set(Object.assign({}, doc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
+    const doc = sbDraftDoc(d), want = sbBaseFor(id, d), ref = db.collection('songDrafts').doc(id);
+    await db.runTransaction(async tx => {
+      await sbDraftCheck(tx, id, want);
+      tx.set(ref, Object.assign({}, doc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
+    });
     if(!sbDrafts) sbDrafts = new Map();
-    sbDrafts.set(id, Object.assign(doc, { savedAt: Date.now() }));
-    sbNote = sbNote && /New file|same mp3/.test(sbNote) ? sbNote : '';
+    sbDrafts.set(id, Object.assign(doc, { savedAt: Date.now(), base: sbBaseOf(doc) }));
+    sbNote = sbNote && /New file|same mp3|in another tab, so/.test(sbNote) ? sbNote : '';   // the line a re-read's merge said (teacherSbLoad) stays
     return true;
   }catch(e){
-    sbNote = e === 'stop' ? 'Stopped: you left the Song builder. The draft was not saved.' : 'The draft was not saved: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.';
+    sbNote = e === 'stop' ? 'Stopped: you left the Song builder. The draft was not saved.' : e && e.moved ? 'The draft was not saved: ' + e.why + '.'
+      : 'The draft was not saved: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.';
     return false;
   }finally{
     sbBusy = ''; sbProgress = ''; sbOpGen++;
@@ -664,11 +737,11 @@ async function sbWriteDraft(id, d){
 /* SB-1 (sweep 2026-11-25). An edit at the Beat or Chart step changes the draft in memory and marks it (d.unsaved; never
    stored, sbDraftDoc keeps only its own fields); it is saved once things settle (1.2 s after the last change, or at
    once). The save belongs to the draft's id, not to the song on screen or to one copy of the draft in memory: it is
-   still made after another song is opened, a re-read keeps a draft with edits not saved (teacherSbLoad), and it ends
-   once any write has stored the draft (sbWriteDraft puts a new copy in memory, with no mark). A stale draft (a song
-   imported over it) is never saved by it. */
+   still made after another song is opened, a re-read keeps a draft with edits not saved (teacherSbLoad; merged with
+   what another tab saved, review R1-1), and it ends once any write has stored the draft (sbWriteDraft puts a new copy in
+   memory, with no mark). A stale draft (a song imported over it) is never saved by it. A save that waits no more (the
+   view was left, the save was refused or failed) is made again by the next re-read. */
 const sbSaveTimers = new Map();          // draft id -> the timer of its waiting save
-let sbSaveAfterLeave = false;           // the view was left: renderTeacherSongBuilder saves what still waits
 function sbUnsaved(d){ return !!(d && (d.dirty || d.unsaved)); }
 function sbSaveSoon(id, ms){
   clearTimeout(sbSaveTimers.get(id)); sbSaveTimers.delete(id);
