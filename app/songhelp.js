@@ -151,15 +151,15 @@ function songHelpClose(){
 
 /* ── The main button ── */
 /* Delete the audio caches and the private songs' device copies. Returns what it did:
-   { caches: [names deleted], songFiles: true|false }. Never rejects. */
+   { caches: [names deleted], songFiles: true|false }. Never rejects; a call that throws at once counts as not done. */
 async function songHelpClearSaved(){
   const deleted = [];
   if(typeof caches !== 'undefined' && caches && typeof caches.delete === 'function'){
     for(const name of SONG_HELP_AUDIO_CACHES){
-      if(await songHelpWithin(caches.delete(name), false)) deleted.push(name);
+      if(await songHelpWithin(new Promise(r => r(caches.delete(name))), false)) deleted.push(name);
     }
   }
-  const songFiles = typeof songFilesClearDevice === 'function' ? await songHelpWithin(songFilesClearDevice(), false) : false;
+  const songFiles = typeof songFilesClearDevice === 'function' ? await songHelpWithin(new Promise(r => r(songFilesClearDevice())), false) : false;
   return { caches: deleted, songFiles: songFiles === true };
 }
 async function songHelpClearAndReload(){
