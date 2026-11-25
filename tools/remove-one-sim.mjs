@@ -26,7 +26,7 @@
                 kinds before it gone, it and every kind after it untouched, no marker; read again and run again → done
      stopped    the unticks of a delete that stopped survive a failed re-read, Close and a reopen (review R1-1), and a
                 reload of the tab (sessionStorage, written before the run starts; review R2-2); one student's never
-                reach another's dialog (R2-3)
+                reach another's dialog (R2-3); the note names exactly the kinds that can be ticked and are not (R3 m5)
      minutes    Practice minutes unticked: nothing under minutes/ is touched, the private Top 5 tag included (R2-3); a
                 stop in the minutes step keeps the tag when it stops before it, and offers the kind for it when it
                 stops at it or a reload cuts the run off there (the console cannot read the tag; R1-6, R2-5)
@@ -187,6 +187,15 @@ function dialogOn(c, students){
   c.run(`allStudentsRaw = ${JSON.stringify(students.map(([uid, name]) => ({ uid, name, email: uid + '@example.test' })))}; trmPaint = function(){};`);
   return async (uid, mode = 'delete') => { c.fn('teacherRemoveClose')(); c.fn('teacherRemoveOpen')(uid); await c.fn('trmChoose')(mode); return c.run('trm'); };
 }
+/* The kept-ticks note (review R3 minor 5): it names exactly the kinds that can be ticked and are not (something to
+   delete, unticked), and says "tick" only when there is one; a kind with nothing to delete has its box switched off. */
+function noteTrue(c){
+  const t = c.run('trm'), L = c.fn('trmKindLines')(t.inv, t.uid), kinds = c.run('TRM_KINDS'), note = String(t.note || '');
+  const left = kinds.filter(k => L[k.id].n > 0 && !t.ticks[k.id]).map(k => k.label);
+  const named = kinds.filter(k => note.includes(k.label)).map(k => k.label);
+  return { ok: /^Ticked as in the delete that stopped\./.test(note) && named.join('|') === left.join('|') && /\btick\b/i.test(note) === left.length > 0,
+    text: `"${note}" (can be ticked and are not: ${left.join('; ') || 'none'})` };
+}
 const ALL = { minutes: true, recordings: true, songRequests: true, join: true, live: true, settings: true, progress: true };
 /* Everything but the target student's cells, the marker and the version: config/class must be byte-identical there. */
 function cfgOthers(cfg, uid){
@@ -311,6 +320,8 @@ console.log('stopped, reopened');
   ok(t1.progress === false && t1.songRequests === true && t1.live === false && t1.settings === true,
     `closed and opened again: saved work stays unticked, a kind with nothing then (live answer) is not ticked now, the rest as before (${Object.keys(t1).filter(k => t1[k]).join(', ')})`);
   ok(/Ticked as in the delete that stopped/.test(c.fn('trmBodyHtml')()), 'the dialog says the ticks are the ones from the delete that stopped');
+  const n1 = noteTrue(c);
+  ok(n1.ok, 'the note names the kinds that can be ticked and are not, and only those: ' + n1.text);
   c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
   ok(T().result.ok && S.has('progress/' + U[0]) && S.has(`liveQuiz/current/answers/${U[0]}`) && !S.has(`songRequests/${U[0]}_2026-W45`),
     `the second run: ${T().result.text} Saved work and the new live answer kept, the song requests gone`);
@@ -385,6 +396,8 @@ console.log('tag');
   const t = await open(U[0]), L = c.fn('trmKindLines')(t.inv, U[0]);
   ok(t.ticks.minutes === true && L.minutes.n === 4 && /of practice, and their private Top 5 tag if they have one$/.test(L.minutes.text),
     `the re-read offers them, ticked, and promises the tag only "if they have one" (${L.minutes.n}: ${L.minutes.text})`);
+  const n0 = noteTrue(c);
+  ok(n0.ok, 'every kind still ticked: the note asks nothing to be ticked ' + n0.text);
   c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
   ok(c.run('trm').result.ok && !pathsOf(S, U[0]).length, `the re-run: ${c.run('trm').result.text} Nothing of Test 0's left (${pathsOf(S, U[0]).join(', ') || 'none'})`);
 }

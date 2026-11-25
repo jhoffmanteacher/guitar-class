@@ -380,7 +380,14 @@ async function trmChoose(mode){
   /* A kind with nothing to delete then was unticked then, so with keep it stays unticked even if it has data now
      (the note says so): nothing is ticked that the teacher did not tick. */
   trm.ticks = {}; TRM_KINDS.forEach(k=>{ trm.ticks[k.id] = lines[k.id].n > 0 && (!keep || keep.ticks[k.id]===true); });
-  if(keep) trm.note = 'Ticked as in the delete that stopped. A kind you unticked, or one with nothing to delete then, stays unticked: tick it to delete it too.';
+  /* Names only the kinds that can be ticked and are not (one with nothing to delete now has its box switched off, so
+     "tick it" would not be true of it: review R3 minor 5). */
+  if(keep){
+    const left = TRM_KINDS.filter(k=>lines[k.id].n > 0 && !trm.ticks[k.id]).map(k=>k.label);
+    trm.note = 'Ticked as in the delete that stopped.' + (left.length
+      ? ` Not ticked, as then: ${left.join('; ')}. Tick ${left.length===1 ? 'it' : 'any of them'} to delete ${left.length===1 ? 'it' : 'them'} too.`
+      : '');
+  }
   trmPaint();
 }
 function trmConfirmed(){ return !!trm && trmNorm(trm.typed)!=='' && trmNorm(trm.typed)===trmNorm(trm.name); }
