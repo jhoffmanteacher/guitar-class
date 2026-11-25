@@ -317,7 +317,7 @@ section 3; what is live since 2026-11-17: "Where things stand".
 
 - **2026-11-25 — Saw chase, Part 1: the silent chase on every Live game's Reveal** (Jonathan 2026-11-24; work order `WORK-ORDER-saw-chase.md`).
   New `live-saw.js` (console only; a switch in the strip, goal % beside Questions; state in sessionStorage, nothing in any doc); band under
-  `lqStageRevealHtml()`; `tools/live-saw-sim.mjs` 106 of 106 pinned by `checks.mjs` 1fd (break-it: exactly 70% as a miss = 2 red); a fret Reveal (the tallest) draws the band under its board, so the stage keeps its height (measured 515/515 on and off at 1366x657). Part 2 (the sound) is next.
+  `lqStageRevealHtml()`; `tools/live-saw-sim.mjs` 106 of 106 pinned by `checks.mjs` 1fd (break-it: exactly 70% as a miss = 2 red); a fret Reveal (the tallest) draws the band under its board, so the stage keeps its height (measured 515/515 on and off at 1366x657). Part 2 (the saw's sound) was skipped on Jonathan's word, 2026-11-25; not built, nothing to roll back (`live-saw.js` only has an unused `lqSawOnMove` call site, behind `typeof`).
   Review: Fast.
 - **2026-11-24 — Streak flame colored by the streak, not this week** (Jonathan: "brown looks like it applies to the streak not
   the week"; work order `WORK-ORDER-streak-flame-color.md`). Both flames (`stripInner()`, `progressHtml()`) get `pm-on` when `st.streak > 0`:
