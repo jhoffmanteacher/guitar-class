@@ -1029,7 +1029,7 @@ try {
     put('data/index-head.html', lines(await read('data:head', 'head', 3, false))); count('data');
     /* The files the rebuild leaves alone (todo.md, "Do not refactor"), byte for byte. */
     const KEEP = ['i18n.js', 'styles.css', 'firestore.rules', 'class-activities.js', 'config-main.js', 'guitar-diagrams.js', 'practice-minutes-config.js', 'practice-minutes.js',
-      'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'fab-tools.js', 'tuner.js', 'manifest.json', ...readdirSync(ROOT).filter(f => /^module-\d+\.js$/.test(f) || /^trainer-.*\.js$/.test(f)).sort(),
+      'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'fab-tools.js', 'tuner.js', 'manifest.json', ...readdirSync(ROOT).filter(f => /^module-\d+\.js$/.test(f) || /^trainer-.*\.js$/.test(f)).sort(),
       ...readdirSync(join(ROOT, 'tabs')).sort().map(f => 'tabs/' + f)];
     for (const f of KEEP) { put(`files/${f}`, existsSync(join(ROOT, f)) ? readFileSync(join(ROOT, f)) : '(missing)'); count('filesKept'); }
   }

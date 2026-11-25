@@ -3,6 +3,7 @@ paths:
   - "live-quiz.js"
   - "live-changes.js"
   - "live-hilo.js"
+  - "live-saw.js"
 ---
 
 ## Live quiz — the whole-class game
@@ -89,6 +90,25 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   - The strip is on the projector: it never names a note or a size. `speedBonus:false` stays (the sound comes after
     the question opens). After any change to it, its `hilo` branches here, the piano files or the `lq.*.hilo` strings:
     `node tools/live-hilo-sim.mjs` (checks.mjs 1ez runs it and pins 20,000 pairs).
+- **"Saw chase"** (Jonathan 2026-11-24, 2026-11-25; its own file, `live-saw.js`, loaded after `live-hilo.js` on index.html
+  only, every call into it behind a `typeof` guard). A band under each Reveal on the PROJECTOR (the console's stage
+  only): a musical saw floats after a running guitarist; a class at or above the goal lets him pull ahead, below it
+  the saw gains, a catch is a gag (the saw shaves the guitar down to a ukulele, bends its blade, the chase restarts at 3)
+  and the game goes on. Every Live game, switch in the strip's every-state row (off the first time, `gc-lq-sawchase`),
+  goal % beside Questions (default 70, `gc-lq-sawgoal`).
+  - **Nothing about it is ever written to `liveQuiz/current`** or any doc: no `lqWrite` / `lqPreviewWrite` in the file
+    (the sim spies on both). The percent is worked out on the console at Reveal: mc / fret / pcname `lqRightCount(s).n`
+    over `lqRoster(s).length`, changes `tally.caught` over (changes x roster); EVERYONE in the game counts, a student who
+    did not answer is wrong. Compared unrounded, as whole numbers (exactly the goal counts as making it).
+  - **A new question type needs a rule in `lqSawPercent()`**, next to the `lqType()` branch list above; without one the
+    chase draws but does not move, and `tools/live-saw-sim.mjs` fails (it walks every quiz in `LIVE_QUIZZES`).
+  - Gap 0 to 5, a game starts at 3; hit +1 (max 5), miss -1, 0 = catch then back to 3, the ukulele stays for the game.
+    A round applies ONCE (state in sessionStorage `gc-lq-sawchase-state`, per `sessionId`; a reload neither replays nor
+    re-applies). The stage repaints on every snapshot, so the animation is played from memory (`lqSawAnim`): a repaint
+    inside its length continues it with a negative delay, after it the end position, a reload the end position.
+    A round with nobody in the game, or revealed while the switch was off, moves nothing.
+  - The band shows on the Reveal stage only (lobby, question, final scores unchanged) and with the switch off the stage
+    HTML is byte-for-byte what it was. After any change: `node tools/live-saw-sim.mjs` (checks.mjs runs and pins it).
 - **The two power chord quizzes differ from the rest in two ways** (Jonathan,
   2026-11-13; `checks.mjs` 1f pins both flags to `pc-find` and `pc-name`):
   - `changeAnswer:true`: a student may tap another answer while the question

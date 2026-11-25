@@ -315,6 +315,10 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-25 — Saw chase, Part 1: the silent chase on every Live game's Reveal** (Jonathan 2026-11-24; work order `WORK-ORDER-saw-chase.md`).
+  New `live-saw.js` (console only; a switch in the strip, goal % beside Questions; state in sessionStorage, nothing in any doc); band under
+  `lqStageRevealHtml()`; `tools/live-saw-sim.mjs` 106 of 106 pinned by `checks.mjs` 1fd (break-it: exactly 70% as a miss = 2 red); a fret Reveal (the tallest) draws the band under its board, so the stage keeps its height (measured 515/515 on and off at 1366x657). Part 2 (the sound) is next.
+  Review: Fast.
 - **2026-11-24 — Streak flame colored by the streak, not this week** (Jonathan: "brown looks like it applies to the streak not
   the week"; work order `WORK-ORDER-streak-flame-color.md`). Both flames (`stripInner()`, `progressHtml()`) get `pm-on` when `st.streak > 0`:
   orange with a streak, `--pm-grey` (3.1 : 1 on the surface) with none; `--streak-dim` deleted. Reverses the 2026-11-01 rule "orange only

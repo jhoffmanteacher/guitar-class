@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-25 — A saw chases the guitar on the projector
+
+- **With "Saw chase" on, a musical saw floats after a running guitarist after each answer in a Live In-Class Game.** When the class
+  gets at least the goal percent right, the guitarist pulls ahead. Below it, the saw gains. If the saw catches him, it shaves his guitar
+  down to a ukulele, bends its blade to tune itself, and the chase starts again. The game keeps going. It shows on the room's screen
+  only; student screens do not change. Your teacher turns it on and sets the goal.
+
 ## 2026-11-24 — The streak flame shows your streak
 
 - **The flame is orange whenever you have a streak, and gray when you do not.** Before, it stayed brown until this week's

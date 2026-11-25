@@ -22,7 +22,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-11-25-809d76a826';
+const CACHE_VERSION = 'guitar-class-2026-11-25-ec6b57a301';
 
 /* BACKING-TRACK AUDIO (2026-10-30 rewrite). Every track lives in ONE cache that
    never changes name, AUDIO_CACHE, apart from the shell's CACHE_VERSION: a routine
@@ -220,6 +220,7 @@ const PRECACHE_CRITICAL = [
   './live-quiz.js',
   './live-changes.js',
   './live-hilo.js',
+  './live-saw.js',
   './trainer-site-adapter.js'
 ];
 
@@ -290,6 +291,7 @@ const ASSETS = [
   './live-quiz.js',
   './live-changes.js',
   './live-hilo.js',
+  './live-saw.js',
   './trainer-site-adapter.js',
   './config-main.js',
   './firebase-config.js',

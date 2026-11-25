@@ -5506,6 +5506,57 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 @media(min-width:820px){.lq-st-split{grid-template-columns:1.35fr 1fr;align-items:start}}
 .lq-lb-stage li{font-size:clamp(0.9375rem,1.5vw / var(--site-fill,1),1.25rem);background:var(--bg3)}
 
+/* ── Saw chase (live-saw.js, 2026-11-25): the band under a Reveal on the projector. The base style is the END position
+   (--g steps behind, 0 to 5; guitar or ukulele); an animation class (.lq-saw-a-gain / -pull / -catch, only on the
+   paint that starts it and the repaints inside its length, with --d a negative delay so it carries on) plays INTO it,
+   so prefers-reduced-motion (no animation) and a reload both land on the same picture. Lengths match LQ_SAW_DUR. ── */
+.lq-saw{display:flex;flex-direction:column;align-items:center;gap:var(--sp-2);margin-top:var(--sp-8)}
+.lq-st-boardcol{min-width:0}
+.lq-saw-track{position:relative;width:100%;height:60px;overflow:hidden;--g:3;--f:3;--d:0s}
+.lq-saw-saw,.lq-saw-guy{position:absolute;top:0;width:84px;height:60px}
+.lq-saw-saw{left:calc(69.5% - 13% * var(--g));display:flex;align-items:center}
+.lq-saw-guy{left:74%}
+.lq-saw-guy svg,.lq-saw-saw svg{position:absolute;left:0;top:0;overflow:visible}
+.lq-saw-saw svg{top:2px}
+.lq-saw-blade{transform-origin:14px 32px}
+.lq-saw-leg{transform-origin:38px 36px}
+.lq-saw-ukulele{opacity:0}
+.lq-saw-uke .lq-saw-guitar{opacity:0}
+.lq-saw-uke .lq-saw-ukulele{opacity:1}
+.lq-saw-cap{font-size:var(--fs-14);font-weight:700;color:var(--text2)}
+.lq-saw-chips{position:absolute;left:50px;top:30px;width:0;height:0}
+.lq-saw-chips i{position:absolute;left:0;top:0;width:9px;height:5px;border-radius:1px;background:#ffd23f;box-shadow:0 0 0 1px #7a3b10;opacity:0}
+.lq-saw-chips i:nth-child(1){--cx:-26px;--cy:-26px}.lq-saw-chips i:nth-child(2){--cx:-8px;--cy:-34px}
+.lq-saw-chips i:nth-child(3){--cx:14px;--cy:-30px}.lq-saw-chips i:nth-child(4){--cx:-30px;--cy:-8px}
+.lq-saw-chips i:nth-child(5){--cx:22px;--cy:-14px}.lq-saw-chips i:nth-child(6){--cx:-14px;--cy:-20px}
+@keyframes lqSawGain{from{left:calc(69.5% - 13% * var(--f))}to{left:calc(69.5% - 13% * var(--g))}}
+@keyframes lqSawCatch{0%{left:calc(69.5% - 13% * var(--f))}38%,70%{left:69.5%}100%{left:calc(69.5% - 13% * var(--g))}}
+@keyframes lqSawGuyBurst{0%{transform:translateX(0)}30%{transform:translateX(26px)}100%{transform:translateX(0)}}
+@keyframes lqSawGuyHit{0%,38%{transform:translateX(0)}44%{transform:translateX(-5px) rotate(-6deg)}52%{transform:translateX(5px) rotate(5deg)}60%{transform:translateX(-3px)}70%,100%{transform:none}}
+@keyframes lqSawLeg{from{transform:rotate(-32deg)}to{transform:rotate(32deg)}}
+@keyframes lqSawFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes lqSawWail{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+@keyframes lqSawBend{0%,70%{transform:none}78%{transform:skewY(-22deg)}86%{transform:skewY(14deg)}94%{transform:skewY(-6deg)}100%{transform:none}}
+@keyframes lqSawGuitarOut{0%,40%{opacity:1}52%,100%{opacity:0}}
+@keyframes lqSawUkeIn{0%,40%{opacity:0}52%,100%{opacity:1}}
+@keyframes lqSawChip{0%,38%{opacity:0;transform:translate(0,0)}42%{opacity:1}100%{opacity:0;transform:translate(var(--cx),calc(var(--cy) + 30px))}}
+.lq-saw-a-gain .lq-saw-saw{animation:lqSawGain 1.8s ease-in-out var(--d) both}
+.lq-saw-a-gain .lq-saw-saw svg{animation:lqSawFloat .45s ease-in-out var(--d) 4}
+.lq-saw-a-gain .lq-saw-blade{animation:lqSawWail .3s linear var(--d) 6}
+.lq-saw-a-gain .lq-saw-leg-a,.lq-saw-a-catch .lq-saw-leg-a{animation:lqSawLeg .22s ease-in-out var(--d) alternate 8}
+.lq-saw-a-gain .lq-saw-leg-b,.lq-saw-a-catch .lq-saw-leg-b{animation:lqSawLeg .22s ease-in-out var(--d) alternate-reverse 8}
+.lq-saw-a-pull .lq-saw-saw{animation:lqSawGain 1.6s ease-in-out var(--d) both}
+.lq-saw-a-pull .lq-saw-guy{animation:lqSawGuyBurst 1.6s ease-out var(--d) both}
+.lq-saw-a-pull .lq-saw-leg-a{animation:lqSawLeg .14s ease-in-out var(--d) alternate 12}
+.lq-saw-a-pull .lq-saw-leg-b{animation:lqSawLeg .14s ease-in-out var(--d) alternate-reverse 12}
+.lq-saw-a-catch .lq-saw-saw{animation:lqSawCatch 2.5s ease-in-out var(--d) both}
+.lq-saw-a-catch .lq-saw-blade{animation:lqSawBend 2.5s ease-in-out var(--d) both}
+.lq-saw-a-catch .lq-saw-guy{animation:lqSawGuyHit 2.5s ease-in-out var(--d) both}
+.lq-saw-a-catch .lq-saw-chips i{animation:lqSawChip 2.5s ease-out var(--d) both}
+.lq-saw-swap .lq-saw-guitar{animation:lqSawGuitarOut 2.5s linear var(--d) both}
+.lq-saw-swap .lq-saw-ukulele{animation:lqSawUkeIn 2.5s linear var(--d) both}
+@media (prefers-reduced-motion:reduce){.lq-saw *{animation:none!important}.lq-saw-chips{display:none}}
+
 /* Deliberately understated: this strip is also on the projector, and the six
    mark-the-answer buttons must read as a neutral row of string names — never
    as a hint about which one is right. */

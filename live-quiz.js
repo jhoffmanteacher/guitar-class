@@ -1672,6 +1672,13 @@ function lqStagePcNameRevealHtml(s, quiz){
 }
 
 function lqStageRevealHtml(s, quiz){
+  // The Saw chase band (live-saw.js, console only) goes under whatever the Reveal shows; '' with its switch off.
+  // A fret Reveal is the tallest (six tally bars and the Top 3), so it draws the band itself, in the free space under
+  // its board (lqStageFretRevealHtml), and nothing here: the stage then keeps its height.
+  if(lqType(quiz) === 'fret') return lqStageRevealBodyHtml(s, quiz);
+  return lqStageRevealBodyHtml(s, quiz) + (typeof lqSawBandHtml === 'function' ? lqSawBandHtml(s, quiz) : '');
+}
+function lqStageRevealBodyHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStageFretRevealHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStagePcNameRevealHtml(s, quiz);
   if(lqType(quiz) === 'changes') return typeof lqCcStageRevealHtml === 'function' ? lqCcStageRevealHtml(s) : '';
@@ -1711,6 +1718,8 @@ function lqStageFretRevealHtml(s, quiz){
   const first = chord ? lqParseFretId(correctIds[0]) : null;
   const box = first ? lqPcBoxSvg(first.string, first.fret) : '';
   if(box) board = `<div class="lq-st-pcwrap">${board}<div class="lq-pcbox lq-pcbox-side">${box}</div></div>`;
+  const saw = typeof lqSawBandHtml === 'function' ? lqSawBandHtml(s, quiz) : '';   // Saw chase (live-saw.js): '' with its switch off
+  if(saw) board = `<div class="lq-st-boardcol">${board}${saw}</div>`;
   const lb = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
@@ -1771,10 +1780,10 @@ function lqPaintControls(){
   if(!el) return;
   // A snapshot landing mid-typing would wipe the half-typed number; the
   // input's own onchange (blur / Enter) saves it and the next paint catches up.
-  if(document.activeElement && (document.activeElement.id === 'lq-limit' || document.activeElement.id === 'lq-total') && !lqTBusy) return;
+  if(document.activeElement && (document.activeElement.id === 'lq-limit' || document.activeElement.id === 'lq-total' || document.activeElement.id === 'lq-sawgoal') && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
-  const full = lqHideNamesInputHtml() + (typeof lqMusicInputHtml === 'function' ? lqMusicInputHtml() : '') + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">${lqIsFullscreen() ? 'Exit full screen' : 'Full screen'}</button>`
+  const full = lqHideNamesInputHtml() + (typeof lqSawSwitchHtml === 'function' ? lqSawSwitchHtml() : '') + (typeof lqMusicInputHtml === 'function' ? lqMusicInputHtml() : '') + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">${lqIsFullscreen() ? 'Exit full screen' : 'Full screen'}</button>`
     + (lqTPreview ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherExitPreview()">Exit preview</button>` : '');
   const pv = lqTPreview ? `<div class="lq-ctl-hint"><b>Preview</b>: only this screen sees it. No student is invited and nothing is saved.</div>` : '';
   if(lqTPreview && s && s.state === 'ended'){
@@ -1796,7 +1805,7 @@ function lqPaintControls(){
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
         <option value="speed"${lqTScoring === 'speed' ? ' selected' : ''}>Faster = more points</option>
       </select></label>`)
-      + lqTotalInputHtml() + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
+      + lqTotalInputHtml() + (typeof lqSawGoalInputHtml === 'function' ? lqSawGoalInputHtml() : '') + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
     el.innerHTML = `<label class="lq-ctl-lbl">Game <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`

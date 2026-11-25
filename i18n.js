@@ -3147,6 +3147,8 @@
     // "Name the power chord" (2026-11-10): the chord box is the question, so the prompt carries NO param (a {chord} would answer it).
     'lq.title.pcName':       { en: 'Name the power chord', es: 'Nombra el acorde de potencia' },
     'lq.prompt.pcName':      { en: 'Which power chord is this?', es: '¿Qué acorde de potencia es este?' },
+    // "Saw chase" (2026-11-25, live-saw.js): the caption under the chase on the projector's Reveal.
+    'lq.saw.caption':        { en: '{n}% of the class · goal {g}%', es: '{n}% de la clase · meta {g}%' },
     // "Higher or lower?" (2026-11-24, live-hilo.js): the room hears two piano notes; each student taps Higher or Lower for the second one.
     'lq.title.hilo':         { en: 'Higher or lower?', es: '¿Más agudo o más grave?' },
     'lq.prompt.hilo':        { en: 'Is the second note higher or lower than the first?', es: '¿La segunda nota es más aguda o más grave que la primera?' },

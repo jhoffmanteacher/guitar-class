@@ -86,7 +86,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'config-main.js',
+  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -5111,7 +5111,7 @@ function checkSpanishDrift() {
    values in coach.js — instead of guessed at.
    ════════════════════════════════════════════════════════════════════ */
 const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 'teacher.js',
-  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
+  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
 
 // (stripJsComments lives in the shared-helpers block above — i18n.js's own
 // top-of-file "how to add a key" doc comment uses example strings like
@@ -5903,7 +5903,7 @@ async function checkLiveQuizPcNameNoLeak() {
    ════════════════════════════════════════════════════════════════════ */
 const DUPLICATE_GLOBALS_ALLOWED = new Set(['isTuningWarmupSection']);
 const CLASSIC_SCRIPTS = ['app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js',
-  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
+  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
 
 function checkDuplicateGlobals() {
   head('1g. Duplicate top-level globals');
@@ -6799,6 +6799,29 @@ function checkLiveHilo() {
   /* Pinned: 20,000 pairs (4 levels x 5,000) and at least 70 cases. A tool that quietly stops checking shows here. */
   if (m[1] !== '20000' || Number(m[3]) < 70) { err(`1ez: the sim ran ${m[1]} pairs and ${m[3]} cases (pinned: 20000 pairs, at least 70 cases): if the proof changed on purpose, re-pin here`); problems++; return; }
   ok(last.replace(/^live-hilo-sim: /, ''));
+}
+/* ════════════════════════════════════════════════════════════════════
+   1fd. SAW CHASE (2026-11-25, live-saw.js): tools/live-saw-sim.mjs runs the REAL files (live-quiz.js, live-changes.js,
+   live-saw.js): the class's percent for every game in LIVE_QUIZZES and all four Reveal shapes (with a roster larger
+   than the answers), the line (69.9% gains, exactly 70% pulls ahead), the gap (3 to start, 0 to 5, a catch goes back
+   to 3, the ukulele stays), once per round (five paints, a reload), the switch off (the stage is byte-for-byte what it
+   was), the band on the Reveal only, and nothing written to a doc. About 1 s.
+   ════════════════════════════════════════════════════════════════════ */
+function checkLiveSaw() {
+  head('1fd. Saw chase: the real game code, every game, the line and the gap (tools/live-saw-sim.mjs)');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'live-saw-sim.mjs')], { encoding: 'utf8', timeout: 60000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const last = lines[lines.length - 1] || '';
+  const m = /^live-saw-sim: (\d+) games, 4 reveal shapes; (\d+) of (\d+) cases pass$/.exec(last);
+  if (r.status !== 0 || !m || m[2] !== m[3]) {
+    err('tools/live-saw-sim.mjs failed' + (r.error ? ': ' + r.error.message : '') + ' — replay: node tools/live-saw-sim.mjs');
+    problems++;
+    for (const l of [...lines.filter(l => /FAIL/.test(l)).slice(0, 8), ...(r.stderr || '').trim().split('\n').slice(-4)]) if (l) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  /* Pinned: at least 8 games (today's count) and 90 cases. A tool that quietly stops checking shows here. */
+  if (Number(m[1]) < 8 || Number(m[3]) < 90) { err(`1fd: the sim walked ${m[1]} games and ${m[3]} cases (pinned: at least 8 games, 90 cases): if the proof changed on purpose, re-pin here`); problems++; return; }
+  ok(last.replace(/^live-saw-sim: /, ''));
 }
 function checkToneTest() {
   head('1cx. The pitch detectors read made-up tones as they did (tools/tone-test.mjs)');
@@ -22810,7 +22833,7 @@ function checkWeekendStreaks() {
   const files = [];
   try {
     for (const n of ['app.js', 'coach.js', 'teacher.js']) for (const p of siteParts(n, ROOT)) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
-    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
+    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
       if (existsSync(join(ROOT, p))) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
   } catch (e) { fail('could not read the site scripts: ' + e.message); return; }
   // comments out, line breaks kept: a reported line number is the file's own
@@ -23542,6 +23565,7 @@ function checkNeverRules(sets) {
   checkLiveQuizHideNames();
   checkLiveChanges();
   checkLiveHilo();
+  checkLiveSaw();
   checkCoachVerdicts();
   checkToneTest();
   await checkCountIn();
