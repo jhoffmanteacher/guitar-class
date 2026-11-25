@@ -54,7 +54,7 @@ const SB_CHART_MAX = 20000;            // characters of pasted chart kept
 const SB_FOLD_MAJ = ['7', 'maj7', 'M7', 'Maj7', 'ma7', '9', 'maj9', 'add9', 'add2', '2', '4', 'sus', 'sus2', 'sus4', '7sus4', '7sus', '6', '11', '13', 'add4', 'maj', 'M', 'Maj'];
 const SB_FOLD_MIN = ['m7', 'min7', 'mi7', '-7', 'm9', 'm6', 'madd9', 'm11', 'min', 'mi', '-'];
 const SB_SPLITS = { '4/4': [[4], [2, 2], [3, 1], [1, 3]], '3/4': [[3], [2, 1], [1, 2]], '6/8': [[2], [1, 1]] };
-let sbCh = null;   // { id, view: 'paste'|'read'|'grid', text, sel, part, undo: [], saveTimer, typed: {} } — this tab only
+let sbCh = null;   // { id, view: 'paste'|'read'|'grid', text, sel, part, undo: [], typed: {} } — this tab only (the save: sbSaveSoon, teacher-sb-core.js)
 
 /* ── Chord symbols ── */
 /* A symbol → { name: 'G' | 'Am' | 'E5' | '' (a rest: N.C.), from, folded } or null when it cannot be read. */
@@ -479,8 +479,10 @@ function sbBarsOffHtml(d, off, fmt, inGrid){
 }
 
 /* ── The view ── */
+/* Another song's state replaces this one's; a save the old song's edit still waits for is NOT dropped (SB-1: it is the
+   draft's own, sbSaveSoon). */
 function sbChFor(id){
-  if(!sbCh || sbCh.id !== id){ if(sbCh) clearTimeout(sbCh.saveTimer); sbCh = { id, view: '', text: null, sel: null, part: 0, undo: [], saveTimer: 0, read: null, readOf: '' }; }
+  if(!sbCh || sbCh.id !== id){ sbCh = { id, view: '', text: null, sel: null, part: 0, undo: [], read: null, readOf: '' }; }
   return sbCh;
 }
 function sbChartMeter(d){ return (d && d.beat && d.beat.meter) || '4/4'; }
@@ -661,18 +663,16 @@ function sbLevelPaneHtml(d){
 }
 
 /* ── Acting ── */
-/* A change to the chart or the level: kept in the draft, saved once things settle (1.2 s), repainted now. */
+/* A change to the chart or the level: kept in the draft, saved once things settle (1.2 s; the save is the draft's,
+   sbSaveSoon in teacher-sb-core.js, SB-1), repainted now. With `now`, saved at once: the promise resolves when the
+   draft is saved (a caller may wait for it: sbChartReadNow). */
 function sbChartSet(d, patch, note, now){
-  const st = sbChFor(sbSel), id = sbSel;
   Object.assign(d, patch);
   d.step = Math.max(Number(d.step) || 1, patch.level ? 5 : 4);
+  d.unsaved = true;
   if(note != null) sbNote = note;
-  clearTimeout(st.saveTimer);
-  const save = () => { const cur = sbDraft(); if(sbSel === id && !sbBusy && cur === d) return sbWriteDraft(id, d); if(sbSel === id && cur === d) st.saveTimer = setTimeout(save, 600); return null; };
   teacherSbPaint();
-  if(now) return save();          // resolves when the draft is saved (a caller may wait for it: sbChartReadNow)
-  st.saveTimer = setTimeout(save, 1200);
-  return null;
+  return sbSaveSoon(sbSel, now ? 0 : 1200);
 }
 function sbChartEdit(d, sections, note){
   const st = sbChFor(sbSel);

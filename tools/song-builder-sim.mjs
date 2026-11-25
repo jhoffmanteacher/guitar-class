@@ -65,7 +65,12 @@
    follow: the reason and the table) write nothing; Add (the pdf through the Song files writer, then one transaction);
    Edit and Publish keep the sheet (and Publish reads its head); Replace (a stored pdf not uploaded again, the old one
    deleted); a pdf or a song another tab changed in the gap; Check it again; Export's .pdf; Remove; both chord sets;
-   Delete. --breaks runs these cases against 22 broken copies of the sheet code and of what carries the sheet. */
+   Delete. --breaks runs these cases against 22 broken copies of the sheet code and of what carries the sheet.
+
+   THE SWEEP CASES (2026-11-25; sweepCases): the Song builder findings SB-1 to SB-7 of the 2026-11-25 sweep, each case red
+   on the code before its fix: edits kept through the 15-s re-read, a song switch and leaving the view; "Level it again"
+   on a published song; leaving while the encoder runs; ◀ 1 beat ▶ and the drag of bar 1; a bar in thirds; the BPM bound.
+   Their comment above sweepCases says more. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -552,6 +557,7 @@ async function runCases(consoleSrc, sheetSrc){
   await r2Cases(consoleSrc, check);
   await r3Cases(consoleSrc, check);
   await sheetCases(consoleSrc, check, sheetSrc);
+  await sweepCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -2517,6 +2523,129 @@ async function sheetCases(consoleSrc, check, sheetSrc){
   }
   check('sheet: every write fits firestore.rules (songFiles heads and pieces, builtSongs, the list, drafts) and none goes to config/class or progress/',
     F.st.violations.length === 0 && !F.st.writes.some(w => /^(config|progress)\//.test(w.path)), F.st.writes.length + ' writes; ' + (F.st.violations.slice(0, 3).join('; ') || 'no violation'));
+}
+
+/* ── SWEEP 2026-11-25 (fixer "sb"; sweepCases): the Song builder findings SB-1 to SB-7, each case red on the code before
+   its fix (38a3843). Every case has its own console and store, a levelled draft ("Test 0") made by the real flow; the
+   consoles' timers run 20 times faster (the 1.2 s save is 60 ms), and the 600-ms retries of a waiting save are counted.
+   SB-1: an edit waiting for its save, or not saved yet, while the 15-s re-read is due: a beat, "+ Bar", a typed title, a
+   chords pdf's text at step 1, a new mp3; "+ Bar" then another song opened at once; "+ Bar" then the view left at once;
+   and the guard (a song imported over the draft in another tab still wins over its unsaved edits, review R3-2).
+   SB-2: "Level it again" on a published song: the same mp3 writes nothing to the file the song plays; other bytes go to
+   their own id; a file of that id with other bytes that a listed song plays is refused. SB-3: leaving while the encoder
+   runs frees the builder. SB-4: ◀ 1 beat ▶ and the drag of bar 1 (the real pointer handler) move every bar line.
+   SB-5: a new chord in a bar written in thirds. SB-7: the Beat step's BPM bound is the validator's. ── */
+const barsOf = d => d && d.chart && Array.isArray(d.chart.sections) ? d.chart.sections.reduce((n, s) => n + s.bars.length, 0) : -1;
+async function sweepDraft(consoleSrc, F){
+  const C = makeConsole(consoleSrc, F || makeDb()), { run } = C;
+  C.retries = 0;
+  C.box.setTimeout = (f, ms) => { if(ms === 600) C.retries++; return setTimeout(f, Math.ceil((Number(ms) || 0) / 20)); };
+  run('renderTeacherSongBuilder()'); await settle();
+  run('sbNewSong()'); await settle();
+  box_set(C, '__f', fileOf('test-a.mp3', SRC_A, 24)); run('sbPickFile(__f)'); await settle();
+  run("sbNew = { title: 'Test 0', artist: 'The Test Band' }"); run('sbSaveUpload()'); await settle(200);
+  C.id = run('sbSel');
+  if(!run('sbCopyCurrent(sbDraft())')){ box_set(C, '__levelNext', 'a'); run('sbRunLevel()'); await settle(200); }
+  return C;
+}
+async function sweepCases(consoleSrc, check){
+  const stores = [];
+  const draft = async F => { const C = await sweepDraft(consoleSrc, F); stores.push(C.F); return C; };
+  const waitSaves = async () => { await settle(); await sleep(150); await settle(); };
+  const due = 'sbReadAt = Date.now() - 20000;';   // the 15-s re-read is due: the next paint reads the store again
+  const chart8 = "sbReadAt = Date.now(); sbStepOn = 4; sbChartDoRead(sbDraft(), '[Verse]\\nG C D G\\n[Chorus]\\nC D G G')";
+  const onScreen = C => C.run('sbDraft().chart.sections.reduce((n, s) => n + s.bars.length, 0)');
+  const near = (x, y) => Math.abs(x - y) < 1e-3;
+  /* SB-1: a beat */
+  {
+    const C = await draft(), { run, F } = C;
+    run(due + ' sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbBeatFromBpm(96, null);');
+    await waitSaves();
+    const r0 = C.retries; await sleep(150); await settle();
+    const st = F.S.get('songDrafts/' + C.id);
+    check('SB-1 beat: a beat set while the 15-s re-read is due stays on screen and is stored once its save comes; the save is not tried again after that',
+      st.beat && st.beat.bpm > 0 && run('!!sbDraft().beat') && C.retries === r0,
+      JSON.stringify({ stored: st.beat && st.beat.bpm, onScreen: run('sbDraft().beat && sbDraft().beat.bpm'), retriesAfter: C.retries - r0 }));
+  }
+  /* SB-1: "+ Bar" */
+  {
+    const C = await draft(), { run, F } = C;
+    run(chart8); await settle(200);
+    const n0 = barsOf(F.S.get('songDrafts/' + C.id));
+    run(due + " sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} })"); await waitSaves();
+    check('SB-1 chart: "+ Bar" made while the re-read is due stays on screen and is stored (8 bars → 9)',
+      n0 === 8 && barsOf(F.S.get('songDrafts/' + C.id)) === 9 && onScreen(C) === 9, JSON.stringify({ before: n0, stored: barsOf(F.S.get('songDrafts/' + C.id)), onScreen: onScreen(C) }));
+  }
+  /* SB-1: a typed title */
+  {
+    const C = await draft(), { run, F } = C;
+    run('sbStepOn = 1; ' + due + " sbInput({ target: { matches: s => s === '[data-sb-field]', dataset: { sbField: 'title' }, value: 'Test 0 Renamed' } }); teacherSbPaint();");
+    await waitSaves();
+    const kept = run('sbDraft().title') === 'Test 0 Renamed' && run('!!sbDraft().dirty');
+    run('sbGoStep(2)'); await settle(200);
+    check('SB-1 title: a title typed and not saved yet survives the re-read, and Next stores it',
+      kept && F.S.get('songDrafts/' + C.id).title === 'Test 0 Renamed', JSON.stringify({ kept, onScreen: run('sbDraft().title'), stored: F.S.get('songDrafts/' + C.id).title }));
+  }
+  /* SB-1: a chords pdf's text at step 1 (sbPdfPutText, what a picked chords pdf does) */
+  {
+    const C = await draft(), { run, F } = C;
+    run('sbStepOn = 1; ' + due + " sbPdfPutText('[Verse]\\nG C D G'); teacherSbPaint();"); await waitSaves();
+    const kept = /G C D G/.test(run('sbDraft().chartText || ""'));
+    run('sbGoStep(2)'); await settle(200);
+    const ch = F.S.get('songDrafts/' + C.id).chart;
+    check('SB-1 pdf text: a chords pdf\'s text put in the step-1 chart box survives the re-read, and Next stores it',
+      kept && ch && /G C D G/.test(ch.text || ''), JSON.stringify({ kept, stored: ch && String(ch.text || '').slice(0, 30) }));
+  }
+  /* SB-1: a new mp3 for a saved draft */
+  {
+    const C = await draft(), { run, F } = C;
+    run('sbStepOn = 1; ' + due); box_set(C, '__f', fileOf('test-b.mp3', SRC_B, 24.02)); run('sbPickFile(__f)'); await waitSaves();
+    const kept = run('sbDraft().source.sha256') === sha(SRC_B) && run('!!sbDraft().dirty') && !run('sbCopyCurrent(sbDraft())');
+    run('sbGoStep(2)'); await settle(300);
+    check('SB-1 new mp3: a new mp3 picked for a saved draft survives the re-read (Preview and Publish wait for Volume, not the old recording), and Next stores it',
+      kept && F.S.get('songDrafts/' + C.id).source.sha256 === sha(SRC_B), JSON.stringify({ kept, stored: String(F.S.get('songDrafts/' + C.id).source.sha256).slice(0, 8), mine: sha(SRC_B).slice(0, 8) }));
+  }
+  /* SB-1: "+ Bar", then another song opened at once */
+  {
+    const F = makeDb(), other = 'sb-sweepother0001';
+    F.S.set('songDrafts/' + other, { v: 1, title: 'Test 1', artist: '', step: 2, source: { name: 'test-c.mp3', bytes: SRC_C.length, sha256: sha(SRC_C), durationSec: 15, sampleRate: 44100, channels: 1, kbps: 192 },
+      audio: null, volume: null, pitch: null, beat: null, chart: null, level: null, pubVer: null, savedAt: TS });
+    const C = await draft(F), { run } = C;
+    run(chart8); await settle(200);
+    run("sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} }); sbOpen(" + JSON.stringify(other) + ');'); await settle();
+    const opened = barsOf(F.S.get('songDrafts/' + C.id));
+    await waitSaves();
+    check('SB-1 switch: "+ Bar", then another song opened at once: the first song\'s edit is stored as the other song opens (8 bars → 9), and stays stored',
+      run('sbSel') === other && opened === 9 && barsOf(F.S.get('songDrafts/' + C.id)) === 9, JSON.stringify({ sel: run('sbSel'), opened, stored: barsOf(F.S.get('songDrafts/' + C.id)) }));
+  }
+  /* SB-1: "+ Bar", then the view left at once */
+  {
+    const C = await draft(), { run, F } = C;
+    run(chart8); await settle(200);
+    run("sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} }); teacherSbLeave(); teacherView = 'students';"); await waitSaves();
+    const away = barsOf(F.S.get('songDrafts/' + C.id));
+    run("teacherView = 'songbuilder'; " + due + ' renderTeacherSongBuilder();'); await waitSaves();
+    check('SB-1 leave: "+ Bar", then the view left at once: nothing is written while away, and the edit is stored when the Song builder shows again (with a re-read due then)',
+      away === 8 && barsOf(F.S.get('songDrafts/' + C.id)) === 9 && onScreen(C) === 9, JSON.stringify({ away, stored: barsOf(F.S.get('songDrafts/' + C.id)), onScreen: onScreen(C) }));
+  }
+  /* SB-1 guard: a song imported over the draft in another tab wins over the draft's unsaved edits (review R3-2) */
+  {
+    const F = makeDb(); F.st.stamp = true;
+    const C = await draft(F), { run } = C;
+    run(chart8); await settle(200);
+    const LV = LEVELLED.get('a'), doc = withAudio(FIXTURES.fourFour.doc, LV.length, sha(LV), 24);
+    doc.audio.id = audioIdFor(C.id, sha(LV)); doc.title = 'Test 0 Imported';
+    F.S.set('builtSongsMeta/list', { songs: { [C.id]: 5 }, updatedAt: TS });
+    F.S.set('builtSongs/' + C.id, Object.assign({}, doc, { savedAt: F.stamp() }));
+    const w0 = F.st.writes.length;
+    run(due + " sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} })"); await waitSaves();
+    const writes = F.st.writes.slice(w0).map(w => w.path);
+    check('SB-1 guard: an edit not saved yet on a draft that a song was imported over (in another tab) is dropped by the re-read, the draft shows as stale, and nothing saves it',
+      run('!!sbDraft().stale') && onScreen(C) === 8 && !writes.includes('songDrafts/' + C.id), JSON.stringify({ stale: run('!!sbDraft().stale'), onScreen: onScreen(C), writes }));
+  }
+  const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
+  check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
+    !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));
 }
 
 /* ── main ── */

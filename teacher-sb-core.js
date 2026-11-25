@@ -157,9 +157,14 @@ async function teacherSbLoad(){
   if(op !== sbOpGen){ teacherSbLoad(); return; }
   sbReadAt = Date.now(); sbReadErr = err;
   if(!err){
-    sbDrafts = drafts; sbPublished = pub;
     /* A draft older than its published song, and not that song (review R2-1, teacher-sb-publish.js sbDraftStale). */
     if(typeof sbDraftStale === 'function') for(const [id, d] of drafts) if(sbDraftStale(d, pub.get(id))) d.stale = true;
+    /* SB-1 (sweep 2026-11-25): a draft with edits this tab has not saved yet (sbUnsaved: a typed title, a new mp3, pdf
+       text, a Beat or Chart edit waiting for its save) keeps this tab's copy, or the read would throw the edits away.
+       Not when the song was imported over it (the stored draft is stale, judged on server times only): the import wins
+       (review R3-2). Not when the draft is gone from the store (deleted in another tab). */
+    if(sbDrafts) for(const [id, mine] of sbDrafts){ const s = drafts.get(id); if(s && !s.stale && sbUnsaved(mine)){ mine.savedAt = s.savedAt; drafts.set(id, mine); } }
+    sbDrafts = drafts; sbPublished = pub;
   }
   teacherSbPaint();
   if(teacherView === 'manage' && typeof teacherSfPaint === 'function') teacherSfPaint();
@@ -194,6 +199,8 @@ function renderTeacherSongBuilder(){
   if(steps && sbStepOn === 6 && typeof sbPreviewMounted === 'function') sbPreviewMounted(root);
   else if(typeof sbPreviewStop === 'function') sbPreviewStop(true);
   if(!sbBusy && (!sbDrafts || Date.now() - sbReadAt > 15000) && !sbReadErr) teacherSbLoad();
+  /* SB-1: an edit whose save was waiting when the view was left (teacherSbLeave) is saved now that it shows again. */
+  if(sbSaveAfterLeave){ sbSaveAfterLeave = false; if(sbDrafts) for(const [id, d] of sbDrafts) if(d.unsaved) sbSaveSoon(id, 1200); }
 }
 function teacherSbPaint(){ if(teacherView === 'songbuilder') renderTeacherSongBuilder(); }
 /* With a pdf shown beside the chart (teacher-sb-pdf.js) the song list gives its column to it. */
@@ -427,7 +434,7 @@ function sbClick(e){
   const b = t.closest('[data-sb-act]');
   if(!b || b.disabled) return;
   const act = b.dataset.sbAct;
-  if(act === 'new'){ if(sbBusy) return; sbStopSounds(); sbSel = 'new'; sbNew = { title: '', artist: '' }; sbStepOn = 1; sbNote = ''; sbMemFor('new'); teacherSbPaint(); return; }
+  if(act === 'new'){ if(sbBusy) return; sbSaveFlush(); sbStopSounds(); sbSel = 'new'; sbNew = { title: '', artist: '' }; sbStepOn = 1; sbNote = ''; sbMemFor('new'); teacherSbPaint(); return; }
   if(act === 'next1'){ sbSaveUpload(); return; }
   if(act === 'level'){ sbRunLevel(); return; }
   if(act === 'delete'){ sbDeleteDraft(); return; }
@@ -491,6 +498,10 @@ function teacherSbLeave(){
   if(typeof sbPreviewStop === 'function') sbPreviewStop(true);   // the preview card leaves the page's activity list too
   if(sbWorker){ try{ sbWorker.terminate(); }catch(e){} sbWorker = null; }
   if(typeof sbPdfLeave === 'function') sbPdfLeave();
+  /* SB-1: the saves that wait stop with the view (a write would stop at once: sbStopped); their edits stay marked in
+     memory, a re-read keeps them, and the view saves them when it shows again (renderTeacherSongBuilder). */
+  for(const t of sbSaveTimers.values()) clearTimeout(t);
+  sbSaveTimers.clear(); sbSaveAfterLeave = true;
 }
 function sbStopSounds(){
   sbStopTen();
@@ -506,6 +517,7 @@ function sbMemFor(id){
 }
 function sbOpen(id){
   if(sbBusy || id === sbSel) return;
+  sbSaveFlush();                          // SB-1: the song left keeps its last edits (stored before this one's work starts)
   sbStopSounds();
   if(typeof sbEditing !== 'undefined') sbEditing.clear();   // a published song opens on its own page again
   sbSel = id; sbNote = ''; sbNew = null;
@@ -648,6 +660,30 @@ async function sbWriteDraft(id, d){
     if(!sbStopped(gen)) teacherSbPaint();
   }
 }
+/* SB-1 (sweep 2026-11-25). An edit at the Beat or Chart step changes the draft in memory and marks it (d.unsaved; never
+   stored, sbDraftDoc keeps only its own fields); it is saved once things settle (1.2 s after the last change, or at
+   once). The save belongs to the draft's id, not to the song on screen or to one copy of the draft in memory: it is
+   still made after another song is opened, a re-read keeps a draft with edits not saved (teacherSbLoad), and it ends
+   once any write has stored the draft (sbWriteDraft puts a new copy in memory, with no mark). A stale draft (a song
+   imported over it) is never saved by it. */
+const sbSaveTimers = new Map();          // draft id -> the timer of its waiting save
+let sbSaveAfterLeave = false;           // the view was left: renderTeacherSongBuilder saves what still waits
+function sbUnsaved(d){ return !!(d && (d.dirty || d.unsaved)); }
+function sbSaveSoon(id, ms){
+  clearTimeout(sbSaveTimers.get(id)); sbSaveTimers.delete(id);
+  const save = () => {
+    sbSaveTimers.delete(id);
+    const cur = sbDrafts && sbDrafts.get(id);
+    if(!cur || !cur.unsaved || cur.stale) return null;
+    if(sbBusy){ sbSaveTimers.set(id, setTimeout(save, 600)); return null; }
+    return sbWriteDraft(id, cur);         // resolves when the draft is saved (a caller may wait for it: sbChartReadNow)
+  };
+  if(!ms) return save();
+  sbSaveTimers.set(id, setTimeout(save, ms));
+  return null;
+}
+/* Every save that waits, made now (another song is opened). */
+function sbSaveFlush(){ for(const id of [...sbSaveTimers.keys()]) sbSaveSoon(id, 0); }
 
 /* ── Decoding and encoding (the browser's own decoder; vendor/lamejs in a Worker) ── */
 async function sbDecode(bytes, fs){
@@ -833,9 +869,10 @@ async function sbClearStep(which){
   const id = sbSel, gen = sbViewGen;
   sbStopSounds();
   const bt = typeof sbBtFor === 'function' ? sbBtFor(id) : null;
-  if(bt){ clearTimeout(bt.saveTimer); bt.taps = []; bt.fit = null; bt.drift = null; }
+  clearTimeout(sbSaveTimers.get(id)); sbSaveTimers.delete(id);   // the write below stores the draft's other edits with it
+  if(bt){ bt.taps = []; bt.fit = null; bt.drift = null; }
   const old = which === 'volume' && d.audio ? d.audio.id : null;
-  if(which === 'chart' && typeof sbChFor === 'function'){ const st = sbChFor(id); clearTimeout(st.saveTimer); st.view = 'paste'; st.sel = null; st.undo = []; st.text = null; }
+  if(which === 'chart' && typeof sbChFor === 'function'){ const st = sbChFor(id); st.view = 'paste'; st.sel = null; st.undo = []; st.text = null; }
   const next = which === 'volume' ? Object.assign({}, d, { audio: null, volume: null, pitch: null, step: 2 })
     : which === 'chart' ? Object.assign({}, d, { chart: d.chart && d.chart.text ? { text: d.chart.text } : null, level: null, step: 4 })
     : Object.assign({}, d, { beat: null, step: 3 });

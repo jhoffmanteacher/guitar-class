@@ -24,9 +24,9 @@
    Everything that sounds here stops on every way out: leaving the view (teacherSbLeave), another step or song,
    a hidden tab, Stop. It never calls a global stopper (the console may be playing to the room). */
 const SB_TAP_WANT = 16;
-let sbBt = null;   // { id, taps: [], fit, audio, url, raf, clicks: [], lastClick, from, drag, drift, computing, saveTimer, view }
+let sbBt = null;   // { id, taps: [], fit, audio, url, raf, clicks: [], lastClick, from, drag, drift, computing, view } (the save: sbSaveSoon, teacher-sb-core.js)
 function sbBtFor(id){
-  if(!sbBt || sbBt.id !== id){ sbBeatStop(); sbBt = { id, taps: [], fit: null, audio: null, raf: 0, clicks: [], lastClick: -1, drift: null, saveTimer: 0, view: null, playingFor: '' }; }
+  if(!sbBt || sbBt.id !== id){ sbBeatStop(); sbBt = { id, taps: [], fit: null, audio: null, raf: 0, clicks: [], lastClick: -1, drift: null, view: null, playingFor: '' }; }
   return sbBt;
 }
 function sbBeatOf(d){ return d && d.beat && Number.isFinite(d.beat.anchor) && Number.isFinite(d.beat.bpm) ? d.beat : null; }
@@ -113,15 +113,17 @@ function sbBeatMounted(){
   if(!lv.E){
     const id = sbSel, gen = sbViewGen;
     setTimeout(() => {
-      if(sbStopped(gen) || sbSel !== id || lv.E) return;
+      /* The draft as it is now (SB-1: a re-read in these 30 ms may have put another copy of it in memory). */
+      const cur = sbDraft();
+      if(sbStopped(gen) || sbSel !== id || lv.E || !cur || !cur.audio) return;
       lv.E = sbOnsetEnv(lv.mono, lv.fs);
-      const b = sbBeatOf(d);
+      const b = sbBeatOf(cur);
       if(b) sbBeatTrack(lv, b);
-      sbBtFor(id).drift = b ? sbDrift(lv.E, b, d.audio.durationSec) : null;
-      sbBtFor(id).need = b ? sbPinsNeeded(lv.E, b, d.audio.durationSec) : null;
+      sbBtFor(id).drift = b ? sbDrift(lv.E, b, cur.audio.durationSec) : null;
+      sbBtFor(id).need = b ? sbPinsNeeded(lv.E, b, cur.audio.durationSec) : null;
       /* A beat whose drift windows are not measured on this copy (a new copy was levelled, review R1-6): measured
          and saved now, so Publish knows them. */
-      if(b && (!Number.isFinite(b.driftOff) || (b.driftFor && b.driftFor !== d.audio.sha256))){ sbBeatSet(d, Object.assign({}, b), null); return; }
+      if(b && (!Number.isFinite(b.driftOff) || (b.driftFor && b.driftFor !== cur.audio.sha256))){ sbBeatSet(cur, Object.assign({}, b), null); return; }
       teacherSbPaint();
     }, 30);
     return;
@@ -313,7 +315,8 @@ function sbBeatFromBpm(bpm0, fit){
     tapBpm: fit ? Math.round(fit.bpm * 100) / 100 : null, taps: fit ? fit.n : 0, tapSpreadMs: fit ? Math.round(fit.spreadMs) : null });
   sbBeatSet(d, beat, `The grid: ${sbPinBpm(beat).toFixed(2)} BPM, bar 1 at ${sbFmtT(beat.anchor)}. Check it with Listen with clicks.`);
 }
-/* Sets the beat, measures the drift windows, saves the draft (once things settle: 1.2 s after the last change). */
+/* Sets the beat, measures the drift windows, saves the draft (once things settle: 1.2 s after the last change; the
+   save is the draft's, sbSaveSoon in teacher-sb-core.js, SB-1). */
 function sbBeatSet(d, beat, note, now){
   const lv = sbMem.level, bt = sbBtFor(sbSel);
   beat.bpm = Math.round(sbPinBpm(beat) * 10000) / 10000;
@@ -324,11 +327,9 @@ function sbBeatSet(d, beat, note, now){
   beat.pinsNeeded = bt.need ? bt.need.pins : null;
   d.beat = beat;
   d.step = Math.max(3, Number(d.step) || 1);
+  d.unsaved = true;
   if(note != null) sbNote = note;
-  clearTimeout(bt.saveTimer);
-  const id = sbSel;
-  const save = () => { if(sbSel === id && !sbBusy && sbDrafts && sbDrafts.get(id) === d) sbWriteDraft(id, d); else if(sbSel === id) bt.saveTimer = setTimeout(save, 600); };
-  if(now) save(); else bt.saveTimer = setTimeout(save, 1200);
+  sbSaveSoon(sbSel, now ? 0 : 1200);
   teacherSbPaint();
 }
 function sbBeatAct(act, b){
