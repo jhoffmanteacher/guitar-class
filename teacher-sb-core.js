@@ -40,8 +40,9 @@
    (teacher-sb-pdf.js, 2026-11-16): they stay in this tab and are never stored.
    VOLUME: teacher-sb-dsp.js sbLevel (one gain to "the cure", a -1 dBFS limiter, 192k constant bitrate in a Worker
    running vendor/lamejs, decoded and measured again). The levelled copy goes to songFiles/{draft id}-{8 hex of its
-   SHA-256} through the Song files writer (teacherSfPutFile, teacher-songfiles.js), then the draft is saved, then
-   the draft's previous copy, if any, is deleted (never one a built song on builtSongsMeta/list plays). Pitch is
+   SHA-256} through the Song files writer (teacherSfPutFile, teacher-songfiles.js; not again when the store holds that
+   copy whole already, SB-2), then the draft is saved, then the draft's previous copy, if any, is deleted (never one a
+   built song on builtSongsMeta/list plays). Pitch is
    shown as "N cents above / below A = 440"; over 10 cents the step says the song cannot be published and to send
    the file to Claude (Jonathan, 2026-11-14), and the later steps stay open. No manual volume (one measured gain
    per song, the site's rule).
@@ -757,7 +758,18 @@ async function sbRunLevel(keep){
     const audio = { id: audioId, bytes: lv.bytes.length, sha256: sha, durationSec, centsOff: pitch.cents == null ? 0 : Math.round(pitch.cents * 10) / 10,
       gainDb: Math.round(lv.gainDb * 100) / 100, sourceSha256: src.sha256 };
     step = 'upload';
-    await teacherSfPutFile(audioId, { file: audioId + '.mp3', bytes: audio.bytes, sha256: sha }, lv.bytes, durationSec, w);
+    /* SB-2 (sweep 2026-11-25): the copy's id comes from its bytes, so the same bytes levelled again are the same file. One
+       the store holds whole is not uploaded again, as Import does (teacher-builtsongs.js): rewriting it sets its head to
+       'uploading', and a published song that plays it is refused to students until the upload ends (for good if it
+       stops). Different bytes get a new id and leave the published song's file alone; only a file of this id with OTHER
+       bytes that a listed song plays (two SHA-256s alike in their first 8 hex digits) is refused rather than written over. */
+    const entry = { file: audioId + '.mp3', bytes: audio.bytes, sha256: sha };
+    await ensureDb();
+    const hs = await db.collection('songFiles').doc(audioId).get(), head = hs.exists ? hs.data() || {} : null;
+    const stored = teacherSfHeadMatches(head, entry);
+    if(!stored && head && head.sha256 && head.sha256 !== sha && typeof teacherBsAudioUsers === 'function' && (await teacherBsAudioUsers(audioId)).length)
+      throw { why: `the database already holds another file named ${audioId} that a published song plays. Send the mp3 to Claude` };
+    if(!stored) await teacherSfPutFile(audioId, entry, lv.bytes, durationSec, w);
     if(sbStopped(gen)) throw 'stop';
     step = 'draft';
     const old = d.audio && d.audio.id !== audioId ? d.audio.id : null;
@@ -774,7 +786,7 @@ async function sbRunLevel(keep){
     if(!saved) return;
     sbMem.level = { bytes: lv.bytes, sha256: sha, chans: level, fs: src.fs, mono: sbMono(level), durationSec, url: null, E: null };
     if(old) await sbDeleteAudio(old, gen);
-    sbNote = `Levelled: ${audio.gainDb >= 0 ? '+' : ''}${audio.gainDb.toFixed(1)} dB, ${sbMb(audio.bytes)} saved in ${w.n} piece${w.n === 1 ? '' : 's'}.`;
+    sbNote = `Levelled: ${audio.gainDb >= 0 ? '+' : ''}${audio.gainDb.toFixed(1)} dB, ${sbMb(audio.bytes)} ${stored ? 'already stored (the same copy: not uploaded again)' : `saved in ${w.n} piece${w.n === 1 ? '' : 's'}`}.`;
   }catch(e){
     const where = step === 'upload' ? (w.wrote ? ' The copy did NOT finish uploading; press Level it again.' : '') : step === 'draft' ? ' The copy is stored but the draft was not saved; press Level it again.' : '';
     if(e === 'stop') sbNote = 'Stopped: you left the Song builder.' + where;

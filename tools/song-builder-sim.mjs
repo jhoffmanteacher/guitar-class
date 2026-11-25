@@ -366,10 +366,11 @@ async function runCases(consoleSrc, sheetSrc){
     && d0.audio === null && firstSf > F.st.writes.findIndex(w => w.path === 'songDrafts/' + id), JSON.stringify(d0 && d0.source));
   check('new draft: the console opens it on step 2', run('sbStepOn') === 2 && run('sbDraft() && sbDraft().title') === 'Test 0');
 
-  /* Volume: the levelled copy goes to songFiles first, then the draft points at it. */
-  const wl = writes();
+  /* Volume: the levelled copy goes to songFiles first, then the draft points at it. Volume started by itself at Next
+     (sbAutoLevel), so the copy is stored by now: the order is read from its first write on. The "Level it" below levels
+     the same bytes again, which no longer uploads them again (SB-2, 2026-11-25; the sweep cases check that). */
   box_set(C, '__levelNext', 'a'); run('sbRunLevel()'); await settle(200);
-  const lw = F.st.writes.slice(wl);
+  const lw = F.st.writes.slice(firstSf);
   const shaA = sha(LEVELLED.get('a')), audA = id + '-' + shaA.slice(0, 8);
   const dIdx = lw.findIndex(w => w.path === 'songDrafts/' + id), hIdx = lw.map(w => w.path).lastIndexOf('songFiles/' + audA);
   const d1 = F.S.get('songDrafts/' + id);
@@ -2642,6 +2643,37 @@ async function sweepCases(consoleSrc, check){
     const writes = F.st.writes.slice(w0).map(w => w.path);
     check('SB-1 guard: an edit not saved yet on a draft that a song was imported over (in another tab) is dropped by the re-read, the draft shows as stale, and nothing saves it',
       run('!!sbDraft().stale') && onScreen(C) === 8 && !writes.includes('songDrafts/' + C.id), JSON.stringify({ stale: run('!!sbDraft().stale'), onScreen: onScreen(C), writes }));
+  }
+  /* SB-2: "Level it again" on a published song */
+  {
+    const C = await draft(), { run, F } = C;
+    const aud = run('sbDraft().audio.id'), a = JSON.parse(run('JSON.stringify(sbDraft().audio)'));
+    F.S.set('builtSongsMeta/list', { songs: { [C.id]: 5 }, updatedAt: TS });
+    F.S.set('builtSongs/' + C.id, { v: 1, title: 'Test 0', artist: 'The Test Band', audio: { id: aud, bytes: a.bytes, sha256: a.sha256, durationSec: a.durationSec, centsOff: 0 }, song: {}, savedAt: TS });
+    const on = (w0, id) => F.st.writes.slice(w0).filter(w => w.path === 'songFiles/' + id || w.path.startsWith('songFiles/' + id + '/')).map(w => w.op + ' ' + w.path.slice(id.length + 10) + ' ' + ((w.data && w.data.state) || ''));
+    run('sbReadAt = Date.now(); sbStepOn = 1;'); box_set(C, '__f', fileOf('test-a.mp3', SRC_A, 24)); run('sbPickFile(__f)'); await settle();
+    let w0 = F.st.writes.length;
+    box_set(C, '__levelNext', 'a'); run('sbStepOn = 2; sbRunLevel()'); await settle(300);
+    const same = on(w0, aud);
+    check('SB-2 same copy: "Level it again" with the same mp3 on a published song writes nothing to the file the song plays (stored whole already: not uploaded again); the draft still names it',
+      same.length === 0 && run('sbDraft().audio.id') === aud && F.S.get('songFiles/' + aud).state === 'ready' && /not uploaded again/.test(run('sbNote')), JSON.stringify({ writes: same, note: run('sbNote') }));
+    w0 = F.st.writes.length;
+    const audB = C.id + '-' + sha(LEVELLED.get('b')).slice(0, 8);
+    box_set(C, '__levelNext', 'b'); run('sbRunLevel()'); await settle(300);
+    const other = on(w0, aud);
+    check('SB-2 another copy: levelled to other bytes, the copy goes whole to its own id and the draft names it; the file the published song plays is never written or deleted',
+      other.length === 0 && run('sbDraft().audio.id') === audB && F.S.get('songFiles/' + audB).state === 'ready' && F.S.get('songFiles/' + aud) && F.S.get('songFiles/' + aud).state === 'ready',
+      JSON.stringify({ live: other, draft: run('sbDraft().audio.id'), newState: (F.S.get('songFiles/' + audB) || {}).state }));
+    const audC = C.id + '-' + sha(LEVELLED.get('c')).slice(0, 8), taken = 'sb-sweepcollide01', f64 = 'f'.repeat(64);
+    F.S.set('songFiles/' + audC, { file: audC + '.mp3', bytes: 5, sha256: f64, pieces: 1, pieceBytes: 900000, durationSec: 15, state: 'ready', uploadedAt: TS });
+    F.S.set('builtSongsMeta/list', { songs: { [C.id]: 5, [taken]: 6 }, updatedAt: TS });
+    F.S.set('builtSongs/' + taken, { v: 1, title: 'Test 9', artist: '', audio: { id: audC, bytes: 5, sha256: f64, durationSec: 15, centsOff: 0 }, song: {}, savedAt: TS });
+    w0 = F.st.writes.length;
+    box_set(C, '__levelNext', 'c'); run('sbRunLevel()'); await settle(300);
+    const hit = on(w0, audC);
+    check('SB-2 same id, other bytes: a copy whose id is already a file another published song plays, with other bytes, is refused with a line; that file is never written and the draft keeps its copy',
+      hit.length === 0 && /Not levelled: the database already holds another file/.test(run('sbNote')) && run('sbDraft().audio.id') === audB && F.S.get('songFiles/' + audC).sha256 === f64,
+      JSON.stringify({ writes: hit, note: run('sbNote') }));
   }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
