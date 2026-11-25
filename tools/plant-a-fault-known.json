@@ -74,13 +74,13 @@
    "date": "2026-11-14"
   },
   {
-   "id": "b2279ce463",
+   "id": "e5959395e3",
    "region": "cache",
    "file": "app/start.js",
    "where": "the service-worker block",
-   "line": 60,
-   "before": "if (!hadController) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: true }); return; }",
-   "after": "if (!hadController) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: false }); return; }",
+   "line": 79,
+   "before": "if (!w || w === ownWorker) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: true }); return; }",
+   "after": "if (!w || w === ownWorker) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: false }); return; }",
    "class": "harmless",
    "reason": "a page fires 'load' once, so { once: false } changes nothing",
    "date": "2026-11-14"

@@ -6699,7 +6699,7 @@ function checkAudioWorker(swPath) {
     ['app.js reads hadController before "load", from the navigation timing', loadAt > 0 && /const hadController = !!navigator\.serviceWorker\.controller && !\(navTiming && navTiming\.workerStart === 0\);/.test(swBlock.slice(0, loadAt))],
     ['app.js attaches both update listeners outside "load"', /\n    navigator\.serviceWorker\.addEventListener\('controllerchange', onNewWorker\);\s*\n    navigator\.serviceWorker\.addEventListener\('message', /.test(swBlock)],
     ['app.js: a waiting tab asks for the rest once', /askedWhileWaiting = true; askForRest\(\);/.test(swBlock)],
-    ['app.js: a page no worker served never reloads', /if \(!hadController\) \{[^\n]*return; \}\n\s*if \(window\.__swReloading\) return;/.test(swBlock)],
+    ['app.js: a page no worker served skips only its own worker\'s takeover', /let ownWorker = hadController \? null : navigator\.serviceWorker\.controller;/.test(swBlock) && /if \(!w \|\| w === ownWorker\) \{[^\n]*return; \}\n\s*\}\n\s*if \(window\.__swReloading\) return;/.test(swBlock)],
     ['sw.js: the fill stops when a newer worker is coming', /while \(queue\.length && !newerWorkerComing\(\)\) \{/.test(swSrc2)],
     ['app.js posts gc-precache-rest', /postMessage\(\{ type: 'gc-precache-rest' \}\)/.test(appSrc)],
     ['sw.js answers gc-precache-rest', /event\.data\.type === 'gc-precache-rest'\) event\.waitUntil\(precacheRest\(\)\)/.test(swSrc2)],

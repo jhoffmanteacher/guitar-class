@@ -54,10 +54,30 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('online', askForRest);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) askForRest(); });
   {
+    /* A page no worker served is the version of ITS worker only: the one
+       that takes it over first (a first visit, cleared site data), or that
+       had already claimed it before this line ran (review R2-2). That
+       takeover, both signals of it, gets no reload. Any other worker taking
+       over later is a new deploy and reloads like any update (APP-CORE-1,
+       2026-11-25): skipping every takeover left the tab on its old parts
+       for the rest of the day, with their cache deleted by the new worker.
+       A hard reload (Ctrl+Shift+R) loads with no controller while the
+       site's worker is active: that worker never claims the page, so it
+       is the page's own, and the first takeover after it is a deploy.
+       Told apart by the worker object, which stays the same for one worker
+       in one page. */
+    let ownWorker = hadController ? null : navigator.serviceWorker.controller;
+    if (!hadController && !ownWorker && navigator.serviceWorker.getRegistration) {
+      navigator.serviceWorker.getRegistration().then(reg => { if (!ownWorker && reg && reg.active) ownWorker = reg.active; }, () => {});
+    }
     const onNewWorker = () => {
-      // A first visit: the worker just took control for the first time. No
-      // reload, but it has only the shell so far.
-      if (!hadController) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: true }); return; }
+      if (!hadController) {
+        const w = navigator.serviceWorker.controller;
+        if (!ownWorker) ownWorker = w;
+        // Its own worker just took control: no reload, but it has only the
+        // shell so far.
+        if (!w || w === ownWorker) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: true }); return; }
+      }
       if (window.__swReloading) return;
       window.__swReloading = true;
       /* Everything the reload must not walk over. Jonathan pushes during
