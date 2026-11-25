@@ -2964,6 +2964,81 @@ async function r1Cases(consoleSrc, check){
       !s1 && !A.run('!!sbDraft().stale') && !A.run('!!sbDraft().unsaved') && A.run('sbDraft().chart.sections[0].bars[0]') === 'G' && verse(F, A.id) === 'G C D G',
       JSON.stringify({ staleAfterReturn: s1, staleAfterReread: A.run('!!sbDraft().stale'), unsaved: A.run('!!sbDraft().unsaved'), bar1: A.run('sbDraft().chart.sections[0].bars[0]') }));
   }
+  /* R1-5 P4: an edit waiting for its save when this tab imports a song over the draft (Manage → Built songs). */
+  {
+    const F = makeDb(); F.st.stamp = true;
+    const A = await draft(F);
+    A.run(chart4); await settle(200); await waitSaves();
+    const LV = LEVELLED.get('a'), doc = withAudio(FIXTURES.fourFour.doc, LV.length, sha(LV), 24);
+    doc.audio.id = audioIdFor(A.id, sha(LV)); doc.title = 'Test 0 Imported';
+    F.S.set('builtSongsMeta/list', { songs: { [A.id]: 5 }, updatedAt: TS });
+    F.S.set('builtSongs/' + A.id, Object.assign({}, doc, { savedAt: F.stamp() }));
+    const w0 = F.st.writes.length;
+    A.box.__doc = doc; A.run(`sbChFor(sbSel).sel = 0; sbChartAct('bar-add', { dataset: {} }); teacherSbImported(${JSON.stringify(A.id)}, __doc, 5);`);
+    await sleep(150); await settle();
+    const ws = F.st.writes.slice(w0).filter(w => w.path === 'songDrafts/' + A.id).length;
+    check('R1-5 P4: an edit waiting for its save when this tab imports a song over the draft is never saved (the import wins: the save checks that the draft is stale)',
+      ws === 0 && A.run('!!sbDraft().stale') && A.run('!!sbDraft().unsaved'), JSON.stringify({ draftWrites: ws, stale: A.run('!!sbDraft().stale') }));
+  }
+  /* The drag of bar 1 on the main waveform (the real pointer handler), as in sweepCases. */
+  const grid120 = "sbReadAt = Date.now(); sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbDraft().beat = { meter: '4/4', bpm: 120, anchor: 1, pins: [{ bar: 10, t: 19 }], driftOff: 0 };";
+  const dragOf = C => {
+    const W = 600, v = JSON.parse(C.run('JSON.stringify(sbBt.view)')), X = t => (t - v.t0) / (v.t1 - v.t0) * W, L = {};
+    const cv = { dataset: { sbWave: 'main' }, getAttribute: () => '118', clientWidth: W, parentNode: { clientWidth: W }, style: {}, getContext: () => null,
+      getBoundingClientRect: () => ({ left: 0, width: W }), setPointerCapture(){}, addEventListener: (t, f) => { L[t] = f; }, removeEventListener(){},
+      closest: sel => /canvas\[data-sb-wave="main"\]/.test(sel) ? cv : null };
+    return { down: from => { for(const f of C.docL.pointerdown || []) f({ target: cv, clientX: X(from), pointerId: 1, preventDefault(){} }); return !!L.pointerup; },
+      up: to => { if(L.pointermove) L.pointermove({ clientX: X(to) }); if(L.pointerup) L.pointerup({}); } };
+  };
+  /* R1-5 P7: ◀ 1 beat ▶ on a grid whose tempo drifts: each pin moves one beat where IT sits. */
+  {
+    const C = await draft(), { run } = C;
+    run("sbReadAt = Date.now(); sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbDraft().beat = { meter: '4/4', bpm: 120, anchor: 1, pins: [{ bar: 5, t: 9 }, { bar: 10, t: 19.5 }], driftOff: 0 };");
+    const b1 = run('sbBeatAt(sbDraft().beat, 1)'), b5 = run('sbBeatAt(sbDraft().beat, 5)'), b10 = run('sbBeatAt(sbDraft().beat, 10)');
+    run("sbBeatAct('a+beat', { dataset: {} })");
+    const g = JSON.parse(run('JSON.stringify({ a: sbDraft().beat.anchor, pins: sbDraft().beat.pins })'));
+    await waitSaves();
+    check('R1-5 P7: "1 beat ▶" on a grid with 3 pins and a tempo change moves bar 1 by its beat (0.5 s) and each pin by the beat where it sits (bar 5 by 0.525 s, bar 10 by 0.542 s)',
+      near(b1, 0.5) && near(b5, 0.525) && Math.abs(b10 - 0.5) > 0.02 && near(g.a, 1.5) && g.pins.length === 2 && near(g.pins[0].t, 9 + b5) && near(g.pins[1].t, 19.5 + b10),
+      JSON.stringify({ b1, b5, b10, g }));
+  }
+  /* R1-5 P8: a drag of 0.7 beat rounds to one whole beat (every bar line moves), the rest moves bar 1 alone. */
+  {
+    const C = await draft(), { run } = C;
+    run(grid120 + ' sbBtFor(sbSel).view = sbMainView(sbDraft().beat, sbDraft().audio.durationSec);');
+    const dg = dragOf(C), ok = dg.down(1); dg.up(1.35);
+    const g = JSON.parse(run('JSON.stringify({ a: sbDraft().beat.anchor, pins: sbDraft().beat.pins })'));
+    await waitSaves();
+    check('R1-5 P8: dragging bar 1 0.7 of a beat (1.0 → 1.35 s at 120 BPM) counts as one whole beat: the pin at bar 10 moves 19.0 → 19.5 s, and bar 1 lands at 1.35 s',
+      ok && near(g.a, 1.35) && g.pins.length === 1 && near(g.pins[0].t, 19.5), JSON.stringify(g));
+  }
+  /* R1-5 P13: a re-read that lands during the drag (it puts a new copy of the draft in memory). */
+  {
+    const C = await draft(), { run, F } = C;
+    run(grid120 + ' sbDraft().unsaved = true; sbSaveSoon(sbSel, 0);'); await waitSaves();
+    run('sbBtFor(sbSel).view = sbMainView(sbDraft().beat, sbDraft().audio.durationSec); sbDraft().__was = 1;');
+    const dg = dragOf(C), ok = dg.down(1);
+    await reread(C);
+    const swapped = !run('sbDraft().__was');
+    dg.up(1.5); await waitSaves();
+    const b = F.S.get('songDrafts/' + C.id).beat;
+    check('R1-5 P13: a re-read that lands while bar 1 is being dragged (a new copy of the draft in memory) does not lose the drag: the store gets bar 1 at 1.5 s and the pin at 19.5 s',
+      ok && swapped && near(b.anchor, 1.5) && near(b.pins[0].t, 19.5), JSON.stringify({ swapped, anchor: b.anchor, pins: b.pins }));
+  }
+  /* R1-5 P14: a re-read that lands in the Beat step's first 30 ms (the beats are read, then the drift check is saved).
+     This console's timers run on the real clock, so the read lands inside the 30 ms. */
+  {
+    const C = await draft(), { run, F } = C;
+    run("sbReadAt = Date.now(); sbDraft().beat = { meter: '4/4', bpm: 120, anchor: 1, pins: [], driftOff: null }; sbDraft().unsaved = true; sbSaveSoon(sbSel, 0);"); await waitSaves();
+    C.box.setTimeout = setTimeout;
+    run("sbDraft().__was = 1; sbMem.level.E = null; sbStepOn = 3; " + due + ' renderTeacherSongBuilder();'); await settle();
+    const order = { swapped: !run('sbDraft().__was'), measuring: !run('sbMem.level.E') };
+    for(let t = 0; t < 40 && !Number.isFinite((F.S.get('songDrafts/' + C.id).beat || {}).driftOff); t++) await sleep(100);   // its 1.2 s save, on the real clock
+    await settle();
+    const b = F.S.get('songDrafts/' + C.id).beat;
+    check('R1-5 P14: a re-read that lands while the Beat step reads the beats (its first 30 ms) does not lose the drift check measured then: it is saved, on this copy',
+      order.swapped && order.measuring && Number.isFinite(b.driftOff) && b.driftFor === run('sbDraft().audio.sha256'), JSON.stringify(Object.assign(order, { driftOff: b.driftOff, driftFor: String(b.driftFor).slice(0, 8) })));
+  }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('r1: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
     !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));
