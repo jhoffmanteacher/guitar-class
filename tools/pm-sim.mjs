@@ -2001,13 +2001,13 @@ console.log('18. My progress rules: can\'t-reach in seconds, "No streak yet" / "
   check('…and shown above 0: a lost streak and a live one both carry pm.tileLongest', /pm\.tileLongest\.many/.test(longest(lost)) && /pm\.tileLongest\.many/.test(longest(live)), [longest(lost), longest(live)]);
   check('…"1 week" uses the .one wording', /pm\.tileLongest\.one/.test(longest(at(WED, 3700, 0, []))), longest(at(WED, 3700, 0, [])));
 
-  /* 4. The flame is lit only when THIS week\'s goal is hit — in the My progress tile and in the header strip, whatever the streak. */
+  /* 4. The flame is lit (orange) whenever there is a streak, grey with none (Jonathan, 2026-11-24; it was "only when THIS week\'s goal is hit" since 2026-11-01) — in the My progress tile and in the header strip. */
   const lit = (r) => ({ tile: /class="pm-streak pm-streak-lg pm-on"/.test(r.tile(2)), strip: /class="pm-streak pm-on"/.test(r.strip) });
-  check('a 3-week streak but this week at 5 of 60 min: the flame is NOT lit (tile or strip)', eq(lit(live), { tile: false, strip: false }), JSON.stringify(lit(live)));
-  check('no streak and this week at 5 min: not lit', eq(lit(never), { tile: false, strip: false }));
+  check('a 3-week streak with this week at 5 of 60 min: the flame IS lit (tile and strip)', eq(lit(live), { tile: true, strip: true }), JSON.stringify(lit(live)));
+  check('no streak and this week at 5 min: not lit (grey)', eq(lit(never), { tile: false, strip: false }));
   const hit = at(WED, 3600, 0, streak3), hitFirst = at(WED, 3600, 0, []);
   check('this week at 60 of 60 min: lit in the tile AND the strip (with a streak, and as a first hit week)', eq(lit(hit), { tile: true, strip: true }) && eq(lit(hitFirst), { tile: true, strip: true }), JSON.stringify([lit(hit), lit(hitFirst)]));
-  check('59 min 59 s: not lit', eq(lit(at(WED, 3599, 0, streak3)), { tile: false, strip: false }));
+  check('59 min 59 s with a streak: still lit; with no streak: not lit', eq(lit(at(WED, 3599, 0, streak3)), { tile: true, strip: true }) && eq(lit(at(WED, 3599, 0, [])), { tile: false, strip: false }));
 
   /* 5. The strip shows the TRUE week total past the goal (Jonathan, 2026-11-15: it showed at most the goal, "60/60", before). The ring
      stays full at the goal. With t() giving back its parameters, the strip's pm.weekMin carries { done, goal } as counted. */

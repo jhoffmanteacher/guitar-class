@@ -199,9 +199,9 @@ await ev(`PM.refreshStrip(true)`); await sleep(300);
 const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id).length, fold: document.body.classList.contains('ca-fold'), cardOpen: !!document.querySelector('.ca-card[open]'), tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
 check('the strip is in the main top bar (a button): one row (bar ≤ 56px), no horizontal overflow', bar.tag === 'BUTTON' && bar.barH <= 56 && !bar.docOverflow && !bar.barOverflow, bar);
 check('back on the In class list ("All activities"): the header unfolds and exactly ONE strip shows (the header one; the Games one is in a hidden screen)', !bar.fold && !bar.cardOpen && bar.strips === 1, bar);
-check('two items: week ring and streak flame — and only text "53/60 min 3" (no "N playing")', bar.items.join() === 'pm-week,pm-streak' && bar.text === '53/60 min 3', bar);
+check('two items: week ring and streak flame — and only text "53/60 min 3" (no "N playing")', bar.items.join() === 'pm-week,pm-streak pm-on' && bar.text === '53/60 min 3', bar);
 const col1 = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { ring: q('.pm-strip .pm-ring-fg', 'stroke'), flame: q('.pm-strip .pm-streak', 'color'), strip: q('.pm-strip', 'backgroundColor'), text: q('.pm-strip .pm-week span', 'color'), dash: q('.pm-strip .pm-ring-fg', 'strokeDashoffset') }; })()`);
-check('goal not hit: ring blue #5AA9FF, flame DIM (#7A5236)', col1.ring === 'rgb(90, 169, 255)' && col1.flame === 'rgb(122, 82, 54)', col1);
+check('goal not hit, streak of 3: ring blue #5AA9FF, flame ORANGE #FF8A3D (the flame shows the streak, not this week)', col1.ring === 'rgb(90, 169, 255)' && col1.flame === 'rgb(255, 138, 61)', col1);
 check('the ring is 53/60 full (dashoffset = circumference × (1 − 53/60))', Math.abs(parseFloat(col1.dash) - 2 * Math.PI * 7 * (1 - 53 / 60)) < 0.5, col1.dash);
 check('no recap after a run under a minute', await ev(`!document.getElementById('pm-recap')`));
 await shot('1-strip-not-hit-en');
@@ -397,13 +397,14 @@ check('a day with no practice is an empty bar: no fill, no number, no miss marke
 check('"Weeks": 8 small squares, oldest first: none, hit, hit, missed, hit, hit, hit… and the current one outlined', mp.squares.length === 8 && mp.squares[7].includes('pm-sq-now') && mp.squares[6].includes('pm-sq-hit'), mp.squares);
 check('caption exactly as specified: Flame = hit the week goal. Breaks don’t count.', mp.cap === 'Flame = hit the week goal. Breaks don’t count.', mp.cap);
 const cs = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { today: q('.pm-today', 'color'), flame: q('#pm-progress .pm-streak-lg', 'color'), ring: q('#pm-progress .pm-ring-fg', 'stroke'), bar: q('.pm-bar-col i', 'backgroundColor'), hitSq: q('.pm-sq-hit', 'backgroundColor'), missed: q('.pm-sq-missed', 'backgroundColor'), nowShadow: q('.pm-sq-now', 'boxShadow'), panel: q('.pm-panel', 'backgroundColor') }; })()`);
-/* Both flames follow ONE rule (Jonathan, 2026-11-01): orange only once THIS week's
-   goal is reached — a 5-week streak with this week at 53 of 60 shows a grey flame. */
-check('colours: Today green, streak flame NOT orange yet (this week 53 of 60), ring blue, bars blue, hit square orange, missed square grey, current square blue outline',
-  cs.today === 'rgb(61, 220, 151)' && cs.flame !== 'rgb(255, 138, 61)' && cs.ring === 'rgb(90, 169, 255)' && cs.bar === 'rgb(90, 169, 255)' && cs.hitSq === 'rgb(255, 138, 61)' && cs.missed === 'rgb(95, 105, 127)' && /90, 169, 255/.test(cs.nowShadow), cs);
+/* Both flames follow ONE rule (Jonathan, 2026-11-24): orange whenever there is a streak, grey
+   (--pm-grey) when there is none; this week's progress is the ring's job. A 5-week streak with
+   this week at 53 of 60 shows an orange flame. (The 2026-11-01 rule was "orange only once this week's goal is reached".) */
+check('colours: Today green, streak flame ORANGE (5-week streak, this week 53 of 60), ring blue, bars blue, hit square orange, missed square grey, current square blue outline',
+  cs.today === 'rgb(61, 220, 151)' && cs.flame === 'rgb(255, 138, 61)' && cs.ring === 'rgb(90, 169, 255)' && cs.bar === 'rgb(90, 169, 255)' && cs.hitSq === 'rgb(255, 138, 61)' && cs.missed === 'rgb(95, 105, 127)' && /90, 169, 255/.test(cs.nowShadow), cs);
 const flameHit = await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); const keep = s.weeks[cur]; s.weeks[cur] = { seconds: 3600, goalSeconds: 3600, hit: true }; renderMyProgress();
   const c = getComputedStyle(document.querySelector('#pm-progress .pm-streak-lg')).color, bar = document.querySelector('.pm-strip .pm-streak'); s.weeks[cur] = keep; renderMyProgress(); return c; })()`);
-check('…and orange once this week\'s 60 minutes are reached, like the flame on the practice card', flameHit === 'rgb(255, 138, 61)', flameHit);
+check('…and still orange once this week\'s 60 minutes are reached', flameHit === 'rgb(255, 138, 61)', flameHit);
 await shot('5-my-progress-en');
 await ev(`document.querySelectorAll('.pm-sq')[3].click()`);
 check('tapping a square shows its minutes (and its hover title carries the same)', (await ev(`document.getElementById('pm-week-tip').textContent`)).includes('6 min') || (await ev(`document.getElementById('pm-week-tip').textContent`)).includes('min'), await ev(`document.getElementById('pm-week-tip').textContent`));
@@ -495,6 +496,8 @@ check('Spanish, time left: "Con 10 más mantienes tu racha"', /50 de 60 min Con 
 await shiftClock('2026-11-25T10:00:00');
 const none = await tilesAt(5, 0, [], 'en'), noneEs = await tilesAt(5, 0, [], 'es'), one = await tilesAt(60, 0, [], 'en'), oneEs = await tilesAt(60, 0, [], 'es');
 await tilesAt(5, 0, [], 'en'); await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(200); await shot('5d-no-streak-en');
+const noStreakTile = await ev(`getComputedStyle(document.querySelector('#pm-progress .pm-streak-lg')).color`);
+check('no streak (streak 0): the My progress flame is grey #5F697F', noStreakTile === 'rgb(95, 105, 127)', noStreakTile);
 check('no streak: the Streak tile says "No streak yet" and nothing else (it said "0-week streak" over "Longest: 0 weeks")', /^Streak No streak yet$/.test(none[1]), none);
 check('Spanish, no streak: "Aún no tienes racha" (not "Racha de 0 semanas")', /^Racha Aún no tienes racha$/.test(noneEs[1]), noneEs);
 const lostJs = lang => `(() => { setLang('${lang}'); const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.weeks = {}; s.pend = {}; s.days = {}; [1, 2, 3, 4, 5].forEach(i => { s.weeks[PM.calc.weekAdd(cur, -(i + 8))] = { seconds: 3700, goalSeconds: 3600, hit: true }; }); s.weeks[cur] = { seconds: 300, goalSeconds: 3600, hit: false }; renderMyProgress(); return [...document.querySelectorAll('#pm-progress .pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()); })()`;
@@ -512,6 +515,9 @@ await tilesAt(5, 0, [], 'en'); await ev(`openClassActivitiesScreen(${JSON.string
 await ev(`PM.syncHeader(true); caSyncTopbar(); PM.refreshStrip(true)`); await sleep(300);
 const flameNone = await ev(`(document.querySelector('.pm-strip .pm-streak') || {}).getAttribute ? document.querySelector('.pm-strip .pm-streak').getAttribute('aria-label') : null`);
 check('the header\'s flame is labelled "No streak yet" with no streak (screen readers did hear "0-week streak")', flameNone === 'No streak yet', flameNone);
+const noStreakStrip = await ev(`getComputedStyle(document.querySelector('.pm-strip .pm-streak')).color`);
+check('no streak (streak 0): the header flame is grey #5F697F', noStreakStrip === 'rgb(95, 105, 127)', noStreakStrip);
+await shot('5e-no-streak-strip-en');
 await shiftClock('2026-11-29T23:45:00');   // 15 minutes of the week left (no daily limit since 2026-11-15: only the clock bounds it)
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.pend = {}; s.days = {}; s.weeks = {}; s.loaded = true; s.lastRecapAt = 0;
   for (let i = 1; i <= 3; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true };
@@ -535,7 +541,7 @@ await shot('7-widest-strip-es');
 await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.skipWeeks.push(PM.calc.ymd(mon)); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
 await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);
 const brk = await ev(`(() => ({ strip: document.querySelector('.pm-strip .pm-week').innerText.trim(), flame: getComputedStyle(document.querySelector('.pm-strip .pm-streak')).color, dash: parseFloat(getComputedStyle(document.querySelector('.pm-strip .pm-ring-fg')).strokeDashoffset) }))()`);
-check('a skipped week: "40 min" (no goal, no "/60"), empty ring, flame not lit', brk.strip === '40 min' && brk.flame === 'rgb(122, 82, 54)' && brk.dash > 43, brk);
+check('a skipped week: "40 min" (no goal, no "/60"), empty ring, flame still orange (the streak of 12 is kept; 2026-11-24 rule)', brk.strip === '40 min' && brk.flame === 'rgb(255, 138, 61)' && brk.dash > 43, brk);
 await ev(`location.hash = '#my-progress'`); await sleep(900);
 await ev(`renderMyProgress()`); await sleep(300);
 const bt = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tile: p.querySelector('.pm-tile').innerText.replace(/\\s+/g, ' ').trim(), tips: [...p.querySelectorAll('.pm-sq')].map(b => b.getAttribute('aria-label')) }; })()`);

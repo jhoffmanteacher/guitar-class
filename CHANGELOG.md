@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-24 — The streak flame shows your streak
+
+- **The flame is orange whenever you have a streak, and gray when you do not.** Before, it stayed brown until this week's
+  minutes were in, so it looked like the streak was gone. This week's progress is shown by the ring: it fills as you play
+  and turns yellow at the goal. This applies to the flame in the top bar and the one on My progress.
+
+
 ## 2026-11-24 — Smells Like Teen Spirit: new pre-chorus and interlude parts
 
 - **The pre-choruses now play the two verse notes, plucked long:** B string fret 1 on beat 1, then high e fret 1 on

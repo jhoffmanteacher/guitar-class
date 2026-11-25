@@ -315,6 +315,12 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-24 — Streak flame colored by the streak, not this week** (Jonathan: "brown looks like it applies to the streak not
+  the week"; work order `WORK-ORDER-streak-flame-color.md`). Both flames (`stripInner()`, `progressHtml()`) get `pm-on` when `st.streak > 0`:
+  orange with a streak, `--pm-grey` (3.1 : 1 on the surface) with none; `--streak-dim` deleted. Reverses the 2026-11-01 rule "orange only
+  once THIS week's goal is reached" (styles.css block, `tools/pm-e2e.mjs`). `pm-e2e.mjs` 133 of 133; break-it (strip back to `w.hit`) 3 red.
+  Review: Fast.
+
 - **2026-11-24 — Sweet Child speed ladder, ONE round that stops and asks (Jonathan: "it should play once through verse at each
   speed ... a notification ... 'got it' ... 'practice again' ... remove the separate verse and chorus parts").** ca-54 has one
   round (verse + chorus, 24 bars), no round or section buttons and no Loop / Build / Stay switch: Play starts it at 90. After

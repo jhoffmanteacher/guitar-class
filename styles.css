@@ -5591,19 +5591,18 @@ body.lq-invite-open{overflow:hidden}
    Colours keep their meaning everywhere they appear:
      --mins    blue    minutes / progress (the week ring, the day bars)
      --live    green   today's minutes on My progress (it marked "N playing" until 2026-11-04)
-     --streak  orange  the streak (a hit week's flame, a hit square)
+     --streak  orange  the streak (any streak's flame, a hit square); a flame with no streak is --pm-grey
      --goal    yellow  the week-goal-hit moment ONLY (full ring, the toast flame)
-     --streak-dim      the flame when this week's goal is not hit yet
    They are bright colours, so they sit on the always-dark --pm-surface (the
    strip, the toast and the My progress panel, in light AND dark theme) rather
    than on the page. Contrast, measured: on --pm-surface the four are
-   7.0 / 9.8 / 7.4 / 11.2 : 1 and --pm-text is 15.8 : 1 (text needs 4.5, graphics
-   3). One pair is under 3 on purpose: --streak-dim, 2.5 : 1 — "dim" is the
-   point, and the flame's state is also in its aria-label and in the ring.
+   7.0 / 9.8 / 7.4 / 11.2 : 1, --pm-grey (the no-streak flame) is 3.1 : 1 and
+   --pm-text is 15.8 : 1 (text needs 4.5, graphics 3). The flame shows the streak
+   only (Jonathan, 2026-11-24); this week's progress is the ring's job.
    The recap is the one light card: it uses the page's own --bg / --text.
    ══════════════════════════════════════════════════════════════════════ */
 :root{
-  --mins:#5AA9FF;--live:#3DDC97;--streak:#FF8A3D;--goal:#FFC93C;--streak-dim:#7A5236;
+  --mins:#5AA9FF;--live:#3DDC97;--streak:#FF8A3D;--goal:#FFC93C;
   --pm-surface:#171b24;--pm-tile:#212837;--pm-text:#f3f5f9;--pm-muted:#b4bccb;
   --pm-track:#3a4152;--pm-grey:#5f697f;
   --rank:#B79CFF;
@@ -5639,7 +5638,7 @@ body.lq-invite-open{overflow:hidden}
 .pm-ring.pm-hit .pm-ring-fg{stroke:var(--goal)}
 .pm-ring-lg{width:40px;height:40px}
 /* The flame and its number sit tight together, no label. */
-.pm-streak{display:inline-flex;align-items:center;gap:1px;color:var(--streak-dim)}
+.pm-streak{display:inline-flex;align-items:center;gap:1px;color:var(--pm-grey)}
 .pm-streak.pm-on{color:var(--streak)}
 .pm-streak b{color:var(--pm-text);font-weight:700}
 .pm-flame-svg{width:16px;height:16px;flex-shrink:0}
