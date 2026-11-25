@@ -2294,9 +2294,9 @@ const DESIGN_ONE_OFFS = {
   'styles.css': {
     fs: ['0.3em', '0.625rem', '0.75em', '0.7812rem', '0.8437rem', '0.85em', '0.9rem', '1.1rem', '1.35rem', '1.75rem', '1.875rem', '1.9rem', '10px', '11pt', '15px', '19px', '2.125rem', '2.25rem',
       '2.375rem', '2.5rem', '2.6rem', '2.75rem', '2.875rem', '2rem', '3.125rem', '3.5rem', '3rem', '5.5px', '7px', '7rem', '87.5%', '9px', 'inherit',
-      'clamp(0.75rem,1.15vw / var(--site-fill,1),0.9375rem)', 'clamp(0.875rem, calc(28cqi / var(--strum-cols,16)), 1.375rem)', 'clamp(0.875rem,1.4vw / var(--site-fill,1),1.125rem)',
-      'clamp(0.875rem,1.5vw / var(--site-fill,1),1.125rem)', 'clamp(0.9375rem,1.5vw / var(--site-fill,1),1.25rem)', 'clamp(1.0625rem,2.6vw / var(--site-fill,1),2.15rem)',
-      'clamp(1.25rem,2.9vw / var(--site-fill,1),2.35rem)', 'clamp(1.25rem,3.2vw / var(--site-fill,1),2.5rem)', 'clamp(1.5rem,3.6vw / var(--site-fill,1),3rem)',
+      'clamp(0.875rem, calc(28cqi / var(--strum-cols,16)), 1.375rem)', 'clamp(0.875rem,1.4vw / var(--site-fill,1),1.125rem)',
+      'clamp(0.875rem,1.5vw / var(--site-fill,1),1.125rem)', 'clamp(0.9375rem,1.5vw / var(--site-fill,1),1.25rem)',
+      'clamp(1.5rem,3.6vw / var(--site-fill,1),3rem)',
       'clamp(1.75rem, calc(95cqi / var(--strum-cols,16)), 84px)', 'clamp(1.75rem,4.4vw / var(--site-fill,1),3.5rem)', 'clamp(1.75rem,4vw / var(--site-fill,1),3.25rem)',
       'clamp(1rem, calc(30cqi / var(--strum-cols,16)), 1.5rem)', 'clamp(1rem,2.2vw / var(--site-fill,1),1.75rem)', 'clamp(1rem,2vw / var(--site-fill,1),1.5rem)',
       'clamp(2.75rem,8vw / var(--site-fill,1),6rem)', 'var(--t-card)', 'var(--t-label)', 'var(--t-page)', 'var(--t-sec)'],

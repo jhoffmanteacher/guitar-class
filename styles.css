@@ -5473,23 +5473,6 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-st-timer.out{border-color:var(--red-text);color:var(--red-text);font-size:clamp(1rem,2.2vw / var(--site-fill,1),1.75rem)}
 .lq-st-idle-title{font-family:var(--font-display);font-size:1.75rem;font-weight:600}
 .lq-st-idle-sub{color:var(--text2);margin-top:var(--sp-6)}
-/* The Spanish half of every bilingual stage line (lqBilingual appends
-   `<cls>-es`). Without these the ES line inherits body text — about 1rem
-   beside a 3rem English line, which is unreadable from the back of the room
-   the projector is for. Each one tracks its English sibling's scale at
-   ~0.72 of it, in the secondary colour so the pair reads as one unit. */
-.lq-st-title-es{font-family:var(--font-display);font-size:clamp(1.25rem,2.9vw / var(--site-fill,1),2.35rem);
-  font-weight:600;line-height:1.15;color:var(--text2)}
-.lq-st-prompt-es{font-size:clamp(1.0625rem,2.6vw / var(--site-fill,1),2.15rem);font-weight:700;
-  line-height:1.2;color:var(--text2)}
-.lq-st-answer-es{font-size:clamp(1.25rem,3.2vw / var(--site-fill,1),2.5rem);font-weight:700;
-  line-height:1.15;color:var(--green-text);opacity:.82}
-.lq-st-qnum-es,.lq-st-cap-es{font-size:clamp(0.75rem,1.15vw / var(--site-fill,1),0.9375rem);font-weight:700;
-  letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
-.lq-st-join-es{font-size:clamp(0.875rem,1.5vw / var(--site-fill,1),1.125rem);color:var(--text3)}
-.lq-st-idle-title-es{font-family:var(--font-display);font-size:var(--fs-20);font-weight:600;
-  color:var(--text2)}
-.lq-st-idle-sub-es{color:var(--text3);font-size:var(--fs-15)}
 .lq-chips{display:flex;flex-wrap:wrap;gap:var(--sp-6);justify-content:center;margin-top:var(--sp-6)}
 .lq-chip{background:var(--bg3);border-radius:999px;padding:var(--sp-4) var(--sp-12);font-size:var(--fs-15)}
 /* Reveal shows the spread and the standings side by side; one column on a
