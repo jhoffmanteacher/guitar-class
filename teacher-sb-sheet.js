@@ -28,6 +28,7 @@
         (the song must still be on it); builtSongs/{id} = the same song with song.sheet (it must pass builtSongCheck
         first), the list with a new edit number (teacherBsNextVer, as Publish), and the song's own draft, when it has
         one that is not stale, with the same sheet (so Edit and Publish keep it, and sbDraftStale still sees one song);
+        the stored draft must still be the one this page read, or none when it read none (review R1-1 and round 2);
      3. the sheet it replaced, if any, deleted once no listed song names it (sbDeleteAudio, as a replaced recording).
    REMOVE SHEET (one OK / Cancel): the same transaction without song.sheet, then the pdf deleted as at 3.
    CHECK IT AGAIN (a song that has a sheet): reads the stored pdf (one song download this month, like a Chromebook's
@@ -276,9 +277,12 @@ async function sbSheetWrite(kind){
     if(sbStopped(gen)) throw 'stop';
     let ver = 0;
     const ref = db.collection('builtSongsMeta').doc('list'), sref = db.collection('builtSongs').doc(id);
-    const dd = d ? sbDraftDoc(Object.assign({}, d, { sheet })) : null, want = d ? sbBaseFor(id, d) : null;
+    const dd = d ? sbDraftDoc(Object.assign({}, d, { sheet })) : null, want = sbBaseFor(id, d);
     await db.runTransaction(async tx => {
-      if(d) await sbDraftCheck(tx, id, want);   // the draft this page read, still (review R1-1, teacher-sb-core.js)
+      /* The draft this page read, still (review R1-1, teacher-sb-core.js), and checked with no copy of it here too (review
+         round 2, R2-1): a draft another tab made since (Edit on an imported song) refuses, or the song written past it would
+         make that draft stale and its saved and unsaved edits would be lost. */
+      await sbDraftCheck(tx, id, want);
       const snap = await tx.get(ref), ss = await tx.get(sref);
       if(sheet){
         const hs2 = await tx.get(db.collection('songFiles').doc(sheet.id));
