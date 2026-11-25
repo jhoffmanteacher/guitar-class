@@ -701,6 +701,13 @@ async function loadAllStudents(){
     // before the roster is filtered — otherwise the first paint shows
     // archived students and then blinks them away.
     await loadTeacherClassConfig();
+    /* A failed read is {} (no archived list): filtering by it would bring archived students back into every view.
+       Refuse to draw, as Games and the board do; teacherStudentsAt stays 0, so Refresh runs this whole load again. */
+    if(!teacherClassConfigReadOk){
+      teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
+      document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>';
+      return;
+    }
     teacherApplyRosterFilter();
   } catch(e){
     teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
