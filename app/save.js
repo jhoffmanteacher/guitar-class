@@ -497,8 +497,14 @@ async function progressStartOverAtSignIn(){
     if(currentUser !== user) return;
     // This Chromebook's place, Keep-it-sharp picks and practice log (the read below would not read the log back either).
     progressClearDevice(false);
+    /* The legacy ticks caAdoptLocalTicks adopted just before (it removed their key) are the only save that can be
+       queued here. A Start over keeps activities, so they go back on top of the read below and are saved (sweep
+       APP-CORE-4; the Delete branch above drops them on purpose). The map also holds the first read's ticks: sending
+       them whole is what the save would have done without the Start over. */
+    const adopted = _dirtyKeys.has('caSteps') ? Object.assign({}, caStepDone) : null;
     clearTimeout(saveTimer); _dirtyKeys.clear();
     await loadProgress();                    // the emptied doc (another tab's apply counts the same)
+    if(adopted){ Object.keys(adopted).forEach(k => { caStepDone[k] = true; }); queueSave('caSteps'); }
     if(applied) progressResetNotice = 'over';
   }catch(e){ console.warn('[guitar-class] the teacher\'s start over is not applied yet; the next sign-in tries again', e); }
 }

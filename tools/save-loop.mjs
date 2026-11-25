@@ -20,7 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
-     --reset            only the reset cases (Start over / Delete, S1-S14, S16, S17, and Z1-Z5: Song Journey ticks; see "the reset
+     --reset            only the reset cases (Start over / Delete, S1-S17, and Z1-Z5: Song Journey ticks; see "the reset
                         cases" below); a full default run runs them too
      --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
      --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
@@ -2318,17 +2318,19 @@ function actionCode(a){
      S5 a marker for another student does nothing
      S8 a Delete marker, the student came back, and a sign-in whose progress read fails: nothing is cleared; the retried
         read then loads the doc they came back with (no Start over waits on it), and, as that doc holds no practice log,
-        not the device's copy in its place (2026-11-25, see S14, S16, S17)
+        not the device's copy in its place (2026-11-25, see S14-S17)
      S13 (2026-11-17) a Delete marker, no doc, a sign-in whose progress read fails: the retried read loads nothing and stops
      S9 two Chromebooks sign in at the same moment: applied once (the transaction re-checks)
      S10 (R3-1) Start over, later Delete, the student returns as new and works: the next sign-in keeps that work
      S11 (R3-6) a new student (no doc, no marker) keeps this Chromebook's copies at sign-in
      S12 (R3-4) Delete, and the Chromebook holds only the legacy activity ticks: nothing old is uploaded
-     S14, S16, S17 (2026-11-25, sweep APP-CORE-2) a second Chromebook keeps its practiceLog:<uid> copy, and a
+     S14-S17 (2026-11-25, sweep APP-CORE-2 / APP-CORE-4) a second Chromebook keeps its practiceLog:<uid> copy, and a
         doc the teacher emptied holds no practiceLog, so the copy must not be read back in its place (Jonathan: "ignore
         the old device copy"): S14 Start over applied on A, then a sign-in on B; S16 Delete, the record re-created on A
         with no rep, then a sign-in on B; S17 as S16 with B's sign-in read failing and its retry loading the record.
         Each: B starts with an empty log, the stored log holds only B's new rep, B's copy holds nothing old.
+        S15, the Start-over twin of S12: the legacy activity ticks adopted at that sign-in are kept (a Start over keeps
+        activities)
      S6 a deleted student signs in again on the Chromebook holding their old copies: a new student, nothing old
         re-uploaded at sign-in
      S7 THE LIMIT, documented: a page left open writes its old copy back, after a Start over and after a Delete
@@ -2674,7 +2676,7 @@ async function resetCases(){
       ['no old activity tick in the new record', !!doc && !(doc.caSteps && doc.caSteps['ca-20:c1']), JSON.stringify(doc)],
       ['the page says it once ("del")', tabs[0].notice === 'del', String(tabs[0].notice)] ] };
   });
-  /* S14, S16, S17 (2026-11-25, sweep APP-CORE-2, LOOPS E3). A Start over or a Delete reaches the ONE Chromebook
+  /* S14-S17 (2026-11-25, sweep APP-CORE-2 / APP-CORE-4, LOOPS E3). A Start over or a Delete reaches the ONE Chromebook
      the student signs in on next; another Chromebook still holds its practiceLog:<uid> copy. A doc the teacher emptied
      holds no practiceLog, so that copy must not be read back as "a doc that predates the field" (Jonathan, 2026-11-25:
      "ignore the old device copy"). */
@@ -2702,6 +2704,19 @@ async function resetCases(){
         ['the doc stays started over (startOverApplied is the marker, no lesson field but the new rep)', !!doc && doc.startOverApplied === w.marker && MODULE_FIELDS.every(f => f === 'practiceLog' || !(f in doc)), JSON.stringify(doc)],
         ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))] ];
     } };
+  });
+  await scenario('S15', 'Start over; the Chromebook holds the legacy activity ticks: they are kept (the Start-over twin of S12)', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A');
+    A.localStorage.setItem('caStepsToday:' + USER.uid, JSON.stringify({ done: { 'ca-20:c1': true } }));
+    c.teacher(500, 'over');
+    c.boot('A', A, 1000);
+    return { endMs: 10000, check: (doc, w, tabs) => [
+      ['the lesson fields are empty', lessonsEmpty(doc), JSON.stringify(doc)],
+      ['the legacy tick is in the record beside the activity ticks it had (a Start over keeps activities)', !!doc && !!doc.caSteps && doc.caSteps['ca-20:c1'] === true && Object.keys(OLD.caSteps).every(k => doc.caSteps[k] === true), JSON.stringify(doc && doc.caSteps)],
+      ['the page holds it too', tabs[0].run("caStepDone['ca-20:c1']") === true],
+      ['the device key is gone (adopted once)', A.localStorage.getItem('caStepsToday:' + USER.uid) === null],
+      ['the page says it once ("over")', tabs[0].notice === 'over', String(tabs[0].notice)] ] };
   });
   await scenario('S16', 'Delete; the student comes back on A (no rep); a sign-in on B, which still holds the old practice log: nothing old returns', c => {
     seed(c.world, OLD);
