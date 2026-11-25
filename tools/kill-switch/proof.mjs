@@ -43,8 +43,12 @@
                                sent at once; offline 7 minutes: no reload until it
                                lands), a write refused for good while online holds
                                it only until the 5-minute limit, its last try is
-                               waited for, and a tick made during that last try
-                               holds it again (APP-CORE-3, review R1-1 and R1-2,
+                               waited for (4 s at most: a stalled write does not
+                               pin the tab), and a tick made during that last try
+                               holds it again; an exit check opened while the
+                               waiting tick is sent holds it too; back online, the
+                               "online" listener re-sends what the save code gave
+                               up on (APP-CORE-3, review R1-1, R1-2 and R2-2,
                                2026-11-25)
      names and tools          the kept names are the pinned ones
                                (tools/sw-audio-map.mjs) and the ones the real
@@ -55,13 +59,15 @@
 
    Then it breaks kill-sw.js on purpose, one way at a time, and requires each
    breakage to turn at least one assertion red; and the same for the "unsaved
-   work" branch of the start.js block (PAGE_BREAKAGES), so that scenario
-   cannot go blind. --verbose prints the first red assertion of every breakage.
+   work" branch of the start.js block (PAGE_BREAKAGES) and for the save code it
+   runs with (SAVE_BREAKAGES), so that scenario cannot go blind. --no-mutations
+   runs the scenarios only (tools/plant-a-fault.mjs runs it so: a breakage's
+   exact-text target is not there on a planted line). --verbose prints the first red assertion of every breakage.
 
    usage: node tools/kill-switch/proof.mjs [path/to/kill-sw.js] [--real path/to/sw.js] [--page path/to/app/start.js] [--verbose] [--no-mutations]
    (--page: the save code is read from the same folder: its save.js, boot.js and shell.js.)
    Last line:
-     kill-switch-proof: <assertions> assertions in <scenarios> scenarios, <caught> of <breakages> start.js breakages caught, <caught> of <mutations> mutations caught
+     kill-switch-proof: <assertions> assertions in <scenarios> scenarios, <caught> of <breakages> start.js breakages caught, <caught> of <breakages> save-code breakages caught, <caught> of <mutations> mutations caught
    Exit 0 only when every assertion holds and every mutation is caught.
    Run it after any change to sw.js, the service-worker block of app/start.js,
    queueSave / flushSave / hasUnsavedWrites / flushBeforeLeaving, or this folder. */
@@ -274,11 +280,12 @@ function openPage(pageSrc, { controller = null, workerStart = 0, active = null }
    (default 300), held while offline (sc.offline windows: Firestore sends it when the connection is back, and the
    "online" event fires as each window ends), refused while sc.refuse says so ('always', or 'untilTold': until 10 s
    after the first "Not saving"), and a write still out when the page reloads never arrives. sc.txMs: the swap45
-   transaction before every write; sc.txFailsOffline: it fails at once while offline (so flushSave gives up).
+   transaction before every write; sc.txFailsOffline: it fails at once while offline (so flushSave gives up);
+   sc.stallAfter: a write sent from that time on is never answered (a stalled connection).
    sc.busy windows: an exit check open. sc.tickInLastTry: a tick that many ms after the first write sent once "Not
    saving" was shown (the last try at the time limit). sc.look: times to note the reloads and saves so far. A new worker
    takes over at sc.takeAt, with both signals. */
-async function unsavedPage(pageSrc, sc) {
+async function unsavedPage(pageSrc, sc, saveCode = SAVE.code) {
   let now = 0, seq = 0, ctx = null;
   const timers = new Map();
   const setT = (fn, ms) => { const id = ++seq; timers.set(id, { at: now + (ms || 0), fn }); return id; };
@@ -299,6 +306,7 @@ async function unsavedPage(pageSrc, sc) {
   const doc = { async set(payload) {
     if (sc.tickInLastTry != null && st.told.length && st.lastTry == null) { st.lastTry = now; setT(tickNow, sc.tickInLastTry); }
     const sent = Object.keys(payload.completed || {});
+    if (sc.stallAfter != null && now >= sc.stallAfter) await new Promise(() => {});
     await sleep(sc.rtt || 300);
     while (within(sc.offline, now)) await sleep(250);
     if (refused()) throw Object.assign(new Error('refused'), { code: 'unavailable' });
@@ -328,7 +336,7 @@ async function unsavedPage(pageSrc, sc) {
       if (sc.txFailsOffline && !nav.onLine) { await sleep(50); throw Object.assign(new Error('offline'), { code: 'unavailable' }); }
     } });
   vm.runInContext(`let _dirtyKeys = new Set(); let saveTimer = null; let _flushP = null; let _saveFailCount = 0; const SAVE_MAX_AUTO_RETRIES = ${SAVE.retries};
-${SAVE.code}
+${saveCode}
 globalThis.__save = { queueSave, get fails() { return _saveFailCount; } };`, ctx, { filename: 'save-code.js' });
   vm.runInContext(pageSrc, ctx, { filename: 'app/start.js' });
   for (const [, b] of sc.offline || []) setT(() => { for (const f of winL.online || []) f({ type: 'online' }); }, b);
@@ -356,7 +364,7 @@ globalThis.__save = { queueSave, get fails() { return _saveFailCount; } };`, ctx
 }
 
 /* ── the scenarios ─────────────────────────────────────────────────────── */
-async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true } = {}) {
+async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true, saveCode = SAVE && SAVE.code } = {}) {
   const out = [];
   let scenario = '';
   const check = (what, cond) => out.push([scenario, what, !!cond]);
@@ -505,7 +513,7 @@ async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true } = {}
   if (unsaved) {
     check('the save code is found (queueSave, flushSave, withTimeout, hasUnsavedWrites, flushBeforeLeaving, the "online" listener)', !!SAVE);
     if (SAVE && pageSrc) {
-      const P = async sc => { try { return await unsavedPage(pageSrc, sc); } catch (e) { return { failed: e.message }; } };
+      const P = async sc => { try { return await unsavedPage(pageSrc, sc, saveCode); } catch (e) { return { failed: e.message }; } };
       const one = r => !!r.reloads && r.reloads.length === 1;
       const kept = r => one(r) && !r.lost.length;
       let r = await P({ ticks: [0], takeAt: 300 });
@@ -520,8 +528,17 @@ async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true } = {}
       r = await P({ ticks: [0], takeAt: 1200, offline: [[0, 60000]] });
       check('offline with the write already on the wire, back at 60 s: saved, then one reload', kept(r));
       r = await P({ ticks: [0], takeAt: 300, offline: [[0, 420000]], txFailsOffline: true, look: [390300] });
-      check('offline 7 minutes and every save fails at once (the save code gives up): no reload at 6.5 minutes; the "online" re-arm saves it; one reload',
+      check('offline 7 minutes and every save fails at once (the save code gives up): no reload at 6.5 minutes; back online, saved, then one reload',
         r.seen && r.seen[390300] && r.seen[390300].reloads === 0 && r.seen[390300].fails > SAVE.retries && kept(r));
+      /* Review R2-2c: back online BEFORE the 5-minute limit, only the "online" listener of app/shell.js re-sends work the
+         save code gave up on; without it the tab waits for the limit's last try (a reload near 5 minutes). */
+      r = await P({ ticks: [0], takeAt: 300, offline: [[0, 120000]], txFailsOffline: true, look: [119000] });
+      check('offline 2 minutes and every save fails at once: back online, the "online" listener re-sends it at once; saved, then one reload within 10 s',
+        r.seen && r.seen[119000] && r.seen[119000].reloads === 0 && r.seen[119000].fails > SAVE.retries && kept(r) && r.reloads[0] < 130000);
+      /* Review R2-2a: the tick sent at once is followed by reload(), which looks at the busy states again: an exit check
+         opened while that write was out holds the reload too. */
+      r = await P({ ticks: [0], takeAt: 300, txMs: 2000, busy: [[1000, 30000]] });
+      check('an exit check opened while the waiting tick is being sent: saved, then one reload after the check, not over it', kept(r) && !r.overBusy && r.reloads[0] >= 30000);
       r = await P({ ticks: [0], takeAt: 300, refuse: 'always', look: [120300] });
       check('a write refused for good while online: "Not saving" shown, no reload at 2 minutes, one reload at the 5-minute limit',
         one(r) && r.seen[120300] && r.seen[120300].reloads === 0 && r.told.length && r.told[0] < r.reloads[0] && r.reloads[0] >= 300300 && r.reloads[0] < 310300);
@@ -530,6 +547,10 @@ async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true } = {}
       /* Review R1-2: the new tick re-arms the save code (queueSave resets the count), so it is not given up on. */
       r = await P({ ticks: [1000], takeAt: 1200, rtt: 2500, refuse: 'untilTold', tickInLastTry: 300 });
       check('...and a tick made during that last try (its write still out when the last try lands): both saved, then one reload', kept(r) && r.ticks.length === 2);
+      /* Review R2-2b: the last try waits SW_RELOAD_SAVE_WAIT (4 s), never longer: a write that never answers does not pin the tab. */
+      r = await P({ ticks: [0], takeAt: 300, refuse: 'always', stallAfter: 200000 });
+      check('a write refused for good, and the last try stalls (never answered): one reload about 4 s after the 5-minute limit',
+        one(r) && r.told.length && r.reloads[0] >= 304300 && r.reloads[0] < 312300);
       r = await P({ takeAt: 100 });
       check('nothing unsaved: one reload at once', one(r) && r.reloads[0] === 100);
     }
@@ -579,6 +600,12 @@ const PAGE_BREAKAGES = [
   ['does not wait for the last try', 'await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);', 'flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);'],
   ['leaves a tick in the 800 ms wait to its timer', 'if (!_flushP && !_saveFailCount && await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT)) return reload();', ''],
   ['reloads over a tick made during the last try (R1-2)', 'if (_saveFailCount <= SAVE_MAX_AUTO_RETRIES && hasUnsavedWrites()) return reload();', ''],
+  ['reloads right after sending the waiting tick, without looking at the busy states again (R2-2a)', 'if (!_flushP && !_saveFailCount && await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT)) return reload();', 'if (!_flushP && !_saveFailCount && await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT)) { location.reload(); return; }'],
+  ['no time limit on the last try (R2-2b)', 'await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);', 'await flushBeforeLeaving(1e9);'],
+];
+/* ── and of the save code it runs with (SAVE above): each must turn an assertion red ── */
+const SAVE_BREAKAGES = [
+  ['no "online" listener in app/shell.js (R2-2c)', "window.addEventListener('online', function(){", '(function(){'],
 ];
 
 const summarise = rows => ({ total: rows.length, failed: rows.filter(r => !r[2]), scenarios: new Set(rows.map(r => r[0])).size });
@@ -604,12 +631,14 @@ const breakEach = async (list, src0, run, what) => {
   }
   return n;
 };
-let caught = 0, pageCaught = 0;
-const ran = args.includes('--no-mutations') ? 0 : MUTATIONS.length, pageRan = args.includes('--no-mutations') ? 0 : PAGE_BREAKAGES.length;
+let caught = 0, pageCaught = 0, saveCaught = 0;
+const noMut = args.includes('--no-mutations');
+const ran = noMut ? 0 : MUTATIONS.length, pageRan = noMut ? 0 : PAGE_BREAKAGES.length, saveRan = noMut || !SAVE ? 0 : SAVE_BREAKAGES.length;
 if (ran) {
   /* A broken kill switch cannot change what the save code does: those runs leave the unsaved-work scenario out. */
   caught = await breakEach(MUTATIONS, KILL_SRC, src => runScenarios(src, PAGE_SRC, { unsaved: false }), 'mutation');
   pageCaught = await breakEach(PAGE_BREAKAGES, PAGE_SRC, src => runScenarios(KILL_SRC, src), 'start.js breakage');
+  if (saveRan) saveCaught = await breakEach(SAVE_BREAKAGES, SAVE.code, src => runScenarios(KILL_SRC, PAGE_SRC, { saveCode: src }), 'save-code breakage');
 }
-console.log(`kill-switch-proof: ${base.total} assertions in ${base.scenarios} scenarios, ${pageCaught} of ${pageRan} start.js breakages caught, ${caught} of ${ran} mutations caught${problems ? ` — ${problems} problem(s)` : ''}`);
+console.log(`kill-switch-proof: ${base.total} assertions in ${base.scenarios} scenarios, ${pageCaught} of ${pageRan} start.js breakages caught, ${saveCaught} of ${saveRan} save-code breakages caught, ${caught} of ${ran} mutations caught${problems ? ` — ${problems} problem(s)` : ''}`);
 process.exit(problems ? 1 : 0);
