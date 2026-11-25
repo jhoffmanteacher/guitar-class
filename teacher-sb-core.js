@@ -67,6 +67,7 @@ const SB_MAX_SRC_BYTES = 60000000;      // an mp3 this big is not a 6-minute son
 const SB_STEPS = ['Upload', 'Volume', 'Beat', 'Chart', 'Level', 'Preview', 'Publish'];
 const SB_BUILT_STEPS = 7;               // Parts b, c and d: every step
 const SB_CURE = 'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3';
+const SB_TOLD_MAX = 3;                  // songs a re-read's line names one by one (teacherSbLoad); more are counted
 let sbDrafts = null;                    // Map id -> draft (as stored, savedAt as ms); null = not read
 let sbPublished = null;                 // Map id -> { title, artist, ver, audioId, doc, at } from builtSongsMeta/list and builtSongs
                                         //   (doc: the song as stored, savedAt left out, null when the list names a missing doc; at: savedAt in ms)
@@ -167,21 +168,25 @@ async function teacherSbLoad(){
        Import marked the copy stale, review R1-4): the import wins (review R3-2). Not when the draft is gone from the store
        (deleted in another tab, review R1-3). And only while the store still holds the draft this copy was worked out
        from (review R1-1): when another tab saved it since, its saved parts win and the parts only this tab changed are
-       kept (sbDraftMerge), and the line says which. */
-    let told = '';
+       kept (sbDraftMerge), and the line says which. One line per song (review round 2, R2-2: one read can merge or drop
+       several), the song on screen and those with a change dropped first, at most SB_TOLD_MAX of them. */
+    const told = [];
     if(sbDrafts) for(const [id, mine] of sbDrafts){
       if(!sbUnsaved(mine) || mine.stale) continue;
-      const s = drafts.get(id), name = id === sbSel ? 'This song' : `"${String(mine.title || 'Untitled')}"`;
-      if(!s){ told = `${name} was deleted in another tab, so your change to it that was not saved is gone.`; continue; }
+      const s = drafts.get(id), name = id === sbSel ? 'This song' : `"${String(mine.title || 'Untitled')}"`, rank = id === sbSel ? 0 : 2;
+      if(!s){ told.push({ rank, line: `${name} was deleted in another tab, so your change to it that was not saved is gone.` }); continue; }
       if(s.stale) continue;
       if(mine.base === s.base){ mine.savedAt = s.savedAt; drafts.set(id, mine); continue; }
       const m = sbDraftMerge(mine, s), list = a => a.length < 2 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
       drafts.set(id, m.d);
-      told = `${name} was changed in another tab, so its saved changes are shown here.`
-        + (m.lost.length ? ` Your change to ${list(m.lost)} that was not saved is dropped.` : '') + (m.kept.length ? ` Your change to ${list(m.kept)} that was not saved is kept.` : '');
+      told.push({ rank: rank + (m.lost.length ? 0 : 1), line: `${name} was changed in another tab, so its saved changes are shown here.`
+        + (m.lost.length ? ` Your change to ${list(m.lost)} that was not saved is dropped.` : '') + (m.kept.length ? ` Your change to ${list(m.kept)} that was not saved is kept.` : '') });
     }
     sbDrafts = drafts; sbPublished = pub;
-    if(told) sbNote = told;
+    if(told.length){
+      const lines = told.sort((a, b) => a.rank - b.rank).map(x => x.line), more = lines.length - SB_TOLD_MAX;
+      sbNote = more > 0 ? lines.slice(0, SB_TOLD_MAX - 1).concat(`And ${more + 1} more songs with changes of yours that were not saved were changed or deleted in another tab: open each to see what it has now.`).join('\n') : lines.join('\n');
+    }
     /* An edit kept above whose save is not waiting (the view was left, its save was refused or failed) is saved now; never
        from the paint, which can come before this read and would write back a draft deleted in another tab (R1-3). */
     if(teacherView === 'songbuilder') for(const [id, d] of drafts) if(d.unsaved && !d.stale && !sbSaveTimers.has(id)) sbSaveSoon(id, 1200);
@@ -281,7 +286,7 @@ function sbListHtml(){
     + `</div><div class="ta-list-body">${body}</div></aside>`;
 }
 function sbStatusHtml(){
-  const lines = [sbProgress, sbNote].filter(Boolean);
+  const lines = [sbProgress, sbNote].filter(Boolean).flatMap(l => String(l).split('\n'));   // a re-read's line has one row per song
   return lines.length ? `<div class="sb-status" role="status" data-sb-status>${lines.map(l => escHtml(l)).join('<br>')}</div>` : '<div class="sb-status" role="status" data-sb-status hidden></div>';
 }
 function sbDetailHtml(){
