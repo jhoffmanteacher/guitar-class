@@ -73,6 +73,7 @@ function makeFirestore(){
       if (/\/pieces\//.test(path) && +path.split('/').pop() === st.dropAtPiece){ st.dropAtPiece = -1; throw err('unavailable'); }
       if (/\/pieces\//.test(path)) st.order.push(+path.split('/').pop());
       const d = docs.get(path);
+      if (!d && st.onMiss && /\/pieces\//.test(path)) st.onMiss();
       return { exists: !!d, id: path.split('/').pop(), data: () => d ? Object.assign({}, d) : undefined };
     },
     async set(data, opt){
@@ -411,9 +412,14 @@ async function suite(src, quiet){
   { // APP-CORE-5: a missing piece: the other readers stop at their next piece instead of reading the rest
     const s = newShared(); const B = bytesOf(8 * PIECE); putFile(s.fs, 'x', B); s.fs.docs.delete('songFiles/x/pieces/1');
     const tab = makeTab(src, s); register(tab, 'x', B);
-    const c = await code(tab.api.songFileLoad('x'));
+    /* Progress reported after the missing piece came back: a piece already on its way when another reader gave up must
+       not move the loading line (review R2-3; piece 1 answers first, so pieces 0, 2 and 3 are all on their way then). */
+    let late = null;
+    s.fs.st.onMiss = () => { if (late === null) late = 0; };
+    const c = await code(tab.api.songFileLoad('x', () => { if (late !== null) late++; }));
     await new Promise(r => setTimeout(r, 100));
     ok('a missing piece in an 8-piece file: not ready, and the other readers stop (fewer than 8 pieces read)', c === 'notready' && s.fs.st.pieceReads < 8, `${c}, ${s.fs.st.pieceReads} of 8 read`);
+    ok('…and no progress is reported after the missing piece (the pieces on their way are dropped)', late === 0, `${late} progress call(s) after it`);
   }
   { // m5: another tab hung holding the lock: this one goes on without it
     const s = newShared(); putFile(s.fs, 'x', BIG); s.locks.hung = true;
@@ -735,6 +741,7 @@ const BREAKS = [
   ['B4: a cancelled wait leaves the button on Stop', "  songFileShow(w.host, '');\n  if(w.ui && w.ui.done) try { w.ui.done(); } catch(e) {}", "  songFileShow(w.host, '');"],
   ['APP-CORE-5: a late IndexedDB connection is left open', "else if(conn){ try { conn.close(); } catch(e) {} }", ''],
   ['APP-CORE-5: the other readers go on after a missing piece', "      while(next < n && !failed){", "      while(next < n){", "        if(failed) return;", "        if(false) return;"],
+  ['R2-3: a piece on its way when another reader gave up still reports progress', "        if(failed) return;", ''],
   ['plant-a-fault 33147bfb56: a "blocked" open is not answered', "    req.onblocked = () => end(null);\n", ''],
   ['plant-a-fault 6eb5c43dc5: the loading line is not announced', "    el.setAttribute('role', 'status');\n", ''],
   ['the SHA-256 is not checked', "if(sha !== expect.sha256) throw songFileErr('bad', 'the SHA-256 is not the list\\'s');", ''],
