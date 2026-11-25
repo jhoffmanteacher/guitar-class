@@ -657,7 +657,8 @@ function pcAudioError(st, el){
   if(pcState !== st) return;
   if(st.audio !== el){ if(st.spare === el) st.spare = null; if(st.leaving === el) st.leaving = null; if(st.twin === el) st.twin = null; return; }
   pcStop();
-  if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+  // What a failed song shows (the toast, or the song help pop-up): app/songhelp.js.
+  songLoadFailed();
 }
 function pcSparePark(st){
   if(pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it

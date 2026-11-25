@@ -11508,6 +11508,149 @@ function checkLoopSpeed(ctx, i18nTable) {
   for (const k of EB_STRINGS) { const e = i18nTable && i18nTable[k]; if (!e || !e.en || !e.es) flag(`${k} is missing in English or Spanish`); }
   if (!bad) ok(`1eb: ${renders} renders of ${acts.length} practice cards (both languages, student and preview): ${nWith} with section buttons draw Loop / Build / Stay, all off, Stay hidden; ${nWithout} with one section draw none · cards-loop.js stores nothing · reset on close · ${EB_STRINGS.length} strings in both languages`);
 }
+/* 1fe. THE SONG HELP POP-UP (app/songhelp.js, Jonathan, 2026-11-25): what a song that does not load shows, by cause.
+   RUN, not read, in the 0b render context: (1) songHelpRoute on every case (9 codes x offline x teacher x closed once
+   x another dialog open = 144), its four totals pinned and the brief's named cases spelled out; (2) songLoadFailed with
+   spies on gateToast and songHelpOpen: the pop-up opens 'unknown', or 'full' once the page saw a QuotaExceededError,
+   the toast gets a Help button after a close, offline keeps today's toast, sf.limit shows nothing extra; (3) the
+   pop-up drawn in both languages and both states, its lines in the pinned order (full: the line, the Downloads
+   steps, then the main button (it reloads, so the steps come first: the lead, 2026-11-25), then play / restart / teacher; unknown: play, the button, Downloads, restart, teacher), every
+   line in English and Spanish; (4) the button's work on a fake CacheStorage: the two audio caches go (the names
+   sw.js and tools/sw-audio-map.mjs pin), the shell cache and anything else stay, localStorage is untouched, and the
+   order is stop the audio, clear, send unsaved progress, mark the reload as the update's (so the student lands back
+   where they were), reload; (5) the three <audio> error sites call songLoadFailed() and none shows the old toast
+   itself. */
+const SH_ROUTES = { popup: 2, 'toast-help': 6, toast: 12, none: 124 };
+const SH_ORDER = {
+  full: ['songHelp.full', 'songHelp.downloads', 'songHelp.dl1', 'songHelp.dl2', 'songHelp.dl3', 'songHelp.dl4', 'songHelp.dl5', 'songHelp.clearBtn', 'songHelp.keeps', 'songHelp.then', 'songHelp.play', 'songHelp.restart', 'songHelp.teacher', 'songHelp.close'],
+  unknown: ['songHelp.title', 'songHelp.tryOrder', 'songHelp.play', 'songHelp.clearBtn', 'songHelp.keeps', 'songHelp.downloads', 'songHelp.dl1', 'songHelp.dl2', 'songHelp.dl3', 'songHelp.dl4', 'songHelp.dl5', 'songHelp.restart', 'songHelp.teacher', 'songHelp.close'],
+};
+async function checkSongHelp(ctx, i18nTable) {
+  head('1fe. Song help pop-up: a song that does not load shows what fits the cause (run in the render context)');
+  let bad = 0, asserts = 0;
+  const flag = m => { err('1fe: ' + m); problems++; bad++; };
+  const is = (cond, msg) => { asserts++; if (!cond) flag(msg); };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['songHelpRoute', 'songLoadFailed', 'songHelpHtml', 'songHelpClearSaved', 'songHelpClearAndReload', 'songHelpIsFull', 'songFilesClearDevice'])
+    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1fe)'); return; }
+  // 1. The route, every case.
+  const CODES = ['', 'failed', 'offline', 'limit', 'clock', 'signin', 'denied', 'notready', 'cancelled'];
+  const tally = { popup: 0, 'toast-help': 0, toast: 0, none: 0 };
+  let cases = 0;
+  for (const code of CODES) for (const offline of [false, true]) for (const teacher of [false, true]) for (const closedOnce of [false, true]) for (const otherOverlay of [false, true]) {
+    ctx.__shO = { code, offline, teacher, closedOnce, otherOverlay };
+    const r = run('songHelpRoute(window.__shO)'); cases++;
+    if (!(r in tally)) { flag(`songHelpRoute(${JSON.stringify(ctx.__shO)}) gave ${r}`); continue; }
+    tally[r]++;
+  }
+  is(JSON.stringify(tally) === JSON.stringify(SH_ROUTES), `the ${cases} route cases give ${JSON.stringify(tally)}, pinned ${JSON.stringify(SH_ROUTES)}`);
+  const R = o => { ctx.__shO = Object.assign({ code: '', offline: false, teacher: false, closedOnce: false, otherOverlay: false }, o); return run('songHelpRoute(window.__shO)'); };
+  is(R({ offline: true }) === 'toast', 'offline, an <audio> error: today\'s toast only (clearing space does not fix Wi-Fi)');
+  is(R({ code: 'clock' }) === 'none' && R({ code: 'limit' }) === 'none', 'sf.clock and sf.limit: their own line, no pop-up');
+  is(R({}) === 'popup' && R({ code: 'failed' }) === 'popup', 'an <audio> error or a private song\'s "failed", online: the pop-up');
+  is(R({ closedOnce: true }) === 'toast-help' && R({ otherOverlay: true }) === 'toast-help', 'closed once, or another dialog open: the toast with Help, never a second pop-up');
+  is(R({ teacher: true }) === 'toast' && R({ teacher: true, code: 'failed' }) === 'none', 'the teacher console: today\'s toast, never the pop-up');
+  // 2. songLoadFailed, with spies.
+  const saved = { gateToast: ctx.gateToast, songHelpOpen: ctx.songHelpOpen, qsa: ctx.document.querySelectorAll, online: ctx.navigator.onLine };
+  const calls = [];
+  ctx.gateToast = (msg, action) => calls.push(['toast', msg, action ? action.label : null]);
+  ctx.songHelpOpen = state => calls.push(['open', state]);
+  /* The page as index.html has it: the Games and Live In-Class Games screens carry aria-modal="true", hidden. */
+  const dlg = (shown, own) => ({ hidden: !shown, closest: s => (own && s === '#song-help-overlay') || (!shown && s === '[hidden]') ? {} : null, getClientRects: () => shown ? [{}] : [] });
+  let modals = [dlg(false), dlg(false)];
+  ctx.document.querySelectorAll = sel => sel === '[aria-modal="true"]' ? modals : [];
+  const settle = () => new Promise(r => setTimeout(r, 0));
+  try {
+    run('setLang("en"); songHelpClosedOnce = false; sfQuotaHit = false;');
+    const step = async (expr, want, label) => { calls.length = 0; const r = run(expr); await settle(); is(r === want[0] && JSON.stringify(calls) === JSON.stringify(want[1]), `${label}: ${expr} gave ${r} ${JSON.stringify(calls)}`); };
+    await step('songLoadFailed()', ['popup', [['open', 'unknown']]], 'an <audio> error opens the pop-up, unknown cause (the hidden Games screens do not count as an open dialog)');
+    modals = [dlg(false), dlg(true)];
+    await step('songLoadFailed()', ['toast-help', [['toast', run('t("ca.snipLoadFailed")'), 'Help']]], 'another dialog shown: the toast with Help, never the pop-up on top of it');
+    modals = [dlg(false), dlg(true, true)];
+    await step('songLoadFailed()', ['popup', [['open', 'unknown']]], 'the song help pop-up itself does not count as another dialog');
+    modals = [dlg(false), dlg(false)];
+    await step('songLoadFailed("limit")', ['none', []], 'the monthly limit: nothing beyond the card\'s own line');
+    run('sfQuotaHit = true');
+    await step('songLoadFailed("failed")', ['popup', [['open', 'full']]], 'after a QuotaExceededError: the pop-up opens "This Chromebook is full."');
+    run('sfQuotaHit = false; songHelpClosedOnce = true');
+    await step('songLoadFailed()', ['toast-help', [['toast', run('t("ca.snipLoadFailed")'), 'Help']]], 'after a close: the old toast with a Help button');
+    run('songHelpClosedOnce = false'); ctx.navigator.onLine = false;
+    await step('songLoadFailed()', ['toast', [['toast', run('t("ca.snipLoadFailed")'), null]]], 'offline: today\'s toast, no Help');
+  } finally {
+    Object.assign(ctx, { gateToast: saved.gateToast, songHelpOpen: saved.songHelpOpen });
+    ctx.document.querySelectorAll = saved.qsa; ctx.navigator.onLine = saved.online;
+    run('songHelpClosedOnce = false; sfQuotaHit = false;');
+  }
+  // 3. The pop-up, both languages, both states.
+  let drawn = 0;
+  try {
+    for (const lang of ['en', 'es']) {
+      run('setLang(' + JSON.stringify(lang) + ')');
+      for (const state of ['full', 'unknown']) {
+        const html = String(run(`songHelpHtml(${JSON.stringify(state)})`)); drawn++;
+        const keys = [...html.matchAll(/data-i18n="([^"]+)"/g)].map(m => m[1]);
+        is(JSON.stringify(keys) === JSON.stringify(SH_ORDER[state]), `${state} (${lang}): the lines are ${keys.join(' > ')}, pinned ${SH_ORDER[state].join(' > ')}`);
+        for (const m of html.matchAll(/data-i18n="([^"]+)">([^<]*)</g)) {
+          const e = i18nTable && i18nTable[m[1]];
+          is(!!(e && e.en && e.es && e.en !== e.es), `${m[1]}: missing, or the same, in English and Spanish`);
+          is(m[2] === String(run(`escHtml(t(${JSON.stringify(m[1])}))`)), `${state} (${lang}): ${m[1]} draws "${m[2]}"`);
+        }
+        is((html.match(/id="song-help-clear"/g) || []).length === 1 && /onclick="songHelpClearAndReload\(\)"/.test(html), `${state} (${lang}): one main button, id song-help-clear, calling songHelpClearAndReload()`);
+        is((html.match(/<li>/g) || []).length === (state === 'full' ? 8 : 10), `${state} (${lang}): ${(html.match(/<li>/g) || []).length} list lines, pinned ${state === 'full' ? 8 : 10}`);
+        is((html.match(/onclick="songHelpClose\(\)"/g) || []).length === 2, `${state} (${lang}): the ✕ and the Close button both close it`);
+        for (const h of html.matchAll(/ onclick="([^"]*)"/g)) { try { new Function(h[1]); } catch { flag(`${state} (${lang}): a handler does not compile: ${h[1]}`); } }
+      }
+    }
+  } finally { run('setLang("en")'); }
+  // 4. The main button's work, on fakes.
+  const names = JSON.parse(run('JSON.stringify(SONG_HELP_AUDIO_CACHES)'));
+  const swSrc = readFileSync(join(ROOT, 'sw.js'), 'utf8');
+  const swName = re => (re.exec(swSrc) || [])[1];
+  const shell = swName(/const CACHE_VERSION = '([^']+)'/);
+  is(JSON.stringify(names) === JSON.stringify([AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME]) && names[0] === swName(/const AUDIO_CACHE = '([^']+)'/) && names[1] === swName(/const AUDIO_HASH_CACHE = '([^']+)'/),
+    `SONG_HELP_AUDIO_CACHES is ${JSON.stringify(names)}; it must be sw.js's AUDIO_CACHE and AUDIO_HASH_CACHE (tools/sw-audio-map.mjs)`);
+  is(!!shell && !names.includes(shell) && !names.some(n => /^guitar-class-\d{4}-\d{2}-\d{2}-[0-9a-f]+$/.test(n)), `the pop-up's cache names must never be the shell cache (${shell})`);
+  const store = new Set([...names, shell, 'guitar-class-2026-01-01-0123456789', 'someone-else']);
+  const log = [];
+  const savedR = { caches: ctx.caches, stopCardAudio: ctx.stopCardAudio, flushSave: ctx.flushSave, swResumeSave: ctx.swResumeSave, reload: ctx.location.reload };
+  ctx.caches = { delete: async n => { log.push('delete ' + n); return store.delete(n); }, keys: async () => [...store] };
+  ctx.stopCardAudio = () => log.push('stop');
+  ctx.flushSave = async () => log.push('flush');
+  ctx.swResumeSave = () => log.push('resume ' + ctx.sessionStorage.getItem('gcSwUpdating'));
+  ctx.location.reload = () => log.push('reload');
+  ctx.localStorage.setItem('1fe-keep', '1');
+  const lsBefore = JSON.stringify(ctx.localStorage._d);
+  try {
+    const r = await run('songHelpClearSaved()');
+    is(JSON.stringify(r.caches) === JSON.stringify(names) && r.songFiles === false && store.size === 3 && store.has(shell), `songHelpClearSaved deleted ${JSON.stringify(r.caches)} (songFiles ${r.songFiles}); left ${[...store].join(', ')}`);
+    names.forEach(n => store.add(n)); log.length = 0;
+    run('songHelpBusy = false; _dirtyKeys.add("1fe-test")');
+    await run('songHelpClearAndReload()');
+    const want = ['stop', ...names.map(n => 'delete ' + n), 'flush', 'resume 1', 'reload'];
+    is(JSON.stringify(log) === JSON.stringify(want), `the main button ran ${log.join(' > ')}; pinned ${want.join(' > ')}`);
+    is(JSON.stringify(ctx.localStorage._d) === lsBefore && ctx.localStorage.getItem('1fe-keep') === '1', 'the main button changed localStorage');
+    log.length = 0;
+    await run('songHelpClearAndReload()');
+    is(log.length === 0, `a second press while the first is on its way does nothing: ${log.join(' > ')}`);
+  } finally {
+    ctx.caches = savedR.caches; ctx.stopCardAudio = savedR.stopCardAudio; ctx.flushSave = savedR.flushSave; ctx.swResumeSave = savedR.swResumeSave; ctx.location.reload = savedR.reload;
+    if (savedR.caches === undefined) delete ctx.caches;
+    run('songHelpBusy = false; _dirtyKeys.delete("1fe-test")');
+    ctx.sessionStorage.removeItem('gcSwUpdating'); ctx.localStorage.removeItem('1fe-keep');
+  }
+  // 5. The three <audio> error sites.
+  const sites = { 'app/snippets.js': 'function snipAudioError', 'app/cards.js': 'function pcAudioError', 'app/drills-call.js': "audio.addEventListener('error'," };
+  let oldToasts = 0;
+  for (const f of readdirSync(join(ROOT, 'app')).filter(x => x.endsWith('.js'))) oldToasts += (stripJsComments(readFileSync(join(ROOT, 'app', f), 'utf8')).match(/gateToast\(t\('ca\.snipLoadFailed'\)\)/g) || []).length;
+  is(oldToasts === 0, `${oldToasts} place(s) in app/*.js still show the old toast themselves (gateToast(t('ca.snipLoadFailed'))): send them through songLoadFailed()`);
+  for (const [f, anchor] of Object.entries(sites)) {
+    const src = stripJsComments(readFileSync(join(ROOT, f), 'utf8'));
+    const at = src.indexOf(anchor);
+    is(at >= 0 && /songLoadFailed\(\)/.test(src.slice(at, at + 600)), `${f}: the <audio> error (${anchor}) no longer calls songLoadFailed()`);
+  }
+  if (!bad) ok(`1fe: ${cases} route cases (${Object.entries(tally).map(([k, v]) => k + ' ' + v).join(', ')}) · songLoadFailed: 7 cases with spies (incl. the hidden aria-modal screens) · ${drawn} drawings (EN + ES, full + unknown) in the pinned order · the button: 2 audio caches deleted, the shell cache and 2 others kept, stop > clear > flush > update-reload mark > reload, localStorage untouched · 3 <audio> error sites · ${asserts} asserts`);
+}
 /* 1fc. THE SPEED LADDER (ca-54, Jonathan, 2026-11-24): card.rounds, card.slowestRate 0.9, card.startStop 'slowest',
    card.buildLaps 1. Three decisions are pinned here, and each is the ONE exception to a rule every other card keeps:
    (1) the bottom stop is the slow file at 0.9 (90 BPM), not SLOWEST_RATE 0.8 (80); the card opens on it, not on Normal;
@@ -22162,7 +22305,7 @@ function checkSongRequests() {
        Journey player cannot play a private song yet; it is its own piece of
        Step 2.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_SIM_PIN = 133;   // 121 -> 133 (2026-11-18, private chord sheets, P1): a .pdf read as bytes (songFileLoadBytes), typed by its name, one shared download, the sign-in rule, a built sheet entry, the sheet card's lines in EN + ES (12 cases); 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
+const SONG_FILES_SIM_PIN = 140;   // 133 -> 140 (2026-11-25, the song help pop-up): a full device remembered (sfQuotaHit, 2 cases), songFilesClearDevice (4 cases), a failed wait hands its code to songLoadFailed; 121 -> 133 (2026-11-18, private chord sheets, P1): a .pdf read as bytes (songFileLoadBytes), typed by its name, one shared download, the sign-in rule, a built sheet entry, the sheet card's lines in EN + ES (12 cases); 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
 const SONG_FILES_CLOSE_PIN = 6;
 /* 1ev. THE LOOSE READ of a lyric sheet (2026-11-18, app/cards-sheet.js pcSheetAlign; the Lyrics view of a private
    song, card.sheetRead 'loose'). RUN by tools/sheet-align-test.mjs (Node, under a second): made-up layouts and
@@ -23550,6 +23693,7 @@ function checkNeverRules(sets) {
   checkCardKeysAndTickPop(rcCtx, rcSets, i18nTable);
   checkLoopSpeed(rcCtx, i18nTable);
   checkSpeedLadder(rcCtx, i18nTable);
+  await checkSongHelp(rcCtx, i18nTable);
   checkOneLineDirections(rcCtx, i18nTable);
   checkCardCaptionWords();
   checkJourneyRetired();

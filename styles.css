@@ -234,6 +234,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Transient hint toast (e.g. tapping a locked set) — self-made element, no markup needed. */
 #gate-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:var(--sp-10) var(--sp-16);border-radius:12px;font-size:0.9rem;font-weight:600;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;z-index:var(--z-toast);max-width:min(90vw / var(--site-fill,1),360px);text-align:center;transition:opacity .18s ease,transform .18s ease}
 #gate-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* The toast's one button (gateToast's `action`: the song help pop-up's "Help", app/songhelp.js). The toast itself
+   lets clicks through; only its button takes them, and only while the toast shows. */
+#gate-toast .gate-toast-act{margin-left:var(--sp-8);font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:12px;padding:var(--sp-2) var(--sp-10);cursor:pointer}
+#gate-toast.show .gate-toast-act{pointer-events:auto}
+#gate-toast .gate-toast-act:focus-visible{outline:2px solid var(--bg);outline-offset:2px}
 .reflection-ta:focus{outline:none;border-color:var(--text2)}
 .reflection-ta:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .week-panel[data-id^="mr"] .albl{color:var(--text);font-weight:600}
@@ -3263,6 +3268,19 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .sr-state-declined{color:var(--red-text)}
 .sr-note{flex-basis:100%;font-size:var(--fs-13);color:var(--text2);overflow-wrap:anywhere}
 .sr-modal{width:min(520px,100%)}
+/* The song help pop-up (app/songhelp.js, 2026-11-25), in the .daily5-overlay/.daily5-modal shell. Fits 1366x657
+   without scrolling in both languages and both states (tools/smoke.mjs songHelpWalk measures it). */
+.song-help{width:min(520px,100%);font-size:var(--fs-15);line-height:1.4;color:var(--text)}
+.song-help .song-help-title{font:inherit;font-size:var(--fs-17);margin:0}
+.song-help-lead{margin:var(--sp-10) 0 var(--sp-4)}
+.song-help-steps,.song-help-dl{margin:0;padding-left:var(--sp-24)}
+.song-help-steps > li{margin:var(--sp-4) 0}
+.song-help-dl{margin-top:var(--sp-2);color:var(--text2)}
+.song-help-clear{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-6) var(--sp-12);margin:var(--sp-4) 0}
+.song-help-note{font-size:var(--fs-13-5);color:var(--text2)}
+.song-help-close{font-family:inherit;font-size:var(--fs-14-5);font-weight:600;padding:var(--sp-8) var(--sp-18);border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer}
+.song-help-close:hover{background:var(--bg2)}
+.song-help .panel-next-btn:disabled{opacity:0.6;cursor:default}
 .sr-label{display:block;font-size:var(--fs-14);font-weight:600;margin:var(--sp-12) 0 var(--sp-4)}
 .sr-input{width:100%;box-sizing:border-box;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:var(--sp-8) 11px;font-size:var(--fs-15);font-family:inherit;color:var(--text);background:var(--bg)}
 .sr-input:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}

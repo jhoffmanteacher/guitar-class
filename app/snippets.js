@@ -1209,7 +1209,8 @@ function snipAudioError(st, el){
   if(snipState !== st) return;
   if(st.audio !== el){ if(st.twin === el) st.twin = null; return; }
   snipStop();
-  if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+  // What a failed song shows (the toast, or the song help pop-up): app/songhelp.js.
+  songLoadFailed();
 }
 /* The twin is the OTHER mix of the tier now playing — see THE TWIN. A song
    with no full mix has nothing to swap to, so it never gets one. */

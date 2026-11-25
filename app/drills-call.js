@@ -1067,7 +1067,7 @@ function chcStart(key){
   chcPaint(st);
   if(!M.call) chcKeyOn();
   try { if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch(e){}   // a focused Stop must not eat the space bar
-  audio.addEventListener('error', () => { if(chordCalls[key] === st && st.audio === audio){ chcQuit(key); if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed')); } }, { once: true });
+  audio.addEventListener('error', () => { if(chordCalls[key] === st && st.audio === audio){ chcQuit(key); songLoadFailed(); } }, { once: true });
   const begin = () => {
     if(chordCalls[key] !== st || st.phase !== 'play' || st.audio !== audio) return;
     try { audio.currentTime = win.start; } catch(e){}

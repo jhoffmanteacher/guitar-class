@@ -199,6 +199,10 @@ const sfUrls = new Map();       // id -> blob: address of the checked copy
 const sfBlobs = new Map();      // id -> that checked copy (a Blob), for songFileLoadBytes; dropped with its address
 const sfInflight = new Map();   // id -> { promise, listeners:Set }
 let sfPersistAsked = false;
+/* This Chromebook said it is full (a QuotaExceededError saving a song's device copy, or loading one) at least once in
+   this page. The song still plays from memory that time; a later song that does not load then opens the song help
+   pop-up as "This Chromebook is full." (app/songhelp.js, 2026-11-25). */
+let sfQuotaHit = false;
 /* ONE COUNT, ONE REFUSAL PER SONG PER PAGE (review A2, 2026-11-14). A song is
    counted against the month at most once in a page session (key: id and
    SHA-256): a retry after a dropped connection downloads again without
@@ -363,14 +367,15 @@ async function sfLoadOnce(id, entry, progress, wanted){
     }
     const b = new Blob([bytes], { type: songFileType(entry) });
     /* A full device (QuotaExceededError) or blocked storage: play it from
-       memory this time; the next page load downloads it again. */
+       memory this time; the next page load downloads it again. A full device
+       is remembered for the song help pop-up (sfQuotaHit). */
     try {
       await sfCopyPut({ id, sha256: entry.sha256, bytes: entry.bytes, blob: b, savedAt: Date.now() });
       if(!sfPersistAsked && typeof navigator !== 'undefined' && navigator.storage && navigator.storage.persist){
         sfPersistAsked = true;
         navigator.storage.persist().catch(() => {});
       }
-    } catch(e) {}
+    } catch(e) { if(e && e.name === 'QuotaExceededError') sfQuotaHit = true; }
     return b;
   });
 }
@@ -397,7 +402,7 @@ function songFileLoad(id, onProgress, waiter){
         sfUrls.set(id, url);
         sfBlobs.set(id, blob);
         return url;
-      }, e => { throw songFileErr(sfFirestoreCode(e), e && e.message); })
+      }, e => { if(e && e.name === 'QuotaExceededError') sfQuotaHit = true; throw songFileErr(sfFirestoreCode(e), e && e.message); })
       .finally(() => { if(sfInflight.get(id) === j) sfInflight.delete(id); });
     job = j;
     sfInflight.set(id, job);
@@ -422,6 +427,14 @@ async function songFileLoadBytes(id){
   const b = sfBlobs.get(id);
   if(!b) throw songFileErr('failed', 'the loaded copy was let go');
   return new Uint8Array(await b.arrayBuffer());
+}
+
+/* Empty this Chromebook's saved song copies (the song help pop-up's "Clear saved songs and reload", app/songhelp.js).
+   Only the 'files' store of 'gc-song-files': saved progress, sign-in and settings are elsewhere. Resolves true once the
+   store is empty, false when IndexedDB is not there or did not answer; never rejects. This page's loaded songs
+   (sfUrls) stay playable: the pop-up reloads the page next. */
+function songFilesClearDevice(){
+  return sfIdb().then(db => db ? sfIdbDo('readwrite', s => s.clear()).then(() => true) : false).catch(() => false);
 }
 
 /* ── The line a card shows while it waits, or instead of playing ── */
@@ -523,5 +536,8 @@ function songFileWaitThen(host, src, restart, ui){
     end();
     const code = (e && e.code) || 'failed';
     songFileShow(host, code);
+    /* The song help pop-up (app/songhelp.js) for a failure the card's line cannot explain; it decides by the code
+       (only 'failed' opens it). */
+    if(typeof songLoadFailed === 'function') songLoadFailed(code);
   });
 }

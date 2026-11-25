@@ -14,14 +14,17 @@
                  piece of the wrong length (bad); one wrong byte (bad); the rules refuse (denied); offline with no
                  copy (offline, nothing read) — and in every one, no copy kept and no address given
      full        a full device (QuotaExceededError): the song still plays this time, nothing kept, and the next
-                 page downloads it again
+                 page downloads it again; the page remembers it (sfQuotaHit, for the song help pop-up)
+     clear       songFilesClearDevice (the song help pop-up's button, 2026-11-25): the saved copies are gone and the
+                 next page downloads again; with no IndexedDB it answers false and does not throw
      tabs        two tabs ask for the same song at once: one download, one count, both get it; two asks in one
                  page share one download and both see progress
      limit       the month's count plus the cost exactly at the limit: allowed; one byte over: limit, nothing
                  read, nothing counted
      wait        songFileWaitThen: the loading line rises to the % and clears, restart() runs once; a stop
                  (songFileCancelWait) during the load: no restart, line cleared; a second card's wait cancels
-                 the first's; a failure shows its line (EN and ES keys exist for every code)
+                 the first's; a failure shows its line (EN and ES keys exist for every code) and hands its code
+                 to songLoadFailed (the song help pop-up, app/songhelp.js)
    --breaks  runs the cases against broken copies of app/songfiles.js; each must turn at least one case red.
 
    Made-up bytes only; nothing leaves the process. */
@@ -96,6 +99,7 @@ function makeIdb(opts){
       let fail = null;
       const store = {
         get(key){ const r = req(); setTimeout(() => { r.result = stores.get(key); }, 0); return r; },
+        clear(){ const r = req(); st.clears = (st.clears || 0) + 1; setTimeout(() => stores.clear(), 0); return r; },
         put(rec){
           const r = req();
           st.puts++;
@@ -158,10 +162,11 @@ function makeTab(src, shared, opts){
     ensureDb: async () => shared.fs.db,
     document: { createElement: () => makeEl() },
     t: (k, p) => k + (p ? JSON.stringify(p) : ''),
+    songLoadFailed: o.helpLog ? (c => { o.helpLog.push(c); }) : undefined,
   };
   vm.createContext(ctx);
   /* The sim's own list: whatever the site ships on SONG_FILES is cleared, so a real entry never changes a case (review B3). */
-  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS, songFilesSetBuilt, songFileEntry, sfUrls, songFileLoadBytes, sfBlobs };`, ctx, { filename: 'app/songfiles.js' });
+  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS, songFilesSetBuilt, songFileEntry, sfUrls, songFileLoadBytes, sfBlobs, songFilesClearDevice, quotaHit: () => sfQuotaHit };`, ctx, { filename: 'app/songfiles.js' });
   return { api: ctx.__api, ctx, urls };
 }
 const newShared = o => ({ fs: makeFirestore(), idb: makeIdb(o), locks: makeLocks() });
@@ -507,6 +512,32 @@ async function suite(src, quiet){
     const next = makeTab(src, s); register(next, 'x', BIG);
     await next.api.songFileLoad('x');
     ok('…and the next page downloads it again', s.fs.st.pieceReads === r0 + 3);
+    ok('…and the page remembers the device is full (sfQuotaHit)', tab.api.quotaHit() === true);
+  }
+  { const s = newShared(); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    await tab.api.songFileLoad('x');
+    ok('a device with room: sfQuotaHit stays false', tab.api.quotaHit() === false);
+  }
+
+  say('== clear the saved songs (the song help pop-up, app/songhelp.js)');
+  { const s = newShared(); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    await tab.api.songFileLoad('x');
+    await tick(); await tick();
+    ok('a song is kept on the device first', !!s.idb.stores.get('x'));
+    const cleared = await tab.api.songFilesClearDevice();
+    await tick(); await tick();
+    ok('songFilesClearDevice answers true and empties the store', cleared === true && s.idb.stores.size === 0 && s.idb.st.clears === 1, `${cleared} ${s.idb.stores.size}`);
+    const r0 = s.fs.st.pieceReads;
+    const next = makeTab(src, s); register(next, 'x', BIG);
+    await next.api.songFileLoad('x');
+    ok('…and the next page downloads the song again', s.fs.st.pieceReads === r0 + 3, String(s.fs.st.pieceReads - r0));
+    const s2 = newShared({ openError: true });
+    const t2 = makeTab(src, s2);
+    let r = 'threw';
+    try { r = await Promise.race([t2.api.songFilesClearDevice(), new Promise(res => setTimeout(() => res('hung'), 400))]); } catch (e) {}
+    ok('with no IndexedDB it answers false and does not throw', r === false, String(r));
   }
 
   say('== two tabs, one song');
@@ -590,6 +621,12 @@ async function suite(src, quiet){
     tab4.api.songFileWaitThen(h4, 'private:q', () => r4++);
     for (let i = 0; i < 50; i++) await tick();
     ok('a practice card shows the limit line in its own status line', status.text === 'sf.limit' && r4 === 0, status.text);
+    const helpLog = [];
+    const tab5 = makeTab(src, s4, { helpLog }); register(tab5, 'q', BIG);
+    const h5 = makeEl('pc'); h5.appendChild(makeEl('pc-status'));
+    tab5.api.songFileWaitThen(h5, 'private:q', () => {});
+    for (let i = 0; i < 50; i++) await tick();
+    ok('a failed wait hands its code to songLoadFailed once (the song help pop-up decides)', helpLog.length === 1 && helpLog[0] === 'limit', JSON.stringify(helpLog));
     const keys = Object.values(tab4.api.SONG_FILE_LINE_KEYS);
     const missingKeys = [...new Set(keys)].filter(k => !new RegExp(`'${k.replace('.', '\\.')}':\\s*\\{ en: '[^']+',\\s*(\\n\\s*)?es: '[^']+'`).test(I18N));
     ok(`every line the loader can show has English and Spanish in i18n.js (${new Set(keys).size} keys)`, missingKeys.length === 0, missingKeys.join(', '));
@@ -654,7 +691,12 @@ const BREAKS = [
   ['the stored SHA-256 is not compared with the list', "|| h.sha256 !== entry.sha256 ", ''],
   ['signed out is not refused', "if(!songFileHost().user) return Promise.reject(songFileErr('signin'));", ''],
   ['offline is not noticed before reading', "if(typeof navigator !== 'undefined' && navigator.onLine === false) throw songFileErr('offline');", ''],
-  ['a full device fails the song', "    } catch(e) {}\n    return b;", "    } catch(e) { throw e; }\n    return b;"],
+  ['a full device fails the song', "    } catch(e) { if(e && e.name === 'QuotaExceededError') sfQuotaHit = true; }\n    return b;", "    } catch(e) { throw e; }\n    return b;"],
+  /* The song help pop-up (2026-11-25). */
+  ['H1: a full device is not remembered', "    } catch(e) { if(e && e.name === 'QuotaExceededError') sfQuotaHit = true; }\n    return b;", "    } catch(e) {}\n    return b;"],
+  ['H2: the clear empties nothing', "db ? sfIdbDo('readwrite', s => s.clear()).then(() => true) : false", "db ? true : false"],
+  ['H3: the clear claims success with no IndexedDB', "db ? sfIdbDo('readwrite', s => s.clear()).then(() => true) : false", "db ? sfIdbDo('readwrite', s => s.clear()).then(() => true) : true"],
+  ['H4: a failed wait never asks for the song help', "    if(typeof songLoadFailed === 'function') songLoadFailed(code);\n", ''],
   ['the month is local time, not UTC', "return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');", "return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 2).padStart(2, '0');"],
   ['a stop does not cancel the restart', "  const w = sfWait;\n  sfWait = null;", "  const w = sfWait;"],
   ['the restart runs for a card no longer waiting', "  w.load.then(() => {\n    if(!mine()) return;", "  w.load.then(() => {"],

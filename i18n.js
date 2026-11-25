@@ -524,6 +524,27 @@
                                  es: 'Esta canci\u00f3n no se pudo cargar. Revisa que la fecha de esta Chromebook sea correcta y vuelve a darle play.' },
     'sf.failed':               { en: 'This song didn\u2019t load. Press play again in a minute.',
                                  es: 'Esta canci\u00f3n no se carg\u00f3. Vuelve a darle play en un minuto.' },
+    // SONG HELP (app/songhelp.js, 2026-11-25): the pop-up when a song does not load. 'full' when the page knows this
+    // Chromebook is full (songHelp.full heads it), else the steps in order of effort (songHelp.title heads it).
+    // A web page cannot see free space or the Downloads folder, so no number is shown: the Files app steps instead.
+    'songHelp.title':          { en: 'This song didn\u2019t load.', es: 'Esta canci\u00f3n no se carg\u00f3.' },
+    'songHelp.full':           { en: 'This Chromebook is full.', es: 'Esta Chromebook est\u00e1 llena.' },
+    'songHelp.tryOrder':       { en: 'Try these steps in order:', es: 'Prueba estos pasos en orden:' },
+    'songHelp.play':           { en: 'Press play again.', es: 'Vuelve a darle play.' },
+    'songHelp.clearBtn':       { en: 'Clear saved songs and reload', es: 'Borrar canciones guardadas y recargar' },
+    'songHelp.clearing':       { en: 'Clearing\u2026', es: 'Borrando\u2026' },
+    'songHelp.keeps':          { en: 'Your progress stays saved.', es: 'Tu progreso sigue guardado.' },
+    'songHelp.downloads':      { en: 'Empty the Downloads folder:', es: 'Vac\u00eda la carpeta Descargas:' },
+    'songHelp.dl1':            { en: 'Open the Files app.', es: 'Abre la app Archivos.' },
+    'songHelp.dl2':            { en: 'Open Downloads.', es: 'Abre Descargas.' },
+    'songHelp.dl3':            { en: 'Press Ctrl + A to select everything.', es: 'Presiona Ctrl + A para seleccionar todo.' },
+    'songHelp.dl4':            { en: 'Click the trash can button to delete it all.', es: 'Haz clic en el bot\u00f3n de la papelera para borrarlo todo.' },
+    'songHelp.dl5':            { en: 'Open Trash and empty it.', es: 'Abre la Papelera y vac\u00edala.' },
+    'songHelp.then':           { en: 'Then:', es: 'Despu\u00e9s:' },
+    'songHelp.restart':        { en: 'Restart the Chromebook.', es: 'Reinicia la Chromebook.' },
+    'songHelp.teacher':        { en: 'Tell your teacher.', es: 'Dile a tu maestro.' },
+    'songHelp.close':          { en: 'Close', es: 'Cerrar' },
+    'songHelp.help':           { en: 'Help', es: 'Ayuda' },
     // BUILT SONGS (app/builtsongs.js, 2026-11-14): a Play Along song the teacher adds in the console. Its card's
     // title ending, caption, directions line and section names come from here (the title, the artist and the
     // lyric lines are the teacher's own). bs.intro must stay one line at 1366x657 with its chords filled in:

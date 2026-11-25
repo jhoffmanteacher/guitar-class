@@ -368,8 +368,12 @@ function isPeekedResponseKey(key){
 }
 
 // Tiny transient toast for gate hints — makes its own element and self-dismisses.
+/* `action` (optional, 2026-11-25, the song help pop-up's "Help", app/songhelp.js): { label, onClick } adds one small
+   button after the text and keeps the toast up for GATE_TOAST_ACTION_MS; the button goes when the toast hides, so a
+   hidden toast leaves nothing to tab to or click. */
 let _gateToastTimer = null;
-function gateToast(msg){
+const GATE_TOAST_ACTION_MS = 7000;
+function gateToast(msg, action){
   let el = document.getElementById('gate-toast');
   if(!el){
     el = document.createElement('div');
@@ -379,9 +383,18 @@ function gateToast(msg){
     document.body.appendChild(el);
   }
   el.textContent = msg;
+  if(action && action.label && typeof action.onClick === 'function'){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gate-toast-act';
+    b.textContent = action.label;
+    b.addEventListener('click', () => { el.classList.remove('show'); b.remove(); action.onClick(); });
+    el.appendChild(document.createTextNode(' '));
+    el.appendChild(b);
+  }
   el.classList.add('show');
   if(_gateToastTimer) clearTimeout(_gateToastTimer);
-  _gateToastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
+  _gateToastTimer = setTimeout(()=>{ el.classList.remove('show'); const b = el.querySelector('.gate-toast-act'); if(b) b.remove(); }, action ? GATE_TOAST_ACTION_MS : 2800);
 }
 
 /* Every module change takes a ticket; only the most recently issued one may
