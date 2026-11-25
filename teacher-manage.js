@@ -263,7 +263,8 @@ async function teacherOpenAllThrough(){
   const n=Number(sel&&sel.value);
   if(!(Number.isInteger(n) && n>=2 && n<=12)) return;
   const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
-  const targets=allStudentsRaw.filter(s=>!arch[s.uid] && teacherStudentOpenThrough(s)<n);
+  // What is in force (their own value or the class-wide floor): a student already open through n by the floor needs no cell.
+  const targets=allStudentsRaw.filter(s=>!arch[s.uid] && teacherEffectiveOpenThrough(s)<n);
   if(!targets.length){ alert('Everyone is already open through Module '+n+' or further.'); return; }
   // n===2 would read "Modules 1–1": name the one earlier module on its own.
   const earlier = n===2 ? 'Module 1' : 'Modules 1–'+(n-1);
