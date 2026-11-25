@@ -1281,9 +1281,9 @@ function renderMyProgress(){
 /* ── ✓ In-Class Activities: teacher-curated, day-specific work pushed out
    alongside the self-paced modules ── An explore page in the main column
    (#class-activities), same plumbing as its rail neighbours above (see
-   EXPLORE_PAGES). An activity is LIVE the moment its entry is on main —
-   there is no toggle — and activities never retire; this page is a
-   permanent archive, newest first. Own lightweight renderer (not the .dp
+   EXPLORE_PAGES). Which activities a student sees is set on the teacher
+   console: the board, release dates, Hidden, Who, Archive and Delete
+   (caIsVisible, app/activities-2.js). Own lightweight renderer (not the .dp
    station-card builder — see the work order this shipped from): activities
    are simple enough that reusing the station machinery would drag in focus
    mode, the footer gate and stepper logic for no benefit. */

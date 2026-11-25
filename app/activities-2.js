@@ -311,8 +311,8 @@ function printActivity(ev, id){
   if(!card) return;
   const wasOpen = card.open;
   // A card no longer always sits straight in the page (item 2f) — it may be
-  // nested one level inside "Still to do" or "Earlier", either of which has
-  // to be open too, or a closed <details> renders none of its content for
+  // nested inside the Unfinished or Completed fold, either of which has to
+  // be open too, or a closed <details> renders none of its content for
   // print. The Today hero has neither ancestor, so this is a no-op for it.
   const group = card.closest('.ca-finished-group, .ca-todo-group');
   const groupWasOpen = group ? group.open : null;
@@ -378,8 +378,8 @@ function caOnToggle(details){
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
   if(!details.open) pcLoopReset(details);   // Loop this part / Build up speed start off at every opening (app/cards-loop.js)
   if(!details.open) songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
-  /* A card opened from "Still to do" left its header wherever it already sat
-     on the page — under the header, the page title and the Do-now card, as
+  /* A card opened from the Unfinished fold left its header wherever it already
+     sat on the page — under the header, the page title and the Today card, as
      low as y≈370 at 1366×657 (2026-09-20). Scroll only on a genuine click:
      `caCardMarkOpening` stamps the flag right before the native toggle, so a
      re-render that merely preserves an already-open card (or printActivity's
@@ -1392,17 +1392,20 @@ function refreshOpenClassActivitiesScreen(){
   const screen = document.getElementById('class-activities-screen');
   if(screen && !screen.hidden) renderClassActivities();
 }
-/* In-Class Activities — three groups, in this order (Today-first work order, Phase 1):
-     1. Do now      — every card released today or yesterday, pending
-                       first, then finished (2026-11-09, evening,
-                       see pendingPool). Collapsed like every
-                       other card (Jonathan, 2026-09-15): the whole point of the
-                       page is seeing the day's work at a glance, and a
+/* In-Class Activities — four groups, in this order:
+     1. Today's activity      — every card dated today or yesterday, or kept
+                       in Today by the console, pending first, then finished
+                       (2026-11-09, evening, see pendingPool). Collapsed like
+                       every other card (Jonathan, 2026-09-15): the whole point
+                       of the page is seeing the day's work at a glance, and a
                        forced-open first card pushed the rest below the fold.
-     2. Still to do — the rest of the pending cards, under a divider label
-                       (skipped when there's only one pending card — nothing
-                       left to divide it from).
-     3. Earlier      — finished work, the existing collapsed group.
+     2. Since your last visit — required cards released on class days with no
+                       saved work (caSinceHtml, the comment above caSinceGap);
+                       no group when there are none.
+     3. Unfinished activities — the rest of the pending cards, in one fold
+                       (caTodoGroupHtml), drawn even for a single card.
+     4. Completed activities  — finished work, a closed fold
+                       (caFinishedGroupHtml).
    Ends with the resume card (moved here from the practice column, see
    index.html) when the activity gate is off — once today's work is done,
    "Your practice" is the next thing on the page. */
@@ -1634,8 +1637,8 @@ function renderClassActivities(){
       pendingHtml = finished.length ? caFreePlayHeroHtml() + todayHtml : '';
     } else {
       // Everything else pending, minus the Today and Since cards (restGroups,
-      // above), wrapped in ONE "Still to do" fold (2f) — module headings
-      // (plain, no progress bar; that's an Earlier-only addition below) when
+      // above), wrapped in ONE Unfinished fold (2f) — module headings
+      // (plain, no progress bar; that's a Completed-only addition below) when
       // anything has been placed in a module, otherwise the flat Unsorted list
       // it always was.
       const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
@@ -1690,7 +1693,7 @@ function renderClassActivities(){
           return `<p class="ca-gate-intro" data-i18n="${key}"${params ? ` data-i18n-params="${escAttr(JSON.stringify(params))}"` : ''}>${escHtml(t(key, params))}</p>`;
         })()
       : '';
-    // Earlier now groups by module too, with a progress bar per heading
+    // Completed groups by module too, with a progress bar per heading
     // (2f) — a genuinely new capability (it used to be one flat list), so
     // it needs the same grouping pass pendingGroups already gets.
     // A finished card shown in Today's activities is not repeated here.
@@ -1709,10 +1712,10 @@ function renderClassActivities(){
   // (restoreLastSet) invokes it independently of this render pass.
   if(document.getElementById('resume-card') && typeof renderResumeCard === 'function') renderResumeCard();
 }
-// Per-module progress for the Earlier fold's headings (item 2f) — "N of M"
+// Per-module progress for the Completed fold's headings (item 2f) — "N of M"
 // and a thin bar, counted over every VISIBLE card ever assigned to that
 // module (done + still pending), not just the finished ones sitting in THIS
-// fold — so Earlier's "4 of 6" and however many are left in Still to do
+// fold — so Completed's "4 of 6" and however many are left in Unfinished
 // always add up to the same total.
 function caModuleHeadHtml(sec, byId){
   if(!sec.mod) return '';
