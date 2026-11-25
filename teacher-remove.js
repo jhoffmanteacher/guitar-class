@@ -36,7 +36,7 @@
    DELETE ORDER (each kind whole before the next; a failure stops there and
    says "done X of N kinds, failed at …", the rest untouched; running it again
    finishes, since every step re-reads what is left):
-     1 practice minutes  minutes/{uid}/days/*, weeks/*, then meta/board
+     1 practice minutes  minutes/{uid}/meta/board (the tag), then days/*, weeks/*
      2 mic recordings    micTakes/{uid}-coach|nr|pw: chunks first, then the take
      3 song requests     songRequests/* where uid == the student
      4 joining           accessRequests/{uid}, then the allow-list entry in config/access
@@ -183,10 +183,13 @@ async function trmDeleteRefs(refs){
 /* Each step re-reads what is left, so a second run after a failure finishes the job. */
 const TRM_STEPS = {
   async minutes(uid){
+    /* The tag FIRST (review R1-6): the console cannot read it, so a re-read sees only days and weeks. Last, a failure
+       at the tag left no minutes to show, the kind was never offered again and the tag stayed. First, any failure
+       leaves days or weeks, so the kind is offered and the re-run deletes the tag again (a missing doc deletes fine). */
+    await teacherRemoveDeleteBoardTag(uid);
     const days = (await teacherAbsDaysGet(uid, '0000-00-00', '9999-99-99')).docs || [];
     const weeks = (await teacherPmWeeksGet({uid})).docs || [];
     await trmDeleteRefs(days.concat(weeks).map(d=>d.ref));
-    await teacherRemoveDeleteBoardTag(uid);
   },
   async recordings(uid){
     for(const mode of TRM_MIC_MODES){

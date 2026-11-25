@@ -300,6 +300,21 @@ console.log('stopped, reopened');
   ok(T().ticks.progress === true && T().ticks.live === true, 'after a delete that ended ok, the next one starts from the usual list (everything with data ticked)');
 }
 
+/* ── a failure at the private Top 5 tag: the minutes kind is offered again and the tag goes (review R1-6) ── */
+console.log('tag');
+{
+  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: `minutes/${U[0]}/meta/board`, op: 'delete', once: true }] });
+  const inv = await c.fn('teacherRemoveRead')(U[0]);
+  const r = await c.fn('teacherRemoveRun')(U[0], inv, ALL);
+  ok(!r.ok && r.at === 'Practice minutes', 'the run stops at Practice minutes: ' + r.text);
+  const c2 = makeConsole(S);
+  const L2 = c2.fn('trmKindLines')(await c2.fn('teacherRemoveRead')(U[0]), U[0]);
+  ok(L2.minutes.n > 0, `the re-read still offers Practice minutes (${L2.minutes.n} things: ${L2.minutes.text})`);
+  const ticks = {}; Object.keys(ALL).forEach(k => { ticks[k] = L2[k].n > 0; });
+  const r2 = await c2.fn('teacherRemoveRun')(U[0], await c2.fn('teacherRemoveRead')(U[0]), ticks);
+  ok(r2.ok && !S.has(`minutes/${U[0]}/meta/board`) && !pathsOf(S, U[0]).length, `the re-run: ${r2.text} The tag is gone, nothing of Test 0's left (${pathsOf(S, U[0]).join(', ') || 'none'})`);
+}
+
 /* ── start over ── */
 console.log('start over');
 {
