@@ -823,6 +823,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the Ladder at 50 BPM with no buzz, three times in a row.',
         text_es: 'Toca la Escalera a 50 BPM sin zumbido, tres veces seguidas.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: 'The Ladder · position 1',
           caption_es: 'La Escalera · posición 1',
           notes: [
@@ -912,6 +913,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the Ladder backwards at 50 BPM with no buzz, three times in a row.',
         text_es: 'Toca la Escalera al revés a 50 BPM sin zumbido, tres veces seguidas.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: 'Down the Ladder · pinky leads',
           caption_es: 'Bajando la Escalera · el meñique va primero',
           notes: [
@@ -1008,6 +1010,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the Ladder in 5th position at 50 BPM with no buzz, three times in a row.',
         text_es: 'Toca la Escalera en la 5.ª posición a 50 BPM sin zumbido, tres veces seguidas.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: '5th position · index on the dot',
           caption_es: '5.ª posición · el índice sobre el punto',
           notes: [
@@ -1092,6 +1095,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Climb the tab at 50 BPM with each finger staying down, three times in a row.',
         text_es: 'Sube la tablatura a 50 BPM con cada dedo quedándose abajo, tres veces seguidas.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: 'Plant as you go · nothing lifts',
           caption_es: 'Planta y sigue · nada se levanta',
           notes: [
@@ -1173,6 +1177,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Jump over the A string at 50 BPM: 8 jumps in a row with the A string silent.',
         text_es: 'Salta por encima de la cuerda La a 50 BPM: 8 saltos seguidos con la cuerda La en silencio.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: 'The skip · over the A string',
           caption_es: 'El salto · por encima de la cuerda La',
           notes: [
@@ -1256,6 +1261,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Warm up the Ladder at 50 BPM: two clean climbs in a row with no buzz.',
         text_es: 'Calienta la Escalera a 50 BPM: dos subidas limpias seguidas, sin zumbido.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: 'Warm-up · Ladder with the shift',
           caption_es: 'Calentamiento · Escalera con el cambio',
           notes: [
@@ -1276,6 +1282,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the Spider at 50 BPM, then once cleanly at 60 BPM.',
         text_es: 'Toca la Araña a 50 BPM y después una pasada limpia a 60 BPM.',
         tab: {
+          bpm: 50,   // the slider opens on the step's own "at 50 BPM"
           caption: 'Spider · faster each clean pass',
           caption_es: 'Araña · más rápido con cada pasada limpia',
           notes: [
