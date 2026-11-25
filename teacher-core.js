@@ -717,10 +717,11 @@ async function loadAllStudents(opts){
         teacherPaintRosterMissing();
         return;
       }
-      /* The read moved the copy while a view is on screen (a retry, or a view opened while the first load was out or the
-         modules loaded): draw it from the new copy now, before the roster read, so nothing drawn from an older or failed
-         copy is left on screen meanwhile (review R3-3, R4-1). At boot with nothing drawn yet, the load draws below. */
-      if(teacherBodyDrawn){ readCfg=false; renderTeacherBody(); }
+      /* The read moved the copy while a view, or a failure line, is on screen (a retry, or a view opened while the first
+         load was out or the modules loaded): draw it from the new copy now, before the roster read, so nothing drawn
+         from an older or failed copy, and no "Could not read the class settings", is left on screen meanwhile (review
+         R3-3, R4-1). At boot with nothing on screen yet, the load draws below. */
+      if(teacherBodyDrawn || teacherRosterBoxFailed){ readCfg=false; renderTeacherBody(); }
     }
     const fresh=await teacherFetchStudents();
     /* An automatic retry that lands while the teacher is mid-drag or typing on a view drawn without the roster is
@@ -799,10 +800,11 @@ function teacherPaintRosterMissing(){
   if(teacherView==='minutes'){ renderTeacherMinutes(); return; }
   const box=document.getElementById('t-grid-container');
   if(box){
-    // Which read failed, or that the reads are still out (no settings read yet is loading, not a failure).
+    /* Which read failed, or that a read is out: no settings read yet, or a retry's progress read after its settings read
+       came back (the failure before it may have been the settings', so no progress read has failed yet). */
     box.innerHTML = !teacherClassConfigReadOk && teacherClassConfigLoaded
       ? '<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>'
-      : teacherRosterDown() && teacherClassConfigReadOk
+      : teacherRosterDown() && teacherClassConfigReadOk && !teacherRefreshing
         ? '<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>'
         : '<div class="t-loading">Loading student data…</div>';
     teacherRosterBoxFailed=true;
@@ -1518,8 +1520,9 @@ function renderTeacherBody(){
      While loading the first load is already on its way (or starts once the modules are in). The views drawn from the
      class settings are drawn while those are good, with the line above them once the roster failed (review R2-4). */
   if(teacherRosterBlocks(teacherView)){
-    teacherPaintRosterMissing();
+    // The read first, so the line says a read is out ("Loading student data…"): the failure before it may have been the settings'.
     if(teacherRosterDown() && !teacherRefreshing) loadAllStudents();
+    teacherPaintRosterMissing();
     return;
   }
   teacherPaintRosterNote();
