@@ -309,7 +309,8 @@ script.
   - Nothing played (C1): the Coach's check-off gate opened in 30 of 72 chord takes and 211 of 552 melody takes in the
     synthetic rooms, 92 of 108 and 524 of 828 in the recorded rooms (dead mic, quiet room and fan: never). Two ways in:
     every slot "unclear" (pitch scored 2 by the chord-mode dim rule, completion 3: desk taps, typing, muted strums), and
-    pitch 1 with timing and completion Great ("Good" needs only two Greats, of any criteria). Strum Radar with nothing
+    pitch 1 with timing and completion Great ("Good" needs only two Greats, of any criteria; closed 2026-11-25, THE NOTES
+    DECIDE below; the first was narrowed by rule A on 2026-11-18). Strum Radar with nothing
     played: median 29% (synthetic) and 78% (recorded rooms), 70 of 72 recorded-room rounds earn a star.
   - Replay of the 13 Coach / Note Runner takes: reproduced 46 of 64 (melody), 6 of 8 (chords), 51 of 74 (Note Runner) from
     the summaries; on the site of each take's own day (`--own-day`, audio) 47, 4 and 53. Noise (`--noise`, summaries):
@@ -362,6 +363,47 @@ script.
     moved: two Greats still make Good), "two Greats make Good" removed (gate "14 better, 1 worse"), Strum Radar's window doubled ("65
     worse"), a Note Runner verdict flipped ("32 of 32 worse"). Same seed twice: same text and `--json`. closed-loop.mjs, no-guitar-listen.mjs
     and replay-listen.mjs give the same output as before the step (byte-identical `--json`).
+- **THE NOTES DECIDE (2026-11-25; the Listening Coach study of that day's sweep; Jonathan left the listening call to the
+  lead: "i need you to decide how to improve the listening code").** The Coach's report card only (`coach-score.js`
+  `coachRenderReport`, one line of `coachScorePitch`): (1) "Right notes" at Not yet is never Good on two other Greats;
+  (2) when that Not yet rests on sounds the Coach could not read (wrong notes on under three quarters of the beats, and
+  more unclear beats than silent ones), the round gets a "couldn't hear" screen (`coach.report.unreadMelody` /
+  `unreadChords`: "I heard sounds, but I could not tell which notes you played..."): no level, nothing saved for the
+  skill, the gate as it was; while the skill still waits on the Coach it names the gate's "Mark it anyway"; (3) melody's
+  quietMost branch needs two right notes for level 2. No slot verdict, detector, onset or matcher moved, and only the
+  Coach calls these functions. `listen-site.mjs` reads the new screen as `couldntHear`. checks.mjs 1fg runs the rules on
+  11,692 made-up rounds. Why: in every recorded room a sound lands near every beat (0 of 64 real beats came back
+  "missed"), so "On the beat" and "Played it through" were Great for desk taps and room noise, and "Right notes", the one
+  criterion that tells playing from not playing, was outvoted.
+  Measured 2026-11-25, before = `27c7097`, after = the change (one seed unless said); the study's own numbers on `d8ca4e2`
+  came out the same in every row:
+  - REAL TAKES (8 Coach melody takes and 1 chord take, 6 clock offsets each): slot verdicts identical in 54 of 54 replays
+    (`replay-listen.mjs --against`: "0 of 146 replayed notes differ"). The two takes whose recordings hold 0 of the 8
+    written notes: Good 12 of 12 -> couldn't hear 11, Not yet 1. The three that clearly hold 5 or more: Not yet 3 -> 0 of 18,
+    the gate open 15 -> 14 of 18 (the one lost is "couldn't hear", and the clock offsets alone move that take between Not
+    yet, Good and Great). Wrong grades in those 30 replays: 15 -> 0.
+  - Nothing played (`no-guitar-listen.mjs`): the gate opened 211 -> 4 of 552 melody rounds and 27 -> 6 of 72 chord rounds
+    ("326 of 672 rounds moved, 0 worse"); the 10 left are one voice or class talking. Desk taps, muted strums, typing: all
+    "couldn't hear".
+  - `listen-loop.mjs --game=melody`, gate open for right players / false passes, of 80 / 40: quiet 80 -> 80 / 30 -> 0; class
+    71 -> 67 / 29 -> 0; room7 75 -> 23 / 37 -> 0; room4 73 -> 6 / 34 -> 0. In room7 and room4 the Coach reads 27% and 10%
+    of a right player's notes as right (they were fitted on strums: harsher than the real rooms for single notes, see
+    `--fit`); there the right players are now told "couldn't hear", not given a wrong grade (Not yet: room7 5 -> 3, room4
+    7 -> 8). `--game=chords`, of 42 / 21: right players 42/42/42/40 -> 42/42/42/39; false passes 15/15/20/21 -> 1/2/11/12
+    (what still passes in room7 and room4 is the chord vote at chance level: it waits for real chord takes). Both: "0 of
+    5100 / 0 of 4480 graded notes differ".
+  - A second seed (`--seeds=2 --rooms=class,room4`, the real code both times): melody class right players 71 -> 67 (seed 1),
+    69 -> 65 (seed 2); room4 73 -> 6 and 70 -> 2; false passes 29, 28 -> 0, 0 (class) and 34, 38 -> 0, 1 (room4). Chords
+    room4 false passes 21, 21 -> 12, 14. Seed to seed a count moves by 0 to 4: the class room's 4 fewer right-playing
+    passes repeat on both seeds (a small real cost); every false-pass drop is far outside the noise.
+  - Other games, nothing moved: Note Runner (`listen-loop --game=runner`, 0 of 1152), Strum Radar (0 of 3520), the
+    Power Chord Switch closed loop (`--rooms=room7,room4`: 0 of 17280 changes in 1152 games; `--no-guitar`: 0 of 4320) and
+    its real takes (0 of 416), the strum-pattern check (identical `--json`), `tone-test.mjs` and `coach-take-save.mjs`
+    (identical output).
+  Roll back (report card only): `|| unread` in coachRenderReport's "couldn't hear" test, the "the notes decide" line, and
+  `good > 1` back to `good > 0` in coachScorePitch; nothing is stored in a new shape. What would move it: 20 or more
+  Coach melody takes from a loud period after it ships (how often a real right player now gets "couldn't hear"), and 10
+  or more chord takes (the chord vote).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on
