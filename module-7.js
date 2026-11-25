@@ -1015,7 +1015,7 @@ MODULE_SONGS[7] = [
       { name: '"Luna" — Peso Pluma, Junior H', added: '2026-07-09', meta: 'Full barre F in the vamp (instead of the little F)', meta_es: 'Cejilla completa de F en el vamp (en lugar del F pequeño)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Wonderwall" — Oasis', added: '2026-05-29', meta: 'Easier with barre chords once you have them down', meta_es: 'Más fácil con acordes con cejilla una vez que los dominas', type: 'Focus', core: true,
+      { name: '"Wonderwall" — Oasis', added: '2026-05-29', meta: 'Easier with barre chords once you can play them', meta_es: 'Más fácil con acordes con cejilla una vez que los dominas', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
         tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE&t=110' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', added: '2026-05-29', meta: 'Barre the D–C–G verse · intro riff = optional harder challenge', meta_es: 'Toca la estrofa D–C–G con cejillas · riff de intro = reto opcional más difícil', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
