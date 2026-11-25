@@ -391,17 +391,14 @@ function sbGridSwap(sections, from, to){
   out.forEach(s => { s.bars = s.bars.map(b => String(b).split(/\s+/).map(tk => { const p = tk.split(':'); if(p[0] === from) p[0] = to; return p.join(':'); }).join(' ')); });
   return out;
 }
-/* A bar string → [{ name ('' = rest), beats }], and back. */
+/* A bar string → [{ name ('' = rest), beats }]. The grid writes a bar back inline (sbChartAct: a split keeps both halves
+   even when they carry the same chord, so the split stays editable). */
 function sbBarRead(bar, meter){ const m = SB_METER[meter] || SB_METER['4/4']; return String(bar).indexOf(':') < 0 ? [{ name: bar === '-' ? '' : bar, beats: m.bpb }] : String(bar).split(/\s+/).map(tk => { const p = tk.split(':'); return { name: p[0] === '-' ? '' : p[0], beats: bsBeats(p[1]) }; }); }   // bsBeats: '2', '1.5' and an imported song's '1/3'
 /* A part's beats as the format writes them (bsBeats, app/builtsongs.js: '2', '1.5', or thirds as '1/3', '5/3'). A bar of
    an imported 6/8 song can hold thirds: written as a number (0.3333333333333333) the validator refuses it (SB-5). */
 function sbBeatsText(b){
   const t = Math.round(b * 3);
   return Math.abs(b - Math.round(b)) < 1e-6 ? String(Math.round(b)) : Math.abs(b * 3 - t) < 1e-6 && t % 3 ? t + '/3' : String(Math.round(b * 1000) / 1000);
-}
-function sbBarWrite(parts, meter){
-  if(parts.length === 1 || parts.every(p => p.name === parts[0].name)) return parts[0].name || '-';
-  return parts.map(p => (p.name || '-') + ':' + p.beats).join(' ');
 }
 
 /* ── From the draft to the song builtSongs takes ── */
