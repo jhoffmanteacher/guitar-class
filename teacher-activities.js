@@ -1262,7 +1262,8 @@ function teacherRenderActivityScreen(screen, opts){
     if(!box.querySelector(`[data-ta-head][data-id="${CSS.escape(activityDetailId)}"]`)) renderTeacherActivityDetail(activityDetailId);
     else teacherSoftRepaintDetail();
     teacherPaintSideTree();
-    if(!cached) teacherReadConfigAndRoster().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
+    // A failed read is {} (review R1-5): keep what is on screen rather than draw every setting as unset.
+    if(!cached) teacherReadConfigAndRoster().then(cfg=>{ if(cfg && teacherClassConfigReadOk && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
     return;
   }
   if(!(window.CLASS_ACTIVITIES||[]).length){
