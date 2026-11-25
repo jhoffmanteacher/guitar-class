@@ -34,7 +34,19 @@
                                reloaded by its own worker; the real worker coming
                                back reloads a tab opened under the kill switch once
                                (APP-CORE-1, 2026-11-25)
-     names and tools           the kept names are the pinned ones
+     an open page with unsaved work  the same block with the REAL save code
+                               (queueSave, flushSave, withTimeout from app/save.js;
+                               hasUnsavedWrites, flushBeforeLeaving from app/boot.js;
+                               the "online" listener of app/shell.js) on a virtual
+                               clock: a takeover never reloads over a tick still
+                               waiting or on the wire (a tick in the 800 ms wait is
+                               sent at once; offline 7 minutes: no reload until it
+                               lands), a write refused for good while online holds
+                               it only until the 5-minute limit, its last try is
+                               waited for, and a tick made during that last try
+                               holds it again (APP-CORE-3, review R1-1 and R1-2,
+                               2026-11-25)
+     names and tools          the kept names are the pinned ones
                                (tools/sw-audio-map.mjs) and the ones the real
                                worker executes; `checks.mjs --live` reads
                                `guitar-class-kill-switch` from it; the full
@@ -42,15 +54,17 @@
                                plain script with no importScripts
 
    Then it breaks kill-sw.js on purpose, one way at a time, and requires each
-   breakage to turn at least one assertion red. --verbose prints the first red
-   assertion of every breakage.
+   breakage to turn at least one assertion red; and the same for the "unsaved
+   work" branch of the start.js block (PAGE_BREAKAGES), so that scenario
+   cannot go blind. --verbose prints the first red assertion of every breakage.
 
    usage: node tools/kill-switch/proof.mjs [path/to/kill-sw.js] [--real path/to/sw.js] [--page path/to/app/start.js] [--verbose] [--no-mutations]
+   (--page: the save code is read from the same folder: its save.js, boot.js and shell.js.)
    Last line:
-     kill-switch-proof: <assertions> assertions in <scenarios> scenarios, <caught> of <mutations> mutations caught
+     kill-switch-proof: <assertions> assertions in <scenarios> scenarios, <caught> of <breakages> start.js breakages caught, <caught> of <mutations> mutations caught
    Exit 0 only when every assertion holds and every mutation is caught.
    Run it after any change to sw.js, the service-worker block of app/start.js,
-   or this folder. */
+   queueSave / flushSave / hasUnsavedWrites / flushBeforeLeaving, or this folder. */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -73,6 +87,38 @@ const PAGE_SRC = (() => {
   const s = lf(readFileSync(pagePath, 'utf8'));
   const a = s.indexOf("if ('serviceWorker' in navigator"), b = s.indexOf('/* ── The hash router listens');
   return a >= 0 && b > a ? s.slice(a, b) : '';
+})();
+/* The save code that block waits on, the real functions, read from the folder of --page: withTimeout, queueSave and
+   flushSave (app/save.js), hasUnsavedWrites and flushBeforeLeaving (app/boot.js), and the "online" listener that
+   re-arms a save (app/shell.js). null if any of them is not found. */
+const braceEnd = (src, open) => {
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    const c = src[i], d = src[i + 1];
+    if (c === '/' && d === '/') { i = src.indexOf('\n', i); continue; }
+    if (c === '/' && d === '*') { i = src.indexOf('*/', i) + 1; continue; }
+    if (c === "'" || c === '"' || c === '`') { const q = c; for (i++; src[i] !== q; i++) if (src[i] === '\\') i++; continue; }
+    if (c === '{') depth++;
+    if (c === '}' && --depth === 0) return i + 1;
+  }
+  throw new Error('unclosed block');
+};
+const fnText = (src, name) => {
+  const m = new RegExp(`(^|\\n)((?:async )?function ${name}\\s*\\()`).exec(src);
+  if (!m) throw new Error(`no function ${name}`);
+  const a = m.index + m[1].length;
+  return src.slice(a, braceEnd(src, src.indexOf('{', a)));
+};
+const SAVE = (() => {
+  try {
+    const read = f => lf(readFileSync(join(dirname(pagePath), f), 'utf8'));
+    const save = read('save.js'), boot = read('boot.js'), shell = read('shell.js');
+    const on = shell.indexOf("window.addEventListener('online', function(){");
+    const retries = (save.match(/^const SAVE_MAX_AUTO_RETRIES = (\d+);/m) || [])[1];
+    if (on < 0 || !retries) return null;
+    return { retries: +retries, code: [fnText(save, 'withTimeout'), fnText(save, 'queueSave'), fnText(save, 'flushSave'),
+      fnText(boot, 'hasUnsavedWrites'), fnText(boot, 'flushBeforeLeaving'), shell.slice(on, braceEnd(shell, shell.indexOf('{', on))) + ');'].join('\n') };
+  } catch { return null; }
 })();
 const BASE = 'https://class.test/guitar-class/';
 
@@ -179,8 +225,8 @@ function boot(src, storage) {
 /* One open page running the real service-worker block of app/start.js, as the browser holds it when that block runs:
    its controller, the navigation's workerStart (0 = no worker served it) and the registration's active worker (a hard
    reload: no controller while the site's worker is active). A worker is one ServiceWorker object per page, as in a
-   browser. Nothing unsaved and nothing busy, so the reload goes straight through (what it waits for:
-   tools/update-reload-loop.mjs in a browser). */
+   browser. Nothing unsaved and nothing busy, so the reload goes straight through (what it waits for: unsavedPage
+   below for unsaved work, tools/update-reload-loop.mjs in a browser for the rest). */
 const tick = () => new Promise(r => setTimeout(r, 0));
 function openPage(pageSrc, { controller = null, workerStart = 0, active = null } = {}) {
   const listeners = {}, objects = new Map();
@@ -223,8 +269,94 @@ function openPage(pageSrc, { controller = null, workerStart = 0, active = null }
   };
 }
 
+/* One open page with work to save, on a virtual clock: the start.js block and the real save code (SAVE above). The
+   student ticks steps (sc.ticks, ms; each a key of `completed`); a write is answered sc.rtt ms after it is sent
+   (default 300), held while offline (sc.offline windows: Firestore sends it when the connection is back, and the
+   "online" event fires as each window ends), refused while sc.refuse says so ('always', or 'untilTold': until 10 s
+   after the first "Not saving"), and a write still out when the page reloads never arrives. sc.txMs: the swap45
+   transaction before every write; sc.txFailsOffline: it fails at once while offline (so flushSave gives up).
+   sc.busy windows: an exit check open. sc.tickInLastTry: a tick that many ms after the first write sent once "Not
+   saving" was shown (the last try at the time limit). sc.look: times to note the reloads and saves so far. A new worker
+   takes over at sc.takeAt, with both signals. */
+async function unsavedPage(pageSrc, sc) {
+  let now = 0, seq = 0, ctx = null;
+  const timers = new Map();
+  const setT = (fn, ms) => { const id = ++seq; timers.set(id, { at: now + (ms || 0), fn }); return id; };
+  const sleep = ms => new Promise(r => setT(r, ms));
+  const settle = async () => { for (let k = 0; k < 30; k++) await new Promise(r => setImmediate(r)); };
+  const within = (ws, t) => (ws || []).some(([a, b]) => t >= a && t < b);
+  const st = { reloads: [], landed: new Set(), told: [], ticks: [], overBusy: false, seen: {}, lastTry: null };
+  const refused = () => sc.refuse === 'always' || (sc.refuse === 'untilTold' && !(st.told.length && now >= st.told[0] + 10000));
+  const swL = {}, winL = {};
+  const worker = () => ({ postMessage() {} });
+  const nav = { serviceWorker: { controller: worker(), addEventListener(t, f) { (swL[t] = swL[t] || []).push(f); }, register: async () => ({}) },
+    get onLine() { return !within(sc.offline, now); } };
+  const tickNow = () => {
+    if (st.reloads.length) return;
+    const k = 'k' + now;
+    ctx.completed[k] = true; st.ticks.push([k, now]); ctx.__save.queueSave('completed');
+  };
+  const doc = { async set(payload) {
+    if (sc.tickInLastTry != null && st.told.length && st.lastTry == null) { st.lastTry = now; setT(tickNow, sc.tickInLastTry); }
+    const sent = Object.keys(payload.completed || {});
+    await sleep(sc.rtt || 300);
+    while (within(sc.offline, now)) await sleep(250);
+    if (refused()) throw Object.assign(new Error('refused'), { code: 'unavailable' });
+    if (st.reloads.length) return;
+    sent.forEach(k => st.landed.add(k));
+  } };
+  const db = { collection: () => ({ doc: () => doc }) };
+  ctx = vm.createContext({ Promise, Object, Set, Map, Array, Error, JSON, Math, console,
+    setTimeout: setT, clearTimeout: id => { timers.delete(id); }, Date: { now: () => now }, navigator: nav,
+    location: { protocol: 'https:', reload() { st.reloads.push(now); if (Object.keys(ctx.ecRuns).length) st.overBusy = true; } },
+    performance: { getEntriesByType: () => [{ workerStart: 5 }] },
+    window: { addEventListener(t, f) { (winL[t] = winL[t] || []).push(f); } },
+    document: { readyState: 'complete', hidden: false, addEventListener() {}, getElementById: () => null },
+    sessionStorage: { setItem() {} }, swResumeSave() {},
+    recState: {}, shuffleDrills: {}, deckDrills: {}, earDrills: {}, ecRuns: {}, ncLive: null, chcLive: null, pcState: null,
+    currentUser: { uid: 'test-0', displayName: 'Test 0', email: 'test0@example.test' },
+    progress: {}, responses: {}, completed: {}, classActivities: {}, caStepDone: {}, exitChecks: {}, games: {}, streak: {}, practiceLog: {},
+    studentPeriod: '4', lastModuleNum: 1, lastSetId: null, progressLoadFailed: false,
+    completedDeletes: new Map(), classActivitiesDeletes: new Map(), caStepDeletes: new Map(),
+    LOAD_DEPENDENT_SAVE_KEYS: new Set(), LOAD_FAILED_EMPTY_MAPS: [],
+    setSaveMsg(k) { if (k === 'save.notSaving') st.told.push(now); },
+    progressLoadRetryNoteChange() {}, isDevBypassUser: () => false, saveLocalPlace() {},
+    closePeriodPicker() {}, refreshOpenClassActivitiesScreen() {}, applyActivityGate() {},
+    ensureDb: async () => db, db, firebase: { firestore: { FieldValue: { delete: () => null } } },
+    swap45Commit: async () => {
+      if (sc.txMs) await sleep(sc.txMs);
+      if (sc.txFailsOffline && !nav.onLine) { await sleep(50); throw Object.assign(new Error('offline'), { code: 'unavailable' }); }
+    } });
+  vm.runInContext(`let _dirtyKeys = new Set(); let saveTimer = null; let _flushP = null; let _saveFailCount = 0; const SAVE_MAX_AUTO_RETRIES = ${SAVE.retries};
+${SAVE.code}
+globalThis.__save = { queueSave, get fails() { return _saveFailCount; } };`, ctx, { filename: 'save-code.js' });
+  vm.runInContext(pageSrc, ctx, { filename: 'app/start.js' });
+  for (const [, b] of sc.offline || []) setT(() => { for (const f of winL.online || []) f({ type: 'online' }); }, b);
+  for (const t of sc.ticks || []) setT(tickNow, t);
+  for (const [a, b] of sc.busy || []) { setT(() => { ctx.ecRuns.x = {}; }, a); setT(() => { delete ctx.ecRuns.x; }, b); }
+  for (const t of sc.look || []) setT(() => { st.seen[t] = { reloads: st.reloads.length, landed: st.landed.size, fails: ctx.__save.fails }; }, t);
+  setT(() => {
+    nav.serviceWorker.controller = worker();
+    for (const f of swL.controllerchange || []) f({ type: 'controllerchange' });
+    for (const f of swL.message || []) f({ type: 'message', data: { type: 'gc-sw-activated' } });
+  }, sc.takeAt);
+  const end = sc.until || 900000;
+  for (;;) {
+    await settle();
+    let next = null;
+    for (const [id, t] of timers) if (t.at <= end && (!next || t.at < next[1].at)) next = [id, t];
+    if (!next) break;
+    timers.delete(next[0]);
+    now = Math.max(now, next[1].at);
+    next[1].fn();
+  }
+  const lost = st.ticks.filter(([k]) => !st.landed.has(k));
+  const at = st.reloads.length ? st.reloads[0] : Infinity;
+  return { ...st, lost: lost.map(([k]) => k), untold: lost.filter(([, t]) => !st.told.some(x => x >= t && x <= at)).map(([k]) => k) };
+}
+
 /* ── the scenarios ─────────────────────────────────────────────────────── */
-async function runScenarios(killSrc) {
+async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true } = {}) {
   const out = [];
   let scenario = '';
   const check = (what, cond) => out.push([scenario, what, !!cond]);
@@ -331,17 +463,17 @@ async function runScenarios(killSrc) {
      back. That is app/start.js's half, run here on the takeovers above (each worker's own claim and message). */
   scenario = 'the open pages';
   {
-    let runs = !!PAGE_SRC;
-    try { if (runs) openPage(PAGE_SRC); } catch { runs = false; }
+    let runs = !!pageSrc;
+    try { if (runs) openPage(pageSrc); } catch { runs = false; }
     check('the service-worker block of app/start.js is found and runs', runs);
     if (runs) {
-      const returning = openPage(PAGE_SRC, { controller: real1, workerStart: 12 });
+      const returning = openPage(pageSrc, { controller: real1, workerStart: 12 });
       /* A first visit (or cleared site data, a guest session): no worker, no registration. */
-      const first = openPage(PAGE_SRC);
+      const first = openPage(pageSrc);
       /* A hard reload (Ctrl+Shift+R) bypasses the worker: no controller, though the real worker is active. */
-      const hard = openPage(PAGE_SRC, { active: real1 });
+      const hard = openPage(pageSrc, { active: real1 });
       /* Claimed by the first worker while it still loaded (start.js, review R2-2): a controller, but no worker served it. */
-      const claimedEarly = openPage(PAGE_SRC, { controller: real1, workerStart: 0 });
+      const claimedEarly = openPage(pageSrc, { controller: real1, workerStart: 0 });
       await tick();
       await first.takeover(real1);
       await claimedEarly.heldMessage(real1);
@@ -355,14 +487,48 @@ async function runScenarios(killSrc) {
       check('...a tab claimed while it loaded exactly once', claimedEarly.reloads === 1);
       /* Served by the real worker, and the kill switch took over before the block ran: its "controllerchange" came before
          any listener, so the held message is the only signal (why sw.js posts it). */
-      const beaten = openPage(PAGE_SRC, { controller: kill, workerStart: 12 });
+      const beaten = openPage(pageSrc, { controller: kill, workerStart: 12 });
       await beaten.heldMessage(kill);
       check('a takeover that came before the page\'s script ran: its held message alone reloads the tab once', beaten.reloads === 1);
       /* Opened while the kill switch was live: no fetch handler, so no worker served it (workerStart 0), yet it controls it. */
-      const underKill = openPage(PAGE_SRC, { controller: kill, workerStart: 0 });
+      const underKill = openPage(pageSrc, { controller: kill, workerStart: 0 });
       await tick();
       if (realBack) await underKill.takeover(realBack);
       check('the real worker coming back reloads a tab opened under the kill switch exactly once', underKill.reloads === 1);
+    }
+  }
+
+  /* APP-CORE-3 (2026-11-25): the update reload never goes over work not saved yet, except work the save code gave up
+     on while online, and then only after the 5-minute limit and one last try. Run by no browser tool: under the dev
+     bypass, which tools/update-reload-loop.mjs uses, queueSave clears its dirty set at once (review R1-1). */
+  scenario = 'an open page with unsaved work';
+  if (unsaved) {
+    check('the save code is found (queueSave, flushSave, withTimeout, hasUnsavedWrites, flushBeforeLeaving, the "online" listener)', !!SAVE);
+    if (SAVE && pageSrc) {
+      const P = async sc => { try { return await unsavedPage(pageSrc, sc); } catch (e) { return { failed: e.message }; } };
+      const one = r => !!r.reloads && r.reloads.length === 1;
+      const kept = r => one(r) && !r.lost.length;
+      let r = await P({ ticks: [0], takeAt: 300 });
+      check('a tick still in the 800 ms wait, online: sent at once, saved, then one reload within a second', kept(r) && r.reloads[0] - 300 < 1000);
+      r = await P({ ticks: [0], takeAt: 900, txMs: 2000 });
+      check('a write already on the wire at the takeover (a 2 s transaction first): saved, then one reload', kept(r));
+      r = await P({ ticks: [0], takeAt: 300, offline: [[0, 60000]], busy: [[30300, 90300]] });
+      check('offline 60 s with a tick waiting, an exit check open from 30 to 90 s: saved, one reload, not over the check', kept(r) && !r.overBusy);
+      r = await P({ ticks: [0], takeAt: 300, offline: [[0, 420000]], look: [390300] });
+      check('offline 7 minutes with a tick waiting: no reload and nothing saved at 6.5 minutes; back online, saved, then one reload',
+        r.seen && r.seen[390300] && r.seen[390300].reloads === 0 && r.seen[390300].landed === 0 && kept(r) && r.reloads[0] >= 420000);
+      r = await P({ ticks: [0], takeAt: 1200, offline: [[0, 60000]] });
+      check('offline with the write already on the wire, back at 60 s: saved, then one reload', kept(r));
+      r = await P({ ticks: [0], takeAt: 300, offline: [[0, 420000]], txFailsOffline: true, look: [390300] });
+      check('offline 7 minutes and every save fails at once (the save code gives up): no reload at 6.5 minutes; the "online" re-arm saves it; one reload',
+        r.seen && r.seen[390300] && r.seen[390300].reloads === 0 && r.seen[390300].fails > SAVE.retries && kept(r));
+      r = await P({ ticks: [0], takeAt: 300, refuse: 'always', look: [120300] });
+      check('a write refused for good while online: "Not saving" shown, no reload at 2 minutes, one reload at the 5-minute limit',
+        one(r) && r.seen[120300] && r.seen[120300].reloads === 0 && r.told.length && r.told[0] < r.reloads[0] && r.reloads[0] >= 300300 && r.reloads[0] < 310300);
+      r = await P({ ticks: [1000], takeAt: 1200, refuse: 'untilTold' });
+      check('refused while online until after "Not saving": the last try at the 5-minute limit is waited for, saved, then one reload', kept(r) && r.reloads[0] >= 301200);
+      r = await P({ takeAt: 100 });
+      check('nothing unsaved: one reload at once', one(r) && r.reloads[0] === 100);
     }
   }
 
@@ -401,26 +567,45 @@ const MUTATIONS = [
   ['answers the page\'s fill message', "self.addEventListener('install', event => {", "self.addEventListener('message', event => { event.waitUntil(caches.open('guitar-class-x')); });\nself.addEventListener('install', event => {"],
 ];
 
+/* ── deliberate breakages of the "unsaved work" branch of the start.js block: each must turn an assertion red ── */
+const PAGE_BREAKAGES = [
+  ['reloads over unsaved work (APP-CORE-3)', 'if (hasUnsavedWrites()) {', 'if (false) {'],
+  ['treats all unsaved work as given up', 'const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES && navigator.onLine !== false;', 'const gaveUp = true;'],
+  ['never gives up on a refused write', 'const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES && navigator.onLine !== false;', 'const gaveUp = false;'],
+  ['gives up offline too', 'const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES && navigator.onLine !== false;', 'const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES;'],
+  ['does not wait for the last try', 'await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);', 'flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);'],
+  ['leaves a tick in the 800 ms wait to its timer', 'if (!_flushP && !_saveFailCount && await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT)) return reload();', ''],
+];
+
 const summarise = rows => ({ total: rows.length, failed: rows.filter(r => !r[2]), scenarios: new Set(rows.map(r => r[0])).size });
 const base = summarise(await runScenarios(KILL_SRC));
 for (const [s, what] of base.failed) console.log(`  ✗ [${s}] ${what}`);
-let problems = base.failed.length, caught = 0, ran = 0;
-if (!args.includes('--no-mutations')) {
-  for (const [name, from, to] of MUTATIONS) {
-    ran++;
+let problems = base.failed.length;
+/* Plants each breakage in a copy of src and runs the scenarios on it; returns how many turned an assertion red. */
+const breakEach = async (list, src0, run, what) => {
+  let n = 0;
+  for (const [name, from, to] of list) {
     const pairs = Array.isArray(from) ? from : [[from, to]];
-    let src = KILL_SRC, bad = null;
+    let src = src0, bad = null;
     for (const [f, t] of pairs) {
-      const n = src.split(f).length - 1;
-      if (n !== 1) { bad = `its target text occurs ${n} times, expected 1: ${JSON.stringify(f.slice(0, 70))}`; break; }
+      const k = src.split(f).length - 1;
+      if (k !== 1) { bad = `its target text occurs ${k} times, expected 1: ${JSON.stringify(f.slice(0, 70))}`; break; }
       src = src.replace(f, () => t);
     }
-    if (bad) { console.log(`  ✗ mutation "${name}": ${bad} — update the proof`); problems++; continue; }
+    if (bad) { console.log(`  ✗ ${what} "${name}": ${bad} — update the proof`); problems++; continue; }
     let red;
-    try { red = summarise(await runScenarios(src)).failed; } catch (e) { red = [['throw', e.message, false]]; }
-    if (red.length) { caught++; if (VERBOSE) console.log(`  caught "${name}": ✗ [${red[0][0]}] ${red[0][1]}${red.length > 1 ? ` (+${red.length - 1} more)` : ''}`); }
-    else { console.log(`  ✗ mutation "${name}" was NOT caught: every assertion still passed on a broken kill switch`); problems++; }
+    try { red = summarise(await run(src)).failed; } catch (e) { red = [['throw', e.message, false]]; }
+    if (red.length) { n++; if (VERBOSE) console.log(`  caught "${name}": ✗ [${red[0][0]}] ${red[0][1]}${red.length > 1 ? ` (+${red.length - 1} more)` : ''}`); }
+    else { console.log(`  ✗ ${what} "${name}" was NOT caught: every assertion still passed`); problems++; }
   }
+  return n;
+};
+let caught = 0, pageCaught = 0;
+const ran = args.includes('--no-mutations') ? 0 : MUTATIONS.length, pageRan = args.includes('--no-mutations') ? 0 : PAGE_BREAKAGES.length;
+if (ran) {
+  /* A broken kill switch cannot change what the save code does: those runs leave the unsaved-work scenario out. */
+  caught = await breakEach(MUTATIONS, KILL_SRC, src => runScenarios(src, PAGE_SRC, { unsaved: false }), 'mutation');
+  pageCaught = await breakEach(PAGE_BREAKAGES, PAGE_SRC, src => runScenarios(KILL_SRC, src), 'start.js breakage');
 }
-console.log(`kill-switch-proof: ${base.total} assertions in ${base.scenarios} scenarios, ${caught} of ${ran} mutations caught${problems ? ` — ${problems} problem(s)` : ''}`);
+console.log(`kill-switch-proof: ${base.total} assertions in ${base.scenarios} scenarios, ${pageCaught} of ${pageRan} start.js breakages caught, ${caught} of ${ran} mutations caught${problems ? ` — ${problems} problem(s)` : ''}`);
 process.exit(problems ? 1 : 0);
