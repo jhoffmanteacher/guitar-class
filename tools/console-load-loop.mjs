@@ -565,7 +565,7 @@ class FakeServer {
     this.commits = []; this.events = []; this.violations = [];
     this.onRead = null; this.onCommit = null; this.onIssue = null;
   }
-  latency() { const r = this.rng(); return r < 0.85 ? 8 + Math.floor(this.rng() * 70) : 120 + Math.floor(this.rng() * 480); }
+  latency() { if (this.fixedLat) return this.fixedLat; const r = this.rng(); return r < 0.85 ? 8 + Math.floor(this.rng() * 70) : 120 + Math.floor(this.rng() * 480); }
   log(text) { this.events.push({ t: this.clock.now, text }); }
   down(kind) { const s = this.netAt(this.clock.now); return kind === 'cfg' ? !!s.cfg : kind === 'prog' ? !!s.prog : false; }
   unavailable(what) { return Object.assign(new Error('fake server: ' + what + ' is unavailable (the planned outage)'), { code: 'unavailable' }); }
@@ -636,6 +636,10 @@ class FakeServer {
     this.log(`the second console wrote config/class → v${v} (${changed.length} cells)`);
   }
   async transaction(fn, who) {
+    this.txInflight = (this.txInflight || 0) + 1;
+    try { return await this.transaction1(fn, who); } finally { this.txInflight--; }
+  }
+  async transaction1(fn, who) {
     for (let attempt = 1; attempt <= 5; attempt++) {
       if (attempt > 1) await this.clock.sleep(Math.round(BACKOFF[attempt - 1] * (0.5 + this.rng())), { kind: 'server' });
       const reads = new Map(), writes = [];
@@ -803,7 +807,7 @@ function makeConsole(W) {
   vm.runInContext('Math.random = __r; delete globalThis.__r;', Object.assign(ctx, { __r: () => rnd() }));
   doc.onScript = el => {
     const m = /^module-(\d+)\.js$/.exec(el.getAttribute('src') || '');
-    clock.add(1, () => {
+    clock.add(W.modMs || 1, () => {
       if (m && SITE.modules[m[1]]) { try { SITE.modules[m[1]].runInContext(ctx); } catch (e) { pageError('loading ' + el.getAttribute('src'), e); } if (typeof el.onload === 'function') el.onload(); }
       else if (typeof el.onerror === 'function') el.onerror(new Error('no network'));
     }, meta);
@@ -820,7 +824,7 @@ function makeConsole(W) {
     globalThis.__peek = () => ({ view: teacherView, studentsAt: teacherStudentsAt, failed: teacherRefreshFailed, refreshing: teacherRefreshing,
       timer: !!teacherAutoRefreshTimer, cfg: teacherClassConfig, v: teacherConfigVersion, ok: teacherClassConfigReadOk,
       board: activityBoardMode, screen: (typeof teacherActivityScreen === 'function' && teacherView === 'activities') ? teacherActivityScreen() : '',
-      raw: allStudentsRaw.length, drag: typeof boardDragId !== 'undefined' ? boardDragId : null });
+      raw: allStudentsRaw.length, uids: allStudents.map(s => s.uid), showArch: teacherShowArchived, drag: typeof boardDragId !== 'undefined' ? boardDragId : null });
     globalThis.__setDrag = v => { boardDragId = v; };
     globalThis.__resume = n => { swResumeNote = n; };
   `, ctx);
@@ -878,7 +882,7 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos'];
 const MIN = 60000, SEC = 1000;
 const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true } };
 const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
@@ -898,12 +902,23 @@ function genCase(seed, k, famOverride) {
   else if (fam === 'r31') { heal = 5 * MIN; boot = pickBoot(SETTINGS_VIEWS); const m = r.pick([1, 2]); slot(0, m * MIN - 15 * SEC, ST.prog); slot(m * MIN - 15 * SEC, m * MIN + 15 * SEC, ST.both); slot(m * MIN + 15 * SEC, heal, ST.prog); }
   else if (fam === 'r33') { heal = 4 * MIN; boot = pickBoot(SETTINGS_VIEWS); slot(0, heal, ST.prog); c.windowClicks = 3; }
   else if (fam === 'storm') { heal = 3 * MIN; slot(0, heal, ST[kind]); }
-  else if (fam === 'healthy') { heal = 5 * MIN; for (let t = 90 * SEC; t < heal; t += 30 * SEC) { const x = r(); slot(t, t + 30 * SEC, x < 0.35 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
+  else if (fam === 'healthy') { heal = 5 * MIN; for (let t = 90 * SEC; t < heal; t += 30 * SEC) { const x = r(); slot(t, t + 30 * SEC, x < 0.35 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } c.slots.push({ from: 60 * SEC, to: 80 * SEC, cfg: false, prog: true }); c.healthyRefresh = true; }
   else if (fam === 'empty') { heal = 0; }
   else if (fam === 'live') { heal = r.int(3, 5) * MIN; boot = 'livequiz'; slot(0, heal, ST[r.pick(['prog', 'cfg', 'both'])]); }
   else if (fam === 'detail') { heal = 4 * MIN; boot = 'activities'; slot(0, heal, ST.prog); c.windowClicks = 2; c.outageOnCommit = true; }
+  // The load window (review R4-1): a view clicked while the first load is still out (slow reads), or while the module
+  // files load (slow scripts), before the progress read has failed or landed.
+  else if (fam === 'early') { heal = 3 * MIN; c.noResume = true; boot = 'activities'; c.lat = r.int(250, 700); const b = r.int(1500, 3500); slot(0, b, ST.both); slot(b, heal, ST.prog); c.earlyView = r.pick(['activities', 'manage', 'songs', 'games', 'livequiz', 'skills', 'students']); c.earlyAt = r.int(200, 1200); if (r.chance(0.5)) c.modMs = 300; }
+  else if (fam === 'early2') { heal = 3 * MIN; c.noResume = true; boot = 'activities'; c.lat = r.int(250, 700); slot(0, heal, ST.prog); c.earlyView = r.pick(['activities', 'manage', 'songs', 'games', 'skills', 'minutes']); c.earlyAt = r.int(200, 1200); }
+  else if (fam === 'midload') { heal = 3 * MIN; c.noResume = true; boot = 'activities'; c.modMs = 300; slot(0, heal, ST.prog); c.earlyView = r.pick(['activities', 'manage', 'songs', 'games', 'trouble']); c.earlyAt = r.int(1000, 3000); }
+  else if (fam === 'summary') { heal = 3 * MIN; boot = 'activities'; slot(0, heal, ST.prog); }
+  else if (fam === 'livelist') { heal = 2 * MIN; boot = 'livequiz'; const e = r.int(5, 40) * SEC; slot(0, e, r.chance(0.5) ? ST.cfg : ST.both); slot(e, heal, r.chance(0.5) ? ST.prog : ST.ok); }
+  else if (fam === 'games2') { heal = 3 * MIN; boot = 'games'; slot(0, heal, ST.prog); }
+  // A loaded console whose settings read fails on a card's page (Refresh) and on Songs (review R1-5, the Songs guard).
+  else if (fam === 'failedread') { heal = 2 * MIN; boot = 'activities'; const e = r.int(20, 30) * SEC; slot(e, e + 25 * SEC, ST.cfg); c.failAt = e; }
+  else if (fam === 'chaos') { heal = 6 * MIN; for (let t = 0; t < heal; t += r.int(2, 20) * SEC) { const x = r(); slot(t, t + 20 * SEC, x < 0.3 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
   c.boot = boot;
-  c.bootSub = fam === 'detail' ? 'detail' : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
+  c.bootSub = (fam === 'detail' || fam === 'failedread') ? 'detail' : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
   c.heal = heal;
   // Before the heal: a teacher at work.
   const pre = Math.max(heal, 3 * MIN);
@@ -931,6 +946,31 @@ function genCase(seed, k, famOverride) {
     add(50 * SEC, 'hide'); add(54 * SEC, 'show');
     add(r.int(70, 80) * SEC, 'B', { cells: 'all' });
     add(r.int(90, 100) * SEC, 'write', {});
+  } else if (fam === 'early' || fam === 'early2' || fam === 'midload') {
+    add(c.earlyAt, 'view', { v: c.earlyView, early: true });
+    add(r.int(20, 40) * SEC, 'write', {});
+    if (r.chance(0.5)) add(r.int(5, 15) * SEC, 'B', { cells: 'mix' });
+  } else if (fam === 'summary') {
+    add(r.int(5, 10) * SEC, 'view', { v: 'skills' });
+    add(r.int(12, 20) * SEC, 'period');
+  } else if (fam === 'livelist') {
+    add(r.int(45, 60) * SEC, 'write', { prefer: 'lqg' });
+  } else if (fam === 'games2') {
+    add(r.int(5, 10) * SEC, 'write', { prefer: 'classgames', must: true });
+  } else if (fam === 'failedread') {
+    add(c.failAt + 3 * SEC, 'refresh');
+    add(c.failAt + 6 * SEC, 'B', { cells: 'all' });
+    add(c.failAt + 9 * SEC, 'write', {});
+    add(c.failAt + 12 * SEC, 'view', { v: r.pick(['songs', 'tsongs', 'livequiz']) });
+    add(c.failAt + 16 * SEC, 'write', {});
+  } else if (fam === 'chaos') {
+    for (let i = 0, n = r.int(4, 10); i < n; i++) add(tIn(3 * SEC, heal - 5 * SEC), 'view', { v: r.pick(VIEWS) });
+    for (let i = 0, n = r.int(3, 8); i < n; i++) add(tIn(3 * SEC, heal - 5 * SEC), 'write', {});
+    for (let i = 0, n = r.int(2, 6); i < n; i++) add(tIn(3 * SEC, heal - 5 * SEC), 'B', { cells: r.pick(['dates', 'mix', 'all']) });
+    for (let i = 0, n = r.int(0, 3); i < n; i++) add(tIn(3 * SEC, heal - 5 * SEC), 'sub', { what: r.pick(['board', 'list', 'pick', 'songs-detail', 'who', 'tab']) });
+    for (let i = 0, n = r.int(0, 2); i < n; i++) { const h = tIn(10 * SEC, heal - 40 * SEC); add(h, 'hide'); add(h + r.int(3, 30) * SEC, 'show'); }
+    if (r.chance(0.5)) add(tIn(10 * SEC, heal - 10 * SEC), 'refresh');
+    c.windowClicks = r.int(0, 4);
   } else if (fam === 'live') {
     add(tIn(30 * SEC, 80 * SEC), 'view', { v: r.pick(VIEWS.filter(usesRoster)) });
     add(tIn(100 * SEC, 140 * SEC), 'view', { v: 'livequiz' });
@@ -945,6 +985,8 @@ function genCase(seed, k, famOverride) {
     if (r.chance(0.4)) { const h = tIn(10 * SEC, pre - 40 * SEC); add(h, 'hide'); add(h + r.int(5, 30) * SEC, 'show'); }
     if (r.chance(0.4)) { const s = tIn(10 * SEC, pre - 100 * SEC), d = r.int(10, 90) * SEC; add(s, r.chance(0.6) ? 'type' : 'drag', { dur: d }); busyTo = Math.max(busyTo, s + d); }
     if (r.chance(0.3)) c.windowClicks = 1;
+    // healthy: a Refresh while the progress read fails on a loaded console, then a view drawn from the settings.
+    if (c.healthyRefresh) { add(65 * SEC, 'refresh'); add(68 * SEC, 'view', { v: r.pick(SETTINGS_VIEWS) }); }
   }
   // The heal and the recovery check: nothing but the second console between them.
   const healAt = Math.max(heal, ...c.events.map(e => e.t + (e.dur || 0) + SEC), 5 * SEC);
@@ -960,7 +1002,7 @@ function genCase(seed, k, famOverride) {
   for (let t = 15 * SEC; t < c.end; t += 15 * SEC) add(t, 'check');
   c.events.sort((a, b) => a.t - b.t);
   // --no-outage, the tool's self-test: the same cases on a network that never fails must all hold.
-  if (flag('--no-outage')) c.slots = [];
+  if (flag('--no-outage')) { c.slots = []; c.outageOnCommit = false; }
   c.netAt = t => { for (let i = c.slots.length - 1; i >= 0; i--) { const s = c.slots[i]; if (t >= s.from && t < s.to) return s; } return ST.ok; };
   return c;
 }
@@ -989,7 +1031,7 @@ function bPatch(r, doc, cells) {
 const WRITE_CLICK = ['[data-set-games]', '[data-open-all-through]', '[data-set-paused]', '[data-set-archived]', '[data-set-period]', '[data-set-activity-hidden]',
   '[data-set-module-hidden]', '[data-tvs-share]', '[data-set-song-place]', '[data-set-activity-optional]', '[data-set-activity-playalong]', '[data-activity-whole-class]',
   '[data-set-activity-pin]', '[data-set-activity-archived]', '[data-delete-activity]', '[data-set-activity-clear]', '[data-clear-all-blockers]', '[data-publish-activity]',
-  '[data-unassign-activity]', '[data-board-bump]', '[data-access-set]', '[data-access-decide]', '[data-access-allow-cas]', '[data-access-del]', 'button[onclick*="teacherSetClassGames"]', '[data-rename-reset]'];
+  '[data-unassign-activity]', '[data-board-bump]', '[data-access-set]', '[data-access-decide]', '[data-access-allow-cas]', '[data-access-del]', 'button[onclick*="teacherSetClassGames"]', '[data-rename-reset]', '[data-lqg-remove]', '[data-lqg-bump]', '[data-lqg-restore]'];
 const WRITE_CHANGE = ['select[data-move-activity]', 'input[data-set-activity-date]', 'select[data-set-open-through]', 'input[data-set-activity-student]', 'input[data-set-activity-keep-today]', 'input[data-board-number]'];
 const WRITE_SEL = WRITE_CLICK.concat(WRITE_CHANGE).join(', ');
 // Controls worked out from the roster (R3-2): none of them may be on screen while the roster has failed to load.
@@ -1011,6 +1053,7 @@ async function runCase(seed, k, o) {
   const clock = new VClock();
   const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0 } };
   W.server = new FakeServer({ clock, rng: makeRng(seed, k, 2), docs: seedDocs(c.empty, c.emptyKind), netAt: c.netAt });
+  W.server.fixedLat = c.lat || 0; W.modMs = c.modMs || 0;
   if (c.boot === 'livequiz' || c.fam === 'live') W.server.docs.set('liveQuiz/current', { state: 'question', quizId: 'string-id', qIndex: 0, sessionId: 'sess-1', limitSec: 20, scores: {}, mode: 'class' });
   const verbose = o.verbose;
   const say = s => { if (verbose) console.log(`  ${mmss(clock.now)} ${s}`); };
@@ -1022,6 +1065,7 @@ async function runCase(seed, k, o) {
     let s; try { s = A.ctx.__stamp(); } catch { return; }
     if (s.cfg === W.lastCopy) return;
     W.lastCopy = s.cfg;
+    if (s.ok) W.goodCopy = s.cfg;
     const rd = W.lastCfgRead; W.lastCfgRead = null;
     if (rd && rd.load && rd.ok && s.ok) { W.bgCopy = { cfg: s.cfg, v: Number(s.v) || 0, t: clock.now }; say(`the copy is now v${s.v}, from a first-load / retry read`); }
     else if (verbose) say(`the copy is now ${s.ok ? 'v' + s.v : 'the failed read ({})'}`);
@@ -1070,11 +1114,11 @@ async function runCase(seed, k, o) {
   const note = { view: c.boot };
   if (c.bootSub === 'board') note.board = true;
   if (c.bootSub === 'detail') { note.act = 'ca-1'; note.from = 'songs'; }
-  if (c.boot !== 'activities' || c.bootSub) A.ctx.__resume({ uid: 'fake-teacher-uid', teacher: true, t: note });
+  if (!c.noResume && (c.boot !== 'activities' || c.bootSub)) A.ctx.__resume({ uid: 'fake-teacher-uid', teacher: true, t: note });
   say(`case ${k}: family ${c.fam}, boots on ${c.boot}${c.bootSub ? ' (' + c.bootSub + ')' : ''}${c.empty ? ', an empty class (' + c.emptyKind + ')' : ''}; the network heals at ${mmss(c.healAt)}`);
   if (verbose) c.slots.forEach(s => console.log(`      network ${mmss(s.from)}–${mmss(s.to)}: ${stName(s)} down`));
   Promise.resolve().then(() => A.ctx.showTeacherApp({ uid: 'fake-teacher-uid', email: 'teacher@example.test', displayName: 'Teacher' })).catch(e => A.pageError('showTeacherApp', e));
-  await advanceTo(2 * SEC);
+  if (!c.noResume) await advanceTo(2 * SEC);
   let hidden = false, busy = null;
   const grid = () => A.doc.getElementById('t-grid-container');
   const app = () => A.doc.getElementById('teacher-app');
@@ -1126,6 +1170,22 @@ async function runCase(seed, k, o) {
       if (!stage) fail('R1-live', 'Live In-Class Games has no stage');
       else { if (W.stageEl && W.stageEl !== stage) fail('R1-live', 'the Live In-Class Games stage was replaced while the view stayed'); W.stageEl = stage; }
     } else W.stageEl = null;
+    // R4-1: the roster-missing lines ("did not load" / "Loading student progress") only while it is missing.
+    if (quiet && p.studentsAt && /Student progress did not load|Loading student progress/.test(text + ' ' + noteTxt)) fail('R4-1', `${p.view}${p.screen ? '/' + p.screen : ''}: a "student progress did not load / loading" line while the roster is loaded`);
+    // R3-2 / M2: the skills summary strip is roster fact too.
+    const summ = A.doc.getElementById('t-summary');
+    if (!p.studentsAt && p.view === 'skills' && summ && /\d/.test(textOf(summ)) && !(summ._style && summ._style.display === 'none')) fail('R3-2', `skills: the summary strip shows "${clip(textOf(summ), 80)}" while the roster has not loaded`);
+    // Never drawn from a failed settings read (review R4, the R1-5 and Songs guards): no write control born from one.
+    if (quiet && app()) {
+      const failedCtl = app().querySelectorAll(WRITE_SEL + ', #lq-games button').filter(el => el.isConnected && el._born && el._born.ok === false && !el.closest('#t-side'));
+      if (failedCtl.length) fail('R4-failedcopy', `${p.view}${p.screen ? '/' + p.screen : ''}: ${failedCtl.length} write control(s) drawn from a FAILED settings read are on screen (${clip([...new Set(failedCtl.map(e => ctrlInfo(e).sel))].join(', '), 120)})`);
+    }
+    // Archived students never come back after a failed read (review R4): the console's own last good list hides them.
+    if (quiet && !W.server.txInflight && p.studentsAt && !p.showArch && W.goodCopy) {
+      const arch = (p.ok ? p.cfg.archived : W.goodCopy.archived) || {};
+      const back = p.uids.filter(u => arch[u] === true);
+      if (back.length) fail('R4-archived', `${p.view}: ${back.length} archived student(s) back in the roster the views draw from (the newest settings read ${p.ok ? 'was good' : 'failed'})`);
+    }
     if (verbose && why !== 'check') say(`  screen [${p.view}${p.screen ? '/' + p.screen : ''}${p.studentsAt ? '' : rosterDown ? ', ROSTER DOWN' : ', no roster yet'}${noteEl ? ', NOTE' : ''}] ${clip(text, 110)}`);
   }
   const clickWrite = (ev) => {
@@ -1133,6 +1193,13 @@ async function runCase(seed, k, o) {
     let els = root.querySelectorAll(WRITE_SEL).filter(el => el.isConnected && !el.disabled && !el.closest('#t-side'));
     if (ev.prefer === 'date') { const d = els.filter(el => el.matches('input[data-set-activity-date], [data-publish-activity]')); if (d.length) els = d; }
     if (ev.prefer === 'hidden') { const d = els.filter(el => el.matches('[data-set-activity-hidden]')); if (d.length) els = d; }
+    if (ev.prefer === 'lqg') { const lr = A.doc.getElementById('lq-games'); const d = lr ? lr.querySelectorAll('button').filter(el => /Remove|Restore|▲|▼/.test(textOf(el))) : []; if (d.length) els = d; }
+    if (ev.prefer === 'classgames') {
+      const d = els.filter(el => el.matches('button[onclick*="teacherSetClassGames"]'));
+      // M1 (lead, 2026-11-25): during a progress outage the class games switch is still offered while the settings read is good.
+      if (ev.must && !d.length && A.peek().ok) fail('R4-games', 'the class games On / Off switch is not offered during a progress outage (the settings read is good)');
+      if (d.length) els = d;
+    }
     if (!els.length) { W.stats.noControl++; say('write click: no write control on screen'); return; }
     const el = r.pick(els), info = ctrlInfo(el);
     if (ev.window) { W.stats.windowClicks++; if (staleVsBg(el)) fail('R3-3', `a click ${ev.window ? 'right after' : 'after'} a first-load / retry read moved the copy to v${W.bgCopy.v} landed on a control drawn from an older copy (${info.sel})`); }
@@ -1208,6 +1275,7 @@ async function runCase(seed, k, o) {
         } else if (/Loading student data/.test(text)) fail('R3-1', `${p.view}: a tool view still on index.html's loading line 2 minutes after the network came back`);
         break;
       }
+      case 'period': { const pf = A.doc.querySelectorAll('[data-set-period-filter]'); const b = pf.find(x => x.getAttribute('data-period') === '4') || pf[0]; say(`click: the period filter (${pf.length} buttons)`); if (b) A.fire(b, 'click'); break; }
       case 'check': break;
     }
     await advanceTo(clock.now + 1);
@@ -1244,7 +1312,7 @@ async function runCase(seed, k, o) {
    ════════════════════════════════════════════════════════════════════════ */
 async function main() {
   const seed = Number(opt('--seed', 1));
-  const n = Number(opt('--cases', 96));
+  const n = Number(opt('--cases', 136));
   const only = opt('--case', null);
   const family = opt('--family', null);
   if (family && !FAMILIES.includes(family)) { console.error(`console-load-loop: unknown family "${family}" (${FAMILIES.join(', ')})`); process.exit(2); }
