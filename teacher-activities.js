@@ -36,9 +36,11 @@ function teacherCopyActivityLink(id, btn){
   const url = activityStudentLink(id);
   const flash = ok => {
     if(!btn) return;
-    const was = btn.textContent;
+    // The label is kept from the first click: a second click inside the 1.4 s would read "Copied" back as it.
+    if(!btn.dataset.copyLabel) btn.dataset.copyLabel = btn.textContent;
+    clearTimeout(btn._copyTimer);
     btn.textContent = ok ? 'Copied \u2713' : 'Copy failed';
-    setTimeout(() => { btn.textContent = was; }, 1400);
+    btn._copyTimer = setTimeout(() => { btn.textContent = btn.dataset.copyLabel; }, 1400);
   };
   /* navigator.clipboard needs a secure context — https or localhost, which
      covers the live site and Live Server. The prompt() fallback is for
