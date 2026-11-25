@@ -160,6 +160,9 @@ function lqgPaintList(){
   const ae = document.activeElement;
   const typing = ae && host.contains(ae) && ae.matches('[data-lqg-name]') && !lqgBusy;
   if(typing) return;
+  /* A failed settings read is {}: the list would show every game in the shipped order, removed ones back, each with
+     its buttons (review R4, M4). Opening this view again reads them again. */
+  if(!teacherClassConfigReadOk){ host.innerHTML = '<div class="t-loading">Could not read the class settings, so your games list is not shown. Open this view again to try.</div>'; return; }
   host.innerHTML = lqgListHtml(teacherClassConfig);
   if(lqgEditId){ const inp = host.querySelector('[data-lqg-name="en"]'); if(inp){ inp.focus(); inp.select(); } }
 }
