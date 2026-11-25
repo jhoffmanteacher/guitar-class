@@ -173,7 +173,8 @@ async function teacherMicChunks(d){
 async function teacherMicWavBlob(d){
   const parts = await teacherMicChunks(d);
   const len = parts.reduce((a, p) => a + p.length, 0);
-  const rate = d.sampleRate || 24000;
+  // Bounded like micEvalRow's: the WAV header is what tools/mic-sim reads the rate from.
+  const sr = Number(d.sampleRate), rate = sr >= 8000 && sr <= 192000 ? sr : 24000;
   const h = new DataView(new ArrayBuffer(44));
   const str = (o, s) => { for(let k = 0; k < s.length; k++) h.setUint8(o + k, s.charCodeAt(k)); };
   str(0, 'RIFF'); h.setUint32(4, 36 + len, true); str(8, 'WAVE');
@@ -1516,7 +1517,10 @@ function micEvalDevice(d){
 /* One take -> one row: device + game + the analysis. No names, no uid —
    this row is what leaves the teacher's machine. */
 function micEvalRow(label, d, pcm, deps){
-  const a = d.mode === 'pw' ? micEvalTakePw(pcm, d.sampleRate || 24000, d, deps) : micEvalTake(pcm, d.sampleRate || 24000, d, deps);
+  // The student's page writes sampleRate and the rules do not check it: every step size is ms * R / 1000, so a
+  // crafted R under 250 rounds a step to 0 and the evaluator never ends. Same bound as srcSampleRate (micEvalTakePw).
+  const sr = Number(d.sampleRate), R = sr >= 8000 && sr <= 192000 ? sr : 24000;
+  const a = d.mode === 'pw' ? micEvalTakePw(pcm, R, d, deps) : micEvalTake(pcm, R, d, deps);
   return Object.assign({
     take: label, period: d.period || '', savedAt: d.savedAt || null,
     game: d.mode === 'nr' ? 'Note Runner L' + ((d.level | 0) + 1) + (d.chords ? ' chords' : '') : d.mode === 'pw' ? 'Switch ' + (d.progression || '') : 'Coach ' + (d.coachMode || ''),
