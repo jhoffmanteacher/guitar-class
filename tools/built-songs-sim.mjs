@@ -38,7 +38,8 @@
                bad keys and values are skipped; a refused or failed doc read; an audio id on SONG_FILES or another
                song's with other bytes; an id already a coded track; sign-out clears; a deep link waits for the
                merge; a changed file drops the page's loaded copy; Hidden takes it off the list; a broken
-               IndexedDB; the tab-return read at most once every 15 minutes; no write anywhere
+               IndexedDB, and every connection closed (one opened after a "blocked" answer, one whose transaction
+               throws); the tab-return read at most once every 15 minutes; no write anywhere
    Made-up data only; nothing leaves the process. */
 import { readFileSync, readdirSync } from 'node:fs';
 import vm from 'node:vm';
@@ -93,6 +94,8 @@ function makeIdb(shared, opts = {}){
     open(name){
       if (opts.throws) throw new Error('blocked');
       const req = {};
+      /* blocked: another tab holds an older version; the open says "blocked" first and goes through 5 ms later. */
+      if (opts.blocked) setTimeout(() => { if (req.onblocked) req.onblocked(); }, 0);
       setTimeout(() => {
         if (opts.never) return;
         let dbs = shared.get(name), fresh = false;
@@ -100,6 +103,7 @@ function makeIdb(shared, opts = {}){
         const db = {
           createObjectStore(s, o){ if (!dbs.has(s)) dbs.set(s, { key: o.keyPath, rows: new Map() }); },
           transaction(s){
+            if (opts.txThrows) throw new Error('NotFoundError');
             const store = dbs.get(s);
             const tx = {};
             const reqs = [];
@@ -110,12 +114,13 @@ function makeIdb(shared, opts = {}){
             setTimeout(() => { if (!opts.quota && tx.oncomplete) tx.oncomplete(); }, 0);
             return tx;
           },
-          close(){},
+          close(){ opts.closed = (opts.closed || 0) + 1; },
         };
+        opts.opened = (opts.opened || 0) + 1;
         req.result = db;
         if (fresh && req.onupgradeneeded) req.onupgradeneeded();
         if (req.onsuccess) req.onsuccess();
-      }, 0);
+      }, opts.blocked ? 5 : 0);
       return req;
     },
   };
@@ -563,6 +568,13 @@ async function runCases(files){
       const t0 = Date.now(); await p.run('builtSongsSync()'); await settle();
       ok(p.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g1.id)})`), `store: ${name}: the song still merges (${Date.now() - t0} ms)`);
     }
+    /* Review R1-6 (2026-11-25): a connection nobody will use is closed (an open one blocks the next version upgrade). */
+    for (const [name, o] of [['an open answered "blocked" that goes through later', { blocked: true }], ['a transaction that throws', { txThrows: true }]]) {
+      const shared = { fs: makeFirestore(), idb: makeIdb(new Map(), o) }; publish(shared.fs, [g1]);
+      const p = makePage(files, shared); p.signIn();
+      await p.run('builtSongsSync()'); await settle(); await new Promise(r => setTimeout(r, 50));
+      ok(p.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g1.id)})`) && o.opened > 0 && o.closed === o.opened, `store: ${name}: the song still merges, and every connection is closed (${o.closed || 0} of ${o.opened || 0})`);
+    }
   }
   return { cases, fails, lines };
 }
@@ -630,6 +642,8 @@ async function main(){
       ['app/builtsongs.js', 'a repaint with no change', "if(sig === bsSig) return false;", ""],
       ['app/builtsongs.js', 'the tab-return throttle dropped', "  if(Date.now() - bsLastRead < BS_RETURN_MS) return;\n", ""],
       ['app/builtsongs.js', 'a refused read does not start the throttle\'s clock', "if(bsDenied(e)){ list = {}; denied = true; bsLastRead = Date.now(); }", "if(bsDenied(e)){ list = {}; denied = true; }"],
+      ['app/builtsongs.js', 'R1-6: a connection that opens after the answer was "none" is left open', "else if(conn){ try { conn.close(); } catch(e) {} }", ""],
+      ['app/builtsongs.js', 'R1-6: a transaction that throws leaves its connection open', "catch(e){ try { db.close(); } catch(e2) {} resolve(null); }", "catch(e){ resolve(null); }"],
       ['app/builtsongs.js', 'a deep link that never waits', "if(typeof id !== 'string' || !BS_ID_RE.test(id) || !bsPending) return false;", "return false;"],
       ['app/cards.js', 'one-file stops at the two-file rates', "const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];", "const PC_ONE_FILE_RATES = [0.8, 1, 0.9, 1];"],
       ['app/cards.js', 'a one-file card opening on the slow file', " data-slow=\"\" data-rate=\"${PC_ONE_FILE_RATES[1]}\"", " data-slow=\"1\""],

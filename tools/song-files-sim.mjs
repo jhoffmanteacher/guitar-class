@@ -17,6 +17,8 @@
                  page downloads it again; the page remembers it (sfQuotaHit, for the song help pop-up)
      clear       songFilesClearDevice (the song help pop-up's button, 2026-11-25): the saved copies are gone and the
                  next page downloads again; with no IndexedDB it answers false and does not throw
+     late        (2026-11-25, review R1-6) an IndexedDB open answering after the wait is closed; a missing piece stops
+                 the other readers
      tabs        two tabs ask for the same song at once: one download, one count, both get it; two asks in one
                  page share one download and both see progress
      limit       the month's count plus the cost exactly at the limit: allowed; one byte over: limit, nothing
@@ -94,6 +96,7 @@ function makeIdb(opts){
   const db = {
     objectStoreNames: { contains: () => true },
     createObjectStore(){ return {}; },
+    close(){ st.closed = (st.closed || 0) + 1; },
     transaction(name, mode){
       const tx = { oncomplete: null, onerror: null, onabort: null, error: null };
       let fail = null;
@@ -119,6 +122,8 @@ function makeIdb(opts){
     /* Another tab holds the database open at an older version: the open fires 'blocked' and nothing else until that
        tab lets go (here: never). */
     if (opts && opts.openBlocked) { setTimeout(() => { r.onblocked && r.onblocked(); }, 0); return r; }
+    /* Answers after the page's wait has run out (review R1-6). */
+    if (opts && opts.openLate) { setTimeout(() => { r.result = db; r.onupgradeneeded && r.onupgradeneeded(); r.onsuccess && r.onsuccess(); }, opts.openLate); return r; }
     setTimeout(() => { r.result = db; if (!opts || !opts.noUpgrade) r.onupgradeneeded && r.onupgradeneeded(); r.onsuccess && r.onsuccess(); }, 0); return r; } };
   return { indexedDB, stores, st };
 }
@@ -387,6 +392,20 @@ async function suite(src, quiet){
       const c = await Promise.race([code(tab.api.songFileLoad('x')), new Promise(r => setTimeout(() => r('hung'), 3000))]);
       ok(`IndexedDB that ${label}: the song still plays this time`, c === 'resolved', c);
     }
+  }
+  { // APP-CORE-5 (review R1-6, 2026-11-25): an open answering after the wait is closed (an open one blocks the next upgrade)
+    const s = newShared({ openLate: 120 }); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c = await code(tab.api.songFileLoad('x'));
+    await new Promise(r => setTimeout(r, 200));
+    ok('an IndexedDB open that answers after the wait: the song plays, and that late connection is closed', c === 'resolved' && s.idb.st.closed === 1, `${c}, closed ${s.idb.st.closed || 0}`);
+  }
+  { // APP-CORE-5: a missing piece: the other readers stop at their next piece instead of reading the rest
+    const s = newShared(); const B = bytesOf(8 * PIECE); putFile(s.fs, 'x', B); s.fs.docs.delete('songFiles/x/pieces/1');
+    const tab = makeTab(src, s); register(tab, 'x', B);
+    const c = await code(tab.api.songFileLoad('x'));
+    await new Promise(r => setTimeout(r, 100));
+    ok('a missing piece in an 8-piece file: not ready, and the other readers stop (fewer than 8 pieces read)', c === 'notready' && s.fs.st.pieceReads < 8, `${c}, ${s.fs.st.pieceReads} of 8 read`);
   }
   { // m5: another tab hung holding the lock: this one goes on without it
     const s = newShared(); putFile(s.fs, 'x', BIG); s.locks.hung = true;
@@ -657,8 +676,8 @@ const BREAKS = [
   ['L1: a device copy\'s size is not checked (and not re-hashed, which now covers it)', "rec.blob && rec.blob.size === entry.bytes", "rec.blob", "      if(sha !== entry.sha256) return null;\n", ''],
   ['L2: a failed load is never tried again', ".finally(() => { if(sfInflight.get(id) === j) sfInflight.delete(id); });", ".then(u => { sfInflight.delete(id); return u; });"],
   ['L3: unavailable is not read as offline', "if(c === 'unavailable') return 'offline';", ''],
-  ['L4: an IndexedDB open error, with no time limit, hangs', "    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
-  ['L4b: the open error handler gone and no time limit', "    req.onerror = () => resolve(null);       // private window, blocked storage: no copy, the song still plays this time\n", "    req.onerror = null;\n", "    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
+  ['L4: an IndexedDB open error, with no time limit, hangs', "    setTimeout(() => end(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
+  ['L4b: the open error handler gone and no time limit', "    req.onerror = () => end(null);       // private window, blocked storage: no copy, the song still plays this time\n", "    req.onerror = null;\n", "    setTimeout(() => end(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
   ['L5: a junk copy kept when the connection drops mid-download', "    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }", "    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }\n    catch(e){ if(e && e.code === 'unavailable') await sfCopyPut({ id, sha256: entry.sha256, bytes: entry.bytes, blob: new Blob([new Uint8Array(entry.bytes)]), savedAt: 0 }); throw e; }\n    try {}"],
   ['C1: the restart does not ask whether the card is still shown', "    if(songFileHostShown(host)) restart();", "    restart();"],
   ['B1: closing a fold does not cancel a wait inside it', "  if(sfWait && el && typeof el.contains === 'function' && el.contains(sfWait.host)) songFileCancelWait();", ''],
@@ -669,7 +688,9 @@ const BREAKS = [
   ['m5: no time limit on a hung lock', "      const opts = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(SONG_FILES_LOCK_WAIT_MS) } : {};", "      const opts = {};"],
   ['m6: a refused count reads as not allowed', "catch(e){ if(e && e.code === 'permission-denied') throw songFileErr('clock'); throw e; }", "catch(e){ throw e; }"],
   ['B4: a cancelled wait leaves the button on Stop', "  songFileShow(w.host, '');\n  if(w.ui && w.ui.done) try { w.ui.done(); } catch(e) {}", "  songFileShow(w.host, '');"],
-  ['plant-a-fault 33147bfb56: a "blocked" open is not answered', "    req.onblocked = () => resolve(null);\n", ''],
+  ['APP-CORE-5: a late IndexedDB connection is left open', "else if(conn){ try { conn.close(); } catch(e) {} }", ''],
+  ['APP-CORE-5: the other readers go on after a missing piece', "      while(next < n && !failed){", "      while(next < n){", "        if(failed) return;", "        if(false) return;"],
+  ['plant-a-fault 33147bfb56: a "blocked" open is not answered', "    req.onblocked = () => end(null);\n", ''],
   ['plant-a-fault 6eb5c43dc5: the loading line is not announced', "    el.setAttribute('role', 'status');\n", ''],
   ['the SHA-256 is not checked', "if(sha !== expect.sha256) throw songFileErr('bad', 'the SHA-256 is not the list\\'s');", ''],
   /* No break drops the piece-length check: a piece of the wrong length also changes the whole file's SHA-256, which
