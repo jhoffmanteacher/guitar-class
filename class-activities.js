@@ -179,8 +179,9 @@
    the tab note by note, a speed control (with `slowest: true`, which every
    card has, a four-stop slider — Slowest / Slower / Slow / Normal — whose
    only visible words are "Slower" at the left end and "Normal" at the
-   right, opening on the Slower stop; without it, a Slower / Normal
-   switch), the Metronome (a click on every counted beat, made by the
+   right; without it, a Slower / Normal switch; every card opens on Normal
+   since 2026-11-20, PC_START_NORMAL in app/cards.js, but ca-54's ladder,
+   which opens on its bottom stop), the Metronome (a click on every counted beat, made by the
    site), a Guitar switch where the track has a full mix, and a Mark
    complete button (no checklist since 2026-11-10 — Jonathan: "get rid of the
    checklists on the activities"; an extra song, `library`, has no Mark
@@ -374,8 +375,8 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-43` (ca-42 is the
-   highest used as of 2026-10-26; check the file first). Any student who
+   NOT max-in-file + 1 — the next new activity is named at the end of this
+   paragraph (check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
@@ -386,7 +387,8 @@
    (2026-11-05); `ca-50` is "Call the Chord: "the cure"" (2026-11-05);
    `ca-51` is the "Perdón Mamá" play-along card (2026-11-09);
    `ca-52` is "Strum Pattern check" (2026-11-14); `ca-53` is "Strum
-   Pattern — The Chorus" (2026-11-16); the next new activity is `ca-54`.
+   Pattern — The Chorus" (2026-11-16); `ca-54` is "Sweet Child O' Mine —
+   Speed Ladder" (2026-11-24); the next new activity is `ca-55`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -2450,7 +2452,7 @@ window.CLASS_ACTIVITIES = [
      Section map: Jonathan's chord chart (capo 1 —
      the shapes Asus2 Cmaj7 Fmaj7 Dm F C G/B are this site's no-capo A C F
      D F C G), placed on the click grid (anchor 0.570 s, 3.333 s a bar)
-     with bass/chroma readings of the mp3 — see CLAUDE.md. The bridge's
+     with bass/chroma readings of the mp3 — see skill `song-facts`. The bridge's
      last four bars (65–68) are the D F C G loop; the final chorus is
      69–80, three laps like the other two. */
   {
@@ -3650,7 +3652,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
-      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Normal (125) — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Slow (112) / Normal (125) — the student picks
       caption:    'The whole song in order · 1 pluck per bar (3 in the C D G bar of Solo 2 and the Outro, 2 in the G A bar of the Ending), let it ring',
       caption_es: 'La canción completa en orden · 1 pulsación por compás (3 en el compás de C D G del Solo 2 y del Final, 2 en el compás de G A del Cierre), déjala sonar',
       sections: [
@@ -5382,8 +5384,9 @@ window.CLASS_ACTIVITIES = [
      read off the record's bass and harmony (chroma per beat); the "D, then
      E7" bars (23, 42, 78) are one beat of D and two of E7, which is what
      the record plays on "pla-cer a fe-li-ci-", "can-ta-ron los rui-" and
-     "mú-si-ca del". Verse 2 is A, not the chord sheet's Am. Given to the
-     same individual students as ca-34 from the board's Who picker. */
+     "mú-si-ca del". Verse 2 is A, not the chord sheet's Am. Built for the
+     same individual students as ca-34 (the board's Who picker); since
+     2026-10-20 a library song, on the Songs page for everyone (`library`). */
   {
     id:    'ca-35',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -5740,7 +5743,8 @@ window.CLASS_ACTIVITIES = [
      under it. The two verses are the same 32 half bars, line for line; the
      two choruses differ where the band slows down ("a llorar"): chorus 2
      holds the IV chord (C) under "en tus brazos". The bridge is the intro's
-     chords. Given to students from the board's Who picker, like ca-35. */
+     chords. Built for students picked on the board's Who picker, like
+     ca-35; since 2026-10-20 a library song, on the Songs page for everyone. */
   {
     id:    'ca-36',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -7647,7 +7651,7 @@ window.CLASS_ACTIVITIES = [
    cards' own, by reference (the same arrays, not copies): nothing is written
    here that is not already a card, and those cards stay where they are.
    - Tab, on every card here: the card's OWN power chords written as tab, the
-     two-note shapes it plays, note by note at their own beats (renderTabSystem
+     three-note shapes it plays, note by note at their own beats (renderTabSystem
      draws a chord note as its frets). The view takes no sections: it is the
      card's own, so it cannot drift from the chords (Jonathan, 2026-11-18, W23
      question 3; until then Tab was the roots card's tab, one pluck per bar:

@@ -941,7 +941,7 @@ function caOpenLinkedCard(from, id){
      It is scheduled on the AudioContext a few ms ahead, offset by
      snipLatency() so it lands where the music is HEARD, not decoded.
    The speed control is a Slower / Normal switch (the slow and fast files),
-   starting on Slower because every card's first checks are on Slower.
+   starting on Normal since 2026-11-20 (PC_START_NORMAL, app/cards.js).
 
    A card is COMPLETE when the student presses its Mark complete button
    (caToggleComplete, like a ladder's last step). Until 2026-11-10 it had a

@@ -32,7 +32,7 @@ window.PM_HOST = {
 };
 /* This week's practice-minutes goal (2026-11-09). The teacher can set it for one week from the console; it lives in
    config/class.pmWeekGoals, which this page does not otherwise read (the gate read below is switched off). ONE get() of
-   that doc per page load, handed to the engine (PM.setWeekGoals, ../practice-minutes.js). Class data, not a student's, so
+   that doc each time sign-in resolves to a student (the auth handler below), handed to the engine (PM.setWeekGoals, ../practice-minutes.js). Class data, not a student's, so
    a student switch changes nothing here. A failed read, or no doc, leaves the engine's last known map (its localStorage copy).
    Fire and forget: nothing on this page waits for it. */
 function pmLoadWeekGoals(db){
@@ -1472,8 +1472,9 @@ window.addEventListener('load', function(){
         // very step they're on. Any other page stays gated.
         var sentHere = blockers.some(function(a){ return a.journey === SONG_ID; }) ||
           // A practice card's Level up (view:'card') points at this page only
-          // AFTER the card is marked complete — pcCheck() in app.js completes
-          // it as soon as the required checks are ticked, before the student
+          // AFTER the card is marked complete — the student's Mark complete
+          // (caToggleComplete, app/activities-2.js; until 2026-11-10 pcCheck
+          // completed it once the checks were ticked), before the student
           // has clicked Level up. So a completed card naming this song stays
           // exempt too, or an unrelated pending activity elsewhere locks the
           // very page the student was just sent to for their extra practice.

@@ -34,7 +34,8 @@
    slowest stop, after PC_BUILD_LAPS laps" above (and to the switches being on screen); it is the only card that is. Its Loop and Build switches are not shown; a round button
    (pcFromRound, app/cards.js) turns both on and starts the round, which loops the sections from..to as ONE lap (st.loopTo)
    from the round's own stop (root.dataset.round -> startStop), moving up after `card.buildLaps` laps (root.dataset.buildLaps,
-   1 there: pcBuildLaps). Stay at this speed and the take-over rule work as above. Every other card is unchanged.
+   1 there: pcBuildLaps). The take-over rule works as above; Stay at this speed is not shown (every rounds card has the
+   prompt below, and "Practice again" is its Stay). Every other card is unchanged.
    THE LADDER STOPS AND ASKS (Jonathan, 2026-11-24: "it should play once through verse at each speed. between each,
    there should be a notification ... with buttons"): a rounds card does not roll into the next stop by itself. At
    the end of ONE time through (pcFrame -> pcLadderAsk) it stops and shows the prompt under the player (.pc-ask):
