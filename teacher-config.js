@@ -418,7 +418,8 @@ function renderTeacherGames(){
         </div>
       </div>
       <div class="tg-note">“Off” hides the Games button for everyone. Use the list below to override individual students (“Default” follows the class switch). Changes take effect the next time a student loads the site.</div>`;
-    if(allStudents.length===0){ box.innerHTML=classCtl+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
+    // No roster yet (loading, or it did not load: teacher-core.js): the class switch only, and why the list is not there (review R4, M1).
+    if(allStudents.length===0){ box.innerHTML=classCtl+`<div class="t-loading">${teacherRosterMissing()?teacherRosterMissingLine():'No students yet — they’ll appear here once they sign in.'}</div>`; return; }
     const sorted=[...allStudents].sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
     const rows=sorted.map(stu=>{
       const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
