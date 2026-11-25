@@ -82,6 +82,13 @@ sight-read" → "Challenge — Mystery TAB (read it before you hear it)"**.
 Students only ever see this "second" one (`m2w2·c·sec1·step5`): the first sits
 in the switched-off Take It to a Song section. ES: "Reto — TAB misterioso (léelo antes de escucharlo)".
 
+**`w1`'s goal step label, "Write your guitar goal" → "Say your guitar goal"**
+(2026-11-25). Typed answers are switched off (`TYPED_RESPONSES_ENABLED`,
+`app/lesson.js`) and the step's text now says "Say your guitar goal out loud",
+but its label (`w1·c·sec1·step0`) is frozen by index: `rule-zero-proof.mjs`
+refused the rename on 2026-11-25. ES: "Escribe tu meta con la guitarra" → "Di tu
+meta con la guitarra".
+
 **Two keyed-MC choice wordings** (frozen by 1ap).
 - Module 2's "the TOP line represents which string?" keys "The high E
   (thinnest) string"; the site's convention is "high e".

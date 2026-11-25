@@ -40,8 +40,8 @@ SETS.push(
           },
           {
             label: 'Watch: smart practice tips', label_es: 'Mira: consejos de práctica',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. While you watch, write down the ONE practice habit she says matters most — you\'ll try it out this session. You\'ve got it when: you can name that one habit without looking back at your notes.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. Mientras miras, anota el ÚNICO hábito de práctica que ella dice que más importa — lo vas a probar en esta sesión. Lo tienes cuando: puedes nombrar ese hábito sin volver a ver tus notas.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. While you watch, listen for the ONE practice habit she says matters most — you\'ll try it out this session. You\'ve got it when: you can name that one habit out loud without looking back at the video.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. Mientras miras, escucha el ÚNICO hábito de práctica que ella dice que más importa — lo vas a probar en esta sesión. Lo tienes cuando: puedes nombrar ese hábito en voz alta sin volver a ver el video.',
             hint: 'Listen for the one habit she says helps most.',
             hint_es: 'Escucha el único hábito que dice que más ayuda.',
             response: { type: 'short', placeholder: 'In one sentence: what practice habit did she say matters most?',
@@ -188,8 +188,8 @@ SETS.push(
             steps: [
           {
             label: 'Write your guitar goal', label_es: 'Escribe tu meta con la guitarra',
-            text: 'Type your guitar goal in the box below. You\'ve got it when: you wrote a goal you can explain in one sentence.',
-            text_es: 'Escribe tu meta con la guitarra en el cuadro de abajo. Lo tienes cuando: escribiste una meta que puedes explicar en una oración.',
+            text: 'Say your guitar goal out loud. You\'ve got it when: you can explain your goal in one sentence.',
+            text_es: 'Di tu meta con la guitarra en voz alta. Lo tienes cuando: puedes explicar tu meta en una oración.',
             hint: 'It can be a song you want to play or a thing you want to learn to do.',
             hint_es: 'Puede ser una canción que quieras tocar o algo que quieras aprender a hacer.',
             skills: [1],
@@ -474,10 +474,10 @@ SETS.push(
             steps: [
           {
             label: 'Name the 6 strings', label_es: 'Nombra las 6 cuerdas',
-            text: 'Type the 6 string names from memory, low to high, in the box below. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can type all six in order without peeking at the mnemonic.<span class="step-figure"><img src="img/m1-string-names-en.svg" alt="Diagram of the six guitar strings side by side, thickest to thinnest: E, A, D, G, B, e — with one word of the mnemonic Eddie Ate Dynamite Good Bye Eddie under each string." width="640" height="244"></span>',
-            text_es: 'Escribe de memoria los nombres de las 6 cuerdas, de grave a aguda, en el cuadro de abajo. Regla mnemotécnica: Eddie Ate Dynamite, Good Bye Eddie. Lo tienes cuando: puedes escribir las seis en orden sin mirar la regla mnemotécnica.<span class="step-figure"><img src="img/m1-string-names-es.svg" alt="Diagrama de las seis cuerdas de la guitarra en orden, de la más gruesa a la más delgada: E, A, D, G, B, e — con una palabra de la regla mnemotécnica Eddie Ate Dynamite Good Bye Eddie bajo cada cuerda." width="640" height="244"></span>',
-            stuck: 'Type just the first letters — E A D G B E — using "Eddie Ate Dynamite, Good Bye Eddie." Clear it, then type them again from memory.',
-            stuck_es: 'Escribe solo las primeras letras — E A D G B E — usando "Eddie Ate Dynamite, Good Bye Eddie". Bórralo, y luego escríbelas otra vez de memoria.',
+            text: 'Say the 6 string names from memory, low to high, out loud. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can say all six in order without peeking at the mnemonic.<span class="step-figure"><img src="img/m1-string-names-en.svg" alt="Diagram of the six guitar strings side by side, thickest to thinnest: E, A, D, G, B, e — with one word of the mnemonic Eddie Ate Dynamite Good Bye Eddie under each string." width="640" height="244"></span>',
+            text_es: 'Di de memoria los nombres de las 6 cuerdas, de grave a aguda, en voz alta. Regla mnemotécnica: Eddie Ate Dynamite, Good Bye Eddie. Lo tienes cuando: puedes decir las seis en orden sin mirar la regla mnemotécnica.<span class="step-figure"><img src="img/m1-string-names-es.svg" alt="Diagrama de las seis cuerdas de la guitarra en orden, de la más gruesa a la más delgada: E, A, D, G, B, e — con una palabra de la regla mnemotécnica Eddie Ate Dynamite Good Bye Eddie bajo cada cuerda." width="640" height="244"></span>',
+            stuck: 'Say just the first letters — E A D G B E — using "Eddie Ate Dynamite, Good Bye Eddie." Look away, then say them again from memory.',
+            stuck_es: 'Di solo las primeras letras — E A D G B E — usando "Eddie Ate Dynamite, Good Bye Eddie". Mira hacia otro lado, y luego dilas otra vez de memoria.',
             levelUp: 'Say the six string names high to low (e B G D A E) without pausing.',
             levelUp_es: 'Di los seis nombres de las cuerdas de aguda a grave (e B G D A E) sin pausar.',
             response: { type: 'short', placeholder: 'The 6 strings, low to high: …',

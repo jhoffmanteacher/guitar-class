@@ -403,8 +403,8 @@ SETS.push(
             steps: [
           {
             label: 'Listen: "Let It Be"', label_es: 'Escucha: "Let It Be"',
-            text: 'Listen to <a href="https://www.youtube.com/watch?v=CGj85pVzRJs" target="_blank">"Let It Be" by The Beatles</a>.<ol><li>Find the C–G–Am–F chord pattern at the start of the verse.</li><li>Count the beats each chord lasts.</li><li>Type your count below.</li></ol>',
-            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=CGj85pVzRJs" target="_blank">"Let It Be" de The Beatles</a>.<ol><li>Encuentra el patrón de acordes C–G–Am–F al principio de la estrofa.</li><li>Cuenta los tiempos que dura cada acorde.</li><li>Escribe tu cuenta abajo.</li></ol>',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=CGj85pVzRJs" target="_blank">"Let It Be" by The Beatles</a>.<ol><li>Find the C–G–Am–F chord pattern at the start of the verse.</li><li>Count the beats each chord lasts.</li><li>Say your count out loud.</li></ol>',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=CGj85pVzRJs" target="_blank">"Let It Be" de The Beatles</a>.<ol><li>Encuentra el patrón de acordes C–G–Am–F al principio de la estrofa.</li><li>Cuenta los tiempos que dura cada acorde.</li><li>Di tu cuenta en voz alta.</li></ol>',
             hint: 'You do not play yet. Tap each time the chord changes.',
             hint_es: 'Todavía no tocas. Da un golpecito cada vez que cambia el acorde.',
             skills: [5],
@@ -1040,8 +1040,8 @@ SETS.push(
             steps: [
           {
             label: 'Listen: "Luna"', label_es: 'Escucha: "Luna"',
-            text: 'Listen to <a href="https://www.youtube.com/watch?v=LExSwglVFIw" target="_blank">"Luna" by Peso Pluma & Junior H</a>. The song uses two chords, F and Am. Dm comes in once, in the opening lines.<ol><li>Tap only the strong beats. There are two in each bar.</li><li>Listen for each chord change. It lands on a strong beat.</li><li>Below, describe one moment when you heard a chord change.</li></ol>',
-            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=LExSwglVFIw" target="_blank">"Luna" de Peso Pluma y Junior H</a>. La canción usa dos acordes, F y Am. Dm aparece una vez, en las primeras líneas.<ol><li>Marca solo los tiempos fuertes. Hay dos en cada compás.</li><li>Escucha cada cambio de acorde. Cae en un tiempo fuerte.</li><li>Abajo, describe un momento en que oíste un cambio de acorde.</li></ol>',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=LExSwglVFIw" target="_blank">"Luna" by Peso Pluma & Junior H</a>. The song uses two chords, F and Am. Dm comes in once, in the opening lines.<ol><li>Tap only the strong beats. There are two in each bar.</li><li>Listen for each chord change. It lands on a strong beat.</li><li>Out loud, describe one moment when you heard a chord change.</li></ol>',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=LExSwglVFIw" target="_blank">"Luna" de Peso Pluma y Junior H</a>. La canción usa dos acordes, F y Am. Dm aparece una vez, en las primeras líneas.<ol><li>Marca solo los tiempos fuertes. Hay dos en cada compás.</li><li>Escucha cada cambio de acorde. Cae en un tiempo fuerte.</li><li>En voz alta, describe un momento en que oíste un cambio de acorde.</li></ol>',
             hint: 'You know Am from Set 1 and F from Set 2.',
             hint_es: 'Conoces Am de la Unidad 1 y F de la Unidad 2.',
             skills: [6],
@@ -1423,8 +1423,8 @@ SETS.push(
             steps: [
           {
             label: 'Map your song\'s chords', label_es: 'Ubica los acordes de tu canción',
-            text: '<ol><li>Find a chord chart for a song you are working on.</li><li>List the chord groups the song uses.</li><li>Below, name the song and the chord change that is hardest for you.</li></ol>',
-            text_es: '<ol><li>Busca un diagrama de acordes de una canción en la que estás trabajando.</li><li>Haz una lista de los grupos de acordes que usa la canción.</li><li>Abajo, nombra la canción y el cambio de acorde que más te cuesta.</li></ol>',
+            text: '<ol><li>Find a chord chart for a song you are working on.</li><li>List the chord groups the song uses.</li><li>Out loud, name the song and the chord change that is hardest for you.</li></ol>',
+            text_es: '<ol><li>Busca un diagrama de acordes de una canción en la que estás trabajando.</li><li>Haz una lista de los grupos de acordes que usa la canción.</li><li>En voz alta, nombra la canción y el cambio de acorde que más te cuesta.</li></ol>',
             hint: 'Spend most of your practice time on that hardest change.',
             hint_es: 'Pasa la mayor parte de tu tiempo de práctica en ese cambio más difícil.',
             skills: [4, 5, 6],
@@ -1433,8 +1433,8 @@ SETS.push(
           },
           {
             label: 'Revisit your Module 1 goal', label_es: 'Vuelve a tu meta del Módulo 1',
-            text: '<ol><li>If you typed a goal in Module 1, Set 1, read it. If not, go on to step 2.</li><li>Below, write one thing you can play now that you could not play when you started this class.</li><li>Write one thing you want to play by the end of Module 4.</li></ol>',
-            text_es: '<ol><li>Si escribiste una meta en el Módulo 1, Unidad 1, léela. Si no, pasa al paso 2.</li><li>Abajo, escribe una cosa que puedes tocar ahora y que no podías tocar cuando empezaste esta clase.</li><li>Escribe una cosa que quieres tocar para el final del Módulo 4.</li></ol>',
+            text: '<ol><li>If you set a goal in Module 1, Set 1, say it again. If not, go on to step 2.</li><li>Out loud, name one thing you can play now that you could not play when you started this class.</li><li>Name one thing you want to play by the end of Module 4.</li></ol>',
+            text_es: '<ol><li>Si pusiste una meta en el Módulo 1, Unidad 1, dila otra vez. Si no, pasa al paso 2.</li><li>En voz alta, nombra una cosa que puedes tocar ahora y que no podías tocar cuando empezaste esta clase.</li><li>Nombra una cosa que quieres tocar para el final del Módulo 4.</li></ol>',
             hint: 'Name a song or a chord change, for example: "I can switch C to G without stopping."',
             hint_es: 'Nombra una canción o un cambio de acorde, por ejemplo: "puedo cambiar de C a G sin detenerme".',
             skills: [5],

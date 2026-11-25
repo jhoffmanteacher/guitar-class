@@ -158,14 +158,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — C and G Chord Families', label_es: 'Reto 1 — Familias de acordes de C y G',
-                text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family\'s chords in order.</li></ol>You\'ve got it when: you play the six chords of each family in order, twice in a row, without stopping to find a chord.',
-                text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca los acordes de cada familia en orden.</li></ol>Lo tienes cuando: tocas los seis acordes de cada familia en orden, dos veces seguidas, sin detenerte a buscar un acorde.',
+                text: '<ol><li>Say the chord families of C major and G major out loud (six chords each).</li><li>Play each family\'s chords in order.</li></ol>You\'ve got it when: you play the six chords of each family in order, twice in a row, without stopping to find a chord.',
+                text_es: '<ol><li>Di en voz alta las familias de acordes de C mayor y G mayor (seis acordes cada una).</li><li>Toca los acordes de cada familia en orden.</li></ol>Lo tienes cuando: tocas los seis acordes de cada familia en orden, dos veces seguidas, sin detenerte a buscar un acorde.',
                 hint: 'Build a triad on each scale note: major-minor-minor-major-major-minor.',
                 hint_es: 'Construye una tríada en cada nota de la escala: mayor-menor-menor-mayor-mayor-menor.',
                 stuck: 'Just play the C family first and get it solid before adding G.',
                 stuck_es: 'Toca primero solo la familia de C y déjala firme antes de agregar G.',
-                levelUp: 'Play both families back to back without looking at what you wrote.',
-                levelUp_es: 'Toca ambas familias una tras otra sin mirar lo que escribiste.',
+                levelUp: 'Play both families back to back from memory.',
+                levelUp_es: 'Toca ambas familias una tras otra de memoria.',
                 skills: [4, 5],
                 response: { type: 'short', placeholder: 'C: … · G: …', placeholder_es: 'C: … · G: …' },
                 chords: [
@@ -467,8 +467,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Which Chord Feels Like Home? Am–G–F', label_es: 'Reto 2 — ¿Cuál acorde se siente como base? Am–G–F',
-                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>You\'ve got it when: you play the loop three times in a row and pick Am as home every time.',
-                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>Lo tienes cuando: tocas el loop tres veces seguidas y eliges Am como base cada vez.',
+                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say which one feels most like "home."</li></ol>You\'ve got it when: you play the loop three times in a row and pick Am as home every time.',
+                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di cuál se siente más como "base."</li></ol>Lo tienes cuando: tocas el loop tres veces seguidas y eliges Am como base cada vez.',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',
                 hint_es: 'Toca el loop unas cuantas veces primero — la base solo se revela una vez que puedes escuchar la forma completa de la progresión.',
                 stuck: 'Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished."',

@@ -89,8 +89,8 @@ SETS.push(
             steps: [
           {
             label: 'Listen: "Dust in the Wind"', label_es: 'Escucha: "Dust in the Wind"',
-            text: 'Listen to <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" by Kansas</a>. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
-            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" de Kansas</a>. Pon atención al patrón de punteo — puedes escuchar claramente el bajo alternante (pulgar) debajo de la melodía (dedos).',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" by Kansas</a>. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers). Then say out loud what you hear the thumb doing and what you hear the fingers doing.',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" de Kansas</a>. Pon atención al patrón de punteo — puedes escuchar claramente el bajo alternante (pulgar) debajo de la melodía (dedos). Luego di en voz alta qué escuchas que hace el pulgar y qué escuchas que hacen los dedos.',
             hint: 'This song is the classic example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
             hint_es: 'Esta canción es el ejemplo clásico de fingerpicking. El bajo se mueve en cada tiempo, los dedos tocan entre los tiempos.',
             skills: [4, 5],
@@ -358,8 +358,8 @@ SETS.push(
           },
           {
             label: 'Watch: pluck patterns and walkdowns', label_es: 'Mira: patrones de pulsación y walkdowns',
-            text: 'Watch: <a href="https://youtu.be/AFyqe-rfxTU" target="_blank">Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman</a> — a fingerpicking specialist\'s take on the same skill as Set 1\'s videos. Mute the strings with your fretting hand and tap the FINGER ORDER on the guitar top as she plays.',
-            text_es: 'Mira: <a href="https://youtu.be/AFyqe-rfxTU" target="_blank">Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman</a> — el enfoque de una especialista en fingerpicking sobre la misma destreza de los videos de la Unidad 1. Silencia las cuerdas con tu mano de trastear y marca el ORDEN DE LOS DEDOS en la tapa de la guitarra mientras ella toca.',
+            text: 'Watch: <a href="https://youtu.be/AFyqe-rfxTU" target="_blank">Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman</a> — a fingerpicking specialist\'s take on the same skill as Set 1\'s videos. Mute the strings with your fretting hand and tap the FINGER ORDER on the guitar top as she plays. Then say out loud one thing Lauren showed or explained that Set 1\'s videos didn\'t.',
+            text_es: 'Mira: <a href="https://youtu.be/AFyqe-rfxTU" target="_blank">Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman</a> — el enfoque de una especialista en fingerpicking sobre la misma destreza de los videos de la Unidad 1. Silencia las cuerdas con tu mano de trastear y marca el ORDEN DE LOS DEDOS en la tapa de la guitarra mientras ella toca. Luego di en voz alta una cosa que Lauren mostró o explicó que los videos de la Unidad 1 no mostraron.',
             hint: 'Tap the finger order until you can do it without thinking. Then speed up.',
             hint_es: 'Marca el orden de los dedos hasta que puedas hacerlo sin pensar. Luego acelera.',
             skills: [3, 4],

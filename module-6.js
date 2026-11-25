@@ -828,8 +828,8 @@ SETS.push(
             steps: [
           {
             label: 'Compare: reggae vs. rock', label_es: 'Compara: reggae vs. rock',
-            text: 'Listen to <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a>, a reggae song, and <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a>, a rock song. They are about the same speed. Listen for how the strums are different. Then answer the question below.',
-            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a>, una canción de reggae, y <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a>, una canción de rock. Tienen una velocidad parecida. Escucha en qué se diferencian los rasgueos. Luego responde la pregunta de abajo.',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a>, a reggae song, and <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a>, a rock song. They are about the same speed. Listen for how the strums are different. Then say out loud, in one sentence, the biggest difference between the reggae strum and the rock strum.',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a>, una canción de reggae, y <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a>, una canción de rock. Tienen una velocidad parecida. Escucha en qué se diferencian los rasgueos. Luego di en voz alta, en una oración, la mayor diferencia entre el rasgueo de reggae y el de rock.',
             hint: 'Listen for which counts the guitar hits: the numbers or the "+".',
             hint_es: 'Escucha en qué tiempos toca la guitarra: en los números o en el "+".',
             skills: [2, 3],
