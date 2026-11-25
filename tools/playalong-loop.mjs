@@ -2135,6 +2135,13 @@ async function main() {
     else if (pin !== clockPin(tr)) dataIssues.push(`track ${k}: its clock (anchor, barTimes, tempos or count) is not the one last confirmed by ear. The tool cannot hear whether the new numbers fit the record: re-measure, listen, then update the pin (--pins)`);
     if (Array.isArray(tr.barTimes) && tr.barTimes[0] !== tr.anchor) dataIssues.push(`track ${k}: barTimes[0] is ${tr.barTimes[0]} and anchor is ${tr.anchor}`);
   }
+  /* A speed ladder (a card with `card.rounds`, ca-54) stops and asks after each time through, so the ordinary walks
+     (play to the end, lap, switch mid-song) do not describe it: it reported 63 false mismatches (2026-11-25). Its own
+     tool plays it in a real browser: tools/speed-ladder-loop.mjs; checks.mjs 1fc pins its stops. */
+  const ladders = consts.cards.filter(a => a.card.rounds).map(a => a.id);
+  consts.cards = consts.cards.filter(a => !a.card.rounds);
+  if (ladders.length) console.log(`playalong-loop: ${ladders.length} speed-ladder card(s) not walked here (${ladders.join(', ')}): node tools/speed-ladder-loop.mjs plays them`);
+  if (ONLY && ONLY.some(id => ladders.includes(id))) { console.error('playalong-loop: a speed-ladder card is walked by tools/speed-ladder-loop.mjs, not here'); return 2; }
   const cards = consts.cards.filter(a => !ONLY || ONLY.includes(a.id));
   if (ONLY) for (const id of ONLY) if (!cards.some(a => a.id === id)) { console.error(`playalong-loop: no practice card "${id}"${id.startsWith('sb-') ? ` (the built ids: ${[...builtIds].join(', ')}; one the page refused is not merged)` : ''}`); return 2; }
   const allViews = [];
