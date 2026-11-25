@@ -689,7 +689,7 @@ SETS.push(
             title_es: 'Prueba a transponer un patrón',
             steps: [
               {
-                label: 'Move box 1 up two frets', label_es: 'Mueve la caja 1 dos trastes',
+                label: 'Move box 1 up two frets', label_es: 'Mueve la caja 1 dos trastes hacia arriba',
                 text: 'Take minor pentatonic box 1 and move it up two frets from wherever you\'re starting. Say out loud what key it\'s in now before you check.',
                 text_es: 'Toma la caja 1 de pentatónica menor y muévela dos trastes hacia arriba desde donde estés empezando. Di en voz alta en qué tonalidad está ahora antes de comprobarlo.',
                 hint: 'As you move the box, check what changes: the fret you start on, the shape of the box, or both?',
