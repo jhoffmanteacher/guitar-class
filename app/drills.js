@@ -1126,28 +1126,39 @@ function erStopAll(){
   Object.keys(earDrills).forEach(erStop);
 }
 /* sdAbortAll()'s twin for the Card Deck and Ear Spark drills, called from
-   the same three exits (set switch, tab switch, closing In-Class
-   Activities). A round left in phase 'run' in a hidden panel reads as
-   "busy" to progressLoadRetryBusy() (app/save.js) and to the update
-   reload (app/start.js), so both waited on a round nobody could see; and
-   an Ear round's queued notes played on over the next set. Stop the notes
-   and put a mid-round drill back on its setup screen. */
-function dkErAbortAll(){
+   the ways out of where a round sits: a set switch and a tab switch (the
+   set panels only), In-Class Activities opening over a set (the set panels
+   only), closing In-Class Activities (all), and a card closed by its title
+   or by "All activities" (that card only). A round left in phase 'run' out
+   of sight reads as "busy" to progressLoadRetryBusy() (app/save.js) and to
+   the update reload (app/start.js), so both waited on a round nobody could
+   see; and an Ear round's queued notes played on over the next set. Stop the
+   notes and put a mid-round drill back on its setup screen. A note already
+   sounding rings out (playNote's own decay, up to about 3 s).
+   scope (optional): only the rounds whose box is inside it. An element (the
+   card that is closing), or a selector: '.week-panel' keeps a set switch from
+   resetting a round on In-Class Activities (showApp's boot-time activateSet
+   runs after the student may have started one). Under a selector, a round
+   whose box is no longer on the page counts as inside: nobody can see it. */
+function dkErAbortAll(scope){
+  const inScope = box => !scope || (typeof scope === 'string' ? !box || !!box.closest(scope) : !!box && scope.contains(box));
   Object.keys(deckDrills).forEach(k => {
     const st = deckDrills[k];
     if(!st || st.phase !== 'run') return;
-    st.phase = 'setup';
     const box = dkBox(k);
+    if(!inScope(box)) return;
+    st.phase = 'setup';
     if(box) box.innerHTML = dkSetupHtml(k);
   });
   Object.keys(earDrills).forEach(k => {
-    erStop(k);
     const st = earDrills[k];
     if(!st) return;
+    const box = erBox(k);
+    if(!inScope(box)) return;
+    erStop(k);
     st.timeouts = [];
     if(st.phase !== 'run') return;
     st.phase = 'setup';
-    const box = erBox(k);
     if(box) box.innerHTML = erSetupHtml(k);
   });
 }

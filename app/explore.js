@@ -1331,6 +1331,9 @@ function openClassActivitiesScreen(focusId){
   if(!screen) return;
   if(screen.hasAttribute('hidden')){
     closeTopPanels('class-activities');
+    /* The set underneath goes out of sight: its Card Deck or Ear Spark round goes back to Start, as on a set switch
+       (the set panels only, dkErAbortAll in app/drills.js). */
+    if(typeof dkErAbortAll === 'function') dkErAbortAll('.week-panel');
     screen.removeAttribute('hidden');
     syncExploreNav();
     const exit = screen.querySelector('.page-exit, .page-title');

@@ -336,6 +336,10 @@ function printActivity(ev, id){
 // renderer doesn't have to pull in station-card CSS classes for one icon.
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 function caOnToggle(details){
+  /* A Card Deck or Ear Spark round in a card that closes goes back to its Start screen (dkErAbortAll, app/drills.js),
+     before any branch below re-renders the list: out of sight, a round left in 'run' holds the update reload and the
+     sign-in read's retry. */
+  if(!details.open && typeof dkErAbortAll === 'function') dkErAbortAll(details);
   /* Closing a Level up's target that sits in its card's slot puts that card
      back, open, where the student left it (caCardLinkHtml). */
   if(!details.open && caSwap && details.dataset.id === caSwap.to && caOpenId === caSwap.to){
@@ -673,6 +677,9 @@ function caCloseOpen(){
   // note above caFullscreenNow). fullscreenchange then redraws the bar.
   if(caFullscreenNow()){ try { document.exitFullscreen().catch(() => {}); } catch(e) { /* nothing to leave */ } }
   const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
+  /* Its Card Deck or Ear Spark round now, while the card is still on the page: caOnToggle's own call comes after the
+     re-render below has replaced it. */
+  if(card && typeof dkErAbortAll === 'function') dkErAbortAll(card);
   if(card) card.open = false;
   /* A Level up's card swapped into another card's slot (caSwap) needs the
      list re-rendered to put the `from` card back. caOnToggle would do that,
@@ -1346,7 +1353,11 @@ document.addEventListener('visibilitychange', () => {
     if(typeof chcStopAll === 'function') chcStopAll();
     /* Name the power chord is not stopped here (Jonathan, 2026-11-09): it has no
        clock, no sound and no mic, so a student who looks something up in another
-       tab comes back to the same card and score. A hit's move-on timer just fires. */
+       tab comes back to the same card and score. A hit's move-on timer just fires.
+       A Card Deck round is the same kind (no clock, sound or mic) and is left as is.
+       An Ear Spark round's queued notes stop (they would play to a hidden tab); the
+       round stays dealt, and its Play again button plays them from the start. */
+    if(typeof erStopAll === 'function') erStopAll();
     flushOnHide();
     return;
   }
