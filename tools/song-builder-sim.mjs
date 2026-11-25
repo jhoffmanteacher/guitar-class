@@ -3043,6 +3043,30 @@ async function r1Cases(consoleSrc, check){
     check('R1-5 P14: a re-read that lands while the Beat step reads the beats (its first 30 ms) does not lose the drift check measured then: it is saved, on this copy',
       order.swapped && order.measuring && Number.isFinite(b.driftOff) && b.driftFor === run('sbDraft().audio.sha256'), JSON.stringify(Object.assign(order, { driftOff: b.driftOff, driftFor: String(b.driftFor).slice(0, 8) })));
   }
+  /* SB-7's note: the Beat step sets a grid exactly when the validator's bpm rule takes the song it makes (the song's bpm is
+     the grid's, rounded: a typed 260 can fit to more, and a pin or a moved bar 1 changes it). Grids near both bounds,
+     with a pin (the pins give the tempo) and without (beat.bpm, rounded to 4 places first). */
+  {
+    const C = await draft(), { run } = C;
+    run(chart4); await settle(200); await waitSaves();
+    run('sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3;');
+    const targets = [29.9994, 29.9995, 29.9996, 30, 30.0004, 120, 259.9996, 260, 260.0004, 260.00049, 260.0005, 260.0006, 260.001, 260.3];
+    let n = 0, agree = 0, took = 0, refused = 0, line = '';
+    const off = [];
+    for(const bpm of targets) for(const pin of [false, true]){
+      const beat = `{ meter: '4/4', bpm: ${bpm}, anchor: 1, pins: ${pin ? `[{ bar: 9, t: ${1 + 8 * 240 / bpm} }]` : '[]'}, driftOff: 0 }`;
+      run(`sbNote = ''; sbDraft().beat = null; sbBeatSet(sbDraft(), ${beat}, null);`);
+      const set = run('!!sbDraft().beat');
+      if(!set && !line) line = run('sbNote');
+      run(`(() => { const d = sbDraft(), b = ${beat}; b.bpm = Math.round(sbPinBpm(b) * 10000) / 10000; d.beat = b; })()`);
+      const bpmBad = run('builtSongCheck(sbSel, sbDocOf(sbDraft()))').some(w => /^bpm/.test(w));
+      n++; if(set === !bpmBad) agree++; else off.push(`${bpm}${pin ? ' pin' : ''}: set ${set}, validator ${bpmBad ? 'refuses' : 'takes'}`);
+      if(set) took++; else refused++;
+    }
+    run("sbDraft().beat = { meter: '4/4', bpm: 120, anchor: 1, pins: [], driftOff: 0 };"); await waitSaves();
+    check(`SB-7 grid: the Beat step sets a grid exactly when the validator's bpm rule takes the song it makes (${agree} of ${n} grids near 30 and 260, with a pin and without; ${took} set, ${refused} refused), and a refusal says the rule`,
+      agree === n && took > 0 && refused > 0 && /makes [\d.]+ BPM\. A BPM from 30 to 260/.test(line) && /count it in two/.test(line), JSON.stringify({ off, line }));
+  }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('r1: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
     !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));

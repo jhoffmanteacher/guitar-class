@@ -425,7 +425,7 @@ function sbSongOf(d){
     if(c && c.full && bsChordName(n).q === '5') c.full = sbPowerShapeFor(n, c.full, ch.powerAt);
   });
   /* An imported song's beat (beat.fromImport) is kept exactly: its bpm unrounded and its own bar times. */
-  const song = { meter: beat.meter, bpm: beat.fromImport ? beat.bpm : Math.round(sbPinBpm(beat) * 1000) / 1000, anchor: beat.anchor, chords, bars, sections,
+  const song = { meter: beat.meter, bpm: beat.fromImport ? beat.bpm : sbSongBpm(beat), anchor: beat.anchor, chords, bars, sections,
     level: lv.versions === 'both' ? { versions: 'both', start: lv.start === 'power' ? 'power' : 'full' } : { versions: lv.versions === 'power' ? 'power' : 'full' } };
   const bt = beat.fromImport && Array.isArray(beat.barTimes) ? beat.barTimes.slice() : sbBarTimes(beat, bars.length);
   if(bt) song.barTimes = bt;

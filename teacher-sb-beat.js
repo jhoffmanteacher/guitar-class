@@ -309,18 +309,25 @@ function sbBeatFromBpm(bpm0, fit){
   const d = sbDraft(), lv = sbMem.level, bt = sbBtFor(sbSel);
   if(!d || !lv || !lv.E || sbBusy) return;
   /* The validator's own bounds (builtSongCheck, app/builtsongs.js: 30 to 260; SB-7): a faster grid could not be published. */
-  if(!(bpm0 >= 30 && bpm0 <= 260)){ sbNote = 'A BPM from 30 to 260, please. A faster song: count it in two (half the BPM).'; teacherSbPaint(); return; }
+  if(!sbBpmOk(bpm0)){ sbNote = SB_BPM_WHY; teacherSbPaint(); return; }
   const meter = (d.beat && d.beat.meter) || bt.meter || '4/4';
   const g = sbAutoGrid(lv.E, lv.mono, lv.fs, d.audio.durationSec, meter, bpm0, fit ? bt.taps : null);
   const beat = Object.assign({}, g.beat, { trackBpm: lv.E.track.bpm, trackSub: lv.E.track.sub,
     tapBpm: fit ? Math.round(fit.bpm * 100) / 100 : null, taps: fit ? fit.n : 0, tapSpreadMs: fit ? Math.round(fit.spreadMs) : null });
   sbBeatSet(d, beat, `The grid: ${sbPinBpm(beat).toFixed(2)} BPM, bar 1 at ${sbFmtT(beat.anchor)}. Check it with Listen with clicks.`);
 }
+/* The BPM a built song may have (builtSongCheck's bpm rule), and the song's BPM a grid makes (sbSongOf rounds it so). */
+const SB_BPM_WHY = 'A BPM from 30 to 260, please. A faster song: count it in two (half the BPM).';
+function sbBpmOk(bpm){ return bpm >= 30 && bpm <= 260; }
+function sbSongBpm(beat){ return Math.round(sbPinBpm(beat) * 1000) / 1000; }
 /* Sets the beat, measures the drift windows, saves the draft (once things settle: 1.2 s after the last change; the
-   save is the draft's, sbSaveSoon in teacher-sb-core.js, SB-1). */
+   save is the draft's, sbSaveSoon in teacher-sb-core.js, SB-1). A grid whose song BPM the validator would refuse is not
+   set (SB-7, review note: a typed 260 can fit to 260.3, and a pin or a moved bar 1 changes it too), with the typed BPM's
+   line, so Level never refuses a BPM the Beat step took. */
 function sbBeatSet(d, beat, note, now){
   const lv = sbMem.level, bt = sbBtFor(sbSel);
   beat.bpm = Math.round(sbPinBpm(beat) * 10000) / 10000;
+  if(!sbBpmOk(sbSongBpm(beat))){ sbNote = `This grid makes ${sbSongBpm(beat)} BPM. ` + SB_BPM_WHY; teacherSbPaint(); return; }
   bt.drift = sbDrift(lv.E, beat, d.audio.durationSec);
   beat.driftOff = bt.drift.filter(w => w.sure && !w.pinned && Math.abs(w.ms) > SB_DRIFT_MS).length;
   beat.driftFor = d.audio.sha256;            // review R1-6: the copy the windows were measured on
