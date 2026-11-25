@@ -7344,12 +7344,15 @@ function checkTitleHeadings() {
       const parts = { caNewestModNum: /function caNewestModNum\([^)]*\)\{[\s\S]*?\n\}/.exec(a2), caOnModFoldToggle: /function caOnModFoldToggle\([^)]*\)\{[\s\S]*?\n\}/.exec(a2),
         caFinishedGroupHtml: /function caFinishedGroupHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2), headHtml: /function headHtml\(sec\)\{[\s\S]*?\n\s*\}/.exec(a2),
         "the Unfinished fold's call site (const restNewest … const body …)": /const restNewest = [^\n]*\n(?:\s*const grid = [^\n]*\n)?\s*const body = restGroups\.some\([\s\S]*?\n\s*: (?:restFlat\.map\(|grid\(restFlat\))[^\n]*;\n/.exec(a2) };
-      const lost = Object.keys(parts).filter(k => !parts[k]);
+      /* Every card on the page goes through caCardOut (app/activities.js, 2026-11-25: it notes how the open card
+         was built, for caRedrawOpenCard); the real one runs here, with no render recording (caOpenRec null). */
+      const cardOut = /function caCardOut\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
+      const lost = Object.keys(parts).filter(k => !parts[k]).concat(cardOut ? [] : ['caCardOut']);
       if (lost.length) flag(`could not find ${lost.join(', ')}: which module fold starts open is NOT checked`);
       else {
         const order = [3, 5, 4];
         const groups = [...order.map(n => ({ sec: { mod: { num: n, name: 'M' + n }, ids: ['a' + n, 'b' + n] }, cards: [{ id: 'a' + n }, { id: 'b' + n }] })), { sec: { mod: null, ids: ['u1'] }, cards: [{ id: 'u1' }] }];
-        const prelude = `${Object.values(parts).slice(0, 4).map(m => m[0]).join('\n')}\n${fold[0]}\n${doneHead[0]}
+        const prelude = `${Object.values(parts).slice(0, 4).map(m => m[0]).join('\n')}\n${fold[0]}\n${doneHead[0]}\n${cardOut[0]}
           function __todoBody(restGroups, restFlat, swapIn, swap){ ${Object.values(parts)[4][0]}\n return body; }
           var __groups = ${J(groups)}, __byId = { z: { id: 'z' } }; __groups.forEach(g => g.cards.forEach(a => { __byId[a.id] = a; }));
           function __render(foldName, swap){
@@ -7374,7 +7377,7 @@ function checkTitleHeadings() {
           ['Completed: an older module holding a Level up swap', 'done', 4, [], null, { from: 'b4', to: 'z' }, true],
           ['Unfinished: an older module when the open card and the swap are in other modules', 'todo', 4, [], 'a5', { from: 'a3', to: 'z' }, false]];
         for (const [what, foldName, num, toggles, openId, swap, want] of cases) {
-          const c = vm.createContext({ caOpenId: openId, caModFoldOpen: {}, caFinishedOpen: false, snipState: null, pcState: null, songFileCancelWaitIn() {},
+          const c = vm.createContext({ caOpenId: openId, caOpenRec: null, caModFoldOpen: {}, caFinishedOpen: false, snipState: null, pcState: null, songFileCancelWaitIn() {},
             escAttr: x => String(x).replace(/"/g, '&quot;'), escHtml: x => String(x), t: k => k, tf: (o, f) => o[f], caIsVisible: () => true, classActivities: {}, caActivityCardHtml: a => `<CARD ${a.id}/>`, caKindRowHtml: a => `<CARD ${a.id}/>` });
           vm.runInContext(prelude, c);
           for (const [tFold, tNum, tOpen] of toggles) {
