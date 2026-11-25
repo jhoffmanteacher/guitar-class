@@ -2328,7 +2328,8 @@ function actionCode(a){
         doc the teacher emptied holds no practiceLog, so the copy must not be read back in its place (Jonathan: "ignore
         the old device copy"): S14 Start over applied on A, then a sign-in on B; S16 Delete, the record re-created on A
         with no rep, then a sign-in on B; S17 as S16 with B's sign-in read failing and its retry loading the record.
-        Each: B starts with an empty log, the stored log holds only B's new rep, B's copy holds nothing old.
+        Each: B starts with an empty log, the stored log holds only B's new rep, B's copy holds nothing old (read before
+        B's rep as well as after: review R1-5).
         S15, the Start-over twin of S12: the legacy activity ticks adopted at that sign-in are kept (a Start over keeps
         activities). S18 (review R1-4) the other side: a record never reset that holds no practice log still reads the
         Chromebook's copy back (a doc that predates the field)
@@ -2682,7 +2683,11 @@ async function resetCases(){
      holds no practiceLog, so that copy must not be read back as "a doc that predates the field" (Jonathan, 2026-11-25:
      "ignore the old device copy"). */
   const oldLogOn = d => d.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify(OLD.practiceLog));
-  const noOldLog = ls => { const v = ls.getItem('practiceLog:' + USER.uid); let m = {}; try { m = JSON.parse(v || '{}') || {}; } catch {} return !Object.keys(m).some(k => k in OLD.practiceLog); };
+  const noOldIn = v => { let m = {}; try { m = JSON.parse(v || '{}') || {}; } catch {} return !Object.keys(m).some(k => k in OLD.practiceLog); };
+  const noOldLog = ls => noOldIn(ls.getItem('practiceLog:' + USER.uid));
+  /* The device copy read in the same moment as the page's log, BEFORE B's rep: the rep rewrites the copy from memory, so
+     a check made only at the end cannot see whether the sign-in's own drop cleared it (review R1-5, 2026-11-25). */
+  const copyNow = d => d.localStorage.getItem('practiceLog:' + USER.uid);
   const NEW_REP = 'm7w1-s1';
   const onlyNewRep = doc => !!doc && canon(Object.keys(doc.practiceLog || {})) === canon([NEW_REP]) && doc.practiceLog[NEW_REP].reps === 1;
   await scenario('S14', 'Start over applied on Chromebook A; a sign-in on B, which still holds the old practice log: nothing old returns', c => {
@@ -2693,7 +2698,7 @@ async function resetCases(){
     c.boot('A', A, 1000);                                                            // applies it, clears A's copies
     c.vis('A', 3000, true); c.kill('A', 3100);
     c.boot('B', B, 5000);                                                            // the doc has startOverApplied and no practiceLog
-    c.at(8000, () => { c.tab('B').s14 = c.tab('B').run('JSON.stringify(practiceLog)'); });
+    c.at(8000, () => { c.tab('B').s14 = c.tab('B').run('JSON.stringify(practiceLog)'); c.tab('B').s14copy = copyNow(B); });
     c.act('B', 9000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
     c.vis('B', 11000, true);
     return { endMs: 16000, check: (doc, w, tabs) => {
@@ -2703,6 +2708,7 @@ async function resetCases(){
         ["B's page starts with an empty practice log (its device copy is not read back)", b.s14 === '{}', b.s14],
         ['the stored practice log holds only the rep made on B after the Start over', onlyNewRep(doc), JSON.stringify(doc && doc.practiceLog)],
         ['the doc stays started over (startOverApplied is the marker, no lesson field but the new rep)', !!doc && doc.startOverApplied === w.marker && MODULE_FIELDS.every(f => f === 'practiceLog' || !(f in doc)), JSON.stringify(doc)],
+        ["B's device copy holds nothing old once B is signed in, before its rep", b.s14copy !== undefined && noOldIn(b.s14copy), String(b.s14copy)],
         ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))] ];
     } };
   });
@@ -2728,7 +2734,7 @@ async function resetCases(){
     c.act('A', 4000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);         // re-creates the record, with no practice log
     c.vis('A', 6000, true); c.kill('A', 6100);
     c.boot('B', B, 8000);
-    c.at(11000, () => { c.tab('B').s16 = c.tab('B').run('JSON.stringify(practiceLog)'); });
+    c.at(11000, () => { c.tab('B').s16 = c.tab('B').run('JSON.stringify(practiceLog)'); c.tab('B').s16copy = copyNow(B); });
     c.act('B', 12000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
     c.vis('B', 14000, true);
     /* Then a third Chromebook, also holding the old copy, once the record HAS a practice log: the record's is shown. */
@@ -2742,6 +2748,7 @@ async function resetCases(){
         ["B's page starts with an empty practice log (its device copy is not read back)", b.s16 === '{}', b.s16],
         ['the stored practice log holds only the rep made on B', onlyNewRep(doc), JSON.stringify(doc && doc.practiceLog)],
         ['nothing else old came back (answers, ratings, activities, exit checks)', !!doc && !doc.responses && !doc.skills && !doc.caSteps && !doc.classActivities && !doc.exitChecks, JSON.stringify(doc)],
+        ["B's device copy holds nothing old once B is signed in, before its rep", b.s16copy !== undefined && noOldIn(b.s16copy), String(b.s16copy)],
         ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))],
         ["C, signing in once the record has a practice log, shows the record's (B's rep), not its old copy and not nothing", !!doc && cc.s16 === JSON.stringify(doc.practiceLog), String(cc.s16)] ];
     } };
@@ -2757,7 +2764,7 @@ async function resetCases(){
     c.act('A', 4000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
     c.vis('A', 6000, true); c.kill('A', 6100);
     c.boot('B', B, 8000);                                                            // its progress read is refused; the settings read succeeds
-    c.at(16000, () => { const t = c.tab('B'); t.s17 = { failed: t.run('progressLoadFailed'), retrying: t.run('_loadRetry !== null'), log: t.run('JSON.stringify(practiceLog)'), tick: t.run('completed[' + JSON.stringify(NEW_TICK) + '] === true') }; });
+    c.at(16000, () => { const t = c.tab('B'); t.s17 = { failed: t.run('progressLoadFailed'), retrying: t.run('_loadRetry !== null'), log: t.run('JSON.stringify(practiceLog)'), tick: t.run('completed[' + JSON.stringify(NEW_TICK) + '] === true'), copy: copyNow(B) }; });
     c.act('B', 17000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
     c.vis('B', 19000, true);
     return { endMs: 25000, check: (doc, w, tabs) => {
@@ -2766,6 +2773,7 @@ async function resetCases(){
         ["B's sign-in read failed and its settings read succeeded", b.failedAtBoot === true && b.run('progressMarkers.ok') === true],
         ['the retry loaded the record (A\'s tick on screen, no retry left)', s17.failed === false && s17.retrying === false && s17.tick === true, JSON.stringify(s17)],
         ["B's practice log is empty after the late load", s17.log === '{}', s17.log],
+        ["B's device copy holds nothing old after the late load, before its rep", s17.copy !== undefined && noOldIn(s17.copy), String(s17.copy)],
         ['the stored practice log holds only the rep made on B', onlyNewRep(doc), JSON.stringify(doc && doc.practiceLog)],
         ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))] ];
     } };
