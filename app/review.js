@@ -214,8 +214,11 @@ function closeMrAssess(){
 }
 /* Jump from a module-review skill back to the lesson set that teaches it. */
 function goToSet(setId){
-  lastSetId = setId;
+  /* activateSet() sets lastSetId itself, and only when it opens the set: a
+     locked set gets a toast and changes nothing, so it is never marked or
+     saved as the student's place (two pills used to show active). */
   activateSet(setId);
+  if(lastSetId !== setId) return;
   saveProgress();
   const pill = document.querySelector(`.wpill[data-id="${setId}"]`);
   if(pill) pill.scrollIntoView({block:'nearest', inline:'nearest'});
