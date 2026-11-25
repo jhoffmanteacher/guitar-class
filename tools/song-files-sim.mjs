@@ -26,9 +26,11 @@
      wait        songFileWaitThen: the loading line rises to the % and clears, restart() runs once; a stop
                  (songFileCancelWait) during the load: no restart, line cleared; a second card's wait cancels
                  the first's; a failure shows its line (EN and ES keys exist for every code) and hands its code
-                 to songLoadFailed (the song help pop-up, app/songhelp.js); a failure on Firestore's side
-                 (resource-exhausted, deadline-exceeded, internal) is 'server': the sf.failed line, never 'failed'
-                 (which opens the pop-up; review R1-3)
+                 to songLoadFailed (the song help pop-up, app/songhelp.js); each of Firestore's 16 error codes is
+                 mapped (12 to 'server': the sf.server line, "press play again later"; permission-denied and
+                 unauthenticated 'denied'; unavailable 'offline'; cancelled its own), never 'failed' (which opens the
+                 pop-up; reviews R1-3, R2-5); a device-side failure with no Firestore code (a TypeError, an IndexedDB
+                 DOMException, a QuotaExceededError) stays 'failed' (review R2-2)
    --breaks  runs the cases against broken copies of app/songfiles.js; each must turn at least one case red.
 
    Made-up bytes only; nothing leaves the process. */
@@ -65,6 +67,8 @@ function makeFirestore(){
       if (st.deny) throw err('permission-denied');
       // Firestore's own failure (a quota, a timeout, an internal error) on a piece read, every time.
       if (st.serverErr && /\/pieces\//.test(path)) throw err(st.serverErr);
+      // A failure on this side (no Firestore code: a TypeError, an IndexedDB DOMException whose code is a number).
+      if (st.pieceThrow && /\/pieces\//.test(path)) throw st.pieceThrow();
       // The connection drops at one piece, once (navigator.onLine still says online).
       if (/\/pieces\//.test(path) && +path.split('/').pop() === st.dropAtPiece){ st.dropAtPiece = -1; throw err('unavailable'); }
       if (/\/pieces\//.test(path)) st.order.push(+path.split('/').pop());
@@ -314,11 +318,11 @@ async function suite(src, quiet){
     const td = makeTab(src, shD); register(td, 'sheet-x', PDF, { file: 'sheet-x.pdf', durationSec: 1 });
     ok('sheet: the rules refuse: denied (the card shows ca.sheetNotAllowed)', await code(td.api.songFileLoadBytes('sheet-x')) === 'denied');
     /* The sheet card's lines (app/cards-sheet.js PC_SHEET_FILE_LINES): one for every line the loader can end on (not
-       loading; failed is the card's own ca.sheetFailed), each in English and Spanish. */
+       loading; failed and server are the card's own ca.sheetFailed), each in English and Spanish. */
     const CS = readFileSync(join(ROOT, 'app/cards-sheet.js'), 'utf8');
     const m = /const PC_SHEET_FILE_LINES = (\{[^}]*\});/.exec(CS);
     const lines = m ? Function('return ' + m[1])() : {};
-    const want = Object.keys(tab.api.SONG_FILE_LINE_KEYS).filter(k => k !== 'loading' && tab.api.SONG_FILE_LINE_KEYS[k] !== 'sf.failed');
+    const want = Object.keys(tab.api.SONG_FILE_LINE_KEYS).filter(k => k !== 'loading' && k !== 'failed' && k !== 'server');
     const gap = want.filter(k => !lines[k]);
     const noText = [...Object.values(lines), 'ca.sheetFailed'].filter(k => !new RegExp(`'${k.replace('.', '\\.')}':\\s*\\{ en: '[^']+',\\s*(\\n\\s*)?es: '[^']+'`).test(I18N));
     ok(`sheet: the card has a line for each of the loader's ${want.length} refusals, each in English and Spanish (${Object.keys(lines).length} lines + ca.sheetFailed)`, m && !gap.length && !noText.length, `missing ${gap.join(', ')} | no EN+ES ${noText.join(', ')}`);
@@ -650,16 +654,38 @@ async function suite(src, quiet){
     tab5.api.songFileWaitThen(h5, 'private:q', () => {});
     for (let i = 0; i < 50; i++) await tick();
     ok('a failed wait hands its code to songLoadFailed once (the song help pop-up decides)', helpLog.length === 1 && helpLog[0] === 'limit', JSON.stringify(helpLog));
-    /* Firestore's own failures are not this Chromebook's: the card says "press play again in a minute" (sf.failed) and
-       the code is 'server', so the song help pop-up (which opens only for 'failed') stays shut (review R1-3). */
-    for (const fc of ['resource-exhausted', 'deadline-exceeded', 'internal']) {
-      const s6 = newShared(); putFile(s6.fs, 'v', BIG); s6.fs.st.serverErr = fc;
+    /* Every Firestore error code (FirestoreErrorCode, firebase 10.12.2: 16) is not this Chromebook's: a coded error never
+       hands 'failed' to the song help (the one code that opens the pop-up, which sends a class to empty Downloads).
+       The ones with no line of their own are 'server': "press play again later" (sf.server; reviews R1-3, R2-5). */
+    const FS_CODES = { 'cancelled': ['cancelled', 'sf.failed'], 'unknown': ['server', 'sf.server'], 'invalid-argument': ['server', 'sf.server'],
+      'deadline-exceeded': ['server', 'sf.server'], 'not-found': ['server', 'sf.server'], 'already-exists': ['server', 'sf.server'],
+      'permission-denied': ['denied', 'sf.notAllowed'], 'resource-exhausted': ['server', 'sf.server'], 'failed-precondition': ['server', 'sf.server'],
+      'aborted': ['server', 'sf.server'], 'out-of-range': ['server', 'sf.server'], 'unimplemented': ['server', 'sf.server'],
+      'internal': ['server', 'sf.server'], 'unavailable': ['offline', 'sf.offline'], 'data-loss': ['server', 'sf.server'],
+      'unauthenticated': ['denied', 'sf.notAllowed'] };
+    const waitFail = async setup => {
+      const s6 = newShared(); putFile(s6.fs, 'v', BIG); setup(s6.fs.st);
       const log6 = [];
       const tab6 = makeTab(src, s6, { helpLog: log6 }); register(tab6, 'v', BIG);
       const h6 = makeEl('pc'); const st6 = makeEl('pc-status'); h6.appendChild(st6);
       tab6.api.songFileWaitThen(h6, 'private:v', () => {});
       await until(() => !log6.length);
-      ok(`Firestore says ${fc}: the card's "press play again in a minute" line, and 'server' (not 'failed') to the song help`, st6.text === 'sf.failed' && JSON.stringify(log6) === '["server"]', `${st6.text} ${JSON.stringify(log6)}`);
+      return { line: st6.text, log: log6, quota: tab6.api.quotaHit() };
+    };
+    for (const [fc, [code, line]] of Object.entries(FS_CODES)) {
+      const r = await waitFail(st => { st.serverErr = fc; });
+      ok(`Firestore says ${fc}: the card's ${line} line, and '${code}' (never 'failed') to the song help`, r.line === line && JSON.stringify(r.log) === JSON.stringify([code]), `${r.line} ${JSON.stringify(r.log)}`);
+    }
+    /* A failure on this side, with no Firestore code, is still 'failed': the card's "in a minute" line, and the song
+       help opens its pop-up (review R2-2: a 'failed' read as 'server' would never show the pop-up). */
+    const DEVICE = [
+      ['a TypeError (no code)', () => new TypeError('x is not a function'), false],
+      ['an IndexedDB UnknownError (a DOMException, numeric code 0)', () => Object.assign(new Error('Internal error'), { name: 'UnknownError', code: 0 }), false],
+      ['a QuotaExceededError (a DOMException, numeric code 22)', () => Object.assign(new Error('full'), { name: 'QuotaExceededError', code: 22 }), true],
+    ];
+    for (const [label, make, quota] of DEVICE) {
+      const r = await waitFail(st => { st.pieceThrow = make; });
+      ok(`a device-side failure, ${label}: the sf.failed line and 'failed' to the song help (the pop-up)${quota ? ', the full device remembered' : ''}`, r.line === 'sf.failed' && JSON.stringify(r.log) === '["failed"]' && r.quota === quota, `${r.line} ${JSON.stringify(r.log)} quota ${r.quota}`);
     }
     const keys = Object.values(tab4.api.SONG_FILE_LINE_KEYS);
     const missingKeys = [...new Set(keys)].filter(k => !new RegExp(`'${k.replace('.', '\\.')}':\\s*\\{ en: '[^']+',\\s*(\\n\\s*)?es: '[^']+'`).test(I18N));
@@ -691,7 +717,10 @@ const BREAKS = [
   ['L1: a device copy\'s size is not checked (and not re-hashed, which now covers it)', "rec.blob && rec.blob.size === entry.bytes", "rec.blob", "      if(sha !== entry.sha256) return null;\n", ''],
   ['L2: a failed load is never tried again', ".finally(() => { if(sfInflight.get(id) === j) sfInflight.delete(id); });", ".then(u => { sfInflight.delete(id); return u; });"],
   ['L3: unavailable is not read as offline', "if(c === 'unavailable') return 'offline';", ''],
-  ['R1-3: Firestore\'s own failures read as failed (the pop-up sends a class to empty Downloads)', "  if(c === 'resource-exhausted' || c === 'deadline-exceeded' || c === 'internal') return 'server';\n", ''],
+  ['R1-3: Firestore\'s own failures read as failed (the pop-up sends a class to empty Downloads)', "  if(SF_SERVER_CODES.includes(c)) return 'server';\n", ''],
+  ['R2-5: one of Firestore\'s other codes (aborted) read as failed', "'failed-precondition', 'aborted', ", "'failed-precondition', "],
+  ['R2-2: a device-side failure read as server (the pop-up never opens)', "  return 'failed';\n}\n/* With one lock", "  return 'server';\n}\n/* With one lock"],
+  ['R2-6b: a failure on Firestore\'s side says "in a minute" (sf.failed)', "failed: 'sf.failed', server: 'sf.server' };", "failed: 'sf.failed', server: 'sf.failed' };"],
   ['L4: an IndexedDB open error, with no time limit, hangs', "    setTimeout(() => end(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
   ['L4b: the open error handler gone and no time limit', "    req.onerror = () => end(null);       // private window, blocked storage: no copy, the song still plays this time\n", "    req.onerror = null;\n", "    setTimeout(() => end(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
   ['L5: a junk copy kept when the connection drops mid-download', "    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }", "    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }\n    catch(e){ if(e && e.code === 'unavailable') await sfCopyPut({ id, sha256: entry.sha256, bytes: entry.bytes, blob: new Blob([new Uint8Array(entry.bytes)]), savedAt: 0 }); throw e; }\n    try {}"],

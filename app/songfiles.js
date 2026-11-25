@@ -287,14 +287,19 @@ async function songFileCount(db, cost){
   catch(e){ if(e && e.code === 'permission-denied') throw songFileErr('clock'); throw e; }
   return used;
 }
-/* 'server': Firestore itself was busy or failed (a quota, a timeout, an internal error), not this Chromebook. The card
-   says sf.failed ("press play again in a minute") and the song help pop-up stays shut: emptying Downloads cannot fix it
-   (the lead, 2026-11-25, review R1-3). */
+/* 'server': Firestore answered with an error code of its own (a quota, a timeout, an internal error, or any other of
+   its codes), so the cause is not this Chromebook. The card says sf.server ("press play again later, tell your teacher
+   if it keeps happening") and the song help pop-up stays shut: emptying Downloads cannot fix it (the lead, 2026-11-25,
+   reviews R1-3 and R2-5). These are the SDK's codes (FirestoreErrorCode, firebase 10.12.2: 16 in all) that have no
+   line of their own: permission-denied and unauthenticated are 'denied', unavailable is 'offline', and cancelled
+   keeps its own code (no pop-up). Only an error with no Firestore code (a device-side failure: a TypeError, an
+   IndexedDB DOMException, whose code is a number) stays 'failed', the one code that opens the pop-up. */
+const SF_SERVER_CODES = ['resource-exhausted', 'deadline-exceeded', 'internal', 'unknown', 'invalid-argument', 'not-found', 'already-exists', 'failed-precondition', 'aborted', 'out-of-range', 'unimplemented', 'data-loss'];
 function sfFirestoreCode(e){
   const c = e && e.code;
   if(c === 'permission-denied' || c === 'unauthenticated') return 'denied';
   if(c === 'unavailable') return 'offline';
-  if(c === 'resource-exhausted' || c === 'deadline-exceeded' || c === 'internal') return 'server';
+  if(SF_SERVER_CODES.includes(c)) return 'server';
   if(c === 'missing' || c === 'bad' || c === 'notready') return 'notready';
   if(c === 'limit' || c === 'offline' || c === 'denied' || c === 'signin' || c === 'clock' || c === 'cancelled') return c;
   return 'failed';
@@ -444,10 +449,11 @@ function songFilesClearDevice(){
 /* ── The line a card shows while it waits, or instead of playing ── */
 /* notready (not uploaded, an unfinished upload, a broken stored file, no
    loader on the page) asks for nothing: another press would not help. Only
-   failed (a dropped connection, an unknown error) and server (Firestore busy
-   or failing, sfFirestoreCode) say to press again; only failed opens the song
-   help pop-up. */
-const SONG_FILE_LINE_KEYS = { loading: 'sf.loading', signin: 'sf.signIn', denied: 'sf.notAllowed', limit: 'sf.limit', offline: 'sf.offline', notready: 'sf.notReady', clock: 'sf.clock', failed: 'sf.failed', server: 'sf.failed' };
+   failed (a dropped connection, an error with no Firestore code) and server
+   (any other Firestore error code, sfFirestoreCode) say to press again: failed
+   "in a minute", server "later" (a daily quota lasts longer than a minute);
+   only failed opens the song help pop-up. */
+const SONG_FILE_LINE_KEYS = { loading: 'sf.loading', signin: 'sf.signIn', denied: 'sf.notAllowed', limit: 'sf.limit', offline: 'sf.offline', notready: 'sf.notReady', clock: 'sf.clock', failed: 'sf.failed', server: 'sf.server' };
 /* Where the line goes: a practice card's own status line (.pc-status); in a
    snippet card, a .sf-line made the first time a
    private song is pressed (a public card never gets one). */
@@ -543,7 +549,7 @@ function songFileWaitThen(host, src, restart, ui){
     const code = (e && e.code) || 'failed';
     songFileShow(host, code);
     /* The song help pop-up (app/songhelp.js) for a failure the card's line cannot explain; it decides by the code
-       (only 'failed' opens it; 'server' is Firestore's, not this Chromebook's: the line alone). */
+       (only 'failed' opens it; 'server', any Firestore error code, is not this Chromebook's: the line alone). */
     if(typeof songLoadFailed === 'function') songLoadFailed(code);
   });
 }

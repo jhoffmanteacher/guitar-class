@@ -524,6 +524,10 @@
                                  es: 'Esta canci\u00f3n no se pudo cargar. Revisa que la fecha de esta Chromebook sea correcta y vuelve a darle play.' },
     'sf.failed':               { en: 'This song didn\u2019t load. Press play again in a minute.',
                                  es: 'Esta canci\u00f3n no se carg\u00f3. Vuelve a darle play en un minuto.' },
+    // Firestore answered with an error of its own (sfFirestoreCode 'server': a quota, a timeout, an internal error):
+    // "in a minute" can be untrue (a daily quota), so "later"; the song help pop-up stays shut.
+    'sf.server':               { en: 'This song didn\u2019t load. Press play again later, and tell your teacher if it keeps happening.',
+                                 es: 'Esta canci\u00f3n no se carg\u00f3. Vuelve a darle play m\u00e1s tarde y dile a tu maestro si sigue pasando.' },
     // SONG HELP (app/songhelp.js, 2026-11-25): the pop-up when a song does not load. 'full' when the page knows this
     // Chromebook is full (songHelp.full heads it), else the steps in order of effort (songHelp.title heads it).
     // A web page cannot see free space or the Downloads folder, so no number is shown: the Files app steps instead.
