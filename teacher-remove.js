@@ -323,6 +323,8 @@ function teacherRemoveClose(){
   if(o) o.remove();
 }
 async function trmChoose(mode){
+  // "Read again and finish" after a Delete that stopped: keep what the teacher had unticked (saved work included).
+  const keep = mode==='delete' && trm.mode==='delete' && trm.phase==='done' && trm.result && !trm.result.ok ? trm.ticks : null;
   trm.mode = mode; trm.phase = 'reading'; trm.typed = ''; trm.result = null; trm.note = '';
   const gen = trm.gen;
   trmPaint();
@@ -336,7 +338,7 @@ async function trmChoose(mode){
   if(!trm || trm.gen!==gen) return;
   trm.inv = inv; trm.phase = 'ready';
   const lines = trmKindLines(inv, trm.uid);
-  trm.ticks = {}; TRM_KINDS.forEach(k=>{ trm.ticks[k.id] = lines[k.id].n > 0; });
+  trm.ticks = {}; TRM_KINDS.forEach(k=>{ trm.ticks[k.id] = lines[k.id].n > 0 && (!keep || keep[k.id]===true); });
   trmPaint();
 }
 function trmConfirmed(){ return !!trm && trmNorm(trm.typed)!=='' && trmNorm(trm.typed)===trmNorm(trm.name); }
