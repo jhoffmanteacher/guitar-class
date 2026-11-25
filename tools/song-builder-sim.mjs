@@ -2732,6 +2732,14 @@ async function sweepCases(consoleSrc, check){
     await waitSaves();
     check('SB-5: a new chord in a bar written in thirds (an imported 6/8 song\'s "A:1/3 E:5/3") keeps its thirds ("D:1/3 E:5/3"), a bar the validator takes', bar === 'D:1/3 E:5/3' && Array.isArray(JSON.parse(parts)), JSON.stringify({ bar, parts }));
   }
+  /* SB-7: the Beat step's bound is the validator's */
+  {
+    const C = await draft(), { run } = C;
+    run("sbReadAt = Date.now(); sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbBeatFromBpm(270, null);");
+    const note = run('sbNote'), beat = run('!!sbDraft().beat');
+    check('SB-7: the Beat step takes the BPMs a built song may have (30 to 260, builtSongCheck): 270 sets no grid, and the line says to count a faster song in two',
+      !beat && /30 to 260/.test(note) && /count it in two/.test(note), JSON.stringify({ beat, note }));
+  }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',
     !bad.length && ws > 50 && !stores.some(F => F.st.writes.some(w => /^(config|progress)\//.test(w.path))), ws + ' writes; ' + (bad.slice(0, 3).join('; ') || 'no violation'));

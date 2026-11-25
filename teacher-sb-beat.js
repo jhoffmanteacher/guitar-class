@@ -308,7 +308,8 @@ function sbBeatTap(){
 function sbBeatFromBpm(bpm0, fit){
   const d = sbDraft(), lv = sbMem.level, bt = sbBtFor(sbSel);
   if(!d || !lv || !lv.E || sbBusy) return;
-  if(!(bpm0 >= 30 && bpm0 <= 300)){ sbNote = 'A BPM from 30 to 300, please.'; teacherSbPaint(); return; }
+  /* The validator's own bounds (builtSongCheck, app/builtsongs.js: 30 to 260; SB-7): a faster grid could not be published. */
+  if(!(bpm0 >= 30 && bpm0 <= 260)){ sbNote = 'A BPM from 30 to 260, please. A faster song: count it in two (half the BPM).'; teacherSbPaint(); return; }
   const meter = (d.beat && d.beat.meter) || bt.meter || '4/4';
   const g = sbAutoGrid(lv.E, lv.mono, lv.fs, d.audio.durationSec, meter, bpm0, fit ? bt.taps : null);
   const beat = Object.assign({}, g.beat, { trackBpm: lv.E.track.bpm, trackSub: lv.E.track.sub,
