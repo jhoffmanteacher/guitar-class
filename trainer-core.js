@@ -655,7 +655,7 @@
       var pf = path.map(function (p) { return p.f; });
       var span = Math.max.apply(null, pf) - Math.min.apply(null, pf);
       if (cfg.minSpan != null && span < cfg.minSpan) continue;
-      var flatKey = mode === 'minor' ? [1, 3, 6, 8, 10].indexOf((rootPc + 3) % 12) >= 0 : [1, 3, 6, 8, 10].indexOf(rootPc) >= 0;
+      var flatKey = mode === 'minor' ? [1, 3, 5, 6, 8, 10].indexOf((rootPc + 3) % 12) >= 0 : [1, 3, 5, 6, 8, 10].indexOf(rootPc) >= 0;
       var notes = path.map(function (p) { return { midi: p.midi, s: p.s, f: p.f, name: noteName(p.midi, flatKey) }; });
       var pairs = [];
       for (i = 1; i < path.length; i++) {
