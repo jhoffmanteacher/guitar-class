@@ -355,6 +355,10 @@ function teacherResponseItemHtml(stu, sl){
 // position in a filtered list, so the rebuilt key matches what was saved.
 function setShortResponses(w){
   const out=[];
+  /* Typed answers are switched off for students (TYPED_RESPONSES_ENABLED,
+     app/lesson.js, 2026-11-25): no box is drawn, so every slot is an old
+     answer, never a prompt a student can still reach. */
+  const typedOff=typeof TYPED_RESPONSES_ENABLED==='boolean' && !TYPED_RESPONSES_ENABLED;
   ['b','c'].forEach(stationId=>{
     const stn=w.stations&&w.stations[stationId]; if(!stn) return;
     const pushStep=(st,ns,i,retired)=>{
@@ -389,9 +393,9 @@ function setShortResponses(w){
          slots read as live and Jonathan can't tell "nobody has done this
          yet" from "this prompt left the course". */
       const live=new Set(visibleSteps(sec,w.moduleNum).map(p=>p.idx));
-      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,secRetired||st.hidden===true||!live.has(i)));
+      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,typedOff||secRetired||st.hidden===true||!live.has(i)));
     });
-    else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i,st.hidden===true));
+    else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i,typedOff||st.hidden===true));
   });
   return out;
 }
