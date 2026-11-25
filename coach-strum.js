@@ -123,19 +123,20 @@ function shRenderSetup(msg){
 }
 
 /* One metronome click on `ctx`, scheduled at an exact audio-clock time —
-   beep()'s envelope recipe, parameterized with a future start. Same voice
-   as the count-in (660 normal / 990 accent), but quieter. Strum Hero, Riff
-   Roulette and Riff Runner each click through this (their own ctx and
-   level). */
-function gameClickAt(ctx, t, accent, level){
+   beep()'s envelope recipe, parameterized with a future start. The count-in's
+   plain 660 Hz voice, but quieter. Strum Hero, Riff Roulette and Riff Runner
+   each click through this (their own ctx and level). Every click the same,
+   count-in and song (Jonathan, 2026-11-25: "no distinct beat anywhere is
+   simplist"): no 990 Hz beat 1, and no 990 Hz last count-in click. */
+function gameClickAt(ctx, t, level){
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.connect(g); g.connect(ctx.destination);
-  o.frequency.value = accent ? 990 : 660;
+  o.frequency.value = 660;
   g.gain.setValueAtTime(level, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
   o.start(t); o.stop(t + 0.05);
 }
-function shClickAt(t, accent){ gameClickAt(sh.ctx, t, accent, 0.25); }
+function shClickAt(t){ gameClickAt(sh.ctx, t, 0.25); }
 
 /* Short muted-strum "chick" on every tap (filtered noise burst) so
    tapping feels like strumming, not like clicking a button. */
@@ -157,8 +158,8 @@ function shChick(){
 
 /* Lookahead scheduler (the "two clocks" pattern): every ~25ms, post any
    click due in the next ~120ms at its exact audio-clock time. Clicks on
-   QUARTER beats only — 4 count-in clicks (beat 4 high, like coachCountIn),
-   then bars 1–8 with beat 1 of each bar accented. */
+   QUARTER beats only — 4 count-in clicks, then bars 1–8, every click the
+   same (gameClickAt). */
 function shSchedule(){
   const s = sh;
   if (!s || (s.phase !== 'countin' && s.phase !== 'play')) return;
@@ -166,8 +167,7 @@ function shSchedule(){
   while (s.nextClick < 4 + SH_BARS * 4){
     const t = s.startAt + s.nextClick * s.spb;
     if (t >= horizon) break;
-    const accent = s.nextClick < 4 ? s.nextClick === 3 : (s.nextClick - 4) % 4 === 0;
-    shClickAt(t, accent);
+    shClickAt(t);
     s.nextClick++;
   }
 }
@@ -847,10 +847,10 @@ function rrSkip(){
 
 /* One metronome click at an exact audio-clock time — Strum Hero's voice
    (gameClickAt), on this game's context. */
-function rrClickAt(t, accent){ gameClickAt(rr.ctx, t, accent, 0.25); }
+function rrClickAt(t){ gameClickAt(rr.ctx, t, 0.25); }
 
 /* Lookahead scheduler: every ~25ms, post the clicks due in the next
-   ~120ms. Beat 1 of each group of 4 is accented. The beat pips ride
+   ~120ms, every click the same (gameClickAt). The beat pips ride
    this interval too — plenty smooth for a decorative pulse. */
 function rrSchedule(){
   const s = rr;
@@ -859,7 +859,7 @@ function rrSchedule(){
   while (true){
     const t = s.startAt + s.nextClick * s.spb;
     if (t >= horizon) break;
-    rrClickAt(t, s.nextClick % 4 === 0);
+    rrClickAt(t);
     s.nextClick++;
   }
   const beat = Math.floor((s.ctx.currentTime - s.startAt) / s.spb);

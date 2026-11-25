@@ -328,9 +328,9 @@ function rnHearStop(){
 }
 
 /* One metronome click at an exact audio-clock time — Strum Hero's voice
-   (660 normal / 990 accent), but softer during play so the plucked riff
-   notes stay on top of the pulse. */
-function rnClickAt(t, accent, loud){ gameClickAt(rn.ctx, t, accent, loud ? 0.25 : 0.12); }
+   (gameClickAt: every click 660 Hz), but softer during play so the plucked
+   riff notes stay on top of the pulse. */
+function rnClickAt(t, loud){ gameClickAt(rn.ctx, t, loud ? 0.25 : 0.12); }
 
 /* Combo streak at which the click fades out for the rest of the round — the
    student's timing has clearly locked onto the tempo on its own, so the
@@ -346,8 +346,8 @@ const RN_METRONOME_FADE_COMBO = 8;
 
 /* Lookahead scheduler (the "two clocks" pattern, same as Strum Hero):
    every ~25ms, post any click due in the next ~120ms at its exact
-   audio-clock time. 4 count-in clicks (beat 4 high, like coachCountIn),
-   then a quiet pulse with beat 1 of each bar accented — until the student's
+   audio-clock time. 4 count-in clicks, then a quieter pulse, every click
+   of each the same (gameClickAt) — until the student's
    combo crosses RN_METRONOME_FADE_COMBO, after which play-phase clicks go
    silent (the count-in always stays audible; s.nextClick bookkeeping still
    advances either way so the schedule itself doesn't drift). */
@@ -360,7 +360,7 @@ function rnSchedule(){
     if (t >= horizon) break;
     const countin = s.nextClick < 4;
     if (countin || !s.clickMuted){
-      rnClickAt(t, countin ? s.nextClick === 3 : (s.nextClick - 4) % s.bpb === 0, countin);
+      rnClickAt(t, countin);
     }
     s.nextClick++;
   }
