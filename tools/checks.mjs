@@ -13755,6 +13755,8 @@ async function checkSongPopularity(ctx) {
       let teacherView = 'songs', activityEditId = null;
       const cfg = { archived: { 'u-arch': true } };
       const loadTeacherClassConfig = () => ({ then: f => f(cfg) });
+      // A read that reached Firestore (teacher-config.js): on a failed one the view refuses to draw (TEACHER-A-4, 2026-11-25).
+      const teacherClassConfigReadOk = true;
       // The sidebar's units tree repaints from renderTeacherSongs; the tree is not what this check is about.
       const teacherPaintSideTree = () => {};
       const allStudentsRaw = [
