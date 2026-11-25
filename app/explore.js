@@ -38,11 +38,16 @@ function switchTabById(wid, tab, keepScroll){
   // Same reasoning as activateSet(): the panel we're leaving might be hiding a
   // still-running inline Coach check — close it so its mic doesn't keep running
   // unseen. Ditto a Shuffle Drill, whose interval survives display:none, and a
-  // Card Deck or Ear Spark round (dkErAbortAll).
+  // Card Deck or Ear Spark round (dkErAbortAll; the set panels only, see
+  // activateSet). None of the three when the panel asked for is the one
+  // already showing (the rail's open tab, a rail Part link): nothing is left.
+  const stayingHere = wrap.classList.contains('active') && panel.classList.contains('active');
   if(typeof coachClose === 'function') coachClose();
-  if(typeof sdAbortAll === 'function') sdAbortAll();
-  if(typeof dkErAbortAll === 'function') dkErAbortAll();
-  stopSetPanelSeq();   // a Play tab line in the panel we are leaving (app/shell.js)
+  if(!stayingHere){
+    if(typeof sdAbortAll === 'function') sdAbortAll();
+    if(typeof dkErAbortAll === 'function') dkErAbortAll('.week-panel');
+    stopSetPanelSeq();   // a Play tab line in the panel we are leaving (app/shell.js)
+  }
   wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   panel.classList.add('active');
   /* The set band carries the lesson's chrome now (pill, "Step n of m", the

@@ -830,9 +830,17 @@ function activateSet(id, opts){
   // never rebuilt like a language-switch re-render, so nothing else stops
   // it. Stopping every drill here (harmless no-op for ones not mid-round)
   // is simpler than tracking which set each key belongs to.
-  if(typeof sdAbortAll === 'function') sdAbortAll();
-  if(typeof dkErAbortAll === 'function') dkErAbortAll();   // the Card Deck and Ear Spark rounds too
-  stopSetPanelSeq();
+  // Not when the set asked for is the one already open (its pill, a rail
+  // link to it, "Show me where"): nothing goes out of sight, and the student
+  // is still using the round or the tab line (review R1-6). The Card Deck and
+  // Ear Spark rounds: the set panels only, so showApp's boot-time call never
+  // resets a round already started on In-Class Activities.
+  const stayingHere = !!activeWeekPanel() && activeWeekPanel().dataset.id === id;
+  if(!stayingHere){
+    if(typeof sdAbortAll === 'function') sdAbortAll();
+    if(typeof dkErAbortAll === 'function') dkErAbortAll('.week-panel');
+    stopSetPanelSeq();
+  }
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   // Module Review row lives outside .wpill now (see renderPills) — keep its
   // active/aria-current in step with every other set-switch, same as the loop above.
