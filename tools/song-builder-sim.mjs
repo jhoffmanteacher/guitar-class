@@ -3143,7 +3143,7 @@ if(args.includes('--breaks')){
     ['teacher-sb-publish.js', 'Delete… leaves the sheet', "p.doc && p.doc.song && p.doc.song.sheet && p.doc.song.sheet.id, d && d.sheet && d.sheet.id].filter(Boolean)", "].filter(Boolean)"],
     ['teacher-sb-publish.js', 'Export leaves the pdf out', "    if(pdf) teacherMicSaveFile(base + '.pdf',", "    if(false) teacherMicSaveFile(base + '.pdf',"],
     ['teacher-sb-publish.js', 'the row missing from the published song\'s page', "    + (doc && verdict.ok && typeof sbSheetRowHtml === 'function' ? sbSheetRowHtml(id, p) : '');", "    + '';"],
-    ['teacher-sb-core.js', 'the draft writer drops the sheet', "'pubVer', 'imported', 'sheet'];", "'pubVer', 'imported'];"],
+    ['teacher-sb-core.js', 'the draft writer drops the sheet', "'pubVer', 'imported', 'sheet', 'capo'];", "'pubVer', 'imported', 'capo'];"],
   ];
   const srcs = new Map(parts.map(p => [p, read(p)]));
   console.log('\n== broken copies (each must turn at least one lyrics-sheet case red)');
