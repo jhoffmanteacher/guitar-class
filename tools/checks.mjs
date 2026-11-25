@@ -11509,8 +11509,8 @@ function checkLoopSpeed(ctx, i18nTable) {
   if (!bad) ok(`1eb: ${renders} renders of ${acts.length} practice cards (both languages, student and preview): ${nWith} with section buttons draw Loop / Build / Stay, all off, Stay hidden; ${nWithout} with one section draw none · cards-loop.js stores nothing · reset on close · ${EB_STRINGS.length} strings in both languages`);
 }
 /* 1fe. THE SONG HELP POP-UP (app/songhelp.js, Jonathan, 2026-11-25): what a song that does not load shows, by cause.
-   RUN, not read, in the 0b render context: (1) songHelpRoute on every case (9 codes x offline x teacher x closed once
-   x another dialog open = 144), its four totals pinned and the brief's named cases spelled out; (2) songLoadFailed with
+   RUN, not read, in the 0b render context: (1) songHelpRoute on every case (10 codes x offline x teacher x closed once
+   x another dialog open = 160; 'server', a failure on Firestore's side, is the card's line only: review R1-3), its four totals pinned and the brief's named cases spelled out; (2) songLoadFailed with
    spies on gateToast and songHelpOpen: the pop-up opens 'unknown', or 'full' once the page saw a QuotaExceededError,
    the toast gets a Help button after a close, offline keeps today's toast, sf.limit shows nothing extra; (3) the
    pop-up drawn in both languages and both states, its lines in the pinned order (full: the line, the Downloads
@@ -11522,7 +11522,7 @@ function checkLoopSpeed(ctx, i18nTable) {
    work unsaved, so the button reloads NOTHING, comes back, and a later press works (never reload over unsaved work,
    the update reload's rule in app/start.js; review R1-1); (5) the three <audio> error sites call songLoadFailed()
    and none shows the old toast itself. */
-const SH_ROUTES = { popup: 2, 'toast-help': 6, toast: 12, none: 124 };
+const SH_ROUTES = { popup: 2, 'toast-help': 6, toast: 12, none: 140 };
 const SH_ORDER = {
   full: ['songHelp.full', 'songHelp.downloads', 'songHelp.dl1', 'songHelp.dl2', 'songHelp.dl3', 'songHelp.dl4', 'songHelp.dl5', 'songHelp.clearBtn', 'songHelp.keeps', 'songHelp.then', 'songHelp.play', 'songHelp.restart', 'songHelp.teacher', 'songHelp.close'],
   unknown: ['songHelp.title', 'songHelp.tryOrder', 'songHelp.play', 'songHelp.clearBtn', 'songHelp.keeps', 'songHelp.downloads', 'songHelp.dl1', 'songHelp.dl2', 'songHelp.dl3', 'songHelp.dl4', 'songHelp.dl5', 'songHelp.restart', 'songHelp.teacher', 'songHelp.close'],
@@ -11537,7 +11537,7 @@ async function checkSongHelp(ctx, i18nTable) {
   for (const fn of ['songHelpRoute', 'songLoadFailed', 'songHelpHtml', 'songHelpClearSaved', 'songHelpClearAndReload', 'songHelpIsFull', 'songFilesClearDevice'])
     if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1fe)'); return; }
   // 1. The route, every case.
-  const CODES = ['', 'failed', 'offline', 'limit', 'clock', 'signin', 'denied', 'notready', 'cancelled'];
+  const CODES = ['', 'failed', 'offline', 'limit', 'clock', 'signin', 'denied', 'notready', 'cancelled', 'server'];
   const tally = { popup: 0, 'toast-help': 0, toast: 0, none: 0 };
   let cases = 0;
   for (const code of CODES) for (const offline of [false, true]) for (const teacher of [false, true]) for (const closedOnce of [false, true]) for (const otherOverlay of [false, true]) {
@@ -11550,6 +11550,7 @@ async function checkSongHelp(ctx, i18nTable) {
   const R = o => { ctx.__shO = Object.assign({ code: '', offline: false, teacher: false, closedOnce: false, otherOverlay: false }, o); return run('songHelpRoute(window.__shO)'); };
   is(R({ offline: true }) === 'toast', 'offline, an <audio> error: today\'s toast only (clearing space does not fix Wi-Fi)');
   is(R({ code: 'clock' }) === 'none' && R({ code: 'limit' }) === 'none', 'sf.clock and sf.limit: their own line, no pop-up');
+  is(R({ code: 'server' }) === 'none', 'a failure on Firestore\'s side (server): the card\'s "press play again in a minute" line, no pop-up (emptying Downloads cannot fix it)');
   is(R({}) === 'popup' && R({ code: 'failed' }) === 'popup', 'an <audio> error or a private song\'s "failed", online: the pop-up');
   is(R({ closedOnce: true }) === 'toast-help' && R({ otherOverlay: true }) === 'toast-help', 'closed once, or another dialog open: the toast with Help, never a second pop-up');
   is(R({ teacher: true }) === 'toast' && R({ teacher: true, code: 'failed' }) === 'none', 'the teacher console: today\'s toast, never the pop-up');
@@ -22325,7 +22326,7 @@ function checkSongRequests() {
        Journey player cannot play a private song yet; it is its own piece of
        Step 2.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_SIM_PIN = 140;   // 133 -> 140 (2026-11-25, the song help pop-up): a full device remembered (sfQuotaHit, 2 cases), songFilesClearDevice (4 cases), a failed wait hands its code to songLoadFailed; 121 -> 133 (2026-11-18, private chord sheets, P1): a .pdf read as bytes (songFileLoadBytes), typed by its name, one shared download, the sign-in rule, a built sheet entry, the sheet card's lines in EN + ES (12 cases); 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
+const SONG_FILES_SIM_PIN = 143;   // 140 -> 143 (2026-11-25, review R1-3): Firestore's own failures (resource-exhausted, deadline-exceeded, internal) are 'server', the card's line only (3 cases); 133 -> 140 (2026-11-25, the song help pop-up): a full device remembered (sfQuotaHit, 2 cases), songFilesClearDevice (4 cases), a failed wait hands its code to songLoadFailed; 121 -> 133 (2026-11-18, private chord sheets, P1): a .pdf read as bytes (songFileLoadBytes), typed by its name, one shared download, the sign-in rule, a built sheet entry, the sheet card's lines in EN + ES (12 cases); 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
 const SONG_FILES_CLOSE_PIN = 6;
 /* 1ev. THE LOOSE READ of a lyric sheet (2026-11-18, app/cards-sheet.js pcSheetAlign; the Lyrics view of a private
    song, card.sheetRead 'loose'). RUN by tools/sheet-align-test.mjs (Node, under a second): made-up layouts and

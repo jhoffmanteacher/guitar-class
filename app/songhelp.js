@@ -8,8 +8,11 @@
      the browser says offline     today's toast only (clearing space does not fix Wi-Fi)
      a private song's own line    the card's line only: sf.clock (wrong date), sf.limit
                                   (the month's downloads), sf.offline, sf.signIn,
-                                  sf.notAllowed, sf.notReady (app/songfiles.js knows
-                                  the cause and says it); only its 'failed' comes here
+                                  sf.notAllowed, sf.notReady, and sf.failed for a
+                                  failure on Firestore's side ('server': busy, a
+                                  timeout, an internal error; emptying Downloads cannot
+                                  fix it) (app/songfiles.js knows the cause and says
+                                  it); only its 'failed' comes here
      the teacher console          today's toast only (the console is not a student's
                                   Chromebook, and the pop-up empties saved songs)
      anything else                the pop-up. "This Chromebook is full." when the page

@@ -287,10 +287,14 @@ async function songFileCount(db, cost){
   catch(e){ if(e && e.code === 'permission-denied') throw songFileErr('clock'); throw e; }
   return used;
 }
+/* 'server': Firestore itself was busy or failed (a quota, a timeout, an internal error), not this Chromebook. The card
+   says sf.failed ("press play again in a minute") and the song help pop-up stays shut: emptying Downloads cannot fix it
+   (the lead, 2026-11-25, review R1-3). */
 function sfFirestoreCode(e){
   const c = e && e.code;
   if(c === 'permission-denied' || c === 'unauthenticated') return 'denied';
   if(c === 'unavailable') return 'offline';
+  if(c === 'resource-exhausted' || c === 'deadline-exceeded' || c === 'internal') return 'server';
   if(c === 'missing' || c === 'bad' || c === 'notready') return 'notready';
   if(c === 'limit' || c === 'offline' || c === 'denied' || c === 'signin' || c === 'clock' || c === 'cancelled') return c;
   return 'failed';
@@ -381,7 +385,7 @@ async function sfLoadOnce(id, entry, progress, wanted){
 }
 /* Load one song for this page: resolves to its blob: address, or rejects
    with an Error whose .code is the line to show: signin, denied, limit,
-   offline, missing, bad or failed. One load per song at a time in a page;
+   offline, notready, clock, cancelled, server or failed. One load per song at a time in a page;
    every caller gets the same promise, and each caller's onProgress (0..1)
    is told as pieces arrive. */
 /* `waiter` (from songFileWaitThen): a card that may give up. The load goes on
@@ -440,8 +444,10 @@ function songFilesClearDevice(){
 /* ── The line a card shows while it waits, or instead of playing ── */
 /* notready (not uploaded, an unfinished upload, a broken stored file, no
    loader on the page) asks for nothing: another press would not help. Only
-   failed (a dropped connection, an unknown error) says to press again. */
-const SONG_FILE_LINE_KEYS = { loading: 'sf.loading', signin: 'sf.signIn', denied: 'sf.notAllowed', limit: 'sf.limit', offline: 'sf.offline', notready: 'sf.notReady', clock: 'sf.clock', failed: 'sf.failed' };
+   failed (a dropped connection, an unknown error) and server (Firestore busy
+   or failing, sfFirestoreCode) say to press again; only failed opens the song
+   help pop-up. */
+const SONG_FILE_LINE_KEYS = { loading: 'sf.loading', signin: 'sf.signIn', denied: 'sf.notAllowed', limit: 'sf.limit', offline: 'sf.offline', notready: 'sf.notReady', clock: 'sf.clock', failed: 'sf.failed', server: 'sf.failed' };
 /* Where the line goes: a practice card's own status line (.pc-status); in a
    snippet card, a .sf-line made the first time a
    private song is pressed (a public card never gets one). */
@@ -537,7 +543,7 @@ function songFileWaitThen(host, src, restart, ui){
     const code = (e && e.code) || 'failed';
     songFileShow(host, code);
     /* The song help pop-up (app/songhelp.js) for a failure the card's line cannot explain; it decides by the code
-       (only 'failed' opens it). */
+       (only 'failed' opens it; 'server' is Firestore's, not this Chromebook's: the line alone). */
     if(typeof songLoadFailed === 'function') songLoadFailed(code);
   });
 }
