@@ -2677,6 +2677,15 @@ async function sweepCases(consoleSrc, check){
     check('SB-2 another copy: levelled to other bytes, the copy goes whole to its own id and the draft names it; the file the published song plays is never written or deleted',
       other.length === 0 && run('sbDraft().audio.id') === audB && F.S.get('songFiles/' + audB).state === 'ready' && F.S.get('songFiles/' + aud) && F.S.get('songFiles/' + aud).state === 'ready',
       JSON.stringify({ live: other, draft: run('sbDraft().audio.id'), newState: (F.S.get('songFiles/' + audB) || {}).state }));
+    /* Review R1-2 (2026-11-25): the write order of "Level it again" with other bytes, which the "volume" case no longer
+       sees (its second level is the same bytes, not uploaded again since SB-2): the new copy's head is 'ready', with
+       every piece, BEFORE any draft write names it. */
+    const lw = F.st.writes.slice(w0), named = lw.findIndex(w => w.path === 'songDrafts/' + C.id && w.data && w.data.audio && w.data.audio.id === audB);
+    const ready = lw.map(w => w.path === 'songFiles/' + audB && w.data && w.data.state === 'ready').lastIndexOf(true);
+    const pieces = lw.filter(w => w.path.startsWith('songFiles/' + audB + '/pieces/')).length;
+    check('volume: "Level it again" with other bytes stores the new copy whole (head ready, every piece) BEFORE the draft names it (review R1-2)',
+      ready >= 0 && named > ready && pieces >= 1 && lw.slice(ready + 1).every(w => !w.path.startsWith('songFiles/' + audB + '/pieces/')),
+      lw.map(w => w.op + ' ' + w.path.replace(new RegExp(C.id, 'g'), '<id>') + (w.data && w.data.state ? ':' + w.data.state : '')).filter(s => !/\/pieces\/[1-9]/.test(s)).join(' → '));
     const audC = C.id + '-' + sha(LEVELLED.get('c')).slice(0, 8), taken = 'sb-sweepcollide01', f64 = 'f'.repeat(64);
     F.S.set('songFiles/' + audC, { file: audC + '.mp3', bytes: 5, sha256: f64, pieces: 1, pieceBytes: 900000, durationSec: 15, state: 'ready', uploadedAt: TS });
     F.S.set('builtSongsMeta/list', { songs: { [C.id]: 5, [taken]: 6 }, updatedAt: TS });
