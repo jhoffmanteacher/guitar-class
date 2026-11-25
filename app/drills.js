@@ -305,7 +305,9 @@ function fgClick(sid, strKind, fret){
     st.idx++;
     if(st.idx >= FG_ROUND){
       st.done = true;
-      setTimeout(()=>fgEnd(sid), 650);
+      // Same round check as the next-prompt timer: a language switch rebuilds the
+      // panel inside these 650 ms, and a fresh Start must not be ended at once.
+      setTimeout(()=>{ if(fretGames[sid] === st) fgEnd(sid); }, 650);
     } else {
       setTimeout(()=>{ if(fretGames[sid] === st && !st.done) fgRenderPrompt(sid); }, 650);
     }
