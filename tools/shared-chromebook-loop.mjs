@@ -125,13 +125,15 @@
        fields), the console's own preferences (gc-teacher-*, teacherSideTree, gc-lq-limits, gc-lq-autoreveal, gc-lq-hidenames).
      Per STUDENT (must never reach the next student):
        keys named with the uid: practiceLog:<uid>, gc-lastModule:<uid>, gc-lastSet:<uid>, gc-srPicks:<uid>,
-       caStepsToday:<uid> (legacy), gc-resetSeen:<uid> (2026-11-14: the newest Start over / Delete marker this device
-       cleared its copies for, app/save.js; written only when a marker exists, which no case here has), micRecConsent:<uid> (coach-core.js: "keyed by uid so the next student on a
+       caStepsToday:<uid> (legacy), micRecConsent:<uid> (coach-core.js: "keyed by uid so the next student on a
        shared Chromebook is asked for themselves"), pm:q:<uid>:<page>, pm:c|t|t5|b|w:<uid>, hif:v1:<uid>;
-       values that carry the uid: caPeriodOverride, caOpenThrough, caForMe, caResetMarker (save.js: "the cache carries the uid";
-       caResetMarker since 2026-11-14, the student's own Start over / Delete marker, a time, read back only for the same uid);
+       values that carry the uid: caPeriodOverride, caOpenThrough, caForMe (save.js: "the cache carries the uid");
        every sessionStorage key (boot.js signOut: "every sessionStorage best ... Reloading clears the lot";
        live-quiz.js lq-q-opened carries the uid too).
+     Not on the device at all: the teacher's Start over / Delete markers. app/save.js reads them from config/class at
+     each sign-in and never caches them (progressMarkersOf, progressStartOverAtSignIn); no key records which marker a
+     device has cleared its copies for (the gc-resetSeen:<uid> and caResetMarker this list named until 2026-11-25 exist
+     in no site file). No case here has a marker; tools/save-loop.mjs's reset cases (S1-S17) cover them.
 
    THE EXPECTED ANSWER (the "oracle" section). It never calls a function of the code under test: it reads the
    scenario's ledger of what each person did and when, facts of the fake world (the server's docs, every write the
@@ -158,7 +160,8 @@
      R4 The first screen of a student (the moment showApp has run): the in-memory state the screens draw from is
         that student's own — completed, responses, caStepDone, classActivities, exitChecks, games, streak,
         practiceLog, songReady, studentPeriod equal what that student's doc holds (or {} / '' for no doc or a
-        failed read; practiceLog falls back to THAT student's own device copy, save.js loadProgress), lastSetId is
+        failed read; practiceLog falls back to THAT student's own device copy, save.js loadProgress, except for a
+        doc the teacher emptied, which no case here has: save.js progressDeviceLogStale), lastSetId is
         never the previous student's set, periodOverride / moduleOpenThrough / activityForMe / gamesAccessOn are the
         config's answer for THIS uid (or the defaults '' / 0 / none / on when the read failed and the cache belongs
         to someone else — KNOWN K1 of tools/visible-loop.mjs is the other half of that rule and is not rebuilt
