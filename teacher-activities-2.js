@@ -326,7 +326,8 @@ function teacherBoardDrop(e){
      An earlier cut flipped this to position 1 under a descending view, which
      silently renumbered every card in the module on a drop the teacher
      thought was a plain "add it here". Only a drop ON a card names a
-     position, and that one does follow the view (below). */
+     position, and that one does follow the view (below). A card let go in
+     the gaps of the unit it already sits in is not moved (below). */
   const append=()=>teacherMoveActivity(id, mn, null);
   /* Sorted by date/name/done, the list on screen is not the course order, so
      no drop inside it names a position. Dropping a card back into the module
@@ -341,6 +342,12 @@ function teacherBoardDrop(e){
   // the aborted drag above. append() here would send it to the end of the
   // module and renumber every card after it.
   if(over && over.dataset.id===id){ renderTeacherActivities({cached:true}); return; }
+  // Let go in a gap between the cards of its own unit: no card named, so no position, and it is already in this
+  // unit, so nothing is written either. A drop on the unit's heading still appends (Jonathan's call, unchanged).
+  if(!over && !t.closest('.t-board-sechead')){
+    const cur=(teacherClassConfig.activityBoard||{})[id];
+    if(cur && (Number(cur.module)||0)===mn){ renderTeacherActivities({cached:true}); return; }
+  }
   if(!over || !section.contains(over)){ append(); return; }
   // pos is counted in the target module AFTER the dragged card is removed,
   // which is exactly what teacherMoveActivity does with it.
