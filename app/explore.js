@@ -37,9 +37,11 @@ function switchTabById(wid, tab, keepScroll){
   if(!wrap) return;
   // Same reasoning as activateSet(): the panel we're leaving might be hiding a
   // still-running inline Coach check — close it so its mic doesn't keep running
-  // unseen. Ditto a Shuffle Drill, whose interval survives display:none.
+  // unseen. Ditto a Shuffle Drill, whose interval survives display:none, and a
+  // Card Deck or Ear Spark round (dkErAbortAll).
   if(typeof coachClose === 'function') coachClose();
   if(typeof sdAbortAll === 'function') sdAbortAll();
+  if(typeof dkErAbortAll === 'function') dkErAbortAll();
   wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   panel.classList.add('active');
   /* The set band carries the lesson's chrome now (pill, "Step n of m", the
@@ -1309,6 +1311,7 @@ function caClosePanel(keepFocus){
      nothing rebuilds it on the way out. Same teardown, and same reasoning, as
      the set-switch in switchTabById; a no-op for drills not mid-round. */
   if(typeof sdAbortAll === 'function') sdAbortAll();
+  if(typeof dkErAbortAll === 'function') dkErAbortAll();   // the Card Deck and Ear Spark rounds too
   /* Same reasoning for an exit check mid-run: its stimulus auto-plays, so
      closing the screen while a line is sounding would leave the notes
      ringing over whatever the student opened next.

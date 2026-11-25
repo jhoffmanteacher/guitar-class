@@ -809,6 +809,7 @@ function activateSet(id, opts){
   // it. Stopping every drill here (harmless no-op for ones not mid-round)
   // is simpler than tracking which set each key belongs to.
   if(typeof sdAbortAll === 'function') sdAbortAll();
+  if(typeof dkErAbortAll === 'function') dkErAbortAll();   // the Card Deck and Ear Spark rounds too
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   // Module Review row lives outside .wpill now (see renderPills) — keep its
   // active/aria-current in step with every other set-switch, same as the loop above.

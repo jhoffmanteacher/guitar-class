@@ -1121,6 +1121,32 @@ function erStop(key){
 function erStopAll(){
   Object.keys(earDrills).forEach(erStop);
 }
+/* sdAbortAll()'s twin for the Card Deck and Ear Spark drills, called from
+   the same three exits (set switch, tab switch, closing In-Class
+   Activities). A round left in phase 'run' in a hidden panel reads as
+   "busy" to progressLoadRetryBusy() (app/save.js) and to the update
+   reload (app/start.js), so both waited on a round nobody could see; and
+   an Ear round's queued notes played on over the next set. Stop the notes
+   and put a mid-round drill back on its setup screen. */
+function dkErAbortAll(){
+  Object.keys(deckDrills).forEach(k => {
+    const st = deckDrills[k];
+    if(!st || st.phase !== 'run') return;
+    st.phase = 'setup';
+    const box = dkBox(k);
+    if(box) box.innerHTML = dkSetupHtml(k);
+  });
+  Object.keys(earDrills).forEach(k => {
+    erStop(k);
+    const st = earDrills[k];
+    if(!st) return;
+    st.timeouts = [];
+    if(st.phase !== 'run') return;
+    st.phase = 'setup';
+    const box = erBox(k);
+    if(box) box.innerHTML = erSetupHtml(k);
+  });
+}
 function renderEarDrill(drill, key, wid){
   const pool = EAR_POOLS[drill.pool];
   if(!pool) return '';
