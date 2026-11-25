@@ -157,7 +157,9 @@ async function teacherSbLoad(){
   }
   if(gen !== sbReadGen) return;
   if(op !== sbOpGen){ teacherSbLoad(); return; }
-  sbReadAt = Date.now(); sbReadErr = err;
+  /* A read that lands while the view is away does not count (review round 2, R2-3): coming back reads first, and that read
+     starts the saves of the edits kept here again. */
+  sbReadAt = teacherView === 'songbuilder' ? Date.now() : 0; sbReadErr = err;
   if(!err){
     /* A draft older than its published song, and not that song (review R2-1, teacher-sb-publish.js sbDraftStale). */
     if(typeof sbDraftStale === 'function') for(const [id, d] of drafts) if(sbDraftStale(d, pub.get(id))) d.stale = true;
@@ -522,7 +524,8 @@ function teacherSbLeave(){
   if(sbWorker){ const w = sbWorker; sbWorker = null; if(w.sbStop) w.sbStop(); else { try{ w.terminate(); }catch(e){} } }   // sbStop settles its promise (SB-3)
   if(typeof sbPdfLeave === 'function') sbPdfLeave();
   /* SB-1: the saves that wait stop with the view (a write would stop at once: sbStopped); their edits stay marked in
-     memory. Coming back reads the store first (sbReadAt = 0, review R1-3), and that read saves them (teacherSbLoad). */
+     memory. Coming back reads the store first (sbReadAt = 0, review R1-3; a read that lands while away leaves it 0,
+     round 2), and that read saves them (teacherSbLoad). */
   for(const t of sbSaveTimers.values()) clearTimeout(t);
   sbSaveTimers.clear(); sbReadAt = 0;
 }
