@@ -14,18 +14,6 @@
    "date": "2026-11-14"
   },
   {
-   "id": "201803741a",
-   "region": "save",
-   "file": "app/save.js",
-   "where": "loadProgress()",
-   "line": 201,
-   "before": "else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];",
-   "after": "else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] || typeof raw[k]==='object') progress[k]=raw[k];",
-   "class": "harmless",
-   "reason": "differs only for a stored skill value that is an object or null on a key that is not -reflection / -performance, which the site never writes",
-   "date": "2026-11-14"
-  },
-  {
    "id": "f86b281546",
    "region": "save",
    "file": "app/save.js",
@@ -143,18 +131,6 @@
    "after": "const to = max >= y - 1 ? y : ((late || Date.now() - steadySince > 1000) ? Math.max(0, max) : null);",
    "class": "harmless",
    "reason": "a tie on a millisecond clock at exactly 1,000 ms: one frame later at most",
-   "date": "2026-11-14"
-  },
-  {
-   "id": "615a123f01",
-   "region": "cache",
-   "file": "app/start.js",
-   "where": "the service-worker block",
-   "line": 73,
-   "before": "const SW_RELOAD_MAX_WAIT = 5 * 60 * 1000;",
-   "after": "const SW_RELOAD_MAX_WAIT = 5 * 60 * 2000;",
-   "class": "accepted",
-   "reason": "the backstop for a reload held by a busy tab moves from 5 to 10 minutes",
    "date": "2026-11-14"
   },
   {
