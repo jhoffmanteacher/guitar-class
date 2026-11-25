@@ -30,11 +30,15 @@
    stops the card's audio, deletes the service worker's two audio caches (by
    name: SONG_HELP_AUDIO_CACHES, the names sw.js and tools/sw-audio-map.mjs pin;
    1fe holds them equal) and empties the private songs' device copies
-   (songFilesClearDevice, app/songfiles.js), sends any unsaved progress
-   (flushSave, as the update reload in app/start.js does), then reloads the way
-   the site's own update does (gcSwUpdating + swResumeSave), so the student comes
-   back to the same page and card. It never touches progress, sign-in,
-   localStorage, or the shell cache.
+   (songFilesClearDevice, app/songfiles.js), sends any unsaved progress and
+   waits for it (flushBeforeLeaving, app/boot.js, at most SONG_HELP_WAIT_MS),
+   then reloads the way the site's own update does (gcSwUpdating +
+   swResumeSave), so the student comes back to the same page and card. Work
+   still not saved after that wait (offline, a write that failed or never
+   answered) is never reloaded over, the same rule as the update reload in
+   app/start.js: no reload, the button comes back, and the line under it says
+   save.notSavedYet. It never touches progress, sign-in, localStorage, or the
+   shell cache.
 
    A web page cannot read free disk space or the Downloads folder, and
    navigator.storage.estimate() cannot tell a full disk either: Chrome reports
@@ -46,9 +50,9 @@
    (AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME in tools/sw-audio-map.mjs). 1fe fails
    the push if either drifts, or if one is ever the shell cache. */
 const SONG_HELP_AUDIO_CACHES = ['guitar-class-audio-2026-10-30-ff9e913a6d', 'guitar-class-audio-hashes'];
-const SONG_HELP_WAIT_MS = 4000;        // a cache delete or an IndexedDB clear that never answers: go on
+const SONG_HELP_WAIT_MS = 4000;        // a cache delete or an IndexedDB clear that never answers: go on; the longest wait for unsaved work
 let songHelpClosedOnce = false;        // the pop-up was closed in this page load: later failures get the toast + Help
-let songHelpBusy = false;              // the main button was pressed: the reload is on its way
+let songHelpBusy = false;              // the main button was pressed and its work is not finished
 
 /* What a failure shows: 'none' (the card's own line says it), 'toast', 'toast-help' or 'popup'.
    o = { code, offline, teacher, closedOnce, otherOverlay }. code: '' for an <audio> element's error, else the
@@ -168,12 +172,20 @@ async function songHelpClearAndReload(){
   const btn = document.getElementById('song-help-clear');
   if(btn){ btn.disabled = true; btn.setAttribute('data-i18n', 'songHelp.clearing'); btn.textContent = t('songHelp.clearing'); }
   try { stopCardAudio(); } catch(e) {}
-  await songHelpClearSaved();
-  /* The update reload's own send (app/start.js): a step marked done a moment ago is still inside queueSave's
-     debounce and would be lost by the reload. One real attempt, then reload either way. */
-  if(_dirtyKeys.size || saveTimer){
-    clearTimeout(saveTimer);
-    try { await flushSave(); } catch(e) {}
+  try { await songHelpClearSaved(); } catch(e) {}
+  /* A step marked done a moment ago is still inside queueSave's debounce, a save may be on the wire, or a failed one
+     waits for its retry: send it now and wait for it, at most SONG_HELP_WAIT_MS (flushBeforeLeaving, app/boot.js,
+     the step Sign out uses). Still not saved: no reload over it (the update reload's rule, app/start.js). The button
+     comes back and says so; a second press clears again (nothing is left to clear) and sends again. */
+  let saved = false;
+  try { saved = !hasUnsavedWrites() || await flushBeforeLeaving(SONG_HELP_WAIT_MS); } catch(e) {}
+  if(!saved){
+    songHelpBusy = false;
+    const b = document.getElementById('song-help-clear');
+    if(b){ b.disabled = false; b.setAttribute('data-i18n', 'songHelp.clearBtn'); b.textContent = t('songHelp.clearBtn'); }
+    const note = document.querySelector('#song-help-overlay .song-help-note');
+    if(note){ note.setAttribute('data-i18n', 'save.notSavedYet'); note.setAttribute('role', 'alert'); note.textContent = t('save.notSavedYet'); }
+    return;
   }
   /* Come back where the student was, as after an update (SW_UPDATE_BOOT, swResumeTake in app/boot.js). The wall
      says "Updating to the newest version…" for that moment. */

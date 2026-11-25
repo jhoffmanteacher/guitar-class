@@ -11517,9 +11517,11 @@ function checkLoopSpeed(ctx, i18nTable) {
    steps, then the main button (it reloads, so the steps come first: the lead, 2026-11-25), then play / restart / teacher; unknown: play, the button, Downloads, restart, teacher), every
    line in English and Spanish; (4) the button's work on a fake CacheStorage: the two audio caches go (the names
    sw.js and tools/sw-audio-map.mjs pin), the shell cache and anything else stay, localStorage is untouched, and the
-   order is stop the audio, clear, send unsaved progress, mark the reload as the update's (so the student lands back
-   where they were), reload; (5) the three <audio> error sites call songLoadFailed() and none shows the old toast
-   itself. */
+   order is stop the audio, clear, send unsaved progress AND wait for it (a save already on the wire lands first),
+   mark the reload as the update's (so the student lands back where they were), reload; a send that fails leaves the
+   work unsaved, so the button reloads NOTHING, comes back, and a later press works (never reload over unsaved work,
+   the update reload's rule in app/start.js; review R1-1); (5) the three <audio> error sites call songLoadFailed()
+   and none shows the old toast itself. */
 const SH_ROUTES = { popup: 2, 'toast-help': 6, toast: 12, none: 124 };
 const SH_ORDER = {
   full: ['songHelp.full', 'songHelp.downloads', 'songHelp.dl1', 'songHelp.dl2', 'songHelp.dl3', 'songHelp.dl4', 'songHelp.dl5', 'songHelp.clearBtn', 'songHelp.keeps', 'songHelp.then', 'songHelp.play', 'songHelp.restart', 'songHelp.teacher', 'songHelp.close'],
@@ -11616,7 +11618,9 @@ async function checkSongHelp(ctx, i18nTable) {
   const savedR = { caches: ctx.caches, stopCardAudio: ctx.stopCardAudio, flushSave: ctx.flushSave, swResumeSave: ctx.swResumeSave, reload: ctx.location.reload };
   ctx.caches = { delete: async n => { log.push('delete ' + n); return store.delete(n); }, keys: async () => [...store] };
   ctx.stopCardAudio = () => log.push('stop');
-  ctx.flushSave = async () => log.push('flush');
+  /* The fake send lands (the test key is saved) unless flushFails: then it stays unsaved, as after a failed write. */
+  let flushFails = false;
+  ctx.flushSave = async () => { log.push('flush'); if (!flushFails) run('_dirtyKeys.delete("1fe-test")'); };
   ctx.swResumeSave = () => log.push('resume ' + ctx.sessionStorage.getItem('gcSwUpdating'));
   ctx.location.reload = () => log.push('reload');
   ctx.localStorage.setItem('1fe-keep', '1');
@@ -11624,6 +11628,21 @@ async function checkSongHelp(ctx, i18nTable) {
   try {
     const r = await run('songHelpClearSaved()');
     is(JSON.stringify(r.caches) === JSON.stringify(names) && r.songFiles === false && store.size === 3 && store.has(shell), `songHelpClearSaved deleted ${JSON.stringify(r.caches)} (songFiles ${r.songFiles}); left ${[...store].join(', ')}`);
+    names.forEach(n => store.add(n)); log.length = 0;
+    run('songHelpBusy = false; _dirtyKeys.add("1fe-test")');
+    flushFails = true;
+    await run('songHelpClearAndReload()');
+    const wantFail = ['stop', ...names.map(n => 'delete ' + n), 'flush'];
+    is(JSON.stringify(log) === JSON.stringify(wantFail) && run('songHelpBusy') === false && run('_dirtyKeys.has("1fe-test")'),
+      `a send that fails: the main button ran ${log.join(' > ')} (busy ${run('songHelpBusy')}); pinned ${wantFail.join(' > ')}, no reload over unsaved work, and the button free again`);
+    flushFails = false;
+    /* A save already on the wire (_flushP) with nothing else dirty: the reload waits for it to land. */
+    names.forEach(n => store.add(n)); log.length = 0;
+    ctx.__shWire = () => log.push('landed');
+    run('_dirtyKeys.delete("1fe-test"); _flushP = new Promise(r => setTimeout(() => { __shWire(); _flushP = null; r(); }, 5))');
+    await run('songHelpClearAndReload()');
+    const wantWire = ['stop', ...names.map(n => 'delete ' + n), 'landed', 'flush', 'resume 1', 'reload'];
+    is(JSON.stringify(log) === JSON.stringify(wantWire), `a save on the wire: the main button ran ${log.join(' > ')}; pinned ${wantWire.join(' > ')}`);
     names.forEach(n => store.add(n)); log.length = 0;
     run('songHelpBusy = false; _dirtyKeys.add("1fe-test")');
     await run('songHelpClearAndReload()');
@@ -11636,7 +11655,8 @@ async function checkSongHelp(ctx, i18nTable) {
   } finally {
     ctx.caches = savedR.caches; ctx.stopCardAudio = savedR.stopCardAudio; ctx.flushSave = savedR.flushSave; ctx.swResumeSave = savedR.swResumeSave; ctx.location.reload = savedR.reload;
     if (savedR.caches === undefined) delete ctx.caches;
-    run('songHelpBusy = false; _dirtyKeys.delete("1fe-test")');
+    run('songHelpBusy = false; _dirtyKeys.delete("1fe-test"); _flushP = null');
+    delete ctx.__shWire;
     ctx.sessionStorage.removeItem('gcSwUpdating'); ctx.localStorage.removeItem('1fe-keep');
   }
   // 5. The three <audio> error sites.
@@ -11649,7 +11669,7 @@ async function checkSongHelp(ctx, i18nTable) {
     const at = src.indexOf(anchor);
     is(at >= 0 && /songLoadFailed\(\)/.test(src.slice(at, at + 600)), `${f}: the <audio> error (${anchor}) no longer calls songLoadFailed()`);
   }
-  if (!bad) ok(`1fe: ${cases} route cases (${Object.entries(tally).map(([k, v]) => k + ' ' + v).join(', ')}) · songLoadFailed: 7 cases with spies (incl. the hidden aria-modal screens) · ${drawn} drawings (EN + ES, full + unknown) in the pinned order · the button: 2 audio caches deleted, the shell cache and 2 others kept, stop > clear > flush > update-reload mark > reload, localStorage untouched · 3 <audio> error sites · ${asserts} asserts`);
+  if (!bad) ok(`1fe: ${cases} route cases (${Object.entries(tally).map(([k, v]) => k + ' ' + v).join(', ')}) · songLoadFailed: 7 cases with spies (incl. the hidden aria-modal screens) · ${drawn} drawings (EN + ES, full + unknown) in the pinned order · the button: 2 audio caches deleted, the shell cache and 2 others kept, stop > clear > flush and wait (a save on the wire lands first) > update-reload mark > reload, a failed send reloads nothing and frees the button, localStorage untouched · 3 <audio> error sites · ${asserts} asserts`);
 }
 /* 1fc. THE SPEED LADDER (ca-54, Jonathan, 2026-11-24): card.rounds, card.slowestRate 0.9, card.startStop 'slowest',
    card.buildLaps 1. Three decisions are pinned here, and each is the ONE exception to a rule every other card keeps:
