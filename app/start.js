@@ -166,6 +166,11 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
           }
           if (inTime) { waitMore(); return; }
           await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);
+          /* A tick made during that last try re-armed the save code (queueSave
+             starts its count again): that work is not given up on, so it holds
+             the reload like any other (review R1-2). The last try's own write,
+             if still out, does not. */
+          if (_saveFailCount <= SAVE_MAX_AUTO_RETRIES && hasUnsavedWrites()) return reload();
         }
         /* Tell the next load this refresh was the site updating itself, so the
            wall says "Updating…" rather than walking the student back through

@@ -527,6 +527,9 @@ async function runScenarios(killSrc, pageSrc = PAGE_SRC, { unsaved = true } = {}
         one(r) && r.seen[120300] && r.seen[120300].reloads === 0 && r.told.length && r.told[0] < r.reloads[0] && r.reloads[0] >= 300300 && r.reloads[0] < 310300);
       r = await P({ ticks: [1000], takeAt: 1200, refuse: 'untilTold' });
       check('refused while online until after "Not saving": the last try at the 5-minute limit is waited for, saved, then one reload', kept(r) && r.reloads[0] >= 301200);
+      /* Review R1-2: the new tick re-arms the save code (queueSave resets the count), so it is not given up on. */
+      r = await P({ ticks: [1000], takeAt: 1200, rtt: 2500, refuse: 'untilTold', tickInLastTry: 300 });
+      check('...and a tick made during that last try (its write still out when the last try lands): both saved, then one reload', kept(r) && r.ticks.length === 2);
       r = await P({ takeAt: 100 });
       check('nothing unsaved: one reload at once', one(r) && r.reloads[0] === 100);
     }
@@ -575,6 +578,7 @@ const PAGE_BREAKAGES = [
   ['gives up offline too', 'const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES && navigator.onLine !== false;', 'const gaveUp = !_flushP && _saveFailCount > SAVE_MAX_AUTO_RETRIES;'],
   ['does not wait for the last try', 'await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);', 'flushBeforeLeaving(SW_RELOAD_SAVE_WAIT);'],
   ['leaves a tick in the 800 ms wait to its timer', 'if (!_flushP && !_saveFailCount && await flushBeforeLeaving(SW_RELOAD_SAVE_WAIT)) return reload();', ''],
+  ['reloads over a tick made during the last try (R1-2)', 'if (_saveFailCount <= SAVE_MAX_AUTO_RETRIES && hasUnsavedWrites()) return reload();', ''],
 ];
 
 const summarise = rows => ({ total: rows.length, failed: rows.filter(r => !r[2]), scenarios: new Set(rows.map(r => r[0])).size });
