@@ -148,19 +148,18 @@ function nrStagePos(){
 function nrSetStagePos(p){
   try { sessionStorage.setItem('nrStagePos', String(p)); } catch(e){}
 }
-/* A non-button sign-out (token revoked, remote sign-out) skips app.js's normal
-   reload, so every game's sessionStorage-cached "today's best" / in-progress
-   picks would otherwise survive into the next signed-in user's session on a
-   shared Chromebook — not just Note Runner's weak-spot map (which is also
-   in-memory and leaks the same way), but the *Best:<id> caches, Riff
-   Roulette's rrDone/rrPts/rrQueue daily counters, and every game's
-   remembered deck/pattern/tempo choice. The ordinary signOut() path in
-   app.js already runs a full sessionStorage.clear(); this is the one other
-   path auth can resolve to null from, so it needs the same result without
-   also reloading (see the comment on the caller). Prefix-matched rather
-   than one sessionStorage.clear() call so a cold signed-out load — this
-   branch's OTHER, far more common trigger — never wipes something outside
-   the games arcade that happens to be sitting in sessionStorage at boot. */
+/* Every game's sessionStorage-cached "today's best" / in-progress picks:
+   the *Best:<id> caches, Riff Roulette's rrDone/rrPts/rrQueue daily
+   counters, every game's remembered deck/pattern/tempo choice, plus Note
+   Runner's in-memory weak-spot map. A signed-in student's sign-out (the
+   button, or a token revoked / remote sign-out) now runs a full
+   sessionStorage.clear() and reloads (signOut() in app/boot.js, the auth
+   listener in app/start.js), so a shared Chromebook's next student never
+   sees them. gamesResetForUser is what is left for the auth listener's
+   signed-out branch when it does NOT reload: a cold signed-out load and the
+   dev bypass. Prefix-matched rather than one sessionStorage.clear() call so a
+   cold signed-out load never wipes something outside the games arcade that
+   happens to be sitting in sessionStorage at boot. */
 const GAMES_SESSION_KEY_PREFIXES = [
   'bcDeck', 'bcBest:', 'cbDeck', 'cbDir', 'cbBest2:', 'ccBpm', 'ccProg', 'ccRate', 'ccBest:',
   'pwBpm', 'pwProg', 'pwRate',
