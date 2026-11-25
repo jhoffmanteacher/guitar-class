@@ -823,15 +823,17 @@ async function teacherRefreshStudents(opts){
   teacherPaintRefreshBar();
 }
 /* An activity's page: repaint the [data-ta-live] boxes only — the Students
-   tab's counts and its block (teacherActivityGridHtml), and for an exit
-   check its turned-in line too (teacherCheckLiveParts) — plus the count on
+   tab's counts, its block (teacherActivityGridHtml), its place line and
+   Optional banner, and for an exit check its turned-in line too
+   (teacherCheckLiveParts) — plus the count on
    the Students tab itself. The Preview is left alone. */
 function teacherRepaintActivityStudents(id){
   const box=document.getElementById('t-grid-container');
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!box || !a) return;
-  const parts = a.kind==='check' ? teacherCheckLiveParts(a) : {grid: teacherActivityGridHtml(a)};
+  const parts = a.kind==='check' ? teacherCheckLiveParts(a) : {grid: teacherActivityGridHtml(a), place: escHtml(teacherActivityPlace(a.id))};
   parts.counts=teacherActivityCountsHtml(a);
+  parts.optional=teacherOptionalBanner(a.id);
   Object.keys(parts).forEach(k=>{
     const el=box.querySelector(`[data-ta-live="${k}"]`);
     if(el) el.innerHTML=parts[k];

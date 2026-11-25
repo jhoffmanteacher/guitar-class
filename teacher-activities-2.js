@@ -665,9 +665,10 @@ function renderTeacherActivityDetail(id){
       : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'))
     +levelUp
     +(caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a></div>`:'');
-  const students=`<div class="tg-note">${escHtml(place)}</div>`
+  // The place line and the Optional banner are live boxes too: a Settings change (assign, archive, Optional) repaints them.
+  const students=`<div class="tg-note" data-ta-live="place">${escHtml(place)}</div>`
     +`<div data-ta-live="counts">${teacherActivityCountsHtml(a)}</div>`
-    +teacherOptionalBanner(a.id)
+    +`<div data-ta-live="optional">${teacherOptionalBanner(a.id)}</div>`
     +`<div data-ta-live="grid">${teacherActivityGridHtml(a)}</div>`;
   host.innerHTML=teacherDetailFrameHtml(a, back, {preview, students, settings:teacherActivitySettingsHtml(a, teacherClassConfig)});
   if(activityEditId){ const inp=host.querySelector('.t-act-title-edit'); if(inp){ inp.focus(); inp.select(); } }
@@ -694,7 +695,7 @@ function renderTeacherCheckDetail(a, back, host){
     +`<div id="ec-preview-body-${escAttr(a.id)}">${caCheckBodyHtml(a,{preview:true,keyPrefix:'ca-preview'})}</div>`;
   const students=`<div class="tg-note" data-ta-live="note">${live.note}</div>`
     +`<div data-ta-live="counts">${teacherActivityCountsHtml(a)}</div>`
-    +teacherOptionalBanner(a.id)
+    +`<div data-ta-live="optional">${teacherOptionalBanner(a.id)}</div>`
     +`<div data-ta-live="grid">${live.grid}</div>`;
   host.innerHTML=teacherDetailFrameHtml(a, back, {preview, students, settings:teacherActivitySettingsHtml(a, teacherClassConfig)});
 }
