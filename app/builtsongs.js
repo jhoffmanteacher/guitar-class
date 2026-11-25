@@ -463,7 +463,7 @@ const BS_RETURN_MS = 15 * 60 * 1000;
 function bsIdb(){
   return new Promise(resolve => {
     let req, done = false;
-    const end = db => { if(!done){ done = true; resolve(db); } else if(db){ try { db.close(); } catch(e) {} } };
+    const end = conn => { if(!done){ done = true; resolve(conn); } else if(conn){ try { conn.close(); } catch(e) {} } };
     setTimeout(() => end(null), BS_IDB_WAIT_MS);
     try { req = indexedDB.open(BS_IDB, 1); } catch(e) { end(null); return; }
     req.onupgradeneeded = () => { try { req.result.createObjectStore('songs', { keyPath: 'id' }); } catch(e) {} };
