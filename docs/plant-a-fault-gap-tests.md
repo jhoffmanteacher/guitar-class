@@ -46,7 +46,9 @@ Fault-copy outputs seen while building (replay copies, `--root`):
 - 74abd846e1 ecSubmit `caOpenId = id` removed: the exit-check card closes after Submit; display only, a rendered list (smoke `activities`).
 - a5fbe32e51 start.js `__authBootPending = true` removed: an update reload landing mid sign-in; needs the service worker (update-reload-loop).
 - 13c1e43118 start.js `hadController` (navTiming compare): needs start.js's service-worker block run against a stub
-  `navigator.serviceWorker`; no Node tool in the cache region's list loads start.js (update-reload-loop is the guard).
+  `navigator.serviceWorker`; no Node tool in the cache region's list loaded start.js then. Since 2026-11-25
+  `tools/kill-switch/proof.mjs` does (its "open pages" and "unsaved work" scenarios), and it catches this one ("a page
+  claimed while it loaded"); update-reload-loop stays the browser guard.
 - 664bdb8856, 48bf19e696, 6e7fdc87c3, f514254138, 638dbaface, abe0fae2ca, 4350eaa127, 1d1c31e436 (swResume*): the update
   reload's note and restore; a Node round trip (save on a stub DOM, apply on a fresh page) would be a new harness, not a few
   lines, and none of the cache region's tools (kill-switch, sw-audio, checks) could host it without editing the plant

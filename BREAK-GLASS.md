@@ -45,6 +45,9 @@ site straight from the internet.
 1. The code on `main` must already be good (do (a) first, or fix it). The kill switch only removes
    the cache; Chromebooks then load whatever `main` has.
 2. Check the kit: `node tools/kill-switch/proof.mjs` must end "14 of 14 mutations caught" and exit 0.
+   A red line that says "start.js breakage", "save-code breakage" or "[an open page with unsaved work]" is about
+   the site's update reload, not the kill-switch kit: if those are the only red lines and its last line still says
+   "14 of 14 mutations caught", the kit is fine to use.
 3. `cp tools/kill-switch/kill-sw.js sw.js`
 4. `git add sw.js && git commit --no-verify -m "BREAK GLASS: kill-switch service worker in sw.js"`.
    `--no-verify` is needed here and only here: the checks read the real worker's file lists, which
