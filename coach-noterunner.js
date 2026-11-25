@@ -1302,7 +1302,7 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
        <button type="button" class="tp-btn" onclick="nrShowSelect()">&#x2190; ${t('games.nr.allLevelsButton')}</button>`;
   body.innerHTML =
     `<div class="nr-acc ${s.passed ? 'pass' : ''}">${s.acc}%</div>
-     <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t('games.nr.resPitch', {n: nPitch}) : ''}</div>
+     <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t(nPitch === 1 ? 'games.nr.resPitchOne' : 'games.nr.resPitch', {n: nPitch}) : ''}</div>
      ${banner ? `<div class="rn-unlock">&#x1F513; ${statusLine}</div>` : `<div class="coach-tip rn-center">${statusLine}</div>`}
      ${bestLine}
      <div class="nr-marks">${marks}</div>

@@ -2406,6 +2406,8 @@
       es: '{hits} de {total} notas, {perfects} perfectas.' },
     'games.nr.resPitch': { en: '{n} more were on the beat but the wrong note.',
       es: '{n} más iban a tiempo pero con la nota equivocada.' },
+    'games.nr.resPitchOne': { en: '{n} more was on the beat but the wrong note.',
+      es: '{n} más iba a tiempo pero con la nota equivocada.' },
     'games.nr.stageDown': { en: 'Going back to {name}.',
       es: 'Volviendo a {name}.' },
     'games.nr.stageStay': { en: 'Staying here one more round — you’re close.',
