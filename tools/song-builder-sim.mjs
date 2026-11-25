@@ -261,13 +261,14 @@ function makeConsole(consoleSrc, F){
   const grid = Object.assign(inert(), { id: 't-grid-container', _html: '', paints: 0, querySelector: () => inert() });
   Object.defineProperty(grid, 'innerHTML', { get(){ return this._html; }, set(v){ this._html = String(v); this.paints++; } });
   const env = { promptAnswer: null, prompts: [], confirmAnswer: true, confirms: [] };
+  const docL = {};                        // the page's document listeners, kept so a case can call one (sweepCases: the drag)
   const box = {
     console: { log() {}, warn() {}, error() {} }, setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
     navigator: {}, location: { hash: '', search: '', href: 'http://sim/index.html' }, addEventListener() {}, removeEventListener() {}, crypto: globalThis.crypto, Blob,
     Audio: class { addEventListener() {} pause() {} load() {} removeAttribute() {} play(){ return Promise.resolve(); } },
     URL: { createObjectURL: () => 'blob:sim', revokeObjectURL() {} },
-    document: { getElementById: id => id === 't-grid-container' ? grid : null, querySelector: () => null, querySelectorAll: () => [], addEventListener() {}, removeEventListener() {},
+    document: { getElementById: id => id === 't-grid-container' ? grid : null, querySelector: () => null, querySelectorAll: () => [], addEventListener: (t, f) => { (docL[t] = docL[t] || []).push(f); }, removeEventListener() {},
       createElement: () => inert(), body: inert(), documentElement: inert(), hidden: false },
     getComputedStyle: () => ({ getPropertyValue: () => '' }),
     prompt: q => { env.prompts.push(q); return env.promptAnswer; }, confirm: q => { env.confirms.push(q); return env.confirmAnswer; }, alert() {}, scrollY: 0, scrollTo() {},
@@ -293,7 +294,7 @@ function makeConsole(consoleSrc, F){
   run("teacherView = 'songbuilder';");
   /* '+ New song' (sbClick's 'new' branch, copied: the click handler needs a real element). */
   run("function sbNewSong(){ sbStopSounds(); sbSel = 'new'; sbNew = { title: '', artist: '' }; sbStepOn = 1; sbNote = ''; sbMemFor('new'); teacherSbPaint(); }");
-  const C = { box, F, env, run, grid };
+  const C = { box, F, env, run, grid, docL };
   CONSOLES.push(C);                       // settle() waits for every console's sbBusy
   return C;
 }
@@ -2689,6 +2690,38 @@ async function sweepCases(consoleSrc, check){
     run("sbBusy = ''; teacherView = 'songbuilder';");
     check('SB-3: leaving the Song builder while the encoder runs ends the levelling as stopped: the builder is free again (not busy until a reload), and the line says so',
       during && busy === '' && /Stopped: you left the Song builder/.test(note), JSON.stringify({ during, busy, note }));
+  }
+  /* SB-4: ◀ 1 beat ▶ and the drag, at 120 BPM with the end pin at bar 10 (19 s) */
+  const grid120 = "sbReadAt = Date.now(); sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbDraft().beat = { meter: '4/4', bpm: 120, anchor: 1, pins: [{ bar: 10, t: 19 }], driftOff: 0 };";
+  const at = C => JSON.parse(C.run('JSON.stringify({ a: sbDraft().beat.anchor, b5: sbBarTime(sbDraft().beat, 5), b10: sbBarTime(sbDraft().beat, 10), bpm: sbDraft().beat.bpm })'));
+  {
+    const C = await draft(), { run } = C;
+    run(grid120);
+    const before = at(C);
+    run("sbBeatAct('a+beat', { dataset: {} })"); const fwd = at(C);
+    run("sbBeatAct('a-beat', { dataset: {} })"); const back = at(C);
+    await waitSaves();
+    check('SB-4 1 beat: "1 beat ▶" moves every bar line one beat (bar 5 9.0 → 9.5 s, bar 10 19.0 → 19.5 s, still 120 BPM; before the fix bar 5 went to 9.278 s at 123.4 BPM), and "◀ 1 beat" puts it back',
+      near(before.b5, 9) && near(fwd.a, 1.5) && near(fwd.b5, 9.5) && near(fwd.b10, 19.5) && near(fwd.bpm, 120) && near(back.a, 1) && near(back.b5, 9) && near(back.b10, 19), JSON.stringify({ before, fwd, back }));
+  }
+  {
+    const C = await draft(), { run } = C;
+    run(grid120 + ' sbBtFor(sbSel).view = sbMainView(sbDraft().beat, sbDraft().audio.durationSec);');
+    const W = 600, v = JSON.parse(run('JSON.stringify(sbBt.view)')), X = t => (t - v.t0) / (v.t1 - v.t0) * W;
+    const drag = (from, to) => {
+      const L = {};
+      const cv = { dataset: { sbWave: 'main' }, getAttribute: () => '118', clientWidth: W, parentNode: { clientWidth: W }, style: {}, getContext: () => null,
+        getBoundingClientRect: () => ({ left: 0, width: W }), setPointerCapture(){}, addEventListener: (t, f) => { L[t] = f; }, removeEventListener(){},
+        closest: sel => /canvas\[data-sb-wave="main"\]/.test(sel) ? cv : null };
+      for(const f of C.docL.pointerdown || []) f({ target: cv, clientX: X(from), pointerId: 1, preventDefault(){} });
+      if(L.pointermove) L.pointermove({ clientX: X(to) });
+      if(L.pointerup) L.pointerup({});
+      return !!L.pointerup;
+    };
+    const g1 = drag(1, 1.5), big = at(C), g2 = drag(1.5, 1.53), small = at(C);
+    await waitSaves();
+    check('SB-4 drag: dragging bar 1 one beat later (1.0 → 1.5 s) moves every bar line one beat, as "1 beat ▶" does (bar 5 9.5 s, bar 10 19.5 s, 120 BPM); a drag under half a beat (30 ms) moves bar 1 alone (the pins stay)',
+      g1 && g2 && near(big.b5, 9.5) && near(big.b10, 19.5) && near(big.bpm, 120) && near(small.a, 1.53) && near(small.b10, 19.5), JSON.stringify({ big, small }));
   }
   const bad = stores.flatMap(F => F.st.violations), ws = stores.reduce((n, F) => n + F.st.writes.length, 0);
   check('sweep: every write of these cases fits firestore.rules and the builder\'s own paths, none to config/class or progress/',

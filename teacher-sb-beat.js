@@ -341,7 +341,6 @@ function sbBeatAct(act, b){
   if(act === 'listen-bar'){ if(beat){ const bar = Number(b.dataset.sbBar); sbBeatPlay(Math.max(0, sbBarTime(beat, Math.max(1, bar - 2))), true); } return; }
   if(act === 'listen-stop'){ sbBeatStop(); sbDrawAll(); return; }
   if(!beat) return;
-  const P = sbBarSec(beat) / SB_METER[beat.meter].bpb;
   const moveAnchor = dt => {
     const a = Math.max(0, Math.min(d.audio.durationSec - 1, beat.anchor + dt));
     sbBeatSet(d, Object.assign({}, beat, { anchor: Math.round(a * 10000) / 10000, pins: (beat.pins || []).filter(p => p.bar > 1) }), null);
@@ -350,7 +349,8 @@ function sbBeatAct(act, b){
   if(act === 'a+10') return moveAnchor(0.01);
   /* Clicks on the "and" (Jonathan, 2026-11-16, American Girl: "the clicks are basically exactly half a beat off"):
      the WHOLE grid moves half a beat, bar 1 and every pin, each by half of the beat where it sits, so the grid
-     keeps following the record's tempo. (◀ 1 beat ▶ moves bar 1 alone: which beat is the "1".) */
+     keeps following the record's tempo. (◀ 1 beat ▶ moves the whole grid by one beat the same way: which beat is the
+     "1", sbBar1Moved.) */
   if(act === 'a-half' || act === 'a+half'){
     const sign = act === 'a-half' ? -1 : 1, bpb = SB_METER[beat.meter].bpb;
     const half = bar => (sbBarTime(beat, bar + 1) - sbBarTime(beat, bar)) / bpb / 2;
@@ -360,8 +360,12 @@ function sbBeatAct(act, b){
     sbBeatSet(d, Object.assign({}, beat, { anchor: Math.round(a * 10000) / 10000, pins }), `Every bar line moved half a beat ${sign < 0 ? 'earlier' : 'later'}. Listen with clicks again.`);
     return;
   }
-  if(act === 'a-beat') return moveAnchor(-P);
-  if(act === 'a+beat') return moveAnchor(P);
+  if(act === 'a-beat' || act === 'a+beat'){
+    const nb = sbBar1Moved(beat, (act === 'a-beat' ? -1 : 1) * sbBeatAt(beat, 1), d.audio.durationSec);
+    if(!nb){ sbNote = 'Bar 1 cannot move that way: it would leave the recording.'; teacherSbPaint(); return; }
+    sbBeatSet(d, nb, null);
+    return;
+  }
   if(act === 'pin' || act === 'unpin'){
     const bar = Number(b.dataset.sbBar);
     if(!(bar > 1)) return;
@@ -369,6 +373,18 @@ function sbBeatAct(act, b){
     if(act === 'pin'){ const f = sbFindBar(lv.E, beat, bar); pins = pins.concat([{ bar, t: Math.round(f.t * 10000) / 10000 }]); }
     sbBeatSet(d, Object.assign({}, beat, { pins: pins.sort((x, y) => x.bar - y.bar) }), act === 'pin' ? `Bar ${bar} is pinned to the music.` : `Bar ${bar} is no longer pinned.`, true);
   }
+}
+/* SB-4 (sweep 2026-11-25). The length of one beat where bar `bar` sits on the grid (s). */
+function sbBeatAt(beat, bar){ return (sbBarTime(beat, bar + 1) - sbBarTime(beat, bar)) / SB_METER[beat.meter].bpb; }
+/* Bar 1 moved by dt seconds (◀ 1 beat ▶ and the drag). Its WHOLE beats move every bar line: bar 1 and each pin by
+   that many beats where it sits, as ½ beat does, so another beat becomes the "1" and the grid still follows the record
+   (moving bar 1 alone kept the end pin, and the bars between were squeezed by a beat: mid-song they sat on the "and").
+   What is left, under half a beat, moves bar 1 alone, as ±10 ms does. Null when bar 1 would leave the recording. */
+function sbBar1Moved(beat, dt, durationSec){
+  const a = beat.anchor + dt, k = Math.round(dt / sbBeatAt(beat, 1));
+  if(!(a >= 0 && a <= durationSec - 1)) return null;
+  const pins = (beat.pins || []).filter(p => p.bar > 1).map(p => ({ bar: p.bar, t: Math.round((p.t + k * sbBeatAt(beat, p.bar)) * 10000) / 10000 }));
+  return Object.assign({}, beat, { anchor: Math.round(a * 10000) / 10000, pins });
 }
 function sbBeatChange(e){
   const t = e.target;
@@ -399,7 +415,8 @@ function sbBeatKey(e){
   e.preventDefault();
   sbBeatTap();
 }
-/* Dragging bar 1's handle on the main waveform. */
+/* Dragging bar 1's handle on the main waveform: the grid drawn while dragging is the one that is saved (sbBar1Moved:
+   whole beats move every bar line, the rest bar 1 alone; SB-4). */
 document.addEventListener('pointerdown', e => {
   const cv = e.target && e.target.closest ? e.target.closest('[data-sb-root] canvas[data-sb-wave="main"]') : null;
   if(!cv || teacherView !== 'songbuilder' || sbBusy) return;
@@ -412,10 +429,15 @@ document.addEventListener('pointerdown', e => {
   try{ cv.setPointerCapture(e.pointerId); }catch(err){}
   const lv = sbMem.level;
   let a = beat.anchor;
-  const move = ev => { a = Math.max(0, Math.min(v.t1, tx(ev.clientX))); sbDrawWave(cv, lv, v.t0, v.t1, Object.assign({}, beat, { anchor: a, pins: [] }), { taps: bt.taps, handle: true, secs: true }); };
+  const move = ev => { a = Math.max(0, Math.min(v.t1, tx(ev.clientX))); sbDrawWave(cv, lv, v.t0, v.t1, sbBar1Moved(beat, a - beat.anchor, d.audio.durationSec) || beat, { taps: bt.taps, handle: true, secs: true }); };
   const up = () => {
     cv.removeEventListener('pointermove', move); cv.removeEventListener('pointerup', up); cv.removeEventListener('pointercancel', up);
-    if(Math.abs(a - beat.anchor) > 0.0005) sbBeatSet(d, Object.assign({}, beat, { anchor: Math.round(a * 10000) / 10000 }), null);
+    /* The draft as it is now (SB-1: a re-read during the drag may have put another copy of it in memory). */
+    const cur = sbDraft(), now = sbBeatOf(cur);
+    if(!now || Math.abs(a - beat.anchor) <= 0.0005) return;
+    const nb = sbBar1Moved(now, a - beat.anchor, cur.audio.durationSec);
+    if(nb) sbBeatSet(cur, nb, null);
+    else { sbNote = 'Bar 1 cannot move that way: it would leave the recording.'; teacherSbPaint(); }
   };
   cv.addEventListener('pointermove', move); cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
 });
