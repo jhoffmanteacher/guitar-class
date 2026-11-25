@@ -509,7 +509,7 @@
 
     /* ── Feedback lines (4.10) ── */
     function missLine(item, played) {
-      var t = item.target.midi, d = played - t, ref = item.ref;
+      var t = core.measureFrom(item, played), d = played - t, ref = item.ref;
       if (Math.abs(d) === 12) return S.fb.octave(d < 0);
       if (ref && Math.sign(played - ref.midi) * Math.sign(t - ref.midi) < 0) return S.fb.wrongWay(dirWord(t - ref.midi));
       if (ref) return S.fb.off(Math.abs(d), d > 0, core.ivlOf(ref.midi, played).name, core.ivlOf(ref.midi, t).name);
@@ -529,7 +529,7 @@
       } else if (item.task === 'hear') {
         text = res.correct ? S.fb.hearRight(item.answerName) : S.fb.hearWrong(item.answerName, ans.choice);
       } else if (item.task === 'play' || item.task === 'note') {
-        if (res.correct) text = S.fb.right(nm(item.target.midi), item.task === 'play' ? item.interval.name + ' ' + item.dir : '');
+        if (res.correct) text = S.fb.right(nm(core.measureFrom(item, ans.played)), item.task === 'play' ? item.interval.name + ' ' + item.dir : '');
         else text = missLine(item, ans.played);
       } else if (item.task === 'phrase') {
         var n = 0; (res.rights || []).forEach(function (x) { if (x) n++; });

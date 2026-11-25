@@ -344,9 +344,23 @@
   var HIST_NAME = {};
   Object.keys(HIST_CODE).forEach(function (k) { HIST_NAME[HIST_CODE[k]] = k; });
 
+  /* The note a played MIDI number is measured from. A Find-the-note item accepts
+     every spot with the target's letter (item.accept), so a miss is measured from
+     the accepted note nearest to what was played (the lower one on a tie), not
+     from the one spot that was drawn: G3 one fret above F#3 is "1 fret too high",
+     not 13. Every other task has one right note, its target. */
+  function measureFrom(item, played) {
+    if (item.task !== 'note' || !item.accept || !item.accept.length) return item.target.midi;
+    var best = item.accept[0];
+    item.accept.forEach(function (m) {
+      var dm = Math.abs(m - played), db = Math.abs(best - played);
+      if (dm < db || (dm === db && m < best)) best = m;
+    });
+    return best;
+  }
   /* played is a MIDI number. item.target / item.ref are positions. */
   function classifyError(item, played) {
-    var target = item.target, ref = item.ref || null, t = target.midi, d = played - t;
+    var target = item.target, ref = item.ref || null, t = measureFrom(item, played), d = played - t;
     if (Math.abs(d) === 12) return 'octave';
     if (ref && d !== 0 && d === bShift(ref, target)) return 'bString';
     if (ref && Math.sign(played - ref.midi) * Math.sign(t - ref.midi) < 0) return 'wrongDir';
@@ -1480,7 +1494,7 @@
     mulberry32: mulberry32, midiAt: midiAt, mkPos: mkPos, noteName: noteName, noteLabel: noteLabel, noteOctave: noteOctave,
     readPitch: readPitch, medianJudge: medianJudge, ivlInfo: ivlInfo, ivlOf: ivlOf, semisOfName: semisOfName, confPartners: confPartners,
     pairId: pairId, tierNames: tierNames, groupOf: groupOf, crossesB: crossesB, bShift: bShift, classifyMove: classifyMove, neckOf: neckOf,
-    bandOf: bandOf, classifyError: classifyError, errMidis: errMidis, zoneData: zoneData, unionData: unionData, prefixZones: prefixZones,
+    bandOf: bandOf, measureFrom: measureFrom, classifyError: classifyError, errMidis: errMidis, zoneData: zoneData, unionData: unionData, prefixZones: prefixZones,
     catalog: catalog, intervalCatalog: intervalCatalog, metaOf: metaOf, rungRange: rungRange, makeCtx: makeCtx, generateItem: generateItem,
     gradeItem: gradeItem, verifyItem: verifyItem, newProfile: newProfile, normalizeProfile: normalizeProfile, serializeProfile: serializeProfile,
     createEngine: createEngine, mergeConfig: mergeConfig, daysBetween: daysBetween, dayStr: dayStr
