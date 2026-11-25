@@ -24,6 +24,12 @@
      untick     recordings unticked: the recordings are byte-identical, the rest is gone
      failure    a planted failure at the third kind (song requests): "done 2 of 7, failed at Song requests", the
                 kinds before it gone, it and every kind after it untouched, no marker; read again and run again → done
+     stopped    the unticks of a delete that stopped survive a failed re-read, Close and a reopen (review R1-1), and a
+                reload of the tab (sessionStorage, written before the run starts; review R2-2); one student's never
+                reach another's dialog (R2-3)
+     minutes    Practice minutes unticked: nothing under minutes/ is touched, the private Top 5 tag included (R2-3); a
+                stop in the minutes step keeps the tag when it stops before it, and offers the kind for it when it
+                stops at it or a reload cuts the run off there (the console cannot read the tag; R1-6, R2-5)
      start over one write, the progressStartOver marker in config/class; nothing else in the store changes; no
                 write to progress/, minutes/ or anything else
      download   one file, nothing written; it decodes back to that student's documents (N of N)
@@ -365,19 +371,44 @@ console.log('untick minutes');
   ok(!rest.length, `everything else of Test 0's is gone (${rest.length} left)`);
 }
 
-/* ── a failure at the private Top 5 tag: the minutes kind is offered again and the tag goes (review R1-6) ── */
+/* ── a stop in the minutes step (review R1-6, R2-5). The tag goes LAST: a stop before it keeps it (deleted first, the
+   student's next page made a second tag and their old Top 5 entry counted their week twice); a stop at it, or a reload
+   that cuts the run off there, leaves no days or weeks, and the console cannot read the tag, so the kind is offered
+   for it from the stopped run's record. ── */
 console.log('tag');
 {
-  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: `minutes/${U[0]}/meta/board`, op: 'delete', once: true }] });
-  const inv = await c.fn('teacherRemoveRead')(U[0]);
-  const r = await c.fn('teacherRemoveRun')(U[0], inv, ALL);
-  ok(!r.ok && r.at === 'Practice minutes', 'the run stops at Practice minutes: ' + r.text);
-  const c2 = makeConsole(S);
-  const L2 = c2.fn('trmKindLines')(await c2.fn('teacherRemoveRead')(U[0]), U[0]);
-  ok(L2.minutes.n > 0, `the re-read still offers Practice minutes (${L2.minutes.n} things: ${L2.minutes.text})`);
-  const ticks = {}; Object.keys(ALL).forEach(k => { ticks[k] = L2[k].n > 0; });
-  const r2 = await c2.fn('teacherRemoveRun')(U[0], await c2.fn('teacherRemoveRead')(U[0]), ticks);
-  ok(r2.ok && !S.has(`minutes/${U[0]}/meta/board`) && !pathsOf(S, U[0]).length, `the re-run: ${r2.text} The tag is gone, nothing of Test 0's left (${pathsOf(S, U[0]).join(', ') || 'none'})`);
+  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: `minutes/${U[0]}/days/`, op: 'delete', once: true }] }), open = dialogOn(c, [[U[0], 'Test 0']]);
+  await open(U[0]); c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  const r = c.run('trm').result, mins = pathsOf(S, U[0]).filter(k => k.startsWith('minutes/'));
+  ok(!r.ok && r.at === 'Practice minutes' && S.has(`minutes/${U[0]}/meta/board`) && mins.length === 5,
+    `a stop at the days keeps the tag: ${r.text} (tag ${S.has(`minutes/${U[0]}/meta/board`) ? 'kept' : 'GONE'}; ${mins.length} of 5 minutes docs left)`);
+  const t = await open(U[0]), L = c.fn('trmKindLines')(t.inv, U[0]);
+  ok(t.ticks.minutes === true && L.minutes.n === 4 && /of practice, and their private Top 5 tag if they have one$/.test(L.minutes.text),
+    `the re-read offers them, ticked, and promises the tag only "if they have one" (${L.minutes.n}: ${L.minutes.text})`);
+  c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  ok(c.run('trm').result.ok && !pathsOf(S, U[0]).length, `the re-run: ${c.run('trm').result.text} Nothing of Test 0's left (${pathsOf(S, U[0]).join(', ') || 'none'})`);
+}
+{
+  const S = makeStore(), c = makeConsole(S, { fail: [{ prefix: `minutes/${U[0]}/meta/board`, op: 'delete', once: true }] }), open = dialogOn(c, [[U[0], 'Test 0']]);
+  await open(U[0]); c.run(`trm.typed = 'Test 0';`); await c.fn('trmGo')();
+  const r = c.run('trm').result, mins = pathsOf(S, U[0]).filter(k => k.startsWith('minutes/'));
+  ok(!r.ok && r.at === 'Practice minutes' && mins.join() === `minutes/${U[0]}/meta/board`, `a stop at the tag: ${r.text} (left under minutes/: ${mins.join(', ') || 'none'})`);
+  const t1 = await open(U[0]), L1 = c.fn('trmKindLines')(t1.inv, U[0]);
+  const c2 = makeConsole(S, {}, c.session), open2 = dialogOn(c2, [[U[0], 'Test 0']]), t2 = await open2(U[0]), L2 = c2.fn('trmKindLines')(t2.inv, U[0]);
+  ok([[t1, L1], [t2, L2]].every(([t, L]) => L.minutes.n === 1 && t.ticks.minutes === true && /^their private Top 5 tag, if the delete that stopped left it/.test(L.minutes.text)),
+    `reopened, and after a reload: Practice minutes is offered for the tag, ticked (${L1.minutes.n} / ${L2.minutes.n}: ${L2.minutes.text})`);
+  c2.run(`trm.typed = 'Test 0';`); await c2.fn('trmGo')();
+  ok(c2.run('trm').result.ok && !pathsOf(S, U[0]).length, `the re-run: ${c2.run('trm').result.text} The tag is gone, nothing of Test 0's left (${pathsOf(S, U[0]).join(', ') || 'none'})`);
+}
+{
+  // The update reload cuts the run off at the tag (its 5-minute wait ran out): the page never hears how it ended.
+  const S = makeStore(), c = makeConsole(S), open = dialogOn(c, [[U[0], 'Test 0']]);
+  c.run('teacherRemoveDeleteBoardTag = function(){ return new Promise(function(){}); };');
+  await open(U[0]); c.run(`trm.typed = 'Test 0';`); c.fn('trmGo')(); await new Promise(r => setTimeout(r, 0));
+  const mins = pathsOf(S, U[0]).filter(k => k.startsWith('minutes/'));
+  const c2 = makeConsole(S, {}, c.session), t = await dialogOn(c2, [[U[0], 'Test 0']])(U[0]), L = c2.fn('trmKindLines')(t.inv, U[0]);
+  ok(mins.join() === `minutes/${U[0]}/meta/board` && L.minutes.n === 1 && t.ticks.minutes === true,
+    `a run a reload cut off at the tag: after the reload Practice minutes is offered for the tag (left: ${mins.join(', ') || 'none'}; ${L.minutes.n}: ${L.minutes.text})`);
 }
 
 /* ── start over ── */

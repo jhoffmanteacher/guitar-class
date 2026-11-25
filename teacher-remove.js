@@ -36,7 +36,9 @@
    DELETE ORDER (each kind whole before the next; a failure stops there and
    says "done X of N kinds, failed at …", the rest untouched; running it again
    finishes, since every step re-reads what is left):
-     1 practice minutes  minutes/{uid}/meta/board (the tag; teacherRemoveRun), then days/*, weeks/*
+     1 practice minutes  days/*, weeks/*, then minutes/{uid}/meta/board (the tag, LAST: the console cannot
+                         read it, so a delete that stopped before it keeps it and offers the kind again; see
+                         trmChoose)
      2 mic recordings    micTakes/{uid}-coach|nr|pw: chunks first, then the take
      3 song requests     songRequests/* where uid == the student
      4 joining           accessRequests/{uid}, then the allow-list entry in config/access
@@ -79,26 +81,27 @@ let trmGen = 0;
    Close and opening the dialog again must not tick again what the teacher unticked (saved work included). Kept in this
    tab's memory and in its sessionStorage, written BEFORE a run starts (review R2-2): the console reloads itself for a
    new version (app/start.js holds that reload while a run is out, at most 5 minutes), and a reload must not tick saved
-   work again either. The stored value is kind ids only, under a key named with the uid: no name. Sign-out, or another
+   work again either. Each is {ticks, at}: at = the kind it stopped at, '' while it runs (so also for a run a reload
+   cut off). The stored value is kind ids only, under a key named with the uid: no name. Sign-out, or another
    account signing in on this tab, clears sessionStorage (signOut, app/start.js); a NEW tab starts from the usual list. */
-const trmStoppedTicks = {};
+const trmStopped = {};
 const TRM_STOPPED_KEY = 'gc-trm-stopped:';   // + uid, in sessionStorage
 function trmKeptGet(uid){
-  if(trmStoppedTicks[uid]) return trmStoppedTicks[uid];
+  if(trmStopped[uid]) return trmStopped[uid];
   try{
     const v = JSON.parse(sessionStorage.getItem(TRM_STOPPED_KEY + uid) || 'null');
     if(!v || !Array.isArray(v.k)) return null;
     const ticks = {};
     TRM_KINDS.forEach(k=>{ ticks[k.id] = v.k.includes(k.id); });
-    return (trmStoppedTicks[uid] = ticks);
+    return (trmStopped[uid] = {ticks, at: TRM_KINDS.some(k=>k.id===v.at) ? v.at : ''});
   }catch(e){ return null; }
 }
-function trmKeptSet(uid, ticks){
-  trmStoppedTicks[uid] = ticks;
-  try{ sessionStorage.setItem(TRM_STOPPED_KEY + uid, JSON.stringify({k: TRM_KINDS.filter(k=>ticks[k.id]).map(k=>k.id)})); }catch(e){ /* storage blocked: this tab's memory still has them */ }
+function trmKeptSet(uid, ticks, at){
+  trmStopped[uid] = {ticks, at: at || ''};
+  try{ sessionStorage.setItem(TRM_STOPPED_KEY + uid, JSON.stringify({k: TRM_KINDS.filter(k=>ticks[k.id]).map(k=>k.id), at: at || ''})); }catch(e){ /* storage blocked: this tab's memory still has them */ }
 }
 function trmKeptDrop(uid){
-  delete trmStoppedTicks[uid];
+  delete trmStopped[uid];
   try{ sessionStorage.removeItem(TRM_STOPPED_KEY + uid); }catch(e){ /* storage blocked */ }
 }
 
@@ -164,8 +167,11 @@ function trmKindLines(inv, uid){
       trmPlural(trmCountMap(p.exitChecks), 'exit check')];
     out.progress = {n: 1, text: `their whole saved-work document (${parts.join(', ')}); they leave the roster`};
   } else out.progress = {n: 0, text: 'no saved-work document'};
-  out.minutes = {n: inv.days.length + inv.weeks.length,
-    text: inv.days.length + inv.weeks.length ? `${trmPlural(inv.days.length, 'day')} and ${trmPlural(inv.weeks.length, 'week')} of practice, and their private Top 5 tag` : 'no practice minutes saved'};
+  // The tag cannot be read: "if they have one" (a page makes it once the student has a period), and inv.tagLeft (trmChoose).
+  const dw = inv.days.length + inv.weeks.length;
+  out.minutes = dw ? {n: dw, text: `${trmPlural(inv.days.length, 'day')} and ${trmPlural(inv.weeks.length, 'week')} of practice, and their private Top 5 tag if they have one`}
+    : inv.tagLeft ? {n: 1, text: 'their private Top 5 tag, if the delete that stopped left it (the console cannot read it to check)'}
+    : {n: 0, text: 'no practice minutes saved'};
   const pieces = inv.takes.reduce((a, t)=>a + t.chunks.length, 0);
   out.recordings = {n: inv.takes.length, text: inv.takes.length ? `${trmPlural(inv.takes.length, 'recording')} (${trmPlural(pieces, 'audio piece')})` : 'no recordings'};
   out.songRequests = {n: inv.songRequests.length, text: inv.songRequests.length ? trmPlural(inv.songRequests.length, 'song request') : 'no song requests'};
@@ -297,19 +303,15 @@ async function teacherRemoveRun(uid, inv, ticks){
   const kinds = TRM_KINDS.filter(k=>ticks[k.id]);
   let done = 0;
   for(const k of kinds){
-    /* The private Top 5 tag goes FIRST, before the minutes step (review R1-6). The console cannot read it, so a re-read
-       sees only days and weeks: deleted last (the step's own last line), a failure at the tag left no minutes to show,
-       the kind was never offered again and the tag stayed. Deleted here first, any failure leaves days or weeks, so
-       the kind is offered and the re-run deletes the tag again; the step's own delete then finds nothing (a missing doc
-       deletes fine). The step is left as it is: checks 1dm pins its block (UNTRACED_REFS_TODAY, tools/never-blocks.mjs). */
-    try{
-      if(k.id==='minutes') await teacherRemoveDeleteBoardTag(uid);
-      await TRM_STEPS[k.id](uid, inv);
-    }
+    /* The minutes step deletes the private Top 5 tag LAST, after the days and weeks (review R2-5). Deleted first
+       (R1-6), a run that stopped at the days left minutes with no tag: the student's next page made a new tag, and
+       their old Top 5 entry (nobody may delete one) counted them twice for the rest of the week. Now a stop before
+       the tag keeps it; a stop at the tag leaves no days or weeks, and trmChoose offers the kind for the tag. */
+    try{ await TRM_STEPS[k.id](uid, inv); }
     catch(e){
       console.warn('[guitar-class] delete stopped at ' + k.id, e);
       const why = (e && (e.code || e.message)) || 'unknown error';
-      return {ok: false, done, total: kinds.length, at: k.label,
+      return {ok: false, done, total: kinds.length, at: k.label, kind: k.id,
         text: `Stopped: done ${done} of ${kinds.length} kinds, failed at ${k.label} (${why}). Nothing after it was touched. Run Delete again to finish: it starts from what is left.`};
     }
     done++;
@@ -370,11 +372,14 @@ async function trmChoose(mode){
     trmPaint(); return;
   }
   if(!trm || trm.gen!==gen) return;
+  /* The tag cannot be read (review R2-5): after a delete that stopped at Practice minutes, or that a reload cut off,
+     with no days or weeks left, it may still be there, so the kind is offered for it. */
+  inv.tagLeft = !!(keep && keep.ticks.minutes && (!keep.at || keep.at==='minutes') && !inv.days.length && !inv.weeks.length);
   trm.inv = inv; trm.phase = 'ready';
   const lines = trmKindLines(inv, trm.uid);
   /* A kind with nothing to delete then was unticked then, so with keep it stays unticked even if it has data now
      (the note says so): nothing is ticked that the teacher did not tick. */
-  trm.ticks = {}; TRM_KINDS.forEach(k=>{ trm.ticks[k.id] = lines[k.id].n > 0 && (!keep || keep[k.id]===true); });
+  trm.ticks = {}; TRM_KINDS.forEach(k=>{ trm.ticks[k.id] = lines[k.id].n > 0 && (!keep || keep.ticks[k.id]===true); });
   if(keep) trm.note = 'Ticked as in the delete that stopped. A kind you unticked, or one with nothing to delete then, stays unticked: tick it to delete it too.';
   trmPaint();
 }
@@ -388,9 +393,9 @@ async function trmGo(){
     trm.phase = 'running'; trmPaint();
     const ticks = Object.assign({}, trm.ticks);
     // Kept before the run (review R2-2): a reload while it runs keeps them; a run that ends ok forgets them.
-    trmKeptSet(uid, ticks);
+    trmKeptSet(uid, ticks, '');
     const r = await teacherRemoveRun(uid, trm.inv, ticks);
-    if(r.ok) trmKeptDrop(uid);
+    if(r.ok) trmKeptDrop(uid); else trmKeptSet(uid, ticks, r.kind);
     if(!trm || trm.gen!==gen) return;
     trm.phase = 'done'; trm.result = r; trmPaint();
     if(r.done && typeof teacherRefreshStudents==='function') teacherRefreshStudents({manual: true});
