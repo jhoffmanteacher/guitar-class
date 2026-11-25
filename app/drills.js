@@ -651,14 +651,16 @@ function sdFinish(key){
   const hits = st.results.filter(r => r.ok);
   const avg = hits.length ? (hits.reduce((s, r) => s + r.ms, 0) / hits.length / 1000).toFixed(1) : '—';
   const pct = st.inTime / c.rounds;
-  const verdict = pct >= 0.9 ? { cls:'good', key:'drill.verdictGood' }
-                : pct >= 0.7 ? { cls:'mid',  key:'drill.verdictMid' }
-                             : { cls:'mid',  key:'drill.verdictLow' };
   const rows = list.length
     ? list.map(b => `<div class="sdr-drill-row"><b>${escHtml(t('drill.rowFret', { fret: b.fret, note: b.note }))}</b>` +
         `<span>${escHtml(b.misses ? t('drill.rowMiss', { n: b.misses }) : t('drill.rowSlow'))}</span></div>`).join('')
     : `<div class="sdr-drill-row"><b>${escHtml(t('drill.clean'))}</b><span>${escHtml(t('drill.cleanNext'))}</span></div>`;
   const canCheck = c.skill && pct >= 0.9 && progress[c.skill] !== 'gotit';
+  /* "check it off" only beside the button that does it: a warm-up drill with
+     no skill, or a skill already checked off, shows no button. */
+  const verdict = pct >= 0.9 ? { cls:'good', key: canCheck ? 'drill.verdictGood' : 'drill.verdictGoodNoCheck' }
+                : pct >= 0.7 ? { cls:'mid',  key:'drill.verdictMid' }
+                             : { cls:'mid',  key:'drill.verdictLow' };
   const checkHtml = canCheck
     ? `<button type="button" class="sdr-checkoff" onclick="sdCheckOff('${key}')">&#x2713; ${escHtml(t('drill.checkOff'))}</button>`
     : '';

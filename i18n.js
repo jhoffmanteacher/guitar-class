@@ -348,8 +348,8 @@
 
     // ── Shuffle-deck check-off gate (soft: student can always override) ──
     'dgate.title':             { en: 'Prove it with the deck', es: 'Demuéstralo con el mazo' },
-    'dgate.body':              { en: 'This skill has its own shuffle deck. Get 9 of 10 within the time limit and the deck checks the skill off for you. Run the deck first; it takes less than a minute.',
-                                 es: 'Esta destreza tiene su propio mazo de cartas. Saca 9 de 10 dentro del límite de tiempo y el mazo marca la destreza por ti. Corre el mazo primero; toma menos de un minuto.' },
+    'dgate.body':              { en: 'This skill has its own shuffle deck. Get 9 of 10 within the time limit, then press Check this skill off. Run the deck first; it takes less than a minute.',
+                                 es: 'Esta destreza tiene su propio mazo de cartas. Saca 9 de 10 dentro del límite de tiempo y luego pulsa «Marcar esta destreza». Corre el mazo primero; toma menos de un minuto.' },
     'dgate.goto':              { en: 'Take me to the deck', es: 'Llévame al mazo' },
 
     // ── In-Class Activities (teacher-curated, day-specific work) ──
@@ -1207,6 +1207,7 @@
                                es: 'en menos de {s} segundos · promedio {avg}s' },
     'drill.verdictGood':     { en: 'You know this string — check it off.',
                                es: 'Ya sabes esta cuerda — márcala.' },
+    'drill.verdictGoodNoCheck': { en: 'You know this string.', es: 'Ya sabes esta cuerda.' },
     'drill.verdictMid':      { en: 'Close. Drill the frets below, then run it again.',
                                es: 'Casi. Practica los trastes de abajo y repítelo.' },
     'drill.verdictLow':      { en: 'Go back to the chart for these, then deal again.',
