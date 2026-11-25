@@ -297,6 +297,8 @@ function buildLesson(w){
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(tf(s.response,'prompt'))}</div>` : '';
       const labelHtml = `<div class="step-resp-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${t('step.yourResponse')}</div>`;
       if(s.response.type === 'short'){
+        // Switched off (TYPED_RESPONSES_ENABLED, below): no box, so nothing is ever written for this step.
+        if(!TYPED_RESPONSES_ENABLED) return '';
         const ph = s.response.placeholder ? tf(s.response,'placeholder') : t('step.answerPlaceholder');
         const prAttrs = isPR ? ` onblur="onResponsePRBlur('${key}')"` : '';
         return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value${isPR?', true':''})"${prAttrs}>${escHtml(stored)}</textarea></div>`;
@@ -1336,6 +1338,17 @@ function printRoutine(){
    10-Minute Routine), lost its one caller in 52ae05f and is also kept,
    unreached, so either can come back. */
 const DAILY5_ENABLED = false;
+/* ── Typed answers in module steps — switched off 2026-11-25, not deleted ──
+   Jonathan: "remove the typed responses in all modules." With this false a
+   step's `response:{type:'short'}` draws no box (stepsHtml() above is the one
+   student renderer that draws it), so nothing is ever written for it. The
+   data stays: every `response` object, its progress key and the answers
+   students already typed, which the console's Responses view still shows
+   (setShortResponses() in teacher-manage.js tags each slot "(retired)" while
+   this is off). The tick never depended on the box: "Mark done" works the same.
+   Keyed and unkeyed multiple choice are not part of this switch. checks.mjs
+   1ff pins it off and finds no step text that still asks the student to type. */
+const TYPED_RESPONSES_ENABLED = false;
 /* Daily 5 — today's 5-minute warm-up for the current module. Same drill for
    everyone on the same date (rotated by day of year). Read-only. */
 function dayOfYear(){ const now=new Date(); return Math.floor((now-new Date(now.getFullYear(),0,0))/86400000); }

@@ -1368,7 +1368,10 @@ try {
       ['rate a skill', '[onclick^="setSkillLevel("]', 0], ['finish a Module Review', '[onclick^="finishModuleReview("]', 0], ['save a Module Review reflection', 'textarea.reflection-ta', 0, 'type'],
       ['mark a skill', '[onclick^="toggleSkill("]', 0], ['answer a quiz question', '[onclick^="onStepMcSelect("]', 0],
       ['answer a practice question', '[onclick^="onPracticeMcSelect("]', 0], ['log a clean rep', '[onclick^="logCleanRep("]', 0],
-      ['type an answer', 'textarea.step-resp-input', 0, 'type']];
+      ['pick an observation choice', 'input[onchange^="onResponseChange("]', 0]];
+    /* No 'type an answer' action since 2026-11-25: typed answers in module steps are switched off
+       (TYPED_RESPONSES_ENABLED, app/lesson.js), so no set draws textarea.step-resp-input. The unkeyed MC above
+       is today's way into the same writer, onResponseChange(). */
     /* Every action must change the student's document on the server (review R3-2: three of them wrote nothing and
        the run still passed). An action meant to write nothing would be named here; none is. */
     const WRITES_NOTHING = new Set([]);
