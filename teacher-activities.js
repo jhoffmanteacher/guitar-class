@@ -266,6 +266,8 @@ function teacherActivityCtlKit(cfg, activities){
   // (loadAllStudents) — no second Firestore read path for completion data.
   const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
   const doneSummary=a=>{
+    // The roster did not load: no done line at all (the note above the page says why), not "No student data yet" (R3-2).
+    if(teacherRosterDown()) return '';
     const isCheck=a.kind==='check';
     const forIt=doneSummaryRoster.filter(s=>teacherActivityForStudent(a,s.uid,cfg));
     const groups=[['4','P4'],['7','P7'],['CAS','CAS'],['','Unassigned']]
@@ -399,7 +401,7 @@ function teacherActivityCtlKit(cfg, activities){
       +`<summary title="Who this activity is for">Who: ${sum}</summary>`
       +`<div class="t-who-body"><div class="t-who-note">Tick students to give this activity to them only. Nobody ticked = the whole class.</div>`
       +(n?`<div class="tg-seg"><button class="tg-seg-btn" data-activity-whole-class data-id="${escAttr(a.id)}">Back to whole class</button></div>`:'')
-      +`<div data-who-boxes>${boardWhoOpen[a.id]?teacherWhoBoxesHtml(a,cfg):''}</div></div></details>`;
+      +`<div data-who-boxes>${boardWhoOpen[a.id]?teacherWhoListHtml(a,cfg):''}</div></div></details>`;
   };
   // A movable song (caIsSongCard) can go to the Songs page instead — see
   // teacherSetSongPlace. Its board slot is kept for the trip back.
@@ -897,7 +899,8 @@ function teacherActivityRowHtml(r){
   let bar='';
   // Counted here, for the rows actually drawn — not for every card on every
   // keystroke of a search.
-  if(r.assignedCounts){
+  // No bar while the roster is down: "0/0 done" would be a count of nobody (review R3-2).
+  if(r.assignedCounts && !teacherRosterDown()){
     const c=teacherActivityDoneCounts(r.a, teacherClassConfig), pct=c.total?Math.round(c.done/c.total*100):0;
     bar=`<span class="ta-row-done"><span class="ta-bar" aria-hidden="true"><i style="width:${pct}%"></i></span>${c.done}/${c.total} ${r.isCheck?'turned in':'done'}</span>`;
   }
@@ -1061,6 +1064,7 @@ function teacherSetDetailTab(tab, focus){
 }
 /* The Students tab's count: done (or turned in) / the students it is for. */
 function teacherStudentsTabLabelHtml(a){
+  if(teacherRosterDown()) return 'Students';   // no count while the roster is down (review R3-2)
   const c=teacherActivityDoneCounts(a, teacherClassConfig);
   return `Students <span class="ta-tab-count">${c.done}/${c.total}</span>`;
 }
@@ -1069,6 +1073,7 @@ function teacherStudentsTabLabelHtml(a){
    (caSteps) but not marked done. Nothing records a card being opened, so
    the third count is "Not started", not "not opened". */
 function teacherActivityCountsHtml(a){
+  if(teacherRosterDown()) return '';
   const c=teacherActivityDoneCounts(a, teacherClassConfig);
   const chip=(n,label,cls)=>`<span class="ta-count ${cls}"><b>${n}</b> ${label}</span>`;
   if(a.kind==='check'){
@@ -1205,6 +1210,9 @@ function teacherDetailFrameHtml(a, back, panes){
   const cfg=teacherClassConfig;
   const tab=activityDetailTab;
   const tabBtn=(k,label)=>`<button type="button" role="tab" class="ta-tab${k===tab?' on':''}" id="ta-tab-${k}" data-ta-tab="${k}" aria-selected="${k===tab}" aria-controls="ta-pane-${k}" tabindex="${k===tab?0:-1}">${label}</button>`;
+  /* The Students tab is the roster: while it is down, one line instead of "No student data yet" and 0 counts
+     (review R3-2). teacherRepaintActivityStudents puts the tab's boxes back once a roster lands. */
+  if(teacherRosterDown()) panes=Object.assign({}, panes, {students:`<div class="t-loading" data-ta-roster-down>${TEACHER_ROSTER_DOWN_LINE}</div>`});
   const pane=k=>`<div class="ta-pane" role="tabpanel" id="ta-pane-${k}" aria-labelledby="ta-tab-${k}" data-ta-pane="${k}"${k===tab?'':' hidden'}>${panes[k]}</div>`;
   return back
     +`<div class="ta-dhead" data-ta-head data-id="${escAttr(a.id)}">${teacherActivityHeadHtml(a,cfg)}</div>`

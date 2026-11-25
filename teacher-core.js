@@ -396,7 +396,7 @@ async function showTeacherApp(user){
         // A closed picker is drawn without its student list — fill it now.
         const slot=e.target.open && e.target.querySelector('[data-who-boxes]');
         const a=slot && !slot.childElementCount && (window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
-        if(a) slot.innerHTML=teacherWhoBoxesHtml(a, teacherClassConfig);
+        if(a) slot.innerHTML=teacherWhoListHtml(a, teacherClassConfig);
         return;
       }
       if(e.target.matches('[data-board-help]')){ boardHelpOpen=!!e.target.open; return; }
@@ -751,8 +751,9 @@ async function loadAllStudents(opts){
    with one line above them (teacherPaintRosterNote), so the day's activities can be released; while it failed none is
    (a failed config read is never drawn as real state). What is on screen follows the two reads as they are NOW
    (review R3-1): the box says which one failed, and a failure line painted here is drawn over again once the state it
-   was painted for is gone. Live In-Class Games and the other tools are drawn as usual: left alone when already on
-   screen (the line used to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…"
+   was painted for is gone. Games is not one of them: its view (teacher-config.js) says "No students yet" for a roster
+   that did not load (review R3-2). Live In-Class Games and the other tools are drawn as usual: left alone when already
+   on screen (the line used to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…"
    (the console booted on one, e.g. the update reload's resume). The minute timer (teacherSyncAutoRefresh) then reads
    again while a roster view is open and the tab is visible, as does a tab return, at most once every 15 s
    (TEACHER_RETRY_GAP_MS, review R3 minor 3); renderTeacherBody reads again when a blocked view is opened. A read that
@@ -761,9 +762,16 @@ let teacherBodyDrawn=false;       // renderTeacherBody has run: the box no longe
 let teacherRosterBoxFailed=false; // the box holds a failure line painted by teacherPaintRosterFailed, not a view
 let teacherRosterTriedAt=0;       // when the last first load (or retry of it) started
 const TEACHER_RETRY_GAP_MS=15000;
-const TEACHER_SETTINGS_VIEWS=['activities','games','manage','songs'];
+const TEACHER_SETTINGS_VIEWS=['activities','manage','songs'];
 function teacherViewUsesRoster(v){ return !TEACHER_NO_REFRESH_BAR_VIEWS.includes(v) || v==='minutes'; }
 function teacherRosterDown(){ return !teacherStudentsAt && teacherRefreshFailed; }
+/* What the views drawn while the roster is down show in place of a roster fact (review R3-2): an empty roster read
+   as "No students yet", "0 of 0 done" and lists with buttons computed from nobody. */
+const TEACHER_ROSTER_DOWN_LINE='Student progress did not load, so no students are shown here. It is read again every minute.';
+// The Who picker's student list (the board's picker and its open toggle above): nobody to tick while the roster is down.
+function teacherWhoListHtml(a, cfg){
+  return teacherRosterDown() ? `<div class="t-who-note">${TEACHER_ROSTER_DOWN_LINE}</div>` : teacherWhoBoxesHtml(a, cfg);
+}
 function teacherRosterBlocks(v){ return teacherRosterDown() && teacherViewUsesRoster(v) && !(teacherClassConfigReadOk && TEACHER_SETTINGS_VIEWS.includes(v)); }
 function teacherPaintRosterFailed(){
   teacherSyncAutoRefresh();
@@ -916,6 +924,13 @@ function teacherRepaintActivityStudents(id){
   const box=document.getElementById('t-grid-container');
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!box || !a) return;
+  /* Drawn while the roster was down, the tab holds one line (teacherDetailFrameHtml, review R3-2): once a roster is in
+     hand its boxes go back, in renderTeacherActivityDetail's order, and are filled below. */
+  const downLine=box.querySelector('[data-ta-roster-down]');
+  if(downLine && !teacherRosterDown()){
+    downLine.insertAdjacentHTML('beforebegin', `<div class="tg-note" data-ta-live="${a.kind==='check'?'note':'place'}"></div><div data-ta-live="counts"></div><div data-ta-live="optional"></div><div data-ta-live="grid"></div>`);
+    downLine.remove();
+  }
   const parts = a.kind==='check' ? teacherCheckLiveParts(a) : {grid: teacherActivityGridHtml(a), place: escHtml(teacherActivityPlace(a.id))};
   parts.counts=teacherActivityCountsHtml(a);
   parts.optional=teacherOptionalBanner(a.id);

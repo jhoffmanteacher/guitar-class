@@ -65,7 +65,8 @@ function renderTeacherSongs(){
       }
       return `<div class="t-board-card t-songs-row${(isHidden||retired)?' t-board-dim':''}">`
         +`<div class="t-board-row"><span class="t-songs-name">${escHtml(name(a))}</span> <button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this song" aria-label="Rename ${escAttr(name(a))}">&#x270E;</button><span class="t-songs-id">${escHtml(a.id)}</span>`
-        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:'No student data yet'}</span>`
+        /* No done line while the roster is down: the note above the view says so (review R3-2). */
+        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:teacherRosterDown()?'':'No student data yet'}</span>`
         +(roster.length?`<span class="t-songs-pop" title="Students who opened this song from the Songs page, and how many times in all (since Nov 1, 2026)">Opened: ${popTxt}</span>`:'')+`</div>`
         +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
         +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
