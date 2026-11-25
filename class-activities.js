@@ -7754,9 +7754,18 @@ window.CLASS_ACTIVITIES = [
   // 16 strums of half a beat, no rest: A5 x4 (1 + 2 +), G5 x3, F5 x6 (it starts on the "+" after 4), G5 x3 (it starts on the "+" after 3 in bar 2)
   const power = [[A5, 4], [G5, 3], [F5, 6], [G5, 3]].flatMap(([c, n]) => Array.from({ length: n }, () => ({ ...copy(c), beats: 0.5 })));
   // rows: one tab row for the nine plucks of a lap, so the lap is not split 5 / 4
-  // fives: the power-chord cards name their chords A5 G5 F5 G5 in the captions too, as their strums and Jimi's captions do
-  const fiveCaps = p => ({ caption: p.caption.replace('A G F G', 'A5 G5 F5 G5'), caption_es: p.caption_es.replace('A G F G', 'A5 G5 F5 G5') });
-  const sections = (notes, rows, fives) => parts.map(p => ({ ...p, ...(rows ? { rows } : {}), ...(fives ? fiveCaps(p) : {}), notes: notes.map(copy) }));
+  // caps: the power-chord cards' own captions, part by part, naming A5 G5 F5 G5 as their strums and Jimi's captions do
+  const powerCaps = [
+    { caption: 'Part 1 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 1 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 2 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 2 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 3 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 3 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 4 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 4 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 5 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 5 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 6 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 6 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 7 — A5 G5 F5 G5, 10 laps', caption_es: 'Parte 7 — A5 G5 F5 G5, 10 vueltas' },
+    { caption: 'Part 8 — A5 G5 F5 G5, 11 laps', caption_es: 'Parte 8 — A5 G5 F5 G5, 11 vueltas' }
+  ];
+  const sections = (notes, rows, caps) => parts.map((p, i) => ({ ...p, ...(rows ? { rows } : {}), ...(caps ? caps[i] : {}), notes: notes.map(copy) }));
   const neil = (id, card) => {
     const a = list.find(x => x.id === id);
     if(a && a.recordingVersions && a.recordingVersions.neil) a.recordingVersions.neil.card = card;
@@ -7773,7 +7782,7 @@ window.CLASS_ACTIVITIES = [
   neil('ca-29', {
     everyStrum: true,   // a strum on every eighth, each with its chord name, like Jimi's (Jonathan, 2026-10-30)
     ...cap29,
-    sections: sections(power, null, true),
+    sections: sections(power, null, powerCaps),
     // Its own views (CARD VIEWS, above; RECORDINGS in app/cards-views.js): Tab, these power chords written as tab. No Lyrics: ca-38's sheet follows Jimi's form.
     otherViews: { tab: { ...cap29 } }
   });
@@ -7782,6 +7791,6 @@ window.CLASS_ACTIVITIES = [
     everyStrum: true,   // ca-40's own Jimi card has one strum per chord; Neil's is the down-up strum on every eighth
     caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them',
     caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia',
-    sections: sections(power, null, true)
+    sections: sections(power, null, powerCaps)
   });
 })();
