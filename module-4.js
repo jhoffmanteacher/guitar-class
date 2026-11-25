@@ -1152,8 +1152,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — Cross-Group Changes', label_es: 'Reto 3 — Cambios entre grupos',
-            text: 'Play each pair at 60 BPM, 2 bars per chord.<ol><li>G to D.</li><li>Am to Em.</li><li>C to A.</li><li>F to Bm.</li><li>G to Em.</li><li>Then play G and D at 70 BPM for 8 bars.</li></ol>You\'ve got it when: you play all five pairs twice at 60 BPM, then 8 bars of G and D at 70, with every change on beat 1.',
-            text_es: 'Toca cada par a 60 BPM, 2 compases por acorde.<ol><li>G a D.</li><li>Am a Em.</li><li>C a A.</li><li>F a Bm.</li><li>G a Em.</li><li>Luego toca G y D a 70 BPM durante 8 compases.</li></ol>Lo tienes cuando: tocas los cinco pares dos veces a 60 BPM, y luego 8 compases de G y D a 70, con cada cambio en el tiempo 1.',
+            text: 'Play each pair at 60 BPM, 2 bars per chord.<ol><li>G to D.</li><li>Am to Em.</li><li>C to A.</li><li>F to Bm.</li><li>G to Em.</li><li>Then play D and A at 70 BPM for 8 bars.</li></ol>You\'ve got it when: you play all five pairs twice at 60 BPM, then 8 bars of D and A at 70, with every change on beat 1.',
+            text_es: 'Toca cada par a 60 BPM, 2 compases por acorde.<ol><li>G a D.</li><li>Am a Em.</li><li>C a A.</li><li>F a Bm.</li><li>G a Em.</li><li>Luego toca D y A a 70 BPM durante 8 compases.</li></ol>Lo tienes cuando: tocas los cinco pares dos veces a 60 BPM, y luego 8 compases de D y A a 70, con cada cambio en el tiempo 1.',
             hint: 'Before you lift your fingers, look at where each one goes next. Set the ⏱ Timer for 3 minutes and play the pairs until it beeps.',
             hint_es: 'Antes de levantar los dedos, mira a dónde va cada uno. Pon el ⏱ Temporizador en 3 minutos y toca los pares hasta que suene.',
             stuck: 'Play one pair at a time. For G to D, move all your fingers together as one shape.',

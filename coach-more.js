@@ -198,7 +198,7 @@ function fgRenderDone(nPerfect, nGood, nPitch, total){
 
   body.innerHTML =
     `<div class="nr-acc ${s.passed ? 'pass' : ''}">${s.acc}%</div>
-     <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t('games.nr.resPitch', {n: nPitch}) : ''}</div>
+     <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t(nPitch === 1 ? 'games.nr.resPitchOne' : 'games.nr.resPitch', {n: nPitch}) : ''}</div>
      ${status}
      ${bestLine}
      <div class="nr-marks">${marks}</div>

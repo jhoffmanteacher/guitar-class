@@ -945,7 +945,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'To turn an E-shape G (fret 3) into an E-shape A, move:', prompt_es: 'Para convertir un G en forma de E (traste 3) en un A en forma de E, mueve:', choices: ['Up 2 frets', 'Down 2 frets', 'Up 1 string', 'Nowhere — re-finger it'], choices_es: ['2 trastes hacia arriba', '2 trastes hacia abajo', '1 cuerda hacia arriba', 'A ningún lado — cambia los dedos'], answer: 0,
           explain: 'One fret is one half step (the smallest distance in music), and G up to A is two of them. Your fingers never change — sliding the root to a new fret is what renames the chord.',
           explain_es: 'Un traste es un semitono (la distancia más pequeña en la música), y de G a A hay dos. Tus dedos no cambian en nada — deslizar la raíz a un traste nuevo es lo que le cambia el nombre al acorde.' } },
-      { id: 'm11w3-s6', text: 'Choose open vs barre voicing (the way a chord is fingered) for a progression and say why',
+      { id: 'm11w3-s6', text: 'Choose open vs barre voicing (which notes of the chord you play, and where on the neck) for a progression and say why',
         text_es: 'Elegir un acorde abierto o uno con cejilla para una progresión y explicar por qué',
         gotItWhen: 'you can say when you\'d reach for a barre versus an open chord, and give the reason, instead of picking one out of habit.',
         gotItWhen_es: 'puedes decir cuándo elegirías una cejilla frente a un acorde abierto, y dar la razón, en lugar de elegir uno por costumbre.',

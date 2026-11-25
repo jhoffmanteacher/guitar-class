@@ -864,8 +864,8 @@ SETS.push(
             ]
           },
           {
-            title: '"Sweet Child O\' Mine" — assessment preparation',
-            title_es: '"Sweet Child O\' Mine" — preparación para la evaluación',
+            title: '"Sweet Child O\' Mine"',
+            title_es: '"Sweet Child O\' Mine"',
             steps: [
           {
             label: 'Challenge — "Sweet Child" Intro and Verse (assessment preparation)', label_es: 'Reto — Intro y estrofa de "Sweet Child" (preparación para la evaluación)',

@@ -17444,9 +17444,9 @@ function checkCoachVerdicts() {
         if (g === 'low' && !/(low|Mi)\u00a0(E|grave)/.test(title)) flag(`1ca: ${lang} Power Chord Switch's "${title}" group title joins "low E" / "Mi grave" with an ordinary space — use a no-break space (\\u00a0) so the title cannot break between the two words`);
       }
       if (lang === 'es' && /power/i.test(pwText)) flag(`1ca: Spanish Power Chord Switch setup says "${pwText.match(/\S*power\S*/i)[0]}" — the glossary word is "acorde de potencia"`);
-      /* Which strings to strum (Jonathan, 2026-11-25, COACH-A-1): the strings marked on the chart, which also covers the open-root
-         shapes (E5, A5 open) that "the three strings with dots" got wrong. */
-      if (!/strings marked on the chart|cuerdas marcadas en el diagrama/.test(pwText)) flag(`1ca: ${lang} Power Chord Switch setup no longer says to strum only the strings marked on the chart`);
+      /* Which strings NOT to strum (2026-11-25, COACH-A-1 and review R1-4): the ones marked X. True for the three-finger
+         shapes and the open-root ones (E5, A5 open), which "the three strings with dots" got wrong. */
+      if (!/strings marked X|cuerdas marcadas con X/.test(pwText)) flag(`1ca: ${lang} Power Chord Switch setup no longer says not to strum the strings marked X`);
       run(`ccSetup()`);
       const open = bodies['cc-body'];
       if (run('cc.mode') !== 'open') flag(`1ca: ccSetup() with no argument left mode "${run('cc.mode')}" — Change Up must stay the default`);
