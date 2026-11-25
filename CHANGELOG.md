@@ -6,6 +6,15 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-25 — Every click sounds the same, and no more typed answers in the modules
+
+- **Every click on the site now sounds the same on every beat**: play-along cards, Song Journey pages, Strum Hero,
+  Riff Roulette and Riff Runner. No beat is louder or higher than the others. The Listening Coach's count-in is
+  unchanged.
+- **The modules no longer ask you to type an answer.** Where a step used to have a typing box, it now asks you to
+  say the answer out loud or play it. Answers you typed before are still saved.
+
+
 ## 2026-11-25 — A check of the whole site: fixes, a song help pop-up, a simpler Metronome
 
 - **When a song does not load, a help pop-up now shows what to try.** It has one button, "Clear saved songs and
