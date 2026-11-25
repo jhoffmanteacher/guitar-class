@@ -15,12 +15,6 @@ function renderTeacherSongs(){
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='songs') return;   // switched views mid-flight
     if(!cfg) return;                    // superseded by a newer read
-    /* A failed read is {} (loadTeacherClassConfig's catch): every song would show Visible and the moved songs would
-       swap places. Refuse to draw, as Games and the board do. */
-    if(!teacherClassConfigReadOk){
-      box.innerHTML='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing below would be accurate, so it isn\'t shown.</div>';
-      return;
-    }
     // Moving a song here or back changes the tree's counts.
     teacherPaintSideTree();
     const songs=(window.CLASS_ACTIVITIES||[]).filter(a=>caIsLibraryCard(a, cfg.songLibrary||{}));

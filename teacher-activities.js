@@ -1250,8 +1250,7 @@ function teacherSoftRepaintDetail(){
    its roll keep counting the old cfg's roster until the minute refresh. The
    board, the split and the detail all read through this. */
 function teacherReadConfigAndRoster(){
-  // A failed read ({}) has no archived list: keep the roster as it was (the board refuses to draw on it anyway).
-  return loadTeacherClassConfig().then(cfg=>{ if(cfg && teacherClassConfigReadOk) teacherApplyRosterFilter(); return cfg; });
+  return loadTeacherClassConfig().then(cfg=>{ if(cfg) teacherApplyRosterFilter(); return cfg; });
 }
 /* The Class activities screens other than the board: the split, and the
    detail alone. Same `cached` contract as the board (see its comment). */
