@@ -5609,10 +5609,11 @@ body.lq-invite-open{overflow:hidden}
 .lq-stage .lq-chip:nth-child(3n+2){border-color:#ff4fa3;box-shadow:0 0 10px rgba(255,79,163,.35)}
 .lq-stage .lq-chip:nth-child(3n){border-color:#b6ff5e;box-shadow:0 0 10px rgba(182,255,94,.3)}
 .lq-stage .lq-lb-stage li{border:2px solid #3d3392}
-.lq-stage .lq-lb-stage li:nth-child(1){border-color:#ffd23f;box-shadow:0 0 16px rgba(255,210,63,.45)}
-.lq-stage .lq-lb-stage li:nth-child(1) .lq-lb-rank{color:#ffd23f}
-.lq-stage .lq-lb-stage li:nth-child(2){border-color:#5ee7ff}
-.lq-stage .lq-lb-stage li:nth-child(3){border-color:#ff4fa3}
+/* By PLACE (lqLbPlaceCls), never by position: players tied on a place look alike (review R1-3). */
+.lq-stage .lq-lb-stage li.lq-lb-p1{border-color:#ffd23f;box-shadow:0 0 16px rgba(255,210,63,.45)}
+.lq-stage .lq-lb-stage li.lq-lb-p1 .lq-lb-rank{color:#ffd23f}
+.lq-stage .lq-lb-stage li.lq-lb-p2{border-color:#5ee7ff}
+.lq-stage .lq-lb-stage li.lq-lb-p3{border-color:#ff4fa3}
 .lq-stage .lq-cc-progress span{background:linear-gradient(90deg,#5ee7ff,#ff4fa3);box-shadow:0 0 12px rgba(255,79,163,.6)}
 .lq-screen{background:radial-gradient(circle at 10% 10%,rgba(255,79,163,.35),transparent 40%),
   radial-gradient(circle at 90% 90%,rgba(94,231,255,.3),transparent 45%),#0f0b2e}

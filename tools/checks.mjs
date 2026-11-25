@@ -22870,7 +22870,7 @@ function checkLiveQuizHideNames() {
     renders++;
     return stage.innerHTML;
   };
-  const rowsOf = html => { const ol = /<ol class="lq-lb lq-lb-stage">([\s\S]*?)<\/ol>/.exec(html); return ol ? [...ol[1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => m[1].replace(/<[^>]*>/g, '|').replace(/\|+/g, '|').replace(/^\||\|$/g, '')) : null; };
+  const rowsOf = html => { const ol = /<ol class="lq-lb lq-lb-stage">([\s\S]*?)<\/ol>/.exec(html); return ol ? [...ol[1].matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map(m => m[1].replace(/<[^>]*>/g, '|').replace(/\|+/g, '|').replace(/^\||\|$/g, '')) : null; };
   try {
     for (const [label, sess, want] of STATES) {
       const shown = paint(sess, false), hidden = paint(sess, true);

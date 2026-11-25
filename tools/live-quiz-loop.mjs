@@ -891,7 +891,7 @@ const COVERAGE = [
   ['R8endq', 'R8 games ended with a question open'], ['R9order', 'R9 questions opened in order'], ['R9mc', 'R9 mc reveals'], ['R9fret', 'R9 fret reveals'],
   ['R9find', 'R9 Find-the-power-chord reveals'], ['R9name', 'R9 Name-the-power-chord reveals'], ['R10yes', 'R10 "Correct! +N" verdicts'], ['R10no', 'R10 "Not this time" verdicts'],
   ['R10none', 'R10 "You didn\'t answer" verdicts'], ['R10late', 'R10 "too late" verdicts'], ['R10end', 'R10 end screens'], ['R11q', 'R11 question stages'],
-  ['R11lobby', 'R11 lobby stages'], ['R11strip', 'R11 control strips'], ['R11reveal', 'R11 Reveal answer lines'], ['R11lb', 'R11 leaderboards'], ['R11tie', 'R11 leaderboards past 3 rows (a tie at the cut)'],
+  ['R11lobby', 'R11 lobby stages'], ['R11strip', 'R11 control strips'], ['R11reveal', 'R11 Reveal answer lines'], ['R11lb', 'R11 leaderboards'], ['R11tie', 'R11 leaderboards past 3 rows (a tie at the cut)'], ['R11place', 'R11 Top 3 rows checked for their place colour'], ['R10endtop', 'R10 end screens\' Top 3 read row by row'], ['R10endtie', 'R10 end screens past 3 rows (a tie at the cut)'],
   ['R11student', 'R11 student screens before Reveal'], ['R11clear', 'R11 cleared boards'], ['R12stage', 'R12 stage countdown repaints'],
   ['R12student', 'R12 student countdown repaints'], ['R12off', 'R12 buttons off after time-up'], ['R13', 'R13 tabs loaded'],
   ['Pwrites', 'P events checked during a preview (no write from that console)'], ['Pstudents', 'P student screens compared during a preview'],
@@ -1533,15 +1533,18 @@ class World {
     const ol = /<ol class="lq-lb lq-lb-stage">([\s\S]*?)<\/ol>/.exec(html);
     if (hidden) {
       /* Names hidden: each row is its place and "N points", nothing else, in the rules' points order. */
-      const rows = ol ? [...ol[1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => textsOf(m[1]).join(' | ')) : [];
+      const rows = ol ? [...ol[1].matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map(m => textsOf(m[1]).join(' | ')) : [];
+      /* The tie row as the hidden rows around it: place, points, then "+N tied" (review R1-3). */
       const want = modelTop(modelRank(this.model.scores, this.model.names)).map(r => r.tied
-        ? `${r.rank} | ${this.tIn('lq.stageTied', 'en', { n: r.tied })} | ${this.tIn('lq.points', 'en', { n: r.pts })}`
+        ? `${r.rank} | ${this.tIn('lq.points', 'en', { n: r.pts })} | ${this.tIn('lq.stageTied', 'en', { n: r.tied })}`
         : `${r.rank} | ${this.tIn('lq.points', 'en', { n: r.pts })}`);
+      this.checkPlaces(ol, where);
       this.cover('R11lb'); if (want.length > 3) this.cover('R11tie');
       this.check('H names hidden', JSON.stringify(rows) === JSON.stringify(want), () => `${where}, names hidden: leaderboard ${JSON.stringify(rows)}, want ${JSON.stringify(want)}`);
       return;
     }
     const rows = ol ? [...ol[1].matchAll(/<span class="lq-lb-rank">([^<]*)<\/span><span class="lq-lb-name">([^<]*)<\/span><span class="lq-lb-pts">([^<]*)<\/span>/g)].map(m => `${m[1]}. ${unesc(m[2])} ${m[3]}`) : [];
+    this.checkPlaces(ol, where);
     const want = modelTop(modelRank(this.model.scores, this.model.names)).map(r => r.tied ? `${r.rank}. ${this.tIn('lq.stageTied', 'en', { n: r.tied })} ${r.pts}` : `${r.rank}. ${r.name || '—'} ${r.pts}`);
     this.cover('R11lb'); if (want.length > 3) this.cover('R11tie');
     /* With a known student's points off, the board must still be in its own points order, and equal to the rules once
@@ -1554,6 +1557,14 @@ class World {
       return ordered && strip(h) === strip(wv);
     };
     this.check('R11 leaderboard', JSON.stringify(rows) === JSON.stringify(want), () => `${where}: leaderboard ${JSON.stringify(rows)}, want ${JSON.stringify(want)}`, null, { equalWithout: boardWithout });
+  }
+  /* R1-3 (2026-11-25): the projector colours a row by its PLACE, so every row of the stage's Top 3 carries
+     lq-lb-p<place> (the "+N tied" row too) and nothing else: two players on one place look alike. */
+  checkPlaces(ol, where) {
+    const rows = ol ? [...ol[1].matchAll(/<li(?: class="([^"]*)")?>\s*<span class="lq-lb-rank">([^<]*)<\/span>/g)] : [];
+    const bad = rows.filter(m => (m[1] || '') !== (+m[2] >= 1 && +m[2] <= 3 ? 'lq-lb-p' + m[2] : ''));
+    this.cover('R11place', rows.length);
+    this.check('R11 place colours', !bad.length && rows.length === (ol ? (ol[1].match(/<li\b/g) || []).length : 0), () => `${where}: a Top 3 row is not marked by its place: ${bad.slice(0, 3).map(m => `place ${m[2]} has class "${m[1] || ''}"`).join(', ') || 'a row the place check could not read'}`);
   }
   checkStrip(tab, html, view) {
     const quiz = this.model.quiz, tIn = this.tIn;
@@ -1800,6 +1811,18 @@ class World {
         return got === alt && (d ? d.pts : null) === (me ? me.pts : null);
       };
       this.check('R10 end screen', got === want, () => `${tab.label}: the end screen says "${got}", want "${want}"`, null, { equalWithout: screenWithout });
+      /* R1-2 (2026-11-25): the student's own Top 3 cuts as the stage does (everyone tied with the 3rd row, up to 4
+         rows, else 3 rows and "+N tied" in the student's language), from the scores that tab shows; the other players
+         are "Student" and the student's own row comes first among those on its place. */
+      const docRows = modelRank(Object.fromEntries(Object.entries((tab.view && tab.view.scores) || {}).map(([u, v]) => [u, { pts: v.pts }])), {});
+      const meRow = docRows.find(r => r.uid === s.uid);
+      const order = meRow ? [...docRows.filter(r => r.rank < meRow.rank), meRow, ...docRows.filter(r => r.rank >= meRow.rank && r !== meRow)] : docRows;
+      const wantTop = modelTop(order).map(r => r.tied ? `${r.rank}. ${this.tIn('lq.stageTied', s.lang, { n: r.tied })} ${r.pts}`
+        : `${r.rank}. ${r.uid === s.uid ? s.name : this.tIn('lq.student', s.lang)} ${r.pts}`);
+      const ol = /<ol class="lq-lb">([\s\S]*?)<\/ol>/.exec(html);
+      const gotTop = ol ? [...ol[1].matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map(m => { const x = textsOf(m[1]); return `${x[0]}. ${x[1]} ${x[2]}`; }) : [];
+      this.cover('R10endtop'); if (wantTop.length > 3) this.cover('R10endtie');
+      this.check('R10 end screen', JSON.stringify(gotTop) === JSON.stringify(wantTop), () => `${tab.label}: the end screen's Top 3 ${JSON.stringify(gotTop)}, want ${JSON.stringify(wantTop)}`);
       }
     }
   }
@@ -2135,6 +2158,13 @@ const NAMED = {
     { plans: [{ r: 2400, right: false }, { r: 1900 }] },
     { plans: [{ answer: false }, { answer: false }] }
   ], [{ revealAfter: 11000, hold: 6000, pick: 0.3 }, { revealAfter: 11000, hold: 6000, pick: 0.6 }], { hide: { end: [false, true] }, note: 'flat scoring: after question 2 two players tie for 3rd; names hidden on the final scores.' }),
+  /* R1-2 (2026-11-25): a long tie at the END. Flat scoring, one question: six of seven right tie for 1st, so the
+     final scores are 3 rows and "+3 tied" on the stage AND on every student's own end screen (one student in Spanish);
+     each tied student's own row stays on their screen. */
+  'tie-at-the-end-long': () => namedSpec('tie-at-the-end-long', 'string-id', false, [10], [
+    { plans: [{ r: 1500 }] }, { plans: [{ r: 1700 }] }, { plans: [{ r: 1900 }], lang: 'es' }, { plans: [{ r: 2100 }] },
+    { plans: [{ r: 2300 }] }, { plans: [{ r: 2500 }] }, { plans: [{ r: 2700, right: false }], lang: 'es' }
+  ], [{ revealAfter: 11000, hold: 6000, pick: 0.4 }], { hide: { end: [false, true] }, note: 'flat scoring: six of seven tie for 1st at the end; two students read Spanish.' }),
   'end-during-question': () => namedSpec('end-during-question', 'string-id', true, [10, 10], [
     { plans: [{ r: 2000 }, { r: 2000 }] },
     { plans: [{ r: 3000, right: false }, { r: 2500 }] }
@@ -2490,10 +2520,16 @@ const HIDE_FAULTS = [
   { id: 'h-lobby-chips', why: 'H: with names hidden, the lobby still draws the name chips', from: "const chips = lqTHideNames ? '' : here.map", to: "const chips = here.map" },
   { id: 'h-no-repaint', why: 'H: ticking the box does not repaint the stage (the names stay until the next snapshot)', from: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n  lqPaintStage();\n", to: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n" },
   { id: 'h-default-on', why: 'H: the box is ticked on a device that never set it', from: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') === '1';", to: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') !== '0';" },
-  { id: 'h-uid-attr', why: 'H: a hidden row carries the uid in an attribute', from: "  return `<li><span class=\"lq-lb-rank\">", to: "  return `<li data-u=\"${escAttr(r.uid)}\"><span class=\"lq-lb-rank\">" },
+  { id: 'h-uid-attr', why: 'H: a hidden row carries the uid in an attribute', from: "  return `<li${cls ? ` class=\"${cls}\"` : ''}><span class=\"lq-lb-rank\">${r.rank}</span><span class=\"lq-lb-pts\">", to: "  return `<li data-u=\"${escAttr(r.uid)}\"><span class=\"lq-lb-rank\">${r.rank}</span><span class=\"lq-lb-pts\">" },
   { id: 'h-reveal-shown', why: 'H: the mc Reveal ignores the box (names stay on the Top 3)', from: "  const board = lqStageTopHtml(lqRankedNamed(s));\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
   { id: 'tie-cut-dropped', why: 'the Top 3 drops players tied with the 3rd row again (before 2026-11-25)', from: '  const top = rows.filter(r => r.rank <= cut);', to: '  const top = rows.slice(0, 3);' },
   { id: 'tie-no-cap', why: 'a long tie at the cut is drawn whole, past the stage\'s room', from: 'const LQ_STAGE_TOP_ROWS = 4;', to: 'const LQ_STAGE_TOP_ROWS = 99;' },
+  { id: 'r1-end-cut', why: 'R1-2: a student\'s end screen drops players tied with the 3rd row again', from: '  const c = lqTopCut(order);', to: '  const c = { rows: order.slice(0, 3), tie: null };' },
+  { id: 'r1-end-tie-en', why: 'R1-2: a student\'s "+N tied" row is in English whatever their language', from: "${escHtml(t('lq.stageTied',{n:c.tie.n}))}", to: "${escHtml(tIn('lq.stageTied','en',{n:c.tie.n}))}" },
+  { id: 'r1-end-me-hidden', why: 'R1-2: a student tied at the cut can lose their own row into "+N tied"', from: '  const order = me ? rows.filter(r => r.rank < me.rank).concat([me], rows.filter(r => r.rank >= me.rank && r !== me)) : rows;', to: '  const order = rows;' },
+  { id: 'r1-place-by-row', why: 'R1-3: the stage colours a row by its position again', from: "function lqLbPlaceCls(rank){ return rank >= 1 && rank <= 3 ? 'lq-lb-p' + rank : ''; }", to: "let lqLbPlaceN = 0;\nfunction lqLbPlaceCls(rank){ lqLbPlaceN = lqLbPlaceN % 3 + 1; return 'lq-lb-p' + lqLbPlaceN; }" },
+  { id: 'r1-tie-no-place', why: 'R1-3: the "+N tied" row carries no place colour', from: '    const cls = lqLbPlaceCls(c.tie.rank), tied', to: "    const cls = '', tied" },
+  { id: 'r1-hidden-tie-layout', why: 'R1-3: with names hidden the tie row puts "+N tied" before its points (points at the right edge)', from: '      + (lqTHideNames ? `<span class="lq-lb-pts">${escHtml(tIn(\'lq.points\', \'en\', { n: c.tie.pts }))}</span>${tied}`', to: '      + (lqTHideNames ? `${tied}<span class="lq-lb-pts">${escHtml(tIn(\'lq.points\', \'en\', { n: c.tie.pts }))}</span>`' },
   { id: 'h-strip-box-gone', why: 'H: the strip loses the box during a question', from: "  const full = lqHideNamesInputHtml() + `", to: "  const full = (s && s.state === 'question' ? '' : lqHideNamesInputHtml()) + `" },
   { id: 'h-wrong-points', why: 'H: a hidden row shows the place twice and no points', from: "escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))", to: "escHtml(tIn('lq.points', 'en', { n: r.rank }))" }
 ];

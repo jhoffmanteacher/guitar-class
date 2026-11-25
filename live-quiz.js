@@ -1137,38 +1137,56 @@ function lqFretAnswerHtml(correctIds, chord){
 }
 
 // One leaderboard row: rank, name, points. The student's own screen marks
-// its rows lq-lb-row (and its own one .me); the stage's rows carry no class.
+// its rows lq-lb-row (and its own one .me); the stage marks a row's PLACE, lq-lb-p1 to lq-lb-p3 (lqLbPlaceCls), so two
+// players on the same place look the same (review R1-3: the colours went by position before).
 function lqLbRowHtml(r, cls){
   return `<li${cls ? ` class="${cls}"` : ''}><span class="lq-lb-rank">${r.rank}</span>`
     + `<span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
     + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`;
 }
+function lqLbPlaceCls(rank){ return rank >= 1 && rank <= 3 ? 'lq-lb-p' + rank : ''; }
 // A row of the STAGE's leaderboard (the projector). With "Hide names on the projector" ticked it is built with no name
 // at all: the place, then the points in words.
 function lqStageLbRowHtml(r){
-  if(!lqTHideNames) return lqLbRowHtml(r);
-  return `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-pts">${escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))}</span></li>`;
+  const cls = lqLbPlaceCls(r.rank);
+  if(!lqTHideNames) return lqLbRowHtml(r, cls);
+  return `<li${cls ? ` class="${cls}"` : ''}><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-pts">${escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))}</span></li>`;
 }
-/* The stage's Top 3 rows, from lqRankedNamed (Jonathan 2026-11-25: "Show everyone tied"): every player on the same
-   points as the 3rd row stays on, at the same place. LQ_STAGE_TOP_ROWS caps it so a Reveal keeps its height on the
-   projector: a longer tie at the cut is the first three rows and one "+N tied" row (the tie's place and points, no
-   name). Every Top 3 on the stage (each Reveal, the final scores) goes through this. */
+/* The Top 3 rows, from a ranked list (Jonathan 2026-11-25: "Show everyone tied"): every player on the same points as
+   the 3rd row stays on, at the same place. LQ_STAGE_TOP_ROWS caps it so a Reveal keeps its height on the projector: a
+   longer tie at the cut is the first three rows and one "+N tied" row (the tie's place and points, no name). Every
+   Top 3 goes through lqTopCut: the stage's (each Reveal, the final scores, lqStageTopHtml) and a student's own end
+   screen (lqStudentEndedHtml, review R1-2). Returns {rows, tie: null | {rank, n, pts}}. */
 const LQ_STAGE_TOP_ROWS = 4;
-function lqStageTopHtml(rows){
+function lqTopCut(rows){
   const cut = rows.length > 3 ? rows[2].rank : Infinity;
   const top = rows.filter(r => r.rank <= cut);
-  if(top.length <= LQ_STAGE_TOP_ROWS) return top.map(r => lqStageLbRowHtml(r)).join('');
-  const pts = rows[2].pts || 0;
-  const ptsText = lqTHideNames ? tIn('lq.points', 'en', { n: pts }) : String(pts);
-  return top.slice(0, 3).map(r => lqStageLbRowHtml(r)).join('')
-    + `<li><span class="lq-lb-rank">${cut}</span><span class="lq-lb-name">${escHtml(tIn('lq.stageTied', 'en', { n: top.length - 3 }))}</span>`
-    + `<span class="lq-lb-pts">${escHtml(ptsText)}</span></li>`;
+  if(top.length <= LQ_STAGE_TOP_ROWS) return { rows: top, tie: null };
+  return { rows: top.slice(0, 3), tie: { rank: cut, n: top.length - 3, pts: rows[2].pts || 0 } };
+}
+/* The stage's "+N tied" row has the layout of the rows around it: names shown, place | "+N tied" in the name's slot |
+   points; names hidden, place | "N points" | "+N tied" after them (review R1-3). */
+function lqStageTopHtml(rows){
+  const c = lqTopCut(rows);
+  let html = c.rows.map(r => lqStageLbRowHtml(r)).join('');
+  if(c.tie){
+    const cls = lqLbPlaceCls(c.tie.rank), tied = `<span class="lq-lb-name">${escHtml(tIn('lq.stageTied', 'en', { n: c.tie.n }))}</span>`;
+    html += `<li${cls ? ` class="${cls}"` : ''}><span class="lq-lb-rank">${c.tie.rank}</span>`
+      + (lqTHideNames ? `<span class="lq-lb-pts">${escHtml(tIn('lq.points', 'en', { n: c.tie.pts }))}</span>${tied}`
+        : `${tied}<span class="lq-lb-pts">${escHtml(String(c.tie.pts))}</span>`) + `</li>`;
+  }
+  return html;
 }
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
+  // Your own row goes first among the players on your place, so a tie at the cut keeps it on your screen.
+  const order = me ? rows.filter(r => r.rank < me.rank).concat([me], rows.filter(r => r.rank >= me.rank && r !== me)) : rows;
+  const c = lqTopCut(order);
   // Other players are "Student": the public scores carry no names (and an older game's leftover names are never drawn). Your own row shows your own name.
-  const top = rows.slice(0, 3).map(r => lqLbRowHtml(Object.assign({}, r, { name: (me && r.uid === me.uid) ? lqName() : t('lq.student') }), 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('');
+  const top = c.rows.map(r => lqLbRowHtml(Object.assign({}, r, { name: (me && r.uid === me.uid) ? lqName() : t('lq.student') }), 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('')
+    + (c.tie ? `<li class="lq-lb-row"><span class="lq-lb-rank">${c.tie.rank}</span><span class="lq-lb-name" data-i18n="lq.stageTied" data-i18n-params="${escAttr(JSON.stringify({n:c.tie.n}))}">${escHtml(t('lq.stageTied',{n:c.tie.n}))}</span>`
+      + `<span class="lq-lb-pts">${escHtml(String(c.tie.pts))}</span></li>` : '');
   const mine = me
     ? `<div class="lq-final-me"><div class="lq-final-rank" data-i18n="lq.rank" data-i18n-params="${escAttr(JSON.stringify({n:me.rank,total:rows.length}))}">${escHtml(t('lq.rank',{n:me.rank,total:rows.length}))}</div>`
       + `<div class="lq-final-pts" data-i18n="lq.points" data-i18n-params="${escAttr(JSON.stringify({n:me.pts||0}))}">${escHtml(t('lq.points',{n:me.pts||0}))}</div></div>`
