@@ -927,6 +927,13 @@ that shape, and comment them.
 changes how `caActivityCardHtml`/`caHeroCardHtml` lay the steps out (via
 `caIsFocus`); the preview deliberately lists every step instead. `caStepHtml` has a focus branch for the head and the
 nav row, so anything added there must land in both of its branches too.
+A Focus step tap (`caFocusGo`) redraws the OPEN CARD alone (`caRedrawOpenCard`, `app/activities.js`, 2026-11-25:
+760 ms → a fraction at 4x CPU), with the builder and arguments the last full render used for it, which every card
+call site in `renderClassActivities()` and its groups passes through `caCardOut`. A new call site goes through
+`caCardOut` too, and anything outside the card that starts to read a step's tick or `caStepOpen` breaks the redraw:
+run `node tools/focus-tap-diff.mjs` (every Focus activity and step, EN and ES: the page after a tap must equal a full
+render, byte for byte). The last step's "Done" and any doubt (another card open, a pending "Since your last visit"
+repaint, a new day, student or language) still render the whole page.
 
 **Paths (`paths` on a Focus-view activity — ca-46) are activity-level too.**
 - ONE flat `steps` array. A step tagged `path: '<key>'` belongs to that path;

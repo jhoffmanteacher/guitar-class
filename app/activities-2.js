@@ -1432,8 +1432,11 @@ function caRequiredFirst(cards, rankOf){
   return cards.filter(a => rankOf(a) === 0).concat(cards.filter(a => rankOf(a) !== 0));
 }
 function renderClassActivities(){
+  // Every card goes through caCardOut, which notes how the open card was built for caRedrawOpenCard (app/activities.js).
+  caOpenCardBuild = null;
+  caOpenRec = { n: 0 };
   const bodyEl = document.getElementById('class-activities-body');
-  if(!bodyEl) return;
+  if(!bodyEl){ caOpenRec = null; return; }
   // Recomputed below only when the list has cards; an emptied list must not
   // keep the last pass's hero, or renderResumeCard stays hidden for good.
   caStartHereId = null;
@@ -1503,11 +1506,11 @@ function renderClassActivities(){
   // A library song is headed with the Songs list it came from (caIsLibrarySong).
   const playOnlyHead = playOnly && caIsLibrarySong(playOnly) ? 'hub.libraryTitle' : 'hub.playAlongTitle';
   const playOnlyHtml = playOnly && !swap && !pinOpen
-    ? `<div class="ca-mod-head" role="heading" aria-level="3" data-i18n="${playOnlyHead}">${escHtml(t(playOnlyHead))}</div>${caActivityCardHtml(playOnly)}`
+    ? `<div class="ca-mod-head" role="heading" aria-level="3" data-i18n="${playOnlyHead}">${escHtml(t(playOnlyHead))}</div>${caCardOut(caActivityCardHtml, playOnly)}`
     : '';
   // The Keep practicing row (caPinRowHtml) plus, under it, a pin-only card
   // the student opened from it.
-  const pinsHtml = () => caPinRowHtml(byId) + (pinOpen ? caActivityCardHtml(pinOpen) : '');
+  const pinsHtml = () => caPinRowHtml(byId) + (pinOpen ? caCardOut(caActivityCardHtml, pinOpen) : '');
   // A deep link whose id isn't published (or is mistyped) says so, above the
   // archive it did open — see caFocusActivity.
   const missing = caLinkMissingId
@@ -1643,7 +1646,7 @@ function renderClassActivities(){
     const todayHtml = todayCards.length
       ? caTodayHeadHtml(todayDay)
         + `<div class="ca-today-grid${todayCards.length > 1 ? ' ca-today-grid--multi' : ''}">`
-        + todayCards.map(a => isDone(a) ? caKindRowHtml(swapIn(a), chipOf(a)) : caHeroCardHtml(swapIn(a), chipOf(a))).join('')
+        + todayCards.map(a => caCardOut(isDone(a) ? caKindRowHtml : caHeroCardHtml, swapIn(a), chipOf(a))).join('')
         + `</div>`
       : '';
     let pendingHtml;
@@ -1671,7 +1674,7 @@ function renderClassActivities(){
            rows (or the flat list) sit in one .ca-todo-grid, same order, read
            left to right, then down; each row carries its kind picture. */
         const restNewest = caNewestModNum(restGroups);
-        const grid = cards => `<div class="ca-todo-grid">${cards.map(a => caKindRowHtml(swapIn(a))).join('')}</div>`;
+        const grid = cards => `<div class="ca-todo-grid">${cards.map(a => caCardOut(caKindRowHtml, swapIn(a))).join('')}</div>`;
         const body = restGroups.some(g => g.sec.mod)
           ? restGroups.map(g => caModFoldHtml('todo', g.sec, headHtml(g.sec), grid(g.cards), g.cards, restNewest, swap)).join('')
           : grid(restFlat);
@@ -1720,6 +1723,7 @@ function renderClassActivities(){
     const finishedRest = finished.filter(a => !caTodayIds.includes(a.id));
     bodyEl.innerHTML = missing + pinsHtml() + gateIntro + playOnlyHtml + pendingHtml + (finishedRest.length ? caFinishedGroupHtml(finishedGroups, finishedRest, byId, swap) : '');
   }
+  caOpenRecDone();
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
   caArmTabReveals(bodyEl);
   caSyncTopbar();
@@ -1818,8 +1822,8 @@ function caFinishedGroupHtml(finishedGroups, finishedFlat, byId, swap){
   const open = caFinishedOpen || finishedFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
   const newest = caNewestModNum(finishedGroups);
   const body = finishedGroups.some(g => g.sec.mod)
-    ? finishedGroups.map(g => caModFoldHtml('done', g.sec, caModuleHeadHtml(g.sec, byId), g.cards.map(a => caActivityCardHtml(swapIn(a))).join(''), g.cards, newest, swap)).join('')
-    : finishedFlat.map(a => caActivityCardHtml(swapIn(a))).join('');
+    ? finishedGroups.map(g => caModFoldHtml('done', g.sec, caModuleHeadHtml(g.sec, byId), g.cards.map(a => caCardOut(caActivityCardHtml, swapIn(a))).join(''), g.cards, newest, swap)).join('')
+    : finishedFlat.map(a => caCardOut(caActivityCardHtml, swapIn(a))).join('');
   return `<details class="ca-finished-group" ${open ? 'open' : ''} ontoggle="caOnFinishedToggle(this)">
     <summary class="ca-finished-summary">${escHtml(t('ca.finishedGroup', {n: finishedFlat.length}))}</summary>
     <div class="ca-finished-body">${body}</div>
@@ -1981,7 +1985,7 @@ function caSinceHtml(since, byId, swapIn){
   const date = caFormatDate(since.last);
   return `<section class="ca-since" aria-labelledby="ca-since-lbl"><div class="ca-today-head" role="heading" aria-level="3"><span class="ca-today-label" id="ca-since-lbl" data-i18n="ca.sinceTitle">${escHtml(t('ca.sinceTitle'))}</span>${date ? `<span class="ca-today-date">${escHtml(date)}</span>` : ''}</div>`
     + `<p class="ca-since-note" data-i18n="${noteKey}"${noteParams ? ` data-i18n-params="${escAttr(JSON.stringify(noteParams))}"` : ''}>${escHtml(t(noteKey, noteParams))}</p>`
-    + cards.map((a, i) => i === 0 ? caHeroCardHtml(swapIn(a), caDate(a) || '') : caActivityCardHtml(swapIn(a))).join('')
+    + cards.map((a, i) => i === 0 ? caCardOut(caHeroCardHtml, swapIn(a), caDate(a) || '') : caCardOut(caActivityCardHtml, swapIn(a))).join('')
     + `</section>`;
 }
 

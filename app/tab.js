@@ -548,10 +548,10 @@ function wrapTabReveal(html, sec, key){
   return `<div class="tab-reveal" data-reveal-delay="${ms}" data-reveal-key="${escAttr(key || '')}" hidden>${html}</div>`;
 }
 /* Arms every not-yet-revealed tab under root that's actually visible — called
-   at the end of renderClassActivities() AND from caOnToggle() when a card
-   opens. Focus-view step navigation re-renders the whole page while the card
-   is open, so returning to a step re-arms its tab and restarts its own
-   countdown, same as before.
+   at the end of renderClassActivities(), from caRedrawOpenCard() on the one
+   card it redraws, AND from caOnToggle() when a card opens. Focus-view step
+   navigation redraws the open card (alone since 2026-11-25), so returning to
+   a step re-arms its tab and restarts its own countdown, same as before.
 
    A tab inside a CLOSED accordion card is skipped here on purpose (found
    2026-09-25): the render pass writes every card's markup regardless of

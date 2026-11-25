@@ -777,7 +777,61 @@ function caFocusNavHtml(a, si, isDone){
     : (last ? escHtml(t('ca.focusLast')) : `${escHtml(t('ca.focusNext'))} &#x25B6;`);
   return `<div class="ca-focus-nav">${back}<button type="button" class="ca-focus-next${isDone ? ' is-done' : ''}" onclick="caFocusGotIt('${id}',${si})">${label}</button></div>`;
 }
-function caFocusGo(id, si){
+/* ── ONE CARD REDRAWN (2026-11-25, sweep perf fix) ──
+   A Focus step tap used to rebuild the whole In class page: 43 cards, about
+   2 MB of HTML, 760 ms from tap to paint at a Chromebook's speed (4x CPU
+   throttle, measured in headless Chrome). A step tap changes only the open
+   card (its step, its ticks; never classActivities), so caFocusGo redraws
+   that card alone, with the same builder and arguments the last full render
+   used for it. caCardOut (every card call site in renderClassActivities and
+   its groups) notes them; caRedrawOpenCard refuses, and the caller does the
+   full render, whenever the result could differ from one: no single note
+   for the card, another card or a closed fold around it, a different card
+   object or done state, a pending "Since your last visit" repaint, or a new
+   student, day or language since that render. The page after a redraw is
+   byte for byte the page a full render would draw: tools/focus-tap-diff.mjs
+   proves it over every Focus activity and step, in both languages. */
+let caOpenRec = null;          // set by renderClassActivities while it builds
+let caOpenCardBuild = null;    // { n, a, done, swap, build } from the last full render, or null
+let caRenderStamp = '';
+function caCardOut(build, a, chipIso){
+  if(caOpenRec && a && a.id === caOpenId){ caOpenRec.n++; caOpenRec.a = a; caOpenRec.build = () => build(a, chipIso); }
+  return build(a, chipIso);
+}
+function caRenderStampNow(){
+  return [(currentUser && currentUser.uid) || '', caTodayStr(), caLocalDay(), typeof getLang === 'function' ? getLang() : ''].join('|');
+}
+// Called by renderClassActivities when its page is written.
+function caOpenRecDone(){
+  const r = caOpenRec;
+  caOpenRec = null;
+  caRenderStamp = caRenderStampNow();
+  caOpenCardBuild = r && r.n === 1 ? Object.assign(r, { done: classActivities[r.a.id] === true, swap: caSwap }) : null;
+}
+// true = the open card was redrawn alone; false = nothing was touched, render the page.
+function caRedrawOpenCard(id){
+  const r = caOpenCardBuild;
+  const bodyEl = document.getElementById('class-activities-body');
+  if(!r || !bodyEl || r.a.id !== id || caSinceRepaint || caSwap !== r.swap || caRenderStampNow() !== caRenderStamp) return false;
+  if((window.CLASS_ACTIVITIES || []).find(x => x.id === id) !== r.a || (classActivities[id] === true) !== r.done) return false;
+  const olds = bodyEl.querySelectorAll(`.ca-card[data-id="${CSS.escape(id)}"]`);
+  const old = olds.length === 1 ? olds[0] : null;
+  if(!old || !old.open || bodyEl.querySelectorAll('.ca-card[open]').length !== 1) return false;
+  for(let el = old.parentElement; el && el !== bodyEl; el = el.parentElement) if(el.tagName === 'DETAILS' && !el.open) return false;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = r.build();
+  const card = tpl.content.firstElementChild;
+  if(!card || tpl.content.childElementCount !== 1) return false;
+  // The caller's stopCardAudio() has stopped the snippet and the song (the full render's snipStop / pcStop).
+  old.replaceWith(card);
+  if(typeof applyI18n === 'function') applyI18n(card);
+  caArmTabReveals(card);
+  caSyncTopbar();
+  return true;
+}
+/* `whole`: render the whole page anyway (the last step's "Done", which the
+   2026-11-25 plan keeps on the full render). */
+function caFocusGo(id, si, whole){
   stopCardAudio();
   // A real step move restarts that step's reveal countdown. "Done" on the
   // LAST step re-renders the same step, and must not blank its tab again.
@@ -789,8 +843,9 @@ function caFocusGo(id, si){
      wrong here — stepping through the Today hero left the Unfinished fold
      open after "All activities". The card is already open and on screen;
      renderClassActivities() keeps its fold open while it's inside one. */
+  const wasOpen = caOpenId;
   caOpenId = id;
-  renderClassActivities();
+  if(whole === true || wasOpen !== id || !caRedrawOpenCard(id)) renderClassActivities();
   caScrollToActivity(id);
   // The button pressed went with the old markup — give focus to the step
   // now on screen (tabindex="-1" head) so Tab carries on from there.
@@ -817,11 +872,11 @@ function caFocusGotIt(id, si){
   const next = last ? si : route[pos + 1];
   if(caStepDone[key] === true){
     if(last) onCaStepChange(key, false);
-    caFocusGo(id, next);
+    caFocusGo(id, next, last);
     return;
   }
   onCaStepChange(key, true);
-  caFocusGo(id, next);
+  caFocusGo(id, next, last);
 }
 /* An activity that names a Song Journey page (`journey: '<slug>'`, see the
    JOURNEY note atop class-activities.js) gets a link button under its steps
