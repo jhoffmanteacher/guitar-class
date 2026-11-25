@@ -100,9 +100,58 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 ---
 
-## Where things stand (updated 2026-11-19 morning)
+## Where things stand (updated 2026-11-25)
 
 Update this block whenever an item opens or closes.
+
+**Done 2026-11-25: the whole-site sweep, push 1 (Reviewed, `site-reviewer-deep` on Opus, up to 3 rounds per area).**
+Jonathan: "it's time for you to do a full review of the website for code and content." 21 read-only auditors (Opus,
+high) read the site by area (about 98,000 lines); the lead verified each serious finding in the code; six fixers and
+three review rounds followed. Run from a cloud session on a clone (nothing on the Mac). What shipped is in
+CHANGELOG 2026-11-25; the code side:
+- **Update reload** (`app/start.js`): a tab that loaded with no controlling worker skips only its OWN worker's first
+  takeover (it used to never reload for a later deploy); the reload never goes ahead over unsaved or in-flight work
+  (a give-up rule bounds it); `tools/kill-switch/proof.mjs` now runs that block with the real save code (its line
+  still ends "14 of 14 mutations caught"). 15,000 random schedules: 0 reloads over untold work, 0 double reloads.
+- **Save path** (`app/save.js`): after a Start over or a Delete, a second Chromebook's local practice-log copy is
+  ignored and cleared (Jonathan chose "ignore the old device copy"; cost: reps made after a reset whose save never
+  landed are dropped); legacy ticks kept at a Start-over sign-in. save-loop S14-S18.
+- **Play-along cards**: a built song's lyric sheet that starts on a rest no longer throws on Play; a 6/8 sheet's
+  strip counts 1-6. No coded card had either.
+- **Song builder**: edits survive the 15 s re-read and a song switch; "Level it again" leaves a live song's file
+  alone; leaving mid-encode no longer locks the builder; whole-beat moves shift every bar line; all three draft
+  writers, Delete draft and Delete… check in a transaction that the stored draft is the one this tab read (two tabs).
+  A refused Level deletes nothing (round 3: the delete could take another tab's copy).
+- **Console**: Delete dialog unticks kept through a failed re-read, Close and a console reload; the update reload held
+  while a Delete runs; mic evaluation no longer hangs on a bad sample rate; "Higher or lower?" cannot reopen a closed
+  game; ties at the Top 3 cut.
+- **The song help pop-up** (`app/songhelp.js`, `checks.mjs` 1fe) and the Metronome without time-signature buttons.
+- **Browser tools behind a proxy**: `--no-proxy-server` beside `--host-resolver-rules` in update-reload-loop, golden,
+  playalong-loop, slow-load and speed-ladder-loop. In a cloud session `HTTPS_PROXY` is set, Chrome sent every request
+  to it, the block stopped nothing, the Firebase SDK loaded and its late "signed out" answer signed the dev user out
+  mid-case (16 of 29 on a sound site; 29 of 29 with the flag). **Those test pages opened a Listen channel to the
+  class project; it was refused (no data, nothing written).** update-reload-loop now stops if the SDK loaded.
+- **GitHub** (`checks.yml`) also runs kill-switch proof, tuning-sim-proof, access-sim, backup-proof, stay-proof and
+  mic-sim/micrec-clock after every push.
+- **Taken out after review round 3, not shipped:** "the console recovers by itself after a failed load" (three rounds
+  each found a new MAJOR: a stuck failure line, Remove buttons computed from an empty roster, the two-console guard
+  off during an outage). The console's failed-read behaviour is main's. Being rebuilt test-first
+  (`tools/console-load-loop.mjs`).
+- **Open from the sweep (push 2 and later; details in the session's reports):** every click the same sound (built);
+  typed answers off in all modules (built: `TYPED_RESPONSES_ENABLED`); a Focus step tap redraws only the open card
+  (built: 588 ms -> 132 ms at 4x CPU; needs a golden compare and a review); the new loops `stop-loop`,
+  `built-song-loop`, `sb-draft-loop` (built) and a console failed-read loop; the Listening Coach "the notes decide"
+  (being built; Always Reviewed, its own push); the per-Chromebook reset marker (a stopped consent "yes", unsent
+  practice seconds and old ticks still come back from a second Chromebook after a Delete); a doc re-created after a
+  Delete without `migrations.swap45`; things left running that `stop-loop` lists (a Shuffle round and Note Call /
+  Call the chord after a card closes by its title, a tab line when In class opens, the Module Review recorder on a
+  language switch); `playalong-loop` walks the ca-54 ladder as an ordinary card (42 ✗ lines, same on d8ca4e2); a class
+  settings change redraws under an open card; Unpublish from an old copy; eight Chrome tools with no network block
+  (the smoke among them); split `live-quiz.js` (over 2,000 lines) and `app/activities-2.js` (1,990s).
+- **Jonathan's calls still open:** the Module 8 fingerpicking video (K2Z3RZc5t-A is titled "Travis Finger Picking";
+  the step's hint and quiz are about p-i-m-a-m-i), ca-34's intro open G vs ca-35's solo D-string fret 4 ("Vuelve a la
+  Vida"), Module 9 Set 1's re-tests shown twice, a privacy-page sentence for "request to join", the Module 2 thumb
+  sketch (the image says index finger; the text says middle).
 
 **Done 2026-11-23: W15, the design-values tidy (Reviewed, `site-reviewer` on Opus, 2 rounds).** Text sizes (`--fs-*`,
 13), layers (`--z-*`, 9) and spacings (`--sp-*`, 11) have names equal to today's values; students see nothing (no

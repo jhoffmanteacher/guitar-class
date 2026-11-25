@@ -6,6 +6,40 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-25 — A check of the whole site: fixes, a song help pop-up, a simpler Metronome
+
+- **When a song does not load, a help pop-up now shows what to try.** It has one button, "Clear saved songs and
+  reload", which clears the site's saved songs and brings you back to where you were. Your progress stays saved, and
+  the page does not reload while your work is still being saved. If this Chromebook is full, the pop-up says so and
+  lists the steps to empty the Downloads folder first. With no internet you still get the short "check the
+  connection" line, and when the problem is on the site's side the card says to press play again later.
+- **The Metronome has no time-signature buttons any more, and every click sounds the same.** On the Luna page it
+  clicks six times a bar on its own.
+- **In-Class Activities left open overnight catches up with today** when you come back to the tab: today's cards show,
+  and Find finds them.
+- **A Card Deck or Ear Spark round you walk away from goes back to its Start screen**, so it no longer holds up a site
+  update. Clicking the set or tab you are already on leaves your round alone.
+- **Finger Gym tempo sliders open at 50**, as the directions say.
+- **All Along the Watchtower, Neil Young power-chord parts:** the captions now say A5 G5 F5 G5.
+- **"the cure" Song Journey page:** the click is as loud as on the play-along card. **Luna, Layer 6:** the chord
+  picture shows the high e open, and is named Fmaj7.
+- **Live In-Class Games:** players tied at 3rd place all show in the Top 3 (on the room's screen and on your own end
+  screen), and in "Hear the chord change" the progress bar stays full while results come in.
+- **The red "Recording this take" label goes away when a recording reaches its 30 seconds.**
+- **Riff Runner, Wait Mode on "Luna"** says "Play A" for the single note A. **Note Hunt in Spanish** names the strings
+  Mi · La, Re · Sol, Si · mi. **Sweet Child O' Mine** says "one note every bar" on the Riff Runner card and the Song
+  Journey page.
+- **Power Chord Switch's tip** now fits the open-string shapes too: "Keep your fingers down. Sliding up the neck means
+  toward the body. Do not strum the strings marked X."
+- **Module wording:** "+" is explained in Module 2, "scale" in Module 5, "chromatic" and "voicing" in Module 11.
+  Module 4's "Cross-Group Changes" pairs now all cross the two chord groups (G to D, Am to Em, C to A, F to Bm, G to
+  Em), then D and A at 70 BPM. Module 8's Em pattern says "Set the metronome to 60 BPM." A few sentences use plainer
+  words.
+- **Site updates reach every open tab**, including one that was opened for the first time that day, and an update
+  never reloads the page while your work is still being saved.
+- **After your teacher starts you over, a second Chromebook no longer brings your old practice counts back.**
+
+
 ## 2026-11-25 — A saw chases the guitar on the projector
 
 - **With "Saw chase" on, a musical saw floats after a running guitarist after each answer in a Live In-Class Game.** When the class
