@@ -7,7 +7,7 @@
    and the student-progress read (the progress collection) fail and come back on a schedule, while a teacher clicks
    views, hides the tab, types, drags, and a second console writes config/class.
 
-     node tools/console-load-loop.mjs                       96 cases, seed 1 (about 10-15 s)
+     node tools/console-load-loop.mjs                       136 cases, seed 1 (about 20-30 s)
      node tools/console-load-loop.mjs --seed S --cases N     another seed / count
      node tools/console-load-loop.mjs --case K --verbose     replay ONE case: every event, read, write and check
      --family F     only that family (names below)            --root DIR    another site folder (a break-it copy)
@@ -31,7 +31,7 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Nine families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Seventeen families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
    booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
@@ -41,6 +41,14 @@
    Games mid-game after an update reload, during an outage), detail (a card's page from the update reload's note,
    progress down; a Hidden click lands on top of the other console's change and its follow-up settings read fails, so
    the page is drawn from the failed copy; a tab return then starts the retry, with a click right after its read).
+   Review R4 added eight: early (slow reads, 250-700 ms; a view clicked 0.2-1.2 s in, while the first load is out,
+   sometimes while the module files load too; both reads down for 1.5-3.5 s, then progress), early2 (the same with
+   only progress down), midload (module files 300 ms; a view clicked while they load), summary (Skills Overview and
+   a class-period change, progress down), livelist (booted on Live In-Class Games with the settings read down, then a
+   Remove / Restore / move in its games list), games2 (Games with progress down: the class games switch must be
+   offered), failedread (a loaded console whose settings read fails for 25 s; Refresh on a card's page, then Songs,
+   Teacher view songs or Live In-Class Games, with write clicks) and chaos (both reads flipping every 2-20 s for
+   6 min under random views, writes, sub-screens, hides and Refresh).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
    board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
    a card dragged for 10-90 s, the second console's writes (dates, Hidden, Optional, Play Along, Keep in Today, pins,
@@ -76,6 +84,12 @@
      R1-dead   no view left on a "Loading…" line with nothing left to run.
      R1-empty  a GOOD but empty class never shows a failure line or the note.
      R1-live   on Live In-Class Games the stage (#lq-stage) is always there and is never replaced while the view stays.
+     R4-1      "Student progress did not load" / "Loading student progress" only while the roster is missing; R3-2 also
+               covers the load window (no roster yet, no read failed) and the Skills Overview summary strip.
+     R4-failedcopy  no write control (and no Live games list button) drawn from a FAILED settings read is on screen once
+               the console is quiet (a view drawn from the empty copy a failed read leaves).
+     R4-archived  an archived student never comes back into the roster the views draw from after a failed settings read.
+     R4-games  during a progress outage with the settings read good, Games still offers the class games On / Off switch.
      page-error   anything the console logs through console.error or throws.
    COVERAGE FLOORS (a full run, 64+ cases, no --family): every family ran; 40+ write clicks reached the server; 4+
    window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks;
@@ -84,8 +98,8 @@
    NOT COVERED: anything a browser adds (layout, CSS: a pane hidden by CSS counts as on screen here; focus moves;
    real event order); the update reload itself (the resume note is set, the reload is not played); a settings read
    that fails AFTER the roster has loaded, on a view with no retry (Games, Manage, Songs, Mic, the board's cached
-   repaint): that view waits for a click or Refresh, as before (asserted only for the R3-1 line consistency, not for
-   recovery); more than one console in a vm (the second console is the server); students writing their own docs
+   repaint): that view waits for a click or Refresh, as before (asserted for the R3-1 line consistency and R4-failedcopy,
+   not for recovery); the sidebar's activity tree and the Live games picker drawn from a failed copy (no write control); more than one console in a vm (the second console is the server); students writing their own docs
    during a case; the Delete dialog (tools/remove-one-sim.mjs); the write race between two real consoles
    (tools/two-consoles-loop.mjs). The latencies (8-78 ms, 15% of calls 120-600 ms) are guesses. Made-up data only:
    12 students "Test Student 01" … at example.test, a made-up teacher address. */
