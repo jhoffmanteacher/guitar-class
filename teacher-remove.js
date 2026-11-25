@@ -371,7 +371,8 @@ async function trmGo(){
 async function trmDownload(){
   if(!trm || !trm.inv) return;
   try{ await teacherRemoveDownload(trm.uid, trm.inv); trm.note = 'Saved to this computer (look in Downloads). It holds the student’s name: keep it off shared drives.'; }
-  catch(e){ trm.note = 'The file could not be built or saved (' + ((e && e.message) || 'unknown error') + '). Nothing was changed.'; }
+  // A value the backup cannot write is thrown as {backupCollection, cause} (teacherBackupEncodeDoc): its reason is the cause's.
+  catch(e){ trm.note = 'The file could not be built or saved (' + ((e && (e.message || (e.cause && e.cause.message))) || 'unknown error') + '). Nothing was changed.'; }
   trmPaint();
 }
 const TRM_KEPT = [
