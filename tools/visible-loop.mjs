@@ -187,7 +187,7 @@
        A tab left open past midnight, config unchanged: at its tab return it shows what a fresh load shows that
        day (Today's activities, the first card, the search index; the directed midnight block, 2026-11-25). With a
        card open (and playing) at that tab return, nothing stops and the list is not redrawn under it; the page
-       catches up when the card closes (review R1-7).
+       catches up when the card closes, by "All activities" or by its title (reviews R1-7, R2-3).
    Not exercised (round-2 review R2-6): board ties on a seeded board (the writers always re-pack 1..N, so R8's
    "pos, then the legacy number, then the id" runs only on the unseeded board); a student un-marking a card.
    Still not stated, measured only: when an already-open Journey page picks up a change (journey.js has no
@@ -1582,6 +1582,29 @@ async function directedMidnight() {
   if (during.renders || during.stops) fail('midnight, a card open and playing', `the tab return redrew the list ${during.renders} time(s) and called a stopper ${during.stops} time(s) under the open card: the student's song stops and the card's round resets`);
   if (JSON.stringify(heldToday) !== JSON.stringify(evening)) fail('midnight, a card open and playing', `the list under the open card changed at the tab return (${JSON.stringify(heldToday)}, was ${JSON.stringify(evening)})`);
   if (JSON.stringify(afterClose) !== JSON.stringify(want)) fail('midnight, a card open: the card closes', `the page shows ${JSON.stringify(afterClose)} after "All activities", a fresh load shows ${JSON.stringify(want)}: it never catches up with the new day`);
+  /* The other way out (review R2-3): the card really opened (its <details> toggled open, caOnToggle) and closed again
+     by its title, not by "◀ All activities". A plain card's close re-renders only for caSinceRepaint, so the new day
+     must be caught up there too. */
+  VNOW = eve;
+  step('midnight, a card opened, closed by its title the next morning');
+  const pt = await bootStudent({ storage: makeStorage() }, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+  pt.els['class-activities-screen'].hidden = false;
+  pt.run('renderClassActivities()');
+  pt.run(`window.__r23 = { open: true, dataset: { id: ${JSON.stringify(a0)} }, contains: () => false, querySelector: () => null, querySelectorAll: () => [], closest: () => null };
+    caOnToggle(__r23);`);
+  const openedId = pt.run('caOpenId');
+  VNOW = morning;
+  pt.client.plan.config.push('ok');
+  pt.ctx.document.hidden = false;
+  (pt.docListeners.visibilitychange || []).forEach(fn => fn({}));
+  await flush();
+  const heldT = shown(pt);
+  pt.run('__r23.open = false; caOnToggle(__r23)');
+  const afterTitle = shown(pt);
+  C.midnightSteps++; C.comparisons += 3;
+  if (openedId !== a0) fail('midnight, a card opened by its title', `caOnToggle on an opened card left caOpenId ${JSON.stringify(openedId)}, not ${a0}: the block is mis-aimed`);
+  if (JSON.stringify(heldT) !== JSON.stringify(evening)) fail('midnight, a card opened by its title', `the list under the open card changed at the tab return (${JSON.stringify(heldT)}, was ${JSON.stringify(evening)})`);
+  if (JSON.stringify(afterTitle) !== JSON.stringify(want)) fail('midnight, a card open: closed by its title', `the page shows ${JSON.stringify(afterTitle)} after the card is closed by its title, a fresh load shows ${JSON.stringify(want)}: it never catches up with the new day`);
   VNOW = DAYS[0][1];
 }
 
@@ -1651,7 +1674,7 @@ out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, 
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins (and after every tab return); JOURNEY_GATE_LOCKS read false on ${C.journeyLocks} Journey probes; ${C.routerChecks} students with an unfinished required activity asked the router for another page`);
 out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
 out.push(`  the signature, directed: ${C.sigSteps} of 14 inputs changed alone, each followed by a tab return with a good read`);
-out.push(`  a tab left open past midnight, directed: ${C.midnightSteps} of 2 tab returns compared with a fresh load (Today, the first card, the search index; with a card open: nothing stops, caught up at the close)`);
+out.push(`  a tab left open past midnight, directed: ${C.midnightSteps} of 3 tab returns compared with a fresh load (Today, the first card, the search index; with a card open: nothing stops, caught up at the close by "All activities" and by its title)`);
 out.push(`  the console after a failed config read, directed: ${C.consoleReadPaints} of 3 Games views painted (failed read, good read, failed read)`);
 out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
 out.push(`  Today's activities (R16, caTodayIds after the same render): ${C.todayChecks} sign-ins checked, ${C.todayKept} of them with a kept card dated before yesterday in Today`);
