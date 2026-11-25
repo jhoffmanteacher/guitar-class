@@ -956,8 +956,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Switch the feel mid-song (assessment preparation)',
-            title_es: 'Cambia la sensación a mitad de la canción (preparación para la evaluación)',
+            title: 'Switch the feel mid-song',
+            title_es: 'Cambia la sensación a mitad de la canción',
             steps: [
           {
             label: 'Challenge 4 — Two Feels, One Song (assessment preparation)', label_es: 'Reto 4 — Dos sensaciones, una canción (preparación para la evaluación)',
