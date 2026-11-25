@@ -237,21 +237,26 @@ async function songFileReadPieces(db, id, expect, onProgress, stop){
   const n = Math.ceil(expect.bytes / SONG_FILE_PIECE);
   const out = new Uint8Array(expect.bytes);
   const ref = db.collection('songFiles').doc(id).collection('pieces');
-  let next = 0, got = 0;
+  /* failed: one reader has given up (a missing or bad piece, a failed read), so the file is lost and the
+     others stop at their next piece instead of reading the rest into a buffer nobody uses (APP-CORE-5). */
+  let next = 0, got = 0, failed = false;
   const one = async () => {
-    while(next < n){
-      if(stop && stop()) throw songFileErr('cancelled');   // nobody waits for it any more: read no more pieces
-      const k = next++;
-      const snap = await ref.doc(String(k)).get();
-      if(!snap.exists) throw songFileErr('missing', 'piece ' + k + ' of ' + n);
-      const d = snap.data() || {};
-      const bytes = d.data && typeof d.data.toUint8Array === 'function' ? d.data.toUint8Array() : null;
-      const want = k < n - 1 ? SONG_FILE_PIECE : expect.bytes - SONG_FILE_PIECE * (n - 1);
-      if(d.i !== k || !bytes || bytes.length !== want) throw songFileErr('bad', 'piece ' + k + ' is not the right size');
-      out.set(bytes, k * SONG_FILE_PIECE);
-      got += bytes.length;
-      if(onProgress) onProgress(got / expect.bytes);
-    }
+    try {
+      while(next < n && !failed){
+        if(stop && stop()) throw songFileErr('cancelled');   // nobody waits for it any more: read no more pieces
+        const k = next++;
+        const snap = await ref.doc(String(k)).get();
+        if(failed) return;   // another reader gave up while this piece was on its way: no late progress either
+        if(!snap.exists) throw songFileErr('missing', 'piece ' + k + ' of ' + n);
+        const d = snap.data() || {};
+        const bytes = d.data && typeof d.data.toUint8Array === 'function' ? d.data.toUint8Array() : null;
+        const want = k < n - 1 ? SONG_FILE_PIECE : expect.bytes - SONG_FILE_PIECE * (n - 1);
+        if(d.i !== k || !bytes || bytes.length !== want) throw songFileErr('bad', 'piece ' + k + ' is not the right size');
+        out.set(bytes, k * SONG_FILE_PIECE);
+        got += bytes.length;
+        if(onProgress) onProgress(got / expect.bytes);
+      }
+    } catch(e){ failed = true; throw e; }
   };
   await Promise.all(Array.from({ length: Math.min(SONG_FILES_PARALLEL, n) }, one));
   const sha = sfHex(await crypto.subtle.digest('SHA-256', out));
