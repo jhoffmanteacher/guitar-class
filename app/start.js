@@ -127,8 +127,9 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         // away and the song counts against the month again: its "counted once" record lasts one page.
         if ((typeof sfWait !== 'undefined' && sfWait) || (typeof sfInflight !== 'undefined' && sfInflight.size)) return 'song';
         // The console's Delete or Start over for one student, while it runs (teacher-remove.js, a console part loaded on
-        // demand): a reload cuts it off between two kinds of data.
-        if (typeof trm !== 'undefined' && trm && trm.phase === 'running') return 'delete';
+        // demand): a reload cuts it off between two kinds of data. And one that stopped, until its result is closed: a
+        // reload drops the "failed at …" the teacher is reading (review R3 minor 6). Both within SW_RELOAD_MAX_WAIT.
+        if (typeof trm !== 'undefined' && trm && (trm.phase === 'running' || (trm.phase === 'done' && trm.result && !trm.result.ok))) return 'delete';
         return null;
       };
       /* While this tab waits, the new worker holds only the shell. Ask it for

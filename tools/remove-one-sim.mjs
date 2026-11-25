@@ -37,7 +37,7 @@
      confirm    the typed name: exact, other case, extra spaces → yes; another name, a part of it, empty → no
      escape     a hostile student name is escaped in every dialog the console draws
      reload hold   app/start.js's busyReason (cut out and run against the real dialog) holds the update reload while a
-                Delete or a Start over runs, and only then (R2-2, R3 minor 1)
+                Delete or a Start over runs, or one that stopped is still on screen, and only then (R2-2, R3 m1, m6)
      status     Manage's line from the roster and config/class: "Started over <date>" (+ "not applied yet"), "Deleted <date> ·
                 has a record again"; the dialogs' warning and backup sentences */
 import { readFileSync } from 'node:fs';
@@ -559,8 +559,17 @@ console.log('reload hold');
   seen.push(['a Start over running', B(), 'delete']);
   c.run('__rel2()'); await over; seen.push(['the Start over done', B(), null]);
   c.fn('teacherRemoveClose')(); seen.push(['the dialog closed', B(), null]);
+  // A Delete that stopped holds it until its result is closed (review R3 minor 6): its own class, a failure at Mic recordings.
+  const S2 = makeStore(), c2 = makeConsole(S2, { fail: [{ prefix: `micTakes/${U[0]}-coach/chunks/`, op: 'delete', once: true }] });
+  c2.run(`var window = {}; var recState = {}, shuffleDrills = {}, deckDrills = {}, earDrills = {}, ecRuns = {}, ncLive = false, chcLive = false, pcState = null;
+    var anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
+    var __busy = ${found ? start.slice(i + head.length, j + 1).replace(/^/, '() => ') : '() => "not found"'};`);
+  const B2 = () => { try { return c2.run('__busy()'); } catch(e) { return 'threw: ' + e.message; } };
+  await dialogOn(c2, [[U[0], 'Test 0']])(U[0]); c2.run(`trm.typed = 'Test 0';`); await c2.fn('trmGo')();
+  seen.push(['a stopped Delete on screen', c2.run('trm.phase') === 'done' && !c2.run('trm.result.ok') ? B2() : 'not stopped', 'delete']);
+  c2.fn('teacherRemoveClose')(); seen.push(['the stopped Delete closed', B2(), null]);
   const good = seen.filter(([, got, want]) => got === want);
-  ok(good.length === seen.length, `the update reload waits while a Delete or a Start over runs, and only then (${good.length} of ${seen.length}): ${seen.map(([l, g]) => l + ' → ' + JSON.stringify(g)).join(', ')}`);
+  ok(good.length === seen.length, `the update reload waits while a Delete or a Start over runs, or one that stopped is on screen, and only then (${good.length} of ${seen.length}): ${seen.map(([l, g]) => l + ' → ' + JSON.stringify(g)).join(', ')}`);
 }
 
 console.log(`remove-one-sim: ${passes} passed, ${fails} failed`);
