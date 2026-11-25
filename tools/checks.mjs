@@ -17334,7 +17334,7 @@ function checkCoachVerdicts() {
         if (wantCounted && !hasCounted) flag(`1ca: ${what} — an all-right late take no longer says "${COUNTED.source}" (control)`);
         if (/\b(other|otras) 1\b/.test(out)) flag(`1ca: ${what} reads "${out.match(/\b(other|otras) 1\b/)[0]}"`);
         const unheard = states.filter(s => !right(s)).length;
-        if (unheard !== 1 && /\bother one\b|\bla otra no\b/.test(out)) flag(`1ca: ${what} says "the other one" with ${unheard} unheard notes`);
+        if (unheard !== 1 && /\bother one\b|\bla otra con claridad\b/.test(out)) flag(`1ca: ${what} says "the other one" with ${unheard} unheard notes`);
       }
     }
     run(`setLang('en')`);
@@ -19302,6 +19302,138 @@ function checkCoachVerdicts() {
   if (bad === 0 && songCounts) { head('1du. Change Up: the strum nearest the chord change decides it; Power Chord Switch: any strum while the chord is the current one'); ok(`${songCounts.pickChecks} real ccLoop runs on scripted frames. Change Up (40 to 90 BPM, every beat and every bar): an early wrong chord then the right one on time is right and never shown before the change; the right one on time then a late wrong one is right; a lone early strum is held and shown about as long after the change as it came before; a Stop while it is held still shows it right; a Stop click that took a change and is dropped leaves the real strum's held verdict, and on the last change the game still counts as finished and awards XP once. Power Chord Switch (15 to 60 BPM, every beat and every bar): the right chord anywhere from the early allowance to the next change is right, shown about 340 ms after its strum; a wrong chord is not shown until the span ends, and a later right one still wins; wrong chord and no strum show when the span ends; one strum is right for one change at most and an early strum of the next chord never makes the current one wrong; Stop finishes a held wrong chord, a dropped Stop click leaves the real strum's verdict, a right last change finishes the game and awards XP once; a tempo press mid-span; the saved take says changePick "span"`); }
   if (bad === 0 && songCounts) { head('1ew. Rule A: a strum with no pitch is never the chord; 1 or 2 readings must be half its notes (coachToneCredit, one helper)'); ok(`${songCounts.ruleA} real ccLoop runs (Change Up at 40, 60 and 90 BPM; Power Chord Switch at 15, 30 and 60 BPM, every beat and every bar): a strum with no pitch, one or two readings of the old chord: wrong chord; one reading of the new chord, or one of each: right; a strum with no pitch never locks a Power Chord Switch change (the new chord later in the span is right); Power Chord Switch reads with its two power gates and then 0.55; the saved take says toneRule "pitch". The helper against the rule written out: ${songCounts.ruleAHelper} cases. The Listening Coach (chords): ${songCounts.ruleACoach} cases (every 0-3 reading strum keeps the slot verdict it had; unclear strums with no pitch or off the chord and none right score level 1 with the no-credit line, the grey zone or one right strum level 2). Note Runner chord notes: ${songCounts.ruleANr} strums graded as before (its 2-reading floor; its half credit is a timing reward)`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; the way back to the chords is one \u25C0 Pick different chords button, first on the songs view and the done screen, run and found absent where it must be (${counts.pwBack} screens, EN + ES); tempo controls: setup −5 +5 and a 10..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1fg. THE NOTES DECIDE (2026-11-25; coach-score.js coachRenderReport; the numbers: tools/mic-sim/README.md). In a classroom a
+   sound lands near every beat whether or not the student played, so "On the beat" and "Played it through" came out Great for a round of
+   desk taps or room noise, and two Greats made Good: the check-off gate opened with "Right notes" at Not yet. RUN, not read, in 1ca's
+   loaded scripts (COACH_SANDBOX): the real coachScorePitch, coachRenderReport and the gate's own test (toggleSkill: coachSkillBest(sid)
+   < COACH_GATE_MIN_LEVEL) on a real Coach-gated skill, for a signed-in made-up student (Test 0) whose saveGames is only counted. Every
+   round of 4, 8 and 12 melody beats and of 8 and 16 chord beats made of right / wrong / unclear / silent beats (every count of each;
+   in blocks and spread out; on the beat and 600 ms off it; a chord's unclear strums with no pitch and in the vote's grey zone), one
+   sound per heard beat for the tempo, EN:
+     A. "Right notes" at Not yet never opens the gate: the report is a "couldn't hear" screen or the Not yet headline, never Good or
+        Great, and the skill's saved level stays under the gate's;
+     B. a round with no beat read as a note (only unclear and silent beats) never gets Good or Great; when its unclear beats outnumber
+        its silent ones (a sound on most beats, none readable: desk taps, room noise) it gets the "could not read" screen. Melody, and
+        chord strums with no pitch; chord strums in the vote's grey zone keep level 2 by design (rule A, 2026-11-18) and are left out;
+     C. a melody round with at most one right note never opens the gate (one right note among unclear ones is not "You're getting it":
+        a voice or a neighbour's guitar gives a short drill its one "right" note);
+     D. a "couldn't hear" screen gives no level and saves nothing: saveGames is not called, games.coach and games.coachSkill stay empty;
+        a graded round saves once;
+     E. the "could not read" screen names "Mark it anyway" exactly when the skill still waits on the Coach (gated, under the gate's
+        level, not ticked): not with no skill, not once the skill passed, not once it is ticked;
+   and controls, so this cannot go blind: every all-right round opens the gate, with the Great headline on the beat and Good 600 ms off
+   it (the timing criteria coach, they do not fail a take). Every total is pinned. */
+const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2 };
+function checkCoachNotesDecide() {
+  head('1fg. Listening Coach: the notes decide; "Right notes" at Not yet never opens the check-off gate, nothing read gets no level (run)');
+  let bad = 0;
+  const fail = m => { err('1fg: ' + m); problems++; bad++; };
+  if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the Coach's report and gate were NOT run"); return; }
+  const { run } = COACH_SANDBOX;
+  let res;
+  try {
+    res = JSON.parse(run(`(function(){
+      const keep = { coach, currentUser, games, saveGames, progress, lang: getLang() };
+      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0 }, bad = [];
+      try {
+        setLang('en');
+        const sid = SETS.flatMap(w => w.skills || []).map(s => s.id).find(id => skillIsCoachGated(id));
+        if (!sid) return JSON.stringify({ err: 'no Coach-gated skill in SETS (skillIsCoachGated found none)' });
+        let saves = 0;
+        saveGames = () => { saves++; };
+        currentUser = { uid: 'test-student-0', displayName: 'Test 0' };
+        progress = {};
+        const said = (html, k) => html.indexOf(t(k)) >= 0;
+        const screen = html => said(html, 'coach.report.unreadMelody') || said(html, 'coach.report.unreadChords') ? 'unread'
+          : said(html, 'coach.report.couldntHearMelody') || said(html, 'coach.report.couldntHearChords') ? 'couldntHear'
+          : said(html, 'coach.overall.great') || said(html, 'coach.overall.greatHeard') ? 3 : said(html, 'coach.overall.good') ? 2
+          : said(html, 'coach.overall.practice') ? 1 : null;
+        const GREY = [0, 1, 2, 3, 5, 6];
+        const round = (mode, states, dev, dimCls, skillIds, before) => {
+          const total = states.length;
+          coach = { mode, bpm: 60, beatMs: 1000, streakKey: 'k1fg', drillId: 'drill-1fg', skillIds, timeouts: [], card: { isConnected: false },
+            slots: states.map((st, i) => ({ label: 'A', midi: 57, classes: [0, 4, 7],
+              chordName: mode === 'chords' ? (i < total / 2 ? 'C' : 'G') : undefined,
+              isChange: mode === 'chords' && i === total / 2,
+              state: st, hit: st === 'miss' ? null : { devMs: dev, midi: st === 'wrong' ? 59 : 57, t: i * 1000 + dev,
+                classes: st === 'dim' ? dimCls : st === 'wrong' ? [1, 2, 3] : [0, 4, 7] } })) };
+          coach.events = coach.slots.map((s, i) => s.hit ? { t: i * 1000 + dev, slot: i } : null).filter(Boolean);
+          games = { coach: {}, coachSkill: before ? { [sid]: { level: before } } : {} };
+          saves = 0;
+          const pitch = coachScorePitch().level;
+          coachRenderReport();
+          const html = coachBody().innerHTML;
+          return { pitch, shown: screen(html), html, saves, saved: games.coachSkill[sid] ? games.coachSkill[sid].level : 0,
+            drill: Object.keys(games.coach).length, gateHolds: coachSkillBest(sid) < COACH_GATE_MIN_LEVEL };
+        };
+        const orders = (c) => {
+          const blocks = [].concat(...Object.entries(c).map(([k, m]) => Array(m).fill(k)));
+          const pools = Object.entries(c).map(([k, m]) => Array(m).fill(k)), spread = [];
+          while (pools.some(p => p.length)) pools.forEach(p => { if (p.length) spread.push(p.pop()); });
+          return [blocks, spread];
+        };
+        for (const [mode, sizes] of [['melody', [4, 8, 12]], ['chords', [8, 16]]]) for (const size of sizes)
+          for (let ok = 0; ok <= size; ok++) for (let wrong = 0; wrong <= size - ok; wrong++) for (let dim = 0; dim <= size - ok - wrong; dim++) {
+            const miss = size - ok - wrong - dim;
+            for (const states of orders({ ok, wrong, dim, miss })) for (const dev of [0, 600]) for (const dimCls of (mode === 'chords' ? [[], GREY] : [[]])) {
+              const r = round(mode, states, dev, dimCls, [sid], 0);
+              const what = mode + ' ' + size + ' beats [' + states.join(',') + '] ' + dev + ' ms' + (mode === 'chords' ? ' unclear ' + JSON.stringify(dimCls) : '');
+              n.rounds++;
+              const screenNoLevel = r.shown === 'unread' || r.shown === 'couldntHear';
+              if (r.shown === null) bad.push(what + ': the report shows no headline and no "couldn\\'t hear" line');
+              if (r.pitch === 1){
+                n.pitchOne++;
+                if (r.shown === 2 || r.shown === 3 || !r.gateHolds) bad.push('A: ' + what + ': "Right notes" is Not yet but the report says ' + r.shown + ' and the gate ' + (r.gateHolds ? 'holds' : 'OPENED'));
+              }
+              /* B: melody, and chord strums with no pitch (rule A: never credited). A chord round of unclear strums in the vote's grey
+                 zone (3+ readings, 10-20% chord tones) keeps level 2 by design until chord takes say otherwise (rule A, 2026-11-18;
+                 tools/mic-sim/README.md), so it is not held to B. */
+              if (ok === 0 && wrong === 0 && (mode === 'melody' || dimCls.length === 0)){
+                n.nothingRead++;
+                if (r.shown === 2 || r.shown === 3 || !r.gateHolds) bad.push('B: ' + what + ': no beat was read as a note, but the report says ' + r.shown + ' and the gate ' + (r.gateHolds ? 'holds' : 'OPENED'));
+                if (dim > miss && !screenNoLevel) bad.push('B: ' + what + ': sounds on most beats and none readable, but the report says ' + r.shown + ', not "couldn\\'t hear"');
+              }
+              if (mode === 'melody' && ok <= 1){
+                n.oneRight++;
+                if (!r.gateHolds) bad.push('C: ' + what + ': ' + ok + ' right note(s) opened the gate (report ' + r.shown + ')');
+              }
+              if (screenNoLevel){
+                if (r.shown === 'unread') n.unread++;
+                if (r.saves || r.saved || r.drill) bad.push('D: ' + what + ': a "couldn\\'t hear" screen saved (saveGames ' + r.saves + ', skill level ' + r.saved + ', drill records ' + r.drill + ')');
+              } else if (r.saves !== 1 || r.saved !== r.shown) bad.push('D: ' + what + ': a graded round (' + r.shown + ') saved ' + r.saves + ' time(s), skill level ' + r.saved);
+              if (!r.gateHolds) n.opened++;
+              if (ok === size){
+                n.allRight++;
+                if (r.gateHolds || r.shown !== (dev ? 2 : 3)) bad.push('control: ' + what + ': every beat right, but the report says ' + r.shown + ' (want ' + (dev ? 'Good: off the beat' : 'Great') + ') and the gate ' + (r.gateHolds ? 'holds' : 'opened'));
+              }
+            }
+          }
+        /* E: the "Mark it anyway" line, on a melody round of 8 unclear beats (the could-not-read screen) */
+        const unclear = Array(8).fill('dim'), MARK = t('coach.report.markAnyway');
+        for (const [why, skills, before, ticked, want] of [['the skill waits on the Coach', [sid], 0, false, true], ['no skill', [], 0, false, false],
+          ['the skill already passed (Good)', [sid], 2, false, false], ['the skill is ticked', [sid], 0, true, false], ['the skill tried before (Not yet)', [sid], 1, false, true]]) {
+          progress = ticked ? { [sid]: 'gotit' } : {};
+          const r = round('melody', unclear, 0, [], skills, before);
+          if (r.shown !== 'unread') bad.push('E: 8 unclear beats (' + why + '): the report says ' + r.shown + ', not the could-not-read screen');
+          else if ((r.html.indexOf(MARK) >= 0) !== want) bad.push('E: the could-not-read screen ' + (want ? 'does not name' : 'names') + ' "Mark it anyway" when ' + why);
+          else if (want) n.tips++;
+          progress = {};
+        }
+      } finally {
+        coach = keep.coach; currentUser = keep.currentUser; games = keep.games; saveGames = keep.saveGames; progress = keep.progress; setLang(keep.lang);
+        try { sessionStorage.removeItem('k1fg'); } catch(e){}
+      }
+      return JSON.stringify({ n, bad: bad.slice(0, 8), badCount: bad.length });
+    })()`));
+  } catch (e) { fail(`running the report threw (${e.message}): a coach-score.js / app/audio-ui.js function was renamed or now needs more of the page`); return; }
+  if (res.err) { fail(res.err); return; }
+  for (const b of res.bad) fail(b);
+  if (res.badCount > res.bad.length) fail(`… and ${res.badCount - res.bad.length} more`);
+  for (const [k, v] of Object.entries(NOTES_DECIDE_PIN)) if (res.n[k] !== v) fail(`${res.n[k]} ${k}, pinned ${v}: the check went partly blind (or the rounds changed: re-pin NOTES_DECIDE_PIN on purpose)`);
+  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" save nothing, every graded round saves once; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of 5 cases, as wanted in all 5); controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -23932,6 +24064,7 @@ function checkNeverRules(sets) {
   checkLiveHilo();
   checkLiveSaw();
   checkCoachVerdicts();
+  checkCoachNotesDecide();   // 1fg, in 1ca's sandbox
   checkToneTest();
   await checkCountIn();
   await checkMicStart();
