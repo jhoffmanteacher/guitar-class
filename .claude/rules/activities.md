@@ -12,7 +12,8 @@ paths:
 
 ## In-Class Activities: directions, the two step renderers, play-along-first
 
-Moved from CLAUDE.md (2026-11-26). The full guide: skill `in-class-activities` (read it before editing this area).
+Moved from CLAUDE.md (2026-11-26). The full guide: skill `in-class-activities` (read it before editing this area, then the one file in its `guide/` that its table
+names for what you are touching).
 
 - **One short line per direction.** Step `text`/`text_power`, `intro`/`intro_power`, a practice-card check's `text`,
   `bassDirections`, a recording version's `intro`, each drill's direction line before Start and a practice card's

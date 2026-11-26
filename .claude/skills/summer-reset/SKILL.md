@@ -66,7 +66,7 @@ re-decide it when the rest is reworded.
 
 `items` is positional and frozen once students have taken the check (the
 "Stored exit-check picks are POSITIONAL" bullet under "Exit checks — the
-end-of-period product" in skill `in-class-activities`).
+end-of-period product" in skill `in-class-activities`, `guide/exit-checks.md`).
 
 **`m2w2` Challenge 3's label, "(your low-E assessment piece)" → "(assessment
 preparation)".** That is the site's wording everywhere else ("No teacher speak"
