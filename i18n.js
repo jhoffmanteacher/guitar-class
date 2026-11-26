@@ -1787,6 +1787,9 @@
       es: 'Solo capté {good} de {total} notas — baja mucho el BPM y di el nombre de cada nota mientras la tocas.' },
     'coach.crit.pitch.needsQuietChords': { en: 'The chord tones sounded right on {good} of {total} beats. I could not hear the rest clearly. Strum each chord firmly, close to the mic.',
       es: 'Las notas del acorde sonaron bien en {good} de {total} tiempos. No pude escuchar el resto con claridad. Rasguea cada acorde con firmeza, cerca del micrófono.' },
+    // coach-score.js coachScorePitch, chords, Not yet with no right strum and no wrong one (some unclear, the rest silent): needsQuietChords would say "right on 0 of 8 beats"
+    'coach.crit.pitch.needsQuietChordsNone': { en: 'I could not hear any clear chord notes. Strum each chord firmly, close to the mic.',
+      es: 'No pude escuchar ninguna nota clara del acorde. Rasguea cada acorde con firmeza, cerca del micrófono.' },
     'coach.crit.pitch.needsQuietMelody': { en: 'You played {good} of {total} notes right. I could not hear the rest clearly. Play each note firmly, close to the mic.',
       es: 'Tocaste bien {good} de {total} notas. No pude escuchar el resto con claridad. Toca cada nota con firmeza, cerca del micrófono.' },
     'coach.crit.pitch.quietMostAll': { en: 'I could not hear any of your notes clearly. Play each note firmly, close to the mic.',

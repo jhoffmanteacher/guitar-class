@@ -324,7 +324,12 @@ function coachScorePitch(){
     }
   } else {
     level = 1;
-    if (quietOnly){
+    /* A chord round can land here with no right strum at all (some unclear, the rest silent), where "sounded right on 0 of 8
+       beats" is no sentence: it gets its own line. Melody cannot: with nothing wrong and over half unclear or silent it takes
+       the quietMost branch above, so needsQuietMelody always has a right note or more. */
+    if (quietOnly && coach.mode === 'chords' && good === 0){
+      sentence = t('coach.crit.pitch.needsQuietChordsNone');
+    } else if (quietOnly){
       sentence = t(coach.mode === 'chords' ? 'coach.crit.pitch.needsQuietChords' : 'coach.crit.pitch.needsQuietMelody', { good, total });
     } else {
       sentence = coach.mode === 'chords'

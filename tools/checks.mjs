@@ -19327,9 +19327,11 @@ function checkCoachVerdicts() {
         ticked, not in a preview (toggleSkill refuses "I've got it!" there, so no gate opens);
      F. a graded report draws one row per criterion that has a level (none for a level-0 criterion such as "no chord changes in this
         drill"), lowest level first, "Right notes" first on a tie, each with its own level (read from the HTML);
+     G. a graded round with no right note never shows a "right on {good} of {total}" line with 0 in it (the chord one has its own
+        line, needsQuietChordsNone: "sounded right on 0 of 8 beats" is no sentence);
    and controls, so this cannot go blind: every all-right round opens the gate, with the Great headline on the beat and Good 600 ms off
    it (the timing criteria coach, they do not fail a take). Every total is pinned. */
-const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2, eCases: 6, rows: 38608 };
+const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2, eCases: 6, rows: 38608, zeroRight: 1180 };
 function checkCoachNotesDecide() {
   head('1fg. Listening Coach: the notes decide; "Right notes" at Not yet never opens the check-off gate, nothing read gets no level (run)');
   let bad = 0;
@@ -19340,7 +19342,7 @@ function checkCoachNotesDecide() {
   try {
     res = JSON.parse(run(`(function(){
       const keep = { coach, currentUser, games, saveGames, progress, lang: getLang() };
-      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0, eCases: 0, rows: 0 }, bad = [];
+      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0, eCases: 0, rows: 0, zeroRight: 0 }, bad = [];
       try {
         setLang('en');
         const sid = SETS.flatMap(w => w.skills || []).map(s => s.id).find(id => skillIsCoachGated(id));
@@ -19355,6 +19357,10 @@ function checkCoachNotesDecide() {
           : said(html, 'coach.overall.great') || said(html, 'coach.overall.greatHeard') ? 3 : said(html, 'coach.overall.good') ? 2
           : said(html, 'coach.overall.practice') ? 1 : null;
         const GREY = [0, 1, 2, 3, 5, 6];
+        /* G: every "right on {good} of {total}" line, written out with 0 right */
+        const RIGHT_KEYS = ['closeQuietChords', 'closeQuietMelody', 'needsQuietChords', 'needsQuietMelody', 'quietMostMany', 'greatQuietMelody',
+          'greatQuietMelodyOne', 'greatChords', 'close', 'correctPerfect', 'wrongNote'].map(k => 'coach.crit.pitch.' + k);
+        const zeroLines = total => RIGHT_KEYS.map(k => t(k, { good: 0, total, rest: total, ordinal: '1st', heard: 'B', expected: 'A' }));
         /* peek: the card sits in a locked set's read-only preview (its .week-panel has .set-peek), as the DOM would answer closest() */
         const round = (mode, states, dev, dimCls, skillIds, before, peek) => {
           const total = states.length;
@@ -19368,7 +19374,7 @@ function checkCoachNotesDecide() {
           coach.events = coach.slots.map((s, i) => s.hit ? { t: i * 1000 + dev, slot: i } : null).filter(Boolean);
           games = { coach: {}, coachSkill: before ? { [sid]: { level: before } } : {} };
           saves = 0;
-          const pitch = coachScorePitch().level;
+          const pitchCrit = coachScorePitch(), pitch = pitchCrit.level;
           coachRenderReport();
           const html = coachBody().innerHTML;
           /* F: the rows as drawn (the criterion's level class, in order) against the criteria's own levels */
@@ -19376,7 +19382,7 @@ function checkCoachNotesDecide() {
           const want = [coachScorePitch(), coachScoreTiming(), coachScoreTempo(), coachScoreChanges(), coachScoreCompletion()]
             .map((c, i) => ({ name: c.icon + ' ' + c.name, level: c.level, i })).filter(c => c.level > 0)
             .sort((a, b) => a.level - b.level || a.i - b.i).map(c => ({ name: c.name, level: c.level }));
-          return { pitch, shown: screen(html), html, drawn, want, saves, saved: games.coachSkill[sid] ? games.coachSkill[sid].level : 0,
+          return { pitch, pitchLine: pitchCrit.sentence, shown: screen(html), html, drawn, want, saves, saved: games.coachSkill[sid] ? games.coachSkill[sid].level : 0,
             drill: Object.keys(games.coach).length, gateHolds: coachSkillBest(sid) < COACH_GATE_MIN_LEVEL };
         };
         const orders = (c) => {
@@ -19414,6 +19420,10 @@ function checkCoachNotesDecide() {
                 if (r.shown === 'unread') n.unread++;
                 if (r.saves || r.saved || r.drill) bad.push('D: ' + what + ': a "couldn\\'t hear" screen saved (saveGames ' + r.saves + ', skill level ' + r.saved + ', drill records ' + r.drill + ')');
               } else if (r.saves !== 1 || r.saved !== r.shown) bad.push('D: ' + what + ': a graded round (' + r.shown + ') saved ' + r.saves + ' time(s), skill level ' + r.saved);
+              if (!screenNoLevel && ok === 0){
+                n.zeroRight++;
+                if (zeroLines(size).includes(r.pitchLine)) bad.push('G: ' + what + ': no right note, but the "Right notes" row says "' + r.pitchLine + '"');
+              }
               if (!screenNoLevel){
                 n.rows += r.drawn.length;
                 if (JSON.stringify(r.drawn) !== JSON.stringify(r.want) || r.html.indexOf('coach-lvl lvl0') >= 0) bad.push('F: ' + what + ': the rows read ' + r.drawn.map(x => x.name + ' ' + x.level).join(', ') + '; want ' + r.want.map(x => x.name + ' ' + x.level).join(', ') + ' (one row per criterion with a level, lowest first, Right notes first on a tie)');
@@ -19449,7 +19459,7 @@ function checkCoachNotesDecide() {
   for (const b of res.bad) fail(b);
   if (res.badCount > res.bad.length) fail(`… and ${res.badCount - res.bad.length} more`);
   for (const [k, v] of Object.entries(NOTES_DECIDE_PIN)) if (res.n[k] !== v) fail(`${res.n[k]} ${k}, pinned ${v}: the check went partly blind (or the rounds changed: re-pin NOTES_DECIDE_PIN on purpose)`);
-  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" save nothing, every graded round saves once; ${res.n.rows} report rows drawn lowest first, none without a level; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of ${res.n.eCases} cases, as wanted in all ${res.n.eCases}); controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
+  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" save nothing, every graded round saves once; ${res.n.rows} report rows drawn lowest first, none without a level; ${res.n.zeroRight} graded rounds with no right note never say "right on 0 of"; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of ${res.n.eCases} cases, as wanted in all ${res.n.eCases}); controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
