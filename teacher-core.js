@@ -99,7 +99,8 @@ let teacherPeriodFilter=(function(){
    Manage view is the deliberate exception: it renders from allStudentsRaw,
    because it is where you FIX a wrong period and must show everyone. */
 /* The archived list of the newest GOOD settings read (review R4): a failed read is {}, and filtering by it brought every
-   archived student back into every view (a write whose follow-up read failed, a view's own failed read). */
+   archived student back into every view (a write whose follow-up read failed, a view's own failed read). Kept here and
+   by loadAllStudents before its progress read goes out (review R5-2). */
 let teacherArchivedKept=null;
 function teacherApplyRosterFilter(){
   if(teacherClassConfigReadOk) teacherArchivedKept=(teacherClassConfig&&teacherClassConfig.archived)||{};
@@ -723,6 +724,9 @@ async function loadAllStudents(opts){
          R3-3, R4-1). At boot with nothing on screen yet, the load draws below. */
       if(teacherBodyDrawn || teacherRosterBoxFailed){ readCfg=false; renderTeacherBody(); }
     }
+    /* Kept now, from the good copy in hand: a view's own settings read can fail while the progress read below is out,
+       and the roster filter would then have only that failed {} to go by (review R5-2). */
+    if(teacherClassConfigReadOk) teacherArchivedKept=(teacherClassConfig&&teacherClassConfig.archived)||{};
     const fresh=await teacherFetchStudents();
     /* An automatic retry that lands while the teacher is mid-drag or typing on a view drawn without the roster is
        thrown away, as a refresh's is; the next tick tries again. Not when this load read the settings and has not
