@@ -869,6 +869,8 @@ try {
   /* While it waits for a browser slot, each poll marks progress (the stall watchdog stays fed) and the wait is left out
      of --timeout's total (review R1-1). */
   t0 = T0 + (await browserSlot('golden', { onWait: (ms) => { stepStart('waiting for a browser slot'); t0 = T0 + ms; } })).waitedMs;
+  /* A hang from here on names this step, not the slot wait (review R3-4). */
+  stepStart('starting Chrome');
   const prof = mkdtempSync(join(tmpdir(), 'gc-golden-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',

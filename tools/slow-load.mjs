@@ -174,6 +174,7 @@ const failures = [];
 try {
   /* While it waits for a browser slot, each poll marks progress, so the stall watchdog stays fed (review R1-1). */
   await browserSlot('slow-load', { onWait: () => mark('waiting for a browser slot') });
+  mark('starting Chrome');
   prof = mkdtempSync(join(tmpdir(), 'gc-slowload-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
