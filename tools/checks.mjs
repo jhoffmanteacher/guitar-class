@@ -22560,7 +22560,7 @@ function checkRulesSchoolGate() {
        than that function, that names the progress collection next to a
        write call: read it, it may be innocent.
    ════════════════════════════════════════════════════════════════════ */
-const REMOVE_ONE_SIM_PIN = 83;
+const REMOVE_ONE_SIM_PIN = 85;
 const CONSOLE_PROGRESS_DELETE = "\nfunction teacherRemoveDeleteProgress(uid){\n  return db.collection('progress').doc(uid).delete();\n}\n";
 function checkRemoveOne() {
   head('1ee. One student: the one console delete of a progress doc (teacher-remove.js) is pinned and called once; the remove-one sim runs; the rules are the guard');

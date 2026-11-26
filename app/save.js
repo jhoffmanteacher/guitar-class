@@ -185,8 +185,13 @@ function swap45OnLoad(stored){
    and songReadyAt alone and never calls restoreLocalPlace() — loadProgress
    sets all of those at the next sign-in. */
 function resetLoadedProgress(){
+  // This Chromebook's practice log and place: not while a reset may be waiting unseen (progressDeviceSure, below).
+  const unsure = progressDeviceSure === false;
+  if(currentUser) progressDeviceReadSeen = progressSeenGet(currentUser.uid);
   progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={};
-  streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace();
+  streak={ count:0, lastDay:null }; practiceLog=unsure ? {} : loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod='';
+  progressLogFromDevice = !unsure;
+  if(!unsure) restoreLocalPlace();
 }
 async function loadProgress(){
   progressLoadRetryStop();   // this read replaces any retry of an earlier one (progressLoadRetryStart)
@@ -233,9 +238,15 @@ function progressApplyDoc(doc){
       // (That local fallback is NOT swap45-remapped: nothing records which
       // numbering a device copy was written in, and remapping a copy this
       // code already wrote would swap it back.)
+      // Nor while a reset may be waiting that this Chromebook has not seen
+      // (progressDeviceSure false: the settings read failed); the copy is
+      // then left as it is, not mirrored over.
       progressDocHasLog = !!data.practiceLog;
-      practiceLog   = data.practiceLog || (progressDeviceLogStale() ? {} : loadLocalPracticeLog());
-      savePracticeLogLocal();
+      progressDeviceReadSeen = progressSeenGet(currentUser.uid);
+      const stale = progressDeviceLogStale(), unsure = !data.practiceLog && !stale && progressDeviceSure === false;
+      practiceLog   = data.practiceLog || (stale || unsure ? {} : loadLocalPracticeLog());
+      progressLogFromDevice = !data.practiceLog && !stale && !unsure;
+      if(!unsure) savePracticeLogLocal();
       songReady     = data.songReady || {};
       songReadyAt   = data.songReadyAt || {};
       studentPeriod = data.period || '';
@@ -408,12 +419,11 @@ function progressLoadNoticeHide(){
        activity ticks) re-uploads nothing old.
      - Every other Chromebook keeps its copies until the student signs in there.
        It then finds a doc (emptied by the Start over, or re-created after the
-       Delete), so none of the above runs; its old practice log is not read
-       back in place of the doc's (progressDeviceLogStale, 2026-11-25), except
-       after a Delete when that sign-in's class-settings read fails: only the
-       marker says the record was re-created (review R1-7). Its other copies
-       (practice minutes, the recording consent, the legacy ticks) are not told
-       apart from new ones: nothing in the doc says which are old.
+       Delete), so none of the above runs. Its copies are cleared by the
+       per-Chromebook marker instead (progressDeviceReset, 2026-11-26, below):
+       each browser remembers the newest marker it cleared them for, and every
+       sign-in compares it with the class settings before anything kept on the
+       Chromebook is used or sent.
    THE LIMIT (said in the console's dialogs and in Manage): a page that is
    already open keeps its old copy and saves it again on its next save (after a
    Delete it re-creates the record, after a Start over it puts old lesson work
@@ -441,14 +451,16 @@ function progressMarkersOf(d, uid){
   const num = v => { const n = Number(v); return Number.isFinite(n) && n > 0 ? n : 0; };
   return { over: num(((d && d.progressStartOver) || {})[uid]), del: num(((d && d.progressDeleted) || {})[uid]), ok: true };
 }
-/* This student's copies on the Chromebook: the lesson ones for a Start over;
-   for a Delete also the legacy activity ticks, the recording consent, the
-   practice-minutes copies and the Hear It First copy. Returns how many it removed. */
+/* This student's copies on the Chromebook: the lesson ones for a Start over
+   (practice log, place, Keep-it-sharp picks); for a Delete also the legacy
+   activity ticks, the recording consent, the practice-minutes copies (the
+   totals, the toast and Top 5 weeks, the board, every page's unsent seconds)
+   and the Hear It First copy. Returns how many it removed. */
 function progressClearDevice(del){
   const uid = currentUser && currentUser.uid;
   if(!uid) return 0;
   const keys = ['practiceLog', 'gc-lastModule', 'gc-lastSet', 'gc-srPicks'].map(k => k + ':' + uid);
-  if(del) keys.push('caStepsToday:' + uid, 'micRecConsent:' + uid, 'hif:v1:' + uid, 'pm:c:' + uid, 'pm:t5:' + uid, 'pm:w:' + uid, 'pm:q:' + uid);
+  if(del) keys.push('caStepsToday:' + uid, 'micRecConsent:' + uid, 'hif:v1:' + uid, 'pm:c:' + uid, 'pm:t:' + uid, 'pm:t5:' + uid, 'pm:w:' + uid, 'pm:q:' + uid);
   let n = 0;
   try{
     if(del) for(let i = localStorage.length - 1; i >= 0; i--){ const k = localStorage.key(i); if(k && k.indexOf('pm:q:' + uid + ':') === 0) keys.push(k); }
@@ -466,16 +478,88 @@ function progressClearDevice(del){
 function progressDeviceLogStale(){
   return progressDocFound && !progressDocHasLog && (progressStartOverApplied > 0 || (progressMarkers.ok && progressMarkers.del > 0));
 }
+
+/* ── This Chromebook's copies after a Start over or a Delete: the per-Chromebook marker (2026-11-26) ──
+   A Start over or a Delete reaches the record once, but EVERY Chromebook the student used keeps its own copies
+   (localStorage, keyed by uid: progressClearDevice lists them). Each browser remembers, per student, the newest marker
+   it has cleared them for: gc-resetSeen:<uid> = the larger of progressStartOver[uid] and progressDeleted[uid] then
+   (the console writes each new marker later than both: trmWriteMarker, teacher-remove.js). progressDeviceReset
+   compares it with the class settings: once per sign-in, at its settings read (loadClassConfig, before the app is
+   drawn); if that read fails, at the first later one that works (every tab return reads them again).
+     - A Delete newer than the stored marker: every copy progressClearDevice(true) lists goes. A newer Start over only:
+       the lesson copies (progressClearDevice(false)); a Start over keeps activities, game scores, practice minutes and
+       the recording answer. Then the marker is stored.
+     - What this page already took from those copies (the doc is read before the settings) is dropped from memory: a
+       practice log standing in for the record's (progressLogFromDevice) and, before the app is drawn, the place of a
+       student with no record. Compared with the marker as it stood when this page read them (progressDeviceReadSeen),
+       so a second tab whose copies another tab cleared a moment earlier drops its own too.
+     - Nothing kept on the Chromebook is SENT before the comparison: the legacy activity ticks are folded in after it
+       (app/start.js, caAdoptLocalTicks), the practice-minutes engine picks up other pages' unsent seconds only after it
+       (PM_HOST.localOk, app/boot.js), Hear It First waits for it, and a take is recorded only after a settings read
+       that works (micSampling), which runs the comparison first.
+   WHILE IT IS NOT KNOWN (the sign-in's settings read failed: progressDeviceSure === false), the page uses none of
+   those copies in place of the record's and sends none of them: a practice log copy standing in for the record's
+   is not shown (the page starts from {}, the copy stays on the Chromebook until a rep writes over it), a student with
+   no record starts at the first set, the legacy ticks and other pages' minutes wait on the Chromebook. Bounded by the
+   next settings read that works (this tab's next return, or the next sign-in), which clears or keeps them. Not held:
+   a failed PROGRESS read's copies, shown as before (the practice log is held back from saving then anyway,
+   LOAD_DEPENDENT_SAVE_KEYS, and the late load decides again), and the place they open on.
+   A student with no marker: the comparison finds nothing newer and changes nothing.
+   THE LIMIT stands: a page open across the click keeps its old copy (and its copies on the Chromebook) and saves it
+   again; the comparison runs once per page, so it never clears under that page's feet. */
+const RESET_SEEN_KEY = 'gc-resetSeen';
+let progressDeviceSure = null;       // null: this sign-in has not compared yet; false: its settings read failed; true: compared
+let progressDeviceReadSeen = 0;      // the stored marker when this page last read the copies (progressApplyDoc / resetLoadedProgress)
+let progressLogFromDevice = false;   // practiceLog came from this Chromebook's copy, not from the record
+let progressDeviceCleared = 0;       // copies a Delete's comparison removed before the app was drawn (the 'del' notice)
+function progressSeenGet(uid){
+  try{ return Number(localStorage.getItem(RESET_SEEN_KEY + ':' + uid)) || 0; }catch(e){ return 0; }
+}
+/* PM_HOST.localOk (app/boot.js), Hear It First, caAdoptLocalTicks: may something kept on this Chromebook for the
+   student be used now? The localhost dev bypass reads no class settings and has no marker: always. */
+function progressDeviceLocalOk(){ return progressDeviceSure === true || isDevBypassUser(); }
+/* Called with the markers of a settings read that worked (loadClassConfig), while this page has not compared. */
+function progressDeviceReset(){
+  const uid = currentUser && currentUser.uid;
+  if(!uid || IS_TEACHER_MODE || isDevBypassUser() || progressDeviceSure === true) return;
+  const m = progressMarkers, top = Math.max(m.over, m.del), seen = progressSeenGet(uid), drawn = appIsOnScreen();
+  if(top > seen){
+    const n = progressClearDevice(m.del > seen);
+    if(!drawn && m.del > seen) progressDeviceCleared += n;
+    // Stored after the clear: a tab that reads this value finds the copies already gone.
+    try{ localStorage.setItem(RESET_SEEN_KEY + ':' + uid, String(top)); }catch(e){ /* storage blocked: no copies kept either */ }
+  }
+  if(top > progressDeviceReadSeen){
+    if(progressLogFromDevice){
+      practiceLog = {}; progressLogFromDevice = false;
+      if(drawn){ document.querySelectorAll('.rep-strip[data-sid]').forEach(el => refreshRepStrips(el.dataset.sid)); refreshReviewCards(); }
+    }
+    if(!progressDocFound && !drawn){ lastModuleNum = 1; lastSetId = null; }
+    progressDeviceReadSeen = top;
+  }
+  progressDeviceSure = true;
+}
+/* The sign-in's settings read failed (progressStartOverAtSignIn): nothing kept on the Chromebook stands in for the
+   record until a settings read works. The copies themselves stay where they are. */
+function progressDeviceUnsure(){
+  progressDeviceSure = false;
+  if(progressLoadFailed) return;
+  if(progressLogFromDevice){ practiceLog = {}; progressLogFromDevice = false; }
+  if(!progressDocFound){ lastModuleNum = 1; lastSetId = null; }
+}
 /* Called once per sign-in, after loadProgress() and loadClassConfig() (app/start.js). Never throws. */
 async function progressStartOverAtSignIn(){
-  if(!currentUser || IS_TEACHER_MODE || isDevBypassUser() || progressLoadFailed || !progressMarkers.ok) return;
+  if(!currentUser || IS_TEACHER_MODE || isDevBypassUser()) return;
+  if(progressDeviceSure !== true) progressDeviceUnsure();   // the settings read failed: see progressDeviceReset
+  if(progressLoadFailed || !progressMarkers.ok) return;
   const user = currentUser;
   if(!progressDocFound){
     /* Deleted: start as a new student with nothing old from this Chromebook.
        caAdoptLocalTicks already ran (it adopts the legacy local ticks), so the
        state it built is dropped and the new-student start runs again. */
-    // _dirtyKeys too: caAdoptLocalTicks may have taken the only device copy (the legacy ticks) already (review R3-4).
-    if(progressMarkers.del && (progressClearDevice(true) + _dirtyKeys.size)){
+    /* What the settings read's comparison cleared counts (progressDeviceReset: the copies go before anything reads
+       them), and _dirtyKeys too: caAdoptLocalTicks may have taken the only device copy (the legacy ticks) (review R3-4). */
+    if(progressMarkers.del && (progressDeviceCleared + progressClearDevice(true) + _dirtyKeys.size)){
       clearTimeout(saveTimer); _dirtyKeys.clear(); caStepDone = {};
       resetLoadedProgress();
       progressResetNotice = 'del';
@@ -551,7 +635,8 @@ async function loadClassConfig(){
     await ensureDb();
     if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
     const doc = await db.collection('config').doc('class').get();
-    if(!doc.exists){ restoreClassConfigFromCache(); applyActivityGate(); return; }
+    /* No class settings at all: an answer, and it holds no marker (the per-Chromebook comparison, progressDeviceReset). */
+    if(!doc.exists){ progressMarkers = progressMarkersOf(null, currentUser.uid); progressDeviceReset(); restoreClassConfigFromCache(); applyActivityGate(); return; }
     const d = doc.data()||{};
     /* Practice minutes: this week's goal set from the console (config/class.pmWeekGoals, { 'YYYY-Www': minutes }).
        Handed to the engine on every SUCCESSFUL read, an absent field as nothing; a failed read never gets here, so
@@ -576,6 +661,9 @@ async function loadClassConfig(){
     try{ localStorage.setItem('caOpenThrough', JSON.stringify({uid: currentUser.uid, v: moduleOpenThrough})); }catch(e){}
     // The teacher's Start over / Delete markers for this student (progressStartOverAtSignIn). From THIS read only: never cached.
     progressMarkers = progressMarkersOf(d, currentUser.uid);
+    /* This Chromebook's copies against them, before anything kept here is used or sent: before micSampling just below
+       (a recording answer from before a Delete is gone before a take could be recorded). */
+    progressDeviceReset();
     const ms = d.micSampling || {};
     const msMax = Number(ms.max);
     micSampling = { on: ms.on === true && msMax > 0, max: msMax > 0 ? msMax : 0 };

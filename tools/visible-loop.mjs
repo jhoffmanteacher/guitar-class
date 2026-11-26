@@ -1040,7 +1040,8 @@ async function bootStudent(device, store, uid, cfgMode, progMode, special, nav =
   if (special === 'dev') {
     await page.run(`(async function(){ currentUser = __user; })()`);
   } else {
-    await page.run(`(async function(){ currentUser = __user; await loadProgress(); try { caAdoptLocalTicks(); } catch(e) {} await loadClassConfig(); })()`);
+    /* start.js's order since 2026-11-26: the legacy ticks are folded in after the settings read (app/save.js progressDeviceReset). */
+    await page.run(`(async function(){ currentUser = __user; await loadProgress(); await loadClassConfig(); try { caAdoptLocalTicks(); } catch(e) {} })()`);
   }
   await flush();
   /* The real showApp() (what start.js's sign-in callback calls next). Stubbed, because they need a rendered lesson

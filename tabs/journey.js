@@ -14,10 +14,23 @@ var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
    feeds it) is read by the Top 5 (2026-11-04): a Journey page writes this
    week's minutes under the student's class period too. */
 var pmDocPeriod = '', pmDocPeriodUid = '';
+/* The teacher's Delete marker for the student, from this page's class-settings read (pmLoadWeekGoals): { uid, del }.
+   null until that read answers. */
+var pmResetRead = null;
 window.PM_HOST = {
   ui: false,
   user: function(){ return (fbUser && fbDb && typeof firebase !== 'undefined') ? firebase.auth().currentUser : null; },
   db: function(){ return fbDb; },
+  /* Seconds other pages left on this Chromebook are picked up only when this page's settings read has answered and
+     holds no Delete newer than the one this Chromebook cleared its copies for (gc-resetSeen:<uid>, written by the main
+     site: app/save.js progressDeviceReset). This page clears nothing itself; after a Delete it leaves them for the main
+     site's next sign-in. A Start over keeps practice minutes, so only the Delete counts here (2026-11-26). */
+  localOk: function(){
+    var u = fbUser, seen = 0;
+    if(!u || !pmResetRead || pmResetRead.uid !== u.uid) return false;
+    try { seen = Number(localStorage.getItem('gc-resetSeen:' + u.uid)) || 0; } catch(e) {}
+    return !(pmResetRead.del > seen);
+  },
   period: function(){
     var known = false;
     try {
@@ -34,11 +47,15 @@ window.PM_HOST = {
    config/class.pmWeekGoals, which this page does not otherwise read (the gate read below is switched off). ONE get() of
    that doc each time sign-in resolves to a student (the auth handler below), handed to the engine (PM.setWeekGoals, ../practice-minutes.js). Class data, not a student's, so
    a student switch changes nothing here. A failed read, or no doc, leaves the engine's last known map (its localStorage copy).
-   Fire and forget: nothing on this page waits for it. */
+   Fire and forget: nothing on this page waits for it. The same read gives the student's Delete marker (pmResetRead, for
+   PM_HOST.localOk); a failed read leaves it unknown, and other pages' seconds wait. */
 function pmLoadWeekGoals(db){
+  var uid = fbUser && fbUser.uid;   // the student this read is for: the auth handler sets fbUser just before the call
   try {
     db.collection('config').doc('class').get().then(function(snap){
       if(snap && snap.exists && window.PM && typeof PM.setWeekGoals === 'function') PM.setWeekGoals((snap.data() || {}).pmWeekGoals);
+      var del = Number((((snap && snap.exists && snap.data()) || {}).progressDeleted || {})[uid]);
+      if(uid) pmResetRead = { uid: uid, del: isFinite(del) && del > 0 ? del : 0 };
     }).catch(function(){});
   } catch(e) {}
 }

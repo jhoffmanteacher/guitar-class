@@ -611,7 +611,10 @@ window.PM_HOST = {
   /* accessLocked (the access screen, 2026-11-13): no user, so nothing counts, loads or retries for an account the rules refuse. */
   user: () => ((typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) || accountPaused || accessLocked) ? null : (auth && auth.currentUser) || null,
   db: () => ensureDb(),
-  period: () => periodOverride || studentPeriod || ''
+  period: () => periodOverride || studentPeriod || '',
+  /* Seconds other pages left on this Chromebook are picked up only once this page has compared its copies with the
+     teacher's Start over / Delete markers (app/save.js progressDeviceReset): after a Delete they are old. */
+  localOk: () => typeof progressDeviceLocalOk === 'function' && progressDeviceLocalOk()
 };
 /* config/class.moduleOpenThrough[uid] — teacher's "Open through Module N"
    (teacher.js Manage view), 2..12, or 0 for no override. Opens modules

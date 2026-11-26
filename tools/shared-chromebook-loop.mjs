@@ -126,14 +126,16 @@
      Per STUDENT (must never reach the next student):
        keys named with the uid: practiceLog:<uid>, gc-lastModule:<uid>, gc-lastSet:<uid>, gc-srPicks:<uid>,
        caStepsToday:<uid> (legacy), micRecConsent:<uid> (coach-core.js: "keyed by uid so the next student on a
-       shared Chromebook is asked for themselves"), pm:q:<uid>:<page>, pm:c|t|t5|b|w:<uid>, hif:v1:<uid>;
+       shared Chromebook is asked for themselves"), pm:q:<uid>:<page>, pm:c|t|t5|b|w:<uid>, hif:v1:<uid>,
+       gc-resetSeen:<uid> (2026-11-26: the newest Start over / Delete marker this device cleared that student's copies
+       for, app/save.js progressDeviceReset);
        values that carry the uid: caPeriodOverride, caOpenThrough, caForMe (save.js: "the cache carries the uid");
        every sessionStorage key (boot.js signOut: "every sessionStorage best ... Reloading clears the lot";
        live-quiz.js lq-q-opened carries the uid too).
-     Not on the device at all: the teacher's Start over / Delete markers. app/save.js reads them from config/class at
-     each sign-in and never caches them (progressMarkersOf, progressStartOverAtSignIn); no key records which marker a
-     device has cleared its copies for (the gc-resetSeen:<uid> and caResetMarker this list named until 2026-11-25 exist
-     in no site file). No case here has a marker; tools/save-loop.mjs's reset cases (S1-S17) cover them.
+     Not on the device: the teacher's Start over / Delete markers themselves. app/save.js reads them from config/class
+     at each sign-in and never caches them (progressMarkersOf, progressStartOverAtSignIn); what the device keeps is
+     gc-resetSeen:<uid> above. Only family reset has a marker (R9); tools/save-loop.mjs's reset cases (S1-S26) cover
+     the rest, two Chromebooks included.
 
    THE EXPECTED ANSWER (the "oracle" section). It never calls a function of the code under test: it reads the
    scenario's ledger of what each person did and when, facts of the fake world (the server's docs, every write the
@@ -170,6 +172,8 @@
         8-digit PR tempos), the tab's sessionStorage holds no key the previous student's session wrote, the page
         never read a localStorage key named with another student's uid nor a localStorage VALUE holding another
         student's marker, and the Google popup it opens carries nothing of anyone but the student signing in.
+     R4's practice-log fallback is {} in family reset: the device's copy predates a Delete the device has not cleared it
+        for (gc-resetSeen at the read), so the page neither shows nor sends it.
      R4 late (family load-retry): a screen read long after the sign-in is judged as a first screen against the page's
         LAST read of the doc, and on top: the page is on the failed-read rules exactly when that read failed, no retry
         runs after a good one, and the "not loaded yet" line (#load-notice) is up exactly while a retry runs. A late
@@ -193,6 +197,11 @@
         page had issued already LANDED and every action of the student on that page carried by one of those landed
         writes (issued at or after it), fails. Any other notice may be true and is not judged. (b) "Sign out anyway"
         signs the device out (or someone else is signed in) within 5 s of the click.
+     R9 (family reset, 2026-11-26) The teacher Deleted A's data and this Chromebook never saw it: none of A's old copies
+        is used or sent. The 240 s an old page left queued never reach minutes/A; the legacy tick is never folded in
+        (record or screen); after a settings read that works, the old recording answer, queue, legacy key, picks,
+        practice log and place are gone from the device and it remembers the marker (gc-resetSeen:A); while A's
+        settings read fails, no take can be recorded and the copies are left as they were.
 
    THE FAMILIES (--list): last-action (A's last action of 8 kinds right before Sign out, network up / slow /
    refused once / offline / stalled; the student who sees the not-saved notice either takes "Sign out anyway" or
@@ -203,7 +212,9 @@
    MODELLED for the console), playing (Sign out with a note playing and the mic open), failed-reads (B's progress and/or config
    read refused, offline, or empty right after A), mix (seeded picks of the others). And load-retry (2026-11-16), NOT
    in the round robin (the default cases and the K-TAB band stay as they were): a full default run adds 6 cases of it
-   after the 120 (LOAD_RETRY_CASES; replay with --family=load-retry), --family=load-retry runs it alone. A's progress
+   after the 120 (LOAD_RETRY_CASES; replay with --family=load-retry), --family=load-retry runs it alone. And reset
+   (2026-11-26), likewise outside the round robin: RESET_CASES (3) after load-retry, one per kind (A's record
+   re-created elsewhere, gone, or A's settings read failing for 40 s), then B on the same tab (R9). A's progress
    read fails and the page keeps retrying it (app/save.js progressLoadRetryNow): out-pending (A signs out with the
    retry pending, B signs in on the same tab and is read again 90 s later), frozen (A's second tab is frozen 0-12 s
    after its sign-in, sometimes with a retried read on the wire, and wakes long after B signed in), positive (the retry
@@ -1237,9 +1248,13 @@ const FAMILIES = {
   'mix': 'seeded random mixes of all of the above',
   /* Not in the round robin of the default cases (their numbering and the K-TAB band stay as they were): a full default
      run adds LOAD_RETRY_CASES of it after them, and --family=load-retry runs it alone. */
-  'load-retry': 'A\'s progress read fails at sign-in and the page keeps retrying it (app/save.js, 2026-11-16): A signs out with the retry pending and B signs in (same tab, or a frozen second tab that wakes up after B signed in), or the retry loads A\'s work while A waits'
+  'load-retry': 'A\'s progress read fails at sign-in and the page keeps retrying it (app/save.js, 2026-11-16): A signs out with the retry pending and B signs in (same tab, or a frozen second tab that wakes up after B signed in), or the retry loads A\'s work while A waits',
+  /* Not in the round robin either (2026-11-26): a full default run adds RESET_CASES of it after load-retry. */
+  'reset': 'the teacher Deleted A\'s data, and this Chromebook still holds A\'s old copies (practice log, place, legacy tick, recording answer, Hear It First, unsent practice seconds): A\'s record re-created elsewhere, gone, or A\'s settings read failing at sign-in; then B signs in (R9, the per-Chromebook reset marker, app/save.js progressDeviceReset)'
 };
 const LOAD_RETRY_CASES = 6;
+const RESET_CASES = 3;
+const OUT_OF_ROBIN = ['load-retry', 'reset'];
 const ACTION_KINDS = ['tick', 'untick', 'answer', 'rep', 'check', 'path', 'pr', 'card'];
 const NET_KINDS = ['up', 'slow', 'refused', 'offline', 'stall'];
 
@@ -1247,7 +1262,7 @@ const NET_KINDS = ['up', 'slow', 'refused', 'offline', 'stall'];
 function caseSeed(idx){ return mix(BASE_SEED, idx); }
 function pick(r, arr){ return arr[Math.floor(r() * arr.length)]; }
 function makeScenario(idx, famFilter){
-  const names = Object.keys(FAMILIES).filter(f => famFilter.length ? famFilter.includes(f) : f !== 'load-retry');
+  const names = Object.keys(FAMILIES).filter(f => famFilter.length ? famFilter.includes(f) : !OUT_OF_ROBIN.includes(f));
   const fam = names[idx % names.length];
   const seed = caseSeed(idx);
   const r = rng(seed);
@@ -1264,6 +1279,7 @@ function makeScenario(idx, famFilter){
   sc.unloadDelivered = UNLOAD_MODE === 'delivered' ? true : UNLOAD_MODE === 'lost' ? false : r() < 0.5;
   /* load-retry only, drawn after everything else so the other families' draws stay what they were. */
   if (fam === 'load-retry'){ sc.lrKind = ['out-pending', 'frozen', 'positive'][idx % 3]; sc.lrLong = r() < 0.5; }
+  if (fam === 'reset') sc.rsKind = ['recreated', 'gone', 'config-fails'][idx % 3];
   return sc;
 }
 function actionFor(sc, kind, r, P){
@@ -1616,6 +1632,41 @@ async function runFamily(world, dev, sc, H){
     await settle();
     return;
   }
+  if (fam === 'reset'){
+    /* The teacher Deleted A's data a minute ago (progressDeleted[A] in config/class). A's record was re-created on
+       another Chromebook since (recreated, config-fails) or is still gone (gone). This Chromebook never saw the Delete:
+       it holds A's old copies (seedDevice) and no gc-resetSeen:A. config-fails: A's settings reads fail for the first
+       40 s, then the tab comes back with them working. A works for 20 s (input), so the practice-minutes engine
+       counts and sends TODAY's seconds; R9 judges only yesterday's, the ones an old page left queued. */
+    const T = world.now - 60000;
+    world.docs.get('config/class').data.progressDeleted = { [A.uid]: T };
+    world.reset = { A: T };
+    world.legacy = {};   // the legacy tick is never folded in: the comparison clears it first, or (not known yet) leaves it
+    if (sc.rsKind === 'gone'){ world.docs.delete('progress/' + A.uid); world.seedDocs.A = null; }
+    else {
+      const back = { name: A.name, email: A.email, migrations: { swap45: true }, completed: { 'm1w1-b-sec0-0': true } };
+      world.docs.set('progress/' + A.uid, { data: clone(back), version: 1 }); world.seedDocs.A = back;
+    }
+    if (sc.rsKind === 'config-fails') world.readFails = [{ prefix: 'config/', from: world.now, until: world.now + 40000 }];
+    world.log(`TEACHER Deleted A's data at ${rel(T)}; A's record ${sc.rsKind === 'gone' ? 'is gone' : 're-created elsewhere'}${sc.rsKind === 'config-fails' ? '; A\'s settings reads fail for 40 s' : ''}`);
+    if (!await H.signIn(tab1, A)) return;
+    pokeInput(world, tab1.page, 20000);
+    siteRun(tab1.page, 'ensureCoachJs()');
+    await world.sleep(3000);
+    const seenNow = () => dev.localStorage._d['gc-resetSeen:' + A.uid];
+    world.r9 = { early: { consent: dev.localStorage._d['micRecConsent:' + A.uid] || null, wanted: safeEval(tab1.page, 'typeof micRecWanted === "function" ? micRecWanted() : "no coach"'), seen: seenNow() } };
+    await H.act(tab1, A, actionFor(sc, 'tick', sc.r, A));
+    await world.sleep(sc.rsKind === 'config-fails' ? 42000 : 8000);
+    if (sc.rsKind === 'config-fails'){ await H.hide(tab1); await world.sleep(1000); await H.show(tab1); await world.sleep(4000); }
+    const ls = dev.localStorage._d, v = k => (k in ls ? ls[k] : null);
+    world.r9.late = { seen: seenNow(), consent: v('micRecConsent:' + A.uid), queue: v('pm:q:' + A.uid + ':p0ldpage0001'), legacy: v('caStepsToday:' + A.uid),
+      picks: v('gc-srPicks:' + A.uid), log: v('practiceLog:' + A.uid), set: v('gc-lastSet:' + A.uid) };
+    await H.signOut(tab1, A, 'wait');
+    await world.sleep(3000);
+    if (await H.signIn(tab1, B)) await H.act(tab1, B, actionFor(sc, 'tick', sc.r, B));
+    await settle();
+    return;
+  }
   if (fam === 'last-action'){
     if (!await H.signIn(tab1, A)) return;
     await H.act(tab1, A, actionFor(sc, pick(sc.r, ['answer', 'tick', 'rep']), sc.r, A));
@@ -1924,16 +1975,20 @@ function oracle(sc, world, dev){
   world.allPages = dev.tabs.flatMap(t => t.pages);
   let compared = 0, actionsLanded = 0, actionsTold = 0, actionsLost = 0;
   /* The legacy day ticks a student left on this Chromebook before 2026-10-01 (caStepsToday:<uid>) are folded into
-     THAT student's progress at their first sign-in whose read succeeds (activities.js: "Fold any still on this
+     THAT student's progress at their first sign-in whose reads succeed (activities.js: "Fold any still on this
      Chromebook into the student's progress once, then drop the local copy"). An owed action of that student.
-     The fold runs right after the page's progress read (start.js: `await loadProgress(); caAdoptLocalTicks();`), so
-     of two tabs of one student the one whose read came back FIRST folds, whichever shows its first screen first
-     (2026-11-15: ordering by first screen blamed the wrong tab when one more read before the screen moved the timing). */
+     The fold runs right after the page's settings read, which follows its progress read (start.js: `await
+     loadProgress(); await loadClassConfig(); caAdoptLocalTicks();`, 2026-11-26), and only when that settings read
+     answered (app/save.js progressDeviceReset compares the reset marker first), so of two tabs of one student the one
+     whose settings read came back FIRST folds, whichever shows its first screen first (2026-11-15: ordering by first
+     screen blamed the wrong tab when one more read before the screen moved the timing). */
   const legacyLeft = {};
   for (const [k, done] of Object.entries(world.legacy || {})) legacyLeft[k] = Object.keys(done);
   const legacyAt = {};
-  const prOf = fs => { const page = world.allPages.find(p => p.id === fs.page); return page && (page.reads['progress/' + world.people[fs.who].uid] || []).filter(x => x.at <= fs.at).pop(); };
-  const foldAt = fs => { const pr = prOf(fs); return pr ? pr.at : fs.at; };
+  const pageOf = id => world.allPages.find(p => p.id === id);
+  const prOf = fs => { const page = pageOf(fs.page); return page && (page.reads['progress/' + world.people[fs.who].uid] || []).filter(x => x.at <= fs.at).pop(); };
+  const cfOf = fs => { const page = pageOf(fs.page), pr = prOf(fs); return page && pr ? (page.reads['config/class'] || []).find(x => x.at >= pr.at && x.at <= fs.at) : null; };
+  const foldAt = fs => { const cf = cfOf(fs); return cf ? cf.at : fs.at; };
   /* ...or at a LATE load (2026-11-16, app/save.js progressLoadRetryNow): a page whose sign-in read of the student's doc
      failed, and which read it again successfully before that student did anything there, while Firebase on that page
      was still signed in as that student, loads it as a sign-in would, folding the legacy ticks in at that read. A first screen of the same student on that page after it counts them as
@@ -1945,6 +2000,8 @@ function oracle(sc, world, dev){
       const rs = page.reads['progress/' + P.uid] || [];
       const okr = rs.length && !rs[0].ok ? rs.find(x => x.ok) : null;
       if (!okr || okr.authUid !== P.uid || world.ledger.some(a => a.page === page.id && a.who === k && a.t <= okr.at)) continue;
+      // A late load folds only on a page whose settings read has answered by then (caAdoptLocalTicks, progressDeviceLocalOk).
+      if (!(page.reads['config/class'] || []).some(x => x.ok && x.at <= okr.at)) continue;
       lateFolds.push({ late: true, who: k, page: page.id, at: okr.at });
     }
   }
@@ -1954,7 +2011,7 @@ function oracle(sc, world, dev){
     if (!(legacyLeft[f.who] || []).length) continue;
     if (f.fs){
       const fs = f.fs, pr = prOf(fs);
-      if (fs.teacherMode || !pr || !pr.ok) continue;
+      if (fs.teacherMode || !pr || !pr.ok || !(cfOf(fs) || {}).ok) continue;
       fs.legacy = legacyLeft[fs.who]; legacyLeft[fs.who] = [];
       legacyAt[fs.who] = true;
       world.ledger.push({ kind: 'adopt', who: fs.who, keys: fs.legacy, t: fs.at, page: fs.page, done: true });
@@ -2064,6 +2121,9 @@ function oracle(sc, world, dev){
     const doc = pr && pr.ok && pr.exists ? pr.data : null;
     const lsAt = (pr && pr.ls) || world.lsBefore[fs.page] || world.lsLatest || {};
     let localLog = {}; try { localLog = JSON.parse(lsAt['practiceLog:' + P.uid] || 'null') || {}; } catch {}
+    /* A Delete newer than the marker this Chromebook cleared its copies for (family reset): the copy is old, and the page
+       neither shows nor sends it (app/save.js progressDeviceReset, or progressDeviceUnsure while its settings read fails). */
+    if (world.reset && world.reset[fs.who] > (Number(lsAt['gc-resetSeen:' + P.uid]) || 0)) localLog = {};
     const want = {
       completed: (doc && doc.completed) || {}, responses: (doc && doc.responses) || {},
       caStepDone: Object.assign(Object.fromEntries(Object.entries((doc && doc.caSteps) || {}).filter(([, v]) => v === true)), Object.fromEntries((fs.legacy || []).map(k => [k, true]))),
@@ -2171,6 +2231,30 @@ function oracle(sc, world, dev){
         continue;
       }
       if (e.siteUid && e.siteUid !== Q.uid) fail('R6', `${e.page} ${e.op === 'set' ? 'wrote' : 'removed'} localStorage "${e.k}" (${k}'s key) while that page showed ${uidOwner[e.siteUid] || e.siteUid}, at ${rel(e.at)}`);
+    }
+  }
+  /* R9 (family reset, 2026-11-26): the teacher Deleted A's data and this Chromebook never saw it. Nothing of A's old
+     copies is used or sent: the 240 s an old page left queued for yesterday never reach minutes/A, the legacy tick is
+     never folded in, the old recording answer, queue, legacy key, picks, practice log and place are gone from the
+     Chromebook once a settings read has worked, and it remembers the marker (gc-resetSeen:A). While A's settings read
+     fails (config-fails), no take can be recorded and the copies are left as they were. */
+  if (world.reset && world.r9){
+    const A = PEOPLE.A, day = oDay(T0 - DAY), r9 = world.r9, L = r9.late || {};
+    let oldSecs = 0;
+    for (const w of world.writes) if (w.ok) for (const it of w.items) if (it.path === 'minutes/' + A.uid + '/days/' + day && it.data && it.data.seconds instanceof FieldIncrement) oldSecs += it.data.seconds.n;
+    if (oldSecs) fail('R9', `minutes/${A.uid}/days/${day} got ${oldSecs} s: the seconds an old page left on this Chromebook before the Delete were sent`);
+    const fin = world.docs.get('progress/' + A.uid), legacyIn = !!(fin && fin.data.caSteps && fin.data.caSteps['ca-18:2']);
+    if (legacyIn) fail('R9', 'the old legacy tick ca-18:2 reached A\'s record');
+    for (const fs of world.firstScreens) if (fs.who === 'A' && fs.vals.caStepDone && fs.vals.caStepDone['ca-18:2']) fail('R9', `A's screen on ${fs.page} holds the old legacy tick ca-18:2`);
+    if (String(L.seen) !== String(world.reset.A)) fail('R9', `this Chromebook does not remember the Delete it cleared A's copies for (gc-resetSeen:A = ${L.seen}, want ${world.reset.A})`);
+    const oldIn = (v, re) => v != null && re.test(String(v));
+    const stale = [['the recording answer', L.consent !== null], ['the old page\'s unsent seconds', L.queue !== null], ['the legacy tick key', L.legacy !== null],
+      ['the Keep-it-sharp picks', oldIn(L.picks, /m9w2-s1/)], ['the practice log', oldIn(L.log, /zz-ama-note|"reps":41/)], ['the place', L.set === 'm9w2']].filter(x => x[1]).map(x => x[0]);
+    if (stale.length) fail('R9', `A's old copies still on the Chromebook after a settings read that worked: ${stale.join(', ')}`);
+    if (world.sc.rsKind === 'config-fails'){
+      const E = r9.early || {};
+      if (E.wanted !== false) fail('R9', `while A's settings read fails, a take could be recorded (micRecWanted = ${JSON.stringify(E.wanted)})`);
+      if (E.consent !== 'yes' || E.seen != null) fail('R9', `while A's settings read fails, the copies must be left as they were (recording answer ${JSON.stringify(E.consent)}, marker ${JSON.stringify(E.seen)})`);
     }
   }
   /* R8 (a): a not-saved notice with nothing left to save. Judged only when the oracle can see that everything was
@@ -2387,9 +2471,12 @@ async function main(){
   const single = opt('case', null);
   const N = Number(opt('cases', 120));
   const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
-  /* A full default run adds the load-retry cases after the round robin (their own family filter). */
-  const extra = new Set();
-  if (single == null && !famFilter.length && N >= 120) for (let i = 0; i < LOAD_RETRY_CASES; i++){ idxs.push(N + i); extra.add(N + i); }
+  /* A full default run adds the load-retry and then the reset cases after the round robin (their own family filter). */
+  const extra = new Map();
+  if (single == null && !famFilter.length && N >= 120){
+    for (let i = 0; i < LOAD_RETRY_CASES; i++){ idxs.push(N + i); extra.set(N + i, 'load-retry'); }
+    for (let i = 0; i < RESET_CASES; i++){ idxs.push(N + LOAD_RETRY_CASES + i); extra.set(N + LOAD_RETRY_CASES + i, 'reset'); }
+  }
   const fams = {};
   const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0, crossUnsent: 0, issuedChecked: 0, unloadSent: 0, unloadCases: 0, r8Anyway: 0 };
   const json = [];
@@ -2397,7 +2484,7 @@ async function main(){
   let failed = 0;
   for (const idx of idxs){
     beat(`case ${idx}`);
-    const { sc, world, dev, res } = await runCase(idx, extra.has(idx) ? ['load-retry'] : famFilter);
+    const { sc, world, dev, res } = await runCase(idx, extra.has(idx) ? [extra.get(idx)] : famFilter);
     const famName = sc.fam === 'mix' ? 'mix/' + sc.sub : sc.fam;
     const f = fams[sc.fam] = fams[sc.fam] || { n: 0, fail: 0 };
     f.n++;
@@ -2416,7 +2503,7 @@ async function main(){
       console.log(`✗ FAIL case ${idx} (seed ${BASE_SEED}, ${what}): ${res.fails.length} finding${res.fails.length > 1 ? 's' : ''}`);
       for (const x of res.fails.slice(0, 8)) console.log(`    ${x.rule} ${x.msg}`);
       if (res.fails.length > 8) console.log(`    … ${res.fails.length - 8} more`);
-      console.log(`    replay: node tools/shared-chromebook-loop.mjs --seed=${BASE_SEED} --case=${idx} --verbose${extra.has(idx) ? ' --family=load-retry --cases=' + (idx + 1) : (famFilter.length ? ' --family=' + famFilter.join(',') : '') + (opt('cases', null) ? ' --cases=' + N : '')}${opt('root', null) ? ' --root=' + ROOT : ''}`);
+      console.log(`    replay: node tools/shared-chromebook-loop.mjs --seed=${BASE_SEED} --case=${idx} --verbose${extra.has(idx) ? ' --family=' + extra.get(idx) + ' --cases=' + (idx + 1) : (famFilter.length ? ' --family=' + famFilter.join(',') : '') + (opt('cases', null) ? ' --cases=' + N : '')}${opt('root', null) ? ' --root=' + ROOT : ''}`);
     }
     if (VERBOSE){
       console.log(`\n── case ${idx} (seed ${BASE_SEED}, ${what}, notice choice ${sc.noticeChoice}, B ${sc.bKind})`);

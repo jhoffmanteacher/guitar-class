@@ -28,10 +28,13 @@
    lesson fields ONCE, at its next sign-in on the main site
    (progressStartOverAtSignIn, app/save.js). Delete also leaves
    progressDeleted[uid] = time; nothing enforces it afterwards (a student who
-   signs in again starts as a new student; that Chromebook's copies are
-   cleared at that sign-in). Both go through teacherWriteConfig(),
-   cell-checked on the one cell. The markers hold a uid and a time, nothing
-   else, and stay until the summer reset.
+   signs in again starts as a new student). Each Chromebook the student used
+   clears its own copies of their work at their next sign-in there: it
+   remembers the newest marker it cleared them for (gc-resetSeen:<uid>,
+   progressDeviceReset in app/save.js), which is why every marker written
+   here is later than both of the student's markers (trmWriteMarker). Both
+   go through teacherWriteConfig(), cell-checked on the one cell. The markers
+   hold a uid and a time, nothing else, and stay until the summer reset.
 
    DELETE ORDER (each kind whole before the next; a failure stops there and
    says "done X of N kinds, failed at …", the rest untouched; running it again
@@ -51,7 +54,7 @@
    nobody delete them), the anonymous Top 5 / class-rank entries (a private
    tag, no uid: the tag is deleted with the minutes, so nothing links them
    to the student any more), the Google sign-in record (Firebase console
-   only), and a copy on a Chromebook until it next opens the site.
+   only), and a copy on a Chromebook until the student next signs in on it.
    NO UNDO: the console cannot put a student back (the rules deny the teacher
    create and update). A restore is hand work in the Firebase console; a
    started-over student's doc put back by hand is emptied again at their next
@@ -432,7 +435,7 @@ const TRM_KEPT = [
   'Their problem reports, if any (nobody can delete those).',
   'Their Google sign-in. Only the Firebase console can remove it; if they sign in again they start fresh.',
   'Their anonymous Top 5 and class-rank entries: no name and no uid, and nothing links them to the student once the private tag is gone.',
-  'A copy on a Chromebook that is still signed in, until that Chromebook next opens the site. A page they already have OPEN keeps its old copy and saves it again (the record comes back; Manage then says “has a record again”): press Delete again.',
+  'A copy on a Chromebook they used, until they next sign in on it (the main site). A page they already have OPEN keeps its old copy and saves it again (the record comes back; Manage then says “has a record again”): press Delete again.',
 ];
 /* Said in both dialogs, above the typed name. */
 function trmWarnHtml(){

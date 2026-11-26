@@ -20,7 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
-     --reset            only the reset cases (Start over / Delete, S1-S21, and Z1-Z5: Song Journey ticks; see "the reset
+     --reset            only the reset cases (Start over / Delete, S1-S26, and Z1-Z5: Song Journey ticks; see "the reset
                         cases" below); a full default run runs them too
      --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
      --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
@@ -59,8 +59,9 @@
    call flushOnHide) and pagehide listener (shell.js), and the browser's 'online' event its own re-save listener
    (shell.js). queueSave's debounce, flushSave's retries, withTimeout, ensureDb's on-demand SDK load,
    swap45Commit's transaction and loadProgress all run as written, on the virtual clock.
-   Sign-in: the tool sets currentUser and runs loadProgress() then caAdoptLocalTicks(), the first two steps of the
-   site's own onAuthStateChanged callback (app/start.js), then progressLoadRetryStart() (start.js starts the background
+   Sign-in: the tool sets currentUser and runs loadProgress() then caAdoptLocalTicks() (since 2026-11-26 start.js folds
+   the legacy ticks in after loadClassConfig, and caAdoptLocalTicks waits for its comparison, so here it adopts nothing:
+   the random cases hold no legacy key; the reset cases run start.js's whole order), then progressLoadRetryStart() (start.js starts the background
    retry once the app is on screen, when that read failed); showApp() and loadClassConfig() are not run at sign-in
    (loadClassConfig runs when a hidden tab is shown again, through the site's own listener). Firebase's own
    auth.currentUser is set to the student with currentUser, as the SDK has it by the time the callback runs.
@@ -503,6 +504,10 @@ function makeClient(world, tab){
     const serverOnly = !!(o && o.source === 'server');
     const phaseNow = dev.phaseAt(world.now).phase, refusedNow = phaseNow === 'refused' || phaseNow === 'denied', deniedNow = phaseNow === 'denied' && FAKE_FAULT !== 'denied-reads-unavailable';
     const tr = world.readTrip(dev);
+    /* A reset case can make one tab's reads of one path fail (as offline) or answer late (`delay`) for a while
+       (world.failReads, S22-S26, 2026-11-26): the class settings read at sign-in, apart from the progress read. */
+    const fr = (world.failReads || []).find(f => f.path === path && (!f.tab || f.tab === tab.name) && world.now >= f.from && world.now < f.until);
+    if (fr && tr.ok === true){ if (fr.delay) tr.at += fr.delay; else tr.ok = false; }
     const settle = () => {
       const cached = tr.ok !== true && !serverOnly && !refusedNow ? cacheSnap(path) : null;
       if (cached){
@@ -2336,6 +2341,13 @@ function actionCode(a){
      S19-S21 (2026-11-26, sweep JOURNEY-3) the Module 4/5 marker on a record created after a Delete: S19 the app's save
         from a page open across the Delete, S20 a Song Journey page's, S21 a sign-in after the Delete; the next sign-in
         keeps Module 4 (Layer 4) as Module 4
+     S22-S26 (2026-11-26) the per-Chromebook reset marker (gc-resetSeen:<uid>, app/save.js progressDeviceReset): S22 B's
+        settings read fails at sign-in (nothing old shown or sent; the tab's next good read clears B), S23 every kind of
+        copy a Delete removes goes from B before anything is sent (another student's and site-wide keys stay), S24 two
+        tabs on B with the record still gone, the second one having read the copies before the first cleared them, S25 never
+        reset, settings read failing (the copy is not used then and stays for the next sign-in), S26 a Start over
+        removes only B's lesson copies. A case can make one tab's reads of one path fail or answer late for a while
+        (world.failReads, in the fake's read)
      S6 a deleted student signs in again on the Chromebook holding their old copies: a new student, nothing old
         re-uploaded at sign-in
      S7 THE LIMIT, documented: a page left open writes its old copy back, after a Start over and after a Delete
@@ -2430,7 +2442,7 @@ async function resetCases(){
   const OLD_TICKS = Object.keys(OLD.completed);
   const NEW_TICK = 'm7w2-c-sec0-1';
   const mkStorage = () => ({ _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } });
-  const BOOT = 'currentUser = __user; auth.currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); await loadClassConfig(); await progressStartOverAtSignIn(); progressLoadRetryStart(); })().finally(() => __booted())';
+  const BOOT = 'currentUser = __user; auth.currentUser = __user; (async () => { await loadProgress(); await loadClassConfig(); caAdoptLocalTicks(); await progressStartOverAtSignIn(); progressLoadRetryStart(); })().finally(() => __booted())';
   const scenario = async (id, what, script) => {
     beat('reset case ' + id);
     const world = new World(mix(BASE_SEED, 9000 + id.charCodeAt(1) * 7 + id.length));
@@ -2598,6 +2610,9 @@ async function resetCases(){
     c.teacher(100, 'del');
     c.at(1000, () => { const back = { name: USER.displayName, email: USER.email, migrations: { swap45: true }, completed: { [NEW_TICK]: true } }; seed(c.world, back); });
     A.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify({ 'm7w1-s1': { reps: 2 } }));   // made since coming back
+    /* The student came back on THIS Chromebook, so it applied the Delete then (2026-11-26: gc-resetSeen, app/save.js
+       progressDeviceReset); a Chromebook that never did clears its copies at once, even with this read failing (S22-S24). */
+    A.localStorage.setItem('gc-resetSeen:' + USER.uid, String(T0 + 100));
     c.boot('A', A, 3100);
     /* Between the end of the sign-in (4.45 s at the latest) and the first retry (2 s after it). */
     c.at(5000, () => { c.tab('A').s8 = { failed: c.tab('A').run('progressLoadFailed'), copy: A.localStorage.getItem('practiceLog:' + USER.uid) }; });
@@ -2852,6 +2867,144 @@ async function resetCases(){
       ['the record is marked', !!doc && !!doc.migrations && doc.migrations.swap45 === true, JSON.stringify(doc && doc.migrations)],
       ['it holds the one new Module 4 tick, as Module 4', !!doc && Object.keys(doc.completed || {}).join() === M4NEW, JSON.stringify(doc && doc.completed)],
       ['the next sign-in shows it as Module 4', tabs.find(t => t.name === 'A2').s21 === JSON.stringify([M4NEW]), String(tabs.find(t => t.name === 'A2').s21)] ] };
+  });
+  /* S22-S26 (2026-11-26, the per-Chromebook reset marker; APP-CORE-2's other copies, R1-7). Every Chromebook the
+     student used keeps its own copies; each remembers, per student, the newest marker it cleared them for
+     (gc-resetSeen:<uid>, app/save.js progressDeviceReset), and nothing it took from them is sent before its sign-in has
+     compared that with the class settings. */
+  const OTHER_KEY = 'practiceLog:uid-someone-else';
+  const deviceCopies = d => {
+    const u = USER.uid, ls = d.localStorage;
+    ls.setItem('practiceLog:' + u, JSON.stringify(OLD.practiceLog));
+    ls.setItem('gc-lastModule:' + u, '6'); ls.setItem('gc-lastSet:' + u, 'm6w1');
+    ls.setItem('gc-srPicks:' + u, JSON.stringify({ day: '2026-11-10', ids: ['m6w1-s1'] }));
+    ls.setItem('caStepsToday:' + u, JSON.stringify({ done: { 'ca-20:c1': true } }));
+    ls.setItem('micRecConsent:' + u, 'yes');
+    ls.setItem('hif:v1:' + u, JSON.stringify({ sessions: 4 }));
+    ls.setItem('pm:c:' + u, JSON.stringify({ days: { '2026-11-10': 600 } })); ls.setItem('pm:t:' + u, '2026-W46');
+    ls.setItem('pm:t5:' + u, '2026-W46'); ls.setItem('pm:w:' + u, JSON.stringify({ at: 1 }));
+    ls.setItem('pm:q:' + u + ':0ldpage00001', JSON.stringify({ days: { '2026-11-10': 240 }, at: T0 - 3600000 }));
+    ls.setItem(OTHER_KEY, JSON.stringify({ 'm1w1-s1': { reps: 1 } })); ls.setItem('gc-lang', 'es');
+  };
+  const LESSON_KEYS = ['practiceLog', 'gc-lastModule', 'gc-lastSet', 'gc-srPicks'];
+  const OTHER_COPIES = ['caStepsToday', 'micRecConsent', 'hif:v1', 'pm:c', 'pm:t', 'pm:t5', 'pm:w', 'pm:q'];
+  const keysLeft = (d, bases) => bases.filter(b => b === 'pm:q' ? Object.keys(d.localStorage._d).some(k => k.startsWith('pm:q:' + USER.uid)) : d.localStorage.getItem(b + ':' + USER.uid) !== null);
+  const seenOn = d => d.localStorage.getItem('gc-resetSeen:' + USER.uid);
+  const backOnA = c => { c.boot('A', c.dev('A'), 1000); c.act('A', 4000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`); c.vis('A', 6000, true); c.kill('A', 6100); };
+  await scenario('S22', 'Delete; the student came back on A; B (old copies) signs in and its class-settings read FAILS: nothing old is shown or sent, and the next good read clears B', c => {
+    seed(c.world, OLD);
+    const B = c.dev('B');
+    deviceCopies(B);
+    c.teacher(100, 'del');
+    backOnA(c);
+    c.world.failReads = [{ path: 'config/class', tab: 'B', from: T0 + 8000, until: T0 + 14000 }];
+    c.boot('B', B, 8000);
+    c.at(11000, () => { const t = c.tab('B'); t.s22 = { ok: t.run('progressMarkers.ok'), failed: t.run('progressLoadFailed'), log: t.run('JSON.stringify(practiceLog)'), legacy: t.run("caStepDone['ca-20:c1'] === true"), copy: copyNow(B) }; });
+    c.act('B', 12000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
+    c.vis('B', 13000, true);
+    c.vis('B', 15000, false);                                                        // the tab comes back: the class settings are read again
+    c.at(18000, () => { c.tab('B').s22b = { seen: seenOn(B), left: keysLeft(B, LESSON_KEYS.slice(1).concat(OTHER_COPIES)) }; });
+    return { endMs: 24000, check: (doc, w, tabs) => {
+      const b = tabs.find(t => t.name === 'B'), s = b.s22 || {}, s2 = b.s22b || {};
+      return [
+        ["B's progress read worked and its settings read failed", s.ok === false && s.failed === false, JSON.stringify(s)],
+        ["B's page shows no old practice log", s.log === '{}', s.log],
+        ['…and has not folded in the old legacy tick', s.legacy === false],
+        ["B's copy is left on B (not read, not overwritten) until a settings read decides", !noOldIn(s.copy), String(s.copy)],
+        ['the stored practice log holds only the rep made on B', onlyNewRep(doc), JSON.stringify(doc && doc.practiceLog)],
+        ['no old legacy tick in the record', !!doc && !(doc.caSteps && doc.caSteps['ca-20:c1']), JSON.stringify(doc && doc.caSteps)],
+        ['the tab came back with the settings read working: B cleared its copies and remembered the marker', s2.seen === String(w.marker) && Array.isArray(s2.left) && !s2.left.length, JSON.stringify(s2)],
+        ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))] ];
+    } };
+  });
+  await scenario('S23', 'Delete; the student came back on A; B (old copies of every kind) signs in: they are all gone before anything is sent, other keys stay', c => {
+    seed(c.world, OLD);
+    const B = c.dev('B');
+    deviceCopies(B);
+    c.teacher(100, 'del');
+    backOnA(c);
+    c.boot('B', B, 8000);
+    c.at(11000, () => { const t = c.tab('B'); t.s23 = { left: keysLeft(B, LESSON_KEYS.concat(OTHER_COPIES)), seen: seenOn(B), log: t.run('JSON.stringify(practiceLog)'), legacy: t.run("caStepDone['ca-20:c1'] === true"), set: t.run('lastSetId') }; });
+    c.vis('B', 13000, true);
+    return { endMs: 18000, check: (doc, w, tabs) => {
+      const b = tabs.find(t => t.name === 'B'), s = b.s23 || {};
+      return [
+        ["every copy a Delete removes is gone from B (practice log, place, picks, legacy ticks, recording answer, Hear It First, practice-minutes copies and unsent seconds)", Array.isArray(s.left) && !s.left.length, JSON.stringify(s.left)],
+        ['B remembers the marker it cleared them for', s.seen === String(w.marker), String(s.seen)],
+        ["another student's copy and the language stay", B.localStorage.getItem(OTHER_KEY) !== null && B.localStorage.getItem('gc-lang') === 'es'],
+        ["B's page: no old practice log, no old legacy tick", s.log === '{}' && s.legacy === false, JSON.stringify(s)],
+        ['no old legacy tick reached the record', !!doc && !(doc.caSteps && doc.caSteps['ca-20:c1']), JSON.stringify(doc && doc.caSteps)],
+        ['B says nothing (the record is there)', !b.notice, String(b.notice)] ];
+    } };
+  });
+  await scenario('S24', 'Delete, the record still gone; TWO tabs on B (old copies) sign in at once: the second read the copies before the first cleared them, and shows or sends nothing old either', c => {
+    seed(c.world, OLD);
+    const B = c.dev('B');
+    deviceCopies(B);
+    c.teacher(100, 'del');
+    /* B1's settings read answers 1 s late and B2's 3 s late, so B2 reads the copies (its progress read) before B1's
+       comparison clears them and compares after B1 stored the marker: B2 drops what it took by the marker as it stood
+       when it read them (progressDeviceReadSeen), not as it stands now. */
+    c.world.failReads = [{ path: 'config/class', tab: 'B1', from: T0 + 8000, until: T0 + 10000, delay: 1000 }, { path: 'config/class', tab: 'B2', from: T0 + 8000, until: T0 + 10000, delay: 3000 }];
+    c.boot('B1', B, 8000); c.boot('B2', B, 8000);
+    c.at(13000, () => { for (const n of ['B1', 'B2']){ const t = c.tab(n); t.s24 = { log: t.run('JSON.stringify(practiceLog)'), legacy: t.run("caStepDone['ca-20:c1'] === true"), set: t.run('lastSetId'), ok: t.run('progressMarkers.ok') }; } });
+    c.act('B1', 14000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
+    c.act('B2', 15000, `logPracticeRep('m7w1-s2')`);
+    c.vis('B1', 17000, true); c.vis('B2', 17500, true);
+    return { endMs: 24000, check: (doc, w, tabs) => {
+      const s1 = tabs.find(t => t.name === 'B1').s24 || {}, s2 = tabs.find(t => t.name === 'B2').s24 || {};
+      const keys = Object.keys((doc && doc.practiceLog) || {}).sort().join();
+      const order = (() => { const g = w.gets.filter(x => x.ok); const at = (tab, path) => (g.find(x => x.tab === tab && x.path === path) || {}).at; return at('B2', 'progress/' + USER.uid) < at('B1', 'config/class') && at('B1', 'config/class') < at('B2', 'config/class'); })();
+      return [
+        ["B2 read the copies before B1's settings read, and its own settings read came after B1's", order],
+        ["both tabs' settings reads worked", s1.ok === true && s2.ok === true, JSON.stringify([s1, s2])],
+        ['neither page shows the old practice log, the old place or the old legacy tick', s1.log === '{}' && s2.log === '{}' && s1.legacy === false && s2.legacy === false && s1.set !== 'm6w1' && s2.set !== 'm6w1', JSON.stringify([s1, s2])],
+        ['the stored practice log holds only the two reps made on B', keys === [NEW_REP, 'm7w1-s2'].sort().join(), JSON.stringify(doc && doc.practiceLog)],
+        ['no old legacy tick in the record', !!doc && !(doc.caSteps && doc.caSteps['ca-20:c1']), JSON.stringify(doc && doc.caSteps)],
+        ["B's device copy holds nothing old", noOldLog(B.localStorage), String(B.localStorage.getItem('practiceLog:' + USER.uid))] ];
+    } };
+  });
+  await scenario('S25', 'never reset: a record holding no practice log, and this sign-in\'s settings read FAILS: the copy is not used then (a Delete may be waiting), and stays for the next sign-in', c => {
+    const noLog = clone(OLD); delete noLog.practiceLog;
+    seed(c.world, noLog);
+    const A = c.dev('A');
+    oldLogOn(A);
+    c.teacher(100, 'del', 'uid-someone-else');
+    c.world.failReads = [{ path: 'config/class', tab: 'A', from: T0 + 1000, until: T0 + 6000 }];
+    c.boot('A', A, 1000);
+    c.at(4000, () => { const t = c.tab('A'); t.s25 = { ok: t.run('progressMarkers.ok'), log: t.run('JSON.stringify(practiceLog)') }; });
+    c.kill('A', 5000);
+    c.boot('A2', A, 8000);
+    c.at(12000, () => { c.tab('A2').s25 = c.tab('A2').run('JSON.stringify(practiceLog)'); });
+    return { endMs: 15000, check: (doc, w, tabs) => {
+      const a = tabs.find(t => t.name === 'A').s25 || {}, a2 = tabs.find(t => t.name === 'A2').s25;
+      return [
+        ["A's settings read failed", a.ok === false, JSON.stringify(a)],
+        ["A's page does not show the Chromebook's copy in place of the record's", a.log === '{}', a.log],
+        ['the copy is still on the Chromebook', A.localStorage.getItem('practiceLog:' + USER.uid) === JSON.stringify(OLD.practiceLog), String(A.localStorage.getItem('practiceLog:' + USER.uid))],
+        ['the next sign-in (both reads working) shows it', a2 === JSON.stringify(OLD.practiceLog), String(a2)],
+        ['nothing was sent: the record is as it was', canon(doc) === canon(noLog), JSON.stringify(doc)],
+        ['no marker remembered (none was ever set for this student)', A.localStorage.getItem('gc-resetSeen:' + USER.uid) === null] ];
+    } };
+  });
+  await scenario('S26', 'Start over applied on A; B (old copies of every kind) signs in: only the lesson copies go; the legacy tick, recording answer, Hear It First and minutes stay', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A'), B = c.dev('B');
+    deviceCopies(B);
+    c.teacher(100, 'over');
+    c.boot('A', A, 1000); c.vis('A', 3000, true); c.kill('A', 3100);
+    c.boot('B', B, 5000);
+    c.at(9000, () => { const t = c.tab('B'); t.s26 = { lesson: keysLeft(B, LESSON_KEYS), other: keysLeft(B, OTHER_COPIES.filter(k => k !== 'caStepsToday')), seen: seenOn(B), legacy: t.run("caStepDone['ca-20:c1'] === true") }; });
+    c.vis('B', 11000, true);
+    return { endMs: 16000, check: (doc, w, tabs) => {
+      const b = tabs.find(t => t.name === 'B'), s = b.s26 || {};
+      return [
+        ['B: the lesson copies (practice log, place, picks) are gone', Array.isArray(s.lesson) && !s.lesson.length, JSON.stringify(s.lesson)],
+        ['B: the recording answer, Hear It First and the practice-minutes copies stay (a Start over keeps them)', Array.isArray(s.other) && s.other.length === OTHER_COPIES.length - 1, JSON.stringify(s.other)],
+        ['B remembers the marker', s.seen === String(w.marker), String(s.seen)],
+        ['the legacy tick is folded in (a Start over keeps activities)', s.legacy === true && !!doc && !!doc.caSteps && doc.caSteps['ca-20:c1'] === true, JSON.stringify(doc && doc.caSteps)],
+        ['applied once, on A; B says nothing', applies(w) === 1 && !b.notice, String(applies(w))] ];
+    } };
   });
   await scenario('S7', 'THE LIMIT (expected, documented): an open page writes its old copy back after a Start over and after a Delete', c => {
     seed(c.world, OLD);

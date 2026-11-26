@@ -456,6 +456,54 @@ console.log('start over');
   ok(later > at, `a second Start over writes a later time (${later} > ${at})`);
 }
 
+/* ── the per-Chromebook marker (2026-11-26): every Chromebook the student used clears its own copies at their next sign-in
+   there, comparing the markers with the newest one it cleared them for (gc-resetSeen:<uid>, app/save.js
+   progressDeviceReset). The console's markers (trmWriteMarker, real) go through the student page's comparison (real,
+   cut out of app/save.js), with the console's clock going BACKWARDS between clicks: each new marker must still make
+   every Chromebook clear again, a Delete every copy, a Start over only the lesson copies. ── */
+console.log('per-Chromebook marker');
+{
+  const S = makeStore(), c = makeConsole(S);
+  let clock = 5000;
+  c.ctx.Date = Object.assign(function(...a){ return new Date(...(a.length ? a : [clock])); }, { now: () => clock, UTC: Date.UTC, parse: Date.parse });
+  let student = null, why = '';
+  try {
+    const parts = [lineOf(APP, 'const RESET_SEEN_KEY = '), extractFn(APP, 'progressMarkersOf'), extractFn(APP, 'progressSeenGet'), extractFn(APP, 'progressClearDevice'), extractFn(APP, 'progressDeviceReset')];
+    student = (ls, uid) => {
+      const lsApi = { getItem: k => (ls.has(k) ? ls.get(k) : null), setItem: (k, v) => { ls.set(k, String(v)); }, removeItem: k => { ls.delete(k); }, key: i => [...ls.keys()][i] ?? null, get length(){ return ls.size; } };
+      const sctx = vm.createContext({ localStorage: lsApi, currentUser: { uid }, IS_TEACHER_MODE: false, isDevBypassUser: () => false, appIsOnScreen: () => false, Number, Math, String });
+      vm.runInContext(parts.join('\n') + '\nlet progressMarkers = null, progressDeviceSure = null, progressDeviceReadSeen = 0, progressLogFromDevice = false, progressDeviceCleared = 0, progressDocFound = true, practiceLog = {}, lastModuleNum = 1, lastSetId = null;', sctx, { filename: 'app/save.js (cut out)' });
+      return cfg => { vm.runInContext(`progressMarkers = progressMarkersOf(${JSON.stringify(cfg)}, ${JSON.stringify(uid)}); progressDeviceSure = null; progressDeviceReset();`, sctx); };
+    };
+  } catch(e){ why = e.message; }
+  const u = U[0], LESSON = ['practiceLog', 'gc-lastModule', 'gc-lastSet', 'gc-srPicks'], OTHER = ['caStepsToday', 'micRecConsent', 'hif:v1', 'pm:c', 'pm:t', 'pm:t5', 'pm:w', 'pm:q:' + u + ':0ldpage'];
+  const fill = (ls, which) => { for (const k of which) ls.set(k.startsWith('pm:q:') ? k : k + ':' + u, 'x'); ls.set('gc-lang', 'en'); ls.set('practiceLog:' + U[1], 'x'); };
+  const has = (ls, k) => ls.has(k.startsWith('pm:q:') ? k : k + ':' + u);
+  const steps = [];
+  if (student){
+    const X = new Map(), Y = new Map(); fill(X, LESSON.concat(OTHER)); fill(Y, LESSON.concat(OTHER));
+    const signInX = student(X, u), signInY = student(Y, u), cfg = () => S.get('config/class');
+    const step = (label, want) => steps.push([label, want.every(Boolean)]);
+    const keptOthers = ls => ls.get('gc-lang') === 'en' && ls.has('practiceLog:' + U[1]);
+    const m1 = await c.fn('trmWriteMarker')('progressStartOver', u); signInX(cfg());
+    step('Start over: X drops its lesson copies, keeps the rest', [LESSON.every(k => !has(X, k)), OTHER.every(k => has(X, k)), X.get('gc-resetSeen:' + u) === String(m1), keptOthers(X)]);
+    fill(X, LESSON); clock = 3000;
+    const m2 = await c.fn('trmWriteMarker')('progressDeleted', u); signInX(cfg());
+    step('a Delete written on a clock 2 s behind: X drops every copy', [m2 > m1, LESSON.concat(OTHER).every(k => !has(X, k)), X.get('gc-resetSeen:' + u) === String(m2), keptOthers(X)]);
+    fill(X, LESSON.concat(OTHER)); clock = 1000;
+    const m3 = await c.fn('trmWriteMarker')('progressStartOver', u); signInX(cfg());
+    step('a Start over after it, on a clock further behind: X drops only its lesson copies', [m3 > m2, LESSON.every(k => !has(X, k)), OTHER.every(k => has(X, k)), X.get('gc-resetSeen:' + u) === String(m3)]);
+    fill(X, LESSON); signInX(cfg());
+    step('no new marker: X keeps what the student made since', [LESSON.concat(OTHER).every(k => has(X, k))]);
+    signInY(cfg());
+    step('Y, which never saw any of the three: every copy goes', [LESSON.concat(OTHER).every(k => !has(Y, k)), Y.get('gc-resetSeen:' + u) === String(m3), keptOthers(Y)]);
+  }
+  const good = steps.filter(x => x[1]);
+  ok(!!student && good.length === steps.length && steps.length === 5, `each marker the console writes makes every Chromebook clear its copies again, by kind, with the console's clock going backwards (${good.length} of ${steps.length || 5} steps${why ? '; ' + why : ''}${steps.some(x => !x[1]) ? ': failed ' + steps.filter(x => !x[1]).map(x => x[0]).join('; ') : ''})`);
+  const kept = c.run('TRM_KEPT').join(' ');
+  ok(/A copy on a Chromebook they used, until they next sign in on it \(the main site\)/.test(kept) && !/until that Chromebook next opens the site/.test(kept), 'the Delete dialog says a Chromebook keeps a copy until the student next signs in on it (not "until that Chromebook next opens the site")');
+}
+
 /* ── the download ── */
 console.log('download');
 {

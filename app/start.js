@@ -281,7 +281,9 @@ if(auth) auth.onAuthStateChanged(async user=>{
       builtSongsSync();
       if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
       else {
-        await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
+        /* The legacy ticks are folded in after the settings read: its comparison with this Chromebook's reset marker
+           (app/save.js progressDeviceReset) clears copies a Delete made old before anything kept here is sent. */
+        await loadProgress(); await loadClassConfig(); caAdoptLocalTicks();
         await progressStartOverAtSignIn();   // the teacher's Start over / Delete, once, at sign-in only (app/save.js)
         clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
         /* An account the rules refused (not @seq.org, not allowed by the

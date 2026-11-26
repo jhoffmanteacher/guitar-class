@@ -37,9 +37,12 @@
 
   var trainer = null, rootEl = null, pill = null, pitch = null, stopWatch = null;
 
-  /* ── Wait for a signed-in, painted app ── */
+  /* ── Wait for a signed-in, painted app ──
+     ...whose sign-in has compared this Chromebook's copies with the teacher's Start over / Delete markers
+     (progressDeviceLocalOk, app/save.js; 2026-11-26): the hif:v1 copy is old after a Delete, and store.load() below
+     would hand it on to the next save. */
   function signedIn() {
-    try { return typeof currentUser !== 'undefined' && !!currentUser && typeof appIsOnScreen === 'function' && appIsOnScreen(); }
+    try { return typeof currentUser !== 'undefined' && !!currentUser && typeof appIsOnScreen === 'function' && appIsOnScreen() && typeof progressDeviceLocalOk === 'function' && progressDeviceLocalOk(); }
     catch (e) { return false; }
   }
   var waited = 0, poll = setInterval(function () {

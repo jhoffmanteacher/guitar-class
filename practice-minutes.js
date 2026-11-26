@@ -76,8 +76,9 @@
    hide and on unload. flush() sends them every 60 s while counting, when playback
    stops, when the tab hides, on `online`, about once a minute while idle with
    something left, and a page takes over the key of a page that is gone (stamp more
-   than 3 minutes away from now, either way) as soon as the student is known; a
-   page that signs the same student back in folds its own key in (sync).
+   than 3 minutes away from now, either way) as soon as the student is known and the
+   host allows it (PM_HOST.localOk: not before it has checked the teacher's Delete);
+   a page that signs the same student back in folds its own key in (sync).
    A flush is one batch. Its seconds move from `pend` to `inflight` when it is sent
    and leave only when the SDK answers — there is NO timeout: the SDK keeps a commit
    it cannot deliver and delivers it when the connection returns, so sending the same
@@ -429,9 +430,14 @@
       if(S && ++beats % 6 === 0 && !session && !S.flushing && !S.loading && takePending()) flush();
     }, QUEUE_FRESH_MS);
   }
+  /* The host may hold the takeover back (PM_HOST.localOk, 2026-11-26): seconds another page left on this Chromebook can
+     predate the teacher's Delete, and nothing kept here is sent until the host has compared its reset marker
+     (app/save.js progressDeviceReset; tabs/journey.js). They wait in their keys; a later adopt() takes them. A host
+     without localOk holds nothing. This page's own counting and sending go on either way. */
+  function localOk(){ var h = getHost(); return !h || typeof h.localOk !== 'function' || h.localOk() === true; }
   function adopt(){
     var st = S, took = false;
-    if(!st) return;
+    if(!st || !localOk()) return;
     /* `legacy`: the key commit 70ef823 wrote for about an hour on 2026-11-01 (10:33
        to 11:36) before the key got a page id: pm:q:<uid>, no `at`. Nothing else ever
        adopted it. An exact match, so another student's key (pm:q:<uid>X) is never

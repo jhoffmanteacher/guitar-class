@@ -421,10 +421,12 @@ function caCleanTicks(raw){
 /* Until 2026-10-01 the ticks lived in localStorage for the day
    (`caStepsToday`). Fold any still on this Chromebook into the student's
    progress once, then drop the local copy, so nobody loses today's ticks to
-   the switch. */
+   the switch. Only once this page has compared the Chromebook's copies with
+   the teacher's Start over / Delete markers (progressDeviceLocalOk,
+   app/save.js): after a Delete they are old, and they stay put until then. */
 const CA_STEPS_LEGACY_KEY = 'caStepsToday';
 function caAdoptLocalTicks(){
-  if(!currentUser || progressLoadFailed || isDevBypassUser()) return;
+  if(!currentUser || progressLoadFailed || isDevBypassUser() || !progressDeviceLocalOk()) return;
   try{
     const k = _uidKey(CA_STEPS_LEGACY_KEY);
     const saved = JSON.parse(localStorage.getItem(k) || 'null');
