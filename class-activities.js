@@ -5241,7 +5241,7 @@ window.CLASS_ACTIVITIES = [
             { string: 'G', fret: 2, note: 'A', midi: 57 },
             { string: 'G', fret: 1, note: 'G#', midi: 56 },
             { string: 'G', fret: 1, note: 'G#', midi: 56 },
-            { string: 'G', fret: 0, note: 'G', midi: 55 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
             { string: 'G', fret: 1, note: 'G#', midi: 56 },
             { string: 'G', fret: 1, note: 'G#', midi: 56 },
             { string: 'G', fret: 2, note: 'A', midi: 57 },

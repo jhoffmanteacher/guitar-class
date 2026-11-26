@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-26 — Las Mañanitas intro
+
+- **Las Mañanitas: one note in the intro tab is fixed.** The sixth note is now F# on the D string, fret 4, the same
+  as in the solo, which plays the intro again.
+
+
 ## 2026-11-26 — An open activity keeps going when the teacher changes the class settings
 
 - **In-Class Activities: a change your teacher makes no longer cuts off the card you have open.** Your
