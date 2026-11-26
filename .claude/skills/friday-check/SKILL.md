@@ -90,7 +90,7 @@ its files, not the commits.
   none): (a) the app shell and lists (`app/*.js` except cards and the player, `index.html`, `styles.css`,
   `site-fill.js`, `i18n.js`); (b) practice cards, the player and the arcade (`app/cards.js`, `app/snippets.js`,
   `coach-*.js`, `practice-minutes*.js`, `class-activities.js`, `module-*.js`); (c) the live game and the console
-  (`live-quiz.js`, `teacher-*.js`); (d) the Song Journey pages (`tabs/**`). A site file in none of them goes to the
+  (`live-quiz.js`, `live-quiz-teacher.js`, `teacher-*.js`); (d) the Song Journey pages (`tabs/**`). A site file in none of them goes to the
   nearest area.
 - `site-reviewer` for each; `site-reviewer-deep` for an area holding a danger-zone change or a section/step move,
   and say in the report that it should never have shipped Fast.

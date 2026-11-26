@@ -78,6 +78,7 @@ const run = (src, name) => vm.runInContext(src, box, { filename: name });
 run(read('i18n.js'), 'i18n.js');
 run('var escHtml = s => String(s); var escAttr = s => String(s);', 'stubs');
 run(read('live-quiz.js'), 'live-quiz.js');
+run(read('live-quiz-teacher.js'), 'live-quiz-teacher.js');
 run(read('live-hilo.js'), 'live-hilo.js');
 const G = expr => vm.runInContext(expr, box);
 
@@ -308,7 +309,7 @@ const NO_NAME = 'Test Student 0';
   };
   box.__realPaint = null;
   // lqPaintControls was stubbed above: reload the real one from the file.
-  const src = read('live-quiz.js');
+  const src = read('live-quiz-teacher.js');
   // Re-declare the real function under another name, from the source text.
   const m = /function lqPaintControls\(\)\{[\s\S]*?\n\}\n/.exec(src);
   run(m[0].replace('function lqPaintControls()', 'function __realPaintFn()') + '\nvar __realPaint = __realPaintFn;', 'real-paint');

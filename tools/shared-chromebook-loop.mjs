@@ -763,7 +763,8 @@ const SCRIPT_CACHE = new Map();
 function siteFiles(root){
   const mods = readdirSync(root).filter(f => /^module-\d+\.js$/.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   return ['firebase-config.js', 'config-main.js', 'class-activities.js', 'i18n.js', 'guitar-diagrams.js', ...mods, ...siteParts('app.js', root),
-    'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'live-quiz.js'];
+    'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'live-quiz.js',
+    ...(existsSync(join(root, 'live-quiz-teacher.js')) ? ['live-quiz-teacher.js'] : [])];   /* split off live-quiz.js 2026-11-25; an older --root has none */
 }
 function script(root, f){
   const key = root + '|' + f;
@@ -780,7 +781,7 @@ const GLOBAL_NAMES = new Map();
 function globalNames(root){
   if (GLOBAL_NAMES.has(root)) return GLOBAL_NAMES.get(root);
   const names = new Set();
-  for (const f of [...siteParts('app.js', root), 'live-quiz.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', root)]){
+  for (const f of [...siteParts('app.js', root), 'live-quiz.js', 'live-quiz-teacher.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', root)]){
     let src = ''; try { src = readFileSync(join(root, f), 'utf8'); } catch { continue; }
     for (const m of src.matchAll(/^(?:let|var|const)\s+([A-Za-z_$][\w$]*)/gm)) names.add(m[1]);
   }

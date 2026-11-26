@@ -35,11 +35,11 @@
                               speed clock (R5)
        --reload-clock=tab     the reading before the reload fix: each tab's countdown starts when the question reaches
                               THAT tab (for a tree without lqRoundOpenedAt)
-       --root=<folder>        test the live-quiz.js / i18n.js / guitar-diagrams.js / firestore.rules in that folder
+       --root=<folder>        test the live-quiz.js (+ live-quiz-teacher.js) / i18n.js / guitar-diagrams.js / firestore.rules in that folder
        --fake-fault=<name>    break the fake world on purpose (rules-off | no-order | shallow-merge | no-local |
                               plain-fieldvalue | no-school-gate); the fake-world probes must then fail (the self-test)
        --prove=<folder>       the break-it proof on the --root tree (default this checkout): a baseline run (must be
-                              green), then FAULTS + FIX_FAULTS + NOV13_FAULTS + HIDE_FAULTS + PREVIEW_FAULTS + AUTO_FAULTS + R3_FAULTS + F4_FAULTS each planted in a copy of its live-quiz.js under <folder>/<fault>/ and the fake-world
+                              green), then FAULTS + FIX_FAULTS + NOV13_FAULTS + HIDE_FAULTS + PREVIEW_FAULTS + AUTO_FAULTS + R3_FAULTS + F4_FAULTS each planted in a copy of its live-quiz.js or live-quiz-teacher.js under <folder>/<fault>/ and the fake-world
                               faults, each a default run; a fault is caught when it adds a failing line (case + kind)
                               the baseline did not have;
                               --games=N per run (default 4), --jobs=N runs at a time (default 3), --only=a,b
@@ -304,9 +304,12 @@ const pick = (r, xs) => xs[Math.floor(r() * xs.length)];
 
 /* ── the scripts (compiled once, run in every tab) ── */
 function src(name) { return siteText(name, ROOT); }
+/* The live quiz's files in load order: live-quiz.js, then its teacher side, live-quiz-teacher.js (split off it on
+   2026-11-25; an older --root has the one file). */
+const LQ_FILES = ['live-quiz.js', ...(existsSync(join(ROOT, 'live-quiz-teacher.js')) ? ['live-quiz-teacher.js'] : [])];
 const SCRIPTS = {};
 function compileScripts() {
-  for (const f of ['i18n.js', 'guitar-diagrams.js', 'live-quiz.js']) SCRIPTS[f] = new vm.Script(src(f), { filename: f });
+  for (const f of ['i18n.js', 'guitar-diagrams.js', ...LQ_FILES]) SCRIPTS[f] = new vm.Script(src(f), { filename: f });
 }
 
 /* hand copies of app/boot.js 452-453 */
@@ -1001,7 +1004,7 @@ class World {
     tab.ctx = g;
     try {
       vm.runInContext('Math.random = __rng; Date.now = __now;', g);
-      for (const f of ['i18n.js', 'guitar-diagrams.js', 'live-quiz.js']) SCRIPTS[f].runInContext(g);
+      for (const f of ['i18n.js', 'guitar-diagrams.js', ...LQ_FILES]) SCRIPTS[f].runInContext(g);
     } catch (e) { this.flag('R13 error', `${tab.label}: live-quiz.js would not load: ${String(e && e.message || e)}`); tab.alive = false; tab.broken = true; }
     this.tabs.push(tab); this.stats.tabs++;
     if (tab.alive) this.cover('R13');
@@ -2579,20 +2582,24 @@ const PREVIEW_FAULTS = [
 function prove(dir) {
   dir = resolve(dir);
   const games = ARGS.games ?? 4, jobs = Math.max(1, Number(ARGS.jobs ?? 3));
-  const base = readFileSync(join(ROOT, 'live-quiz.js'), 'utf8');
+  const base = Object.fromEntries(LQ_FILES.map(f => [f, readFileSync(join(ROOT, f), 'utf8')]));
   const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...NOV13_FAULTS.map(f => ({ ...f, set: '2026-11-13' })), ...HIDE_FAULTS.map(f => ({ ...f, set: 'hide names' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
   const only = ARGS.only ? String(ARGS.only).split(',') : null;
   if (only) { for (const id of only) if (!all.some(f => f.id === id)) { console.log(`live-quiz-loop: ✗ --only: no fault ${id}`); return Promise.resolve(2); } all.splice(0, all.length, ...all.filter(f => only.includes(f.id))); }
   const FAKE = only ? [] : ['rules-off', 'no-order', 'shallow-merge', 'no-local', 'plain-fieldvalue', 'no-school-gate'];
-  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${NOV13_FAULTS.length} change-answer/count/total + ${HIDE_FAULTS.length} hide-names + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
+  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${NOV13_FAULTS.length} change-answer/count/total + ${HIDE_FAULTS.length} hide-names + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its ${LQ_FILES.join(' / ')}, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
   const plans = [{ label: 'baseline: the site as it is (must be GREEN, the two known faults excused)', args: [`--root=${ROOT}`], baseline: true }];
   for (const f of all) {
     const pairs = [[f.from, f.to], ...(f.more || [])];
-    const bad = pairs.find(([a]) => base.split(a).length !== 2), n = bad ? base.split(bad[0]).length - 1 : 1;
-    if (n !== 1) { plans.push({ label: `${f.id} [${f.set}] — ${f.why}`, skip: `its anchor occurs ${n} times in live-quiz.js (update the fault list)` }); continue; }
+    /* Each anchor must occur once in the live quiz's files together; it is planted in the file that holds it. */
+    const count = a => LQ_FILES.reduce((k, x) => k + base[x].split(a).length - 1, 0);
+    const bad = pairs.find(([a]) => count(a) !== 1), n = bad ? count(bad[0]) : 1;
+    if (n !== 1) { plans.push({ label: `${f.id} [${f.set}] — ${f.why}`, skip: `its anchor occurs ${n} times in ${LQ_FILES.join(' + ')} (update the fault list)` }); continue; }
     const d = join(dir, f.id);
     mkdirSync(d, { recursive: true });
-    writeFileSync(join(d, 'live-quiz.js'), pairs.reduce((t, [a, b]) => t.replace(a, () => b), base));
+    const planted = { ...base };
+    for (const [a, b] of pairs) { const x = LQ_FILES.find(y => planted[y].includes(a)); planted[x] = planted[x].replace(a, () => b); }
+    for (const x of LQ_FILES) writeFileSync(join(d, x), planted[x]);
     for (const x of ['i18n.js', 'guitar-diagrams.js', 'firestore.rules']) writeFileSync(join(d, x), readFileSync(join(ROOT, x)));
     plans.push({ label: `${f.id} [${f.set}] — ${f.why}`, args: [`--root=${d}`], invisible: f.invisible });
   }
@@ -2652,7 +2659,7 @@ const SIGS = new Set();
 async function main() {
   if (ARGS.list) { for (const k of Object.keys(NAMED)) console.log(k); return 0; }
   const t0 = Date.now();
-  try { compileScripts(); loadModelData(); HAS_PREVIEW = /\bfunction lqTeacherPreview\s*\(/.test(src('live-quiz.js')); HAS_RELOAD_FIX = /\bfunction lqRoundOpenedAt\s*\(/.test(src('live-quiz.js')); }
+  try { compileScripts(); loadModelData(); const lqSrc = LQ_FILES.map(src).join(''); HAS_PREVIEW = /\bfunction lqTeacherPreview\s*\(/.test(lqSrc); HAS_RELOAD_FIX = /\bfunction lqRoundOpenedAt\s*\(/.test(lqSrc); }
   catch (e) { console.log(`  ✗ R13 error: live-quiz.js / i18n.js / guitar-diagrams.js would not load: ${String(e && e.message || e)}`); if (process.env.LQL_SIGS) console.log('@@sig load|R13 error'); return 1; }
   let fail = 0;
   for (const [ms, speed, limit, want] of POINTS_BY_HAND) {

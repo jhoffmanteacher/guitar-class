@@ -86,7 +86,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'config-main.js',
+  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'live-quiz-teacher.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -5111,7 +5111,7 @@ function checkSpanishDrift() {
    values in coach.js — instead of guessed at.
    ════════════════════════════════════════════════════════════════════ */
 const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 'teacher.js',
-  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
+  'live-quiz.js', 'live-quiz-teacher.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
 
 // (stripJsComments lives in the shared-helpers block above — i18n.js's own
 // top-of-file "how to add a key" doc comment uses example strings like
@@ -5268,7 +5268,7 @@ function checkMissingI18nKeys(I18N) {
       }
     }
     if (!LIVE_QUIZZES['pc-find'] || !LIVE_QUIZZES['pc-name']) { err(`live-quiz.js LIVE_QUIZZES has no pc-find / pc-name: the changeAnswer / countOnly pin has nothing to read`); problems++; dynamicBad++; }
-    if (!/\bconst LQ_TOTAL_DEFAULT = 10, /.test(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'))) { err(`live-quiz.js: the Questions box no longer defaults to 10 (LQ_TOTAL_DEFAULT)`); problems++; dynamicBad++; }
+    if (!/\bconst LQ_TOTAL_DEFAULT = 10, /.test(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'))) { err(`live-quiz-teacher.js: the Questions box no longer defaults to 10 (LQ_TOTAL_DEFAULT)`); problems++; dynamicBad++; }
   } catch (e) { warn(`could not enumerate LIVE_QUIZZES from live-quiz.js: ${e.message}`); warnings++; }
   try {
     const FRET_STRING_NAMES = loadConstObject(siteSource('coach.js', ROOT), 'FRET_STRING_NAMES');
@@ -5350,6 +5350,7 @@ function checkLiveQuizTimerRepaint() {
   try {
     vm.createContext(box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'), box, { filename: 'live-quiz-teacher.js' });
     vm.runInContext('var teacherView = "livequiz";', box);
   } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
   const fretId = vm.runInContext('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret") || ""', box);
@@ -5422,6 +5423,7 @@ function checkLiveQuizAutoReveal() {
   try {
     vm.createContext(box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'), box, { filename: 'live-quiz-teacher.js' });
   } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
   if (vm.runInContext('lqTAutoReveal', box) !== true) flag('the option is not ON by default (lqTAutoReveal)');
   const id = type => vm.runInContext(`Object.keys(LIVE_QUIZZES).find(k => (LIVE_QUIZZES[k].type || "mc") === "${type}") || ""`, box);
@@ -5491,6 +5493,7 @@ async function checkLiveQuizNoNames() {
   try {
     vm.createContext(box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'), box, { filename: 'live-quiz-teacher.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-changes.js'), 'utf8'), box, { filename: 'live-changes.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-hilo.js'), 'utf8'), box, { filename: 'live-hilo.js' });
     vm.runInContext('var currentUser = { uid: "me", displayName: "Me Myself" };', box);
@@ -5668,6 +5671,7 @@ function checkLiveGamesList() {
     vm.createContext(box);
     vm.runInContext(escSrc, box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'), box, { filename: 'live-quiz-teacher.js' });
     vm.runInContext(readFileSync(join(ROOT, 'teacher-livegames.js'), 'utf8'), box, { filename: 'teacher-livegames.js' });
     vm.runInContext('var teacherClassConfig = {}; var currentUser = { uid: "me", displayName: "Test Me" };', box);
   } catch (e) { flag(`live-quiz.js + teacher-livegames.js would not load in the test VM: ${e.message}`); return; }
@@ -5810,6 +5814,7 @@ async function checkLiveQuizPcNameNoLeak() {
     if (typeof box.t !== 'function' && box.window.t) { box.t = box.window.t; box.tIn = box.window.tIn; }
     vm.runInContext(readFileSync(join(ROOT, 'guitar-diagrams.js'), 'utf8'), box, { filename: 'guitar-diagrams.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'), box, { filename: 'live-quiz-teacher.js' });
     vm.runInContext('var teacherView = "livequiz";', box);
   } catch (e) { flag(`i18n.js / guitar-diagrams.js / live-quiz.js would not load in the test VM: ${e.message}`); return; }
   const run = code => vm.runInContext(code, box);
@@ -5903,7 +5908,7 @@ async function checkLiveQuizPcNameNoLeak() {
    ════════════════════════════════════════════════════════════════════ */
 const DUPLICATE_GLOBALS_ALLOWED = new Set(['isTuningWarmupSection']);
 const CLASSIC_SCRIPTS = ['app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js',
-  'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
+  'live-quiz.js', 'live-quiz-teacher.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
 
 function checkDuplicateGlobals() {
   head('1g. Duplicate top-level globals');
@@ -22997,8 +23002,8 @@ async function checkMicZipsAnonymous() {
    points. A teacher's display choice kept on the teacher's device
    (gc-lq-hidenames): it never writes the session doc and never changes a
    student's own screen. EXECUTES the real i18n.js + guitar-diagrams.js +
-   live-quiz.js in a VM and paints the stage through lqPaintStage() for made-up
-   players ("Test 0" …) in every state: lobby; question (mc, fret, Name, Hear the
+   live-quiz.js + live-quiz-teacher.js in a VM and paints the stage through
+   lqPaintStage() for made-up players ("Test 0" …) in every state: lobby; question (mc, fret, Name, Hear the
    chord change); Reveal (mc, fret, Find the power chord, Name the power chord,
    Hear the chord change, live-changes.js loaded too, 2026-11-23); final. Off,
    every name it should show is there (the matcher is not blind) and the rows
@@ -23038,6 +23043,7 @@ function checkLiveQuizHideNames() {
     if (typeof box.t !== 'function' && box.window.t) { box.t = box.window.t; box.tIn = box.window.tIn; }
     vm.runInContext(readFileSync(join(ROOT, 'guitar-diagrams.js'), 'utf8'), box, { filename: 'guitar-diagrams.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz-teacher.js'), 'utf8'), box, { filename: 'live-quiz-teacher.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-changes.js'), 'utf8'), box, { filename: 'live-changes.js' });
     vm.runInContext(readFileSync(join(ROOT, 'live-hilo.js'), 'utf8'), box, { filename: 'live-hilo.js' });
     box.__docCalls = 0;
@@ -23191,7 +23197,7 @@ function checkWeekendStreaks() {
   const files = [];
   try {
     for (const n of ['app.js', 'coach.js', 'teacher.js']) for (const p of siteParts(n, ROOT)) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
-    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
+    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'live-quiz-teacher.js', 'live-changes.js', 'live-hilo.js', 'live-saw.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
       if (existsSync(join(ROOT, p))) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
   } catch (e) { fail('could not read the site scripts: ' + e.message); return; }
   // comments out, line breaks kept: a reported line number is the file's own

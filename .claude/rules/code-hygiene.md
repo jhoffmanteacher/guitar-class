@@ -4,6 +4,7 @@ paths:
   - "teacher-*.js"
   - "coach-*.js"
   - "live-quiz.js"
+  - "live-quiz-teacher.js"
   - "fab-tools.js"
   - "tuner.js"
   - "tabs/journey.js"

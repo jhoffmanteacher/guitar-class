@@ -48,6 +48,7 @@ run(read('app/snippets.js').replace(/^const SNIPPET_TRACKS\b/m, 'var SNIPPET_TRA
 run(read('i18n.js'), 'i18n.js');
 run('var escHtml = s => String(s); var escAttr = s => String(s); var songFileSrc = s => s;   /* app/songfiles.js: a plain path passes through */', 'stubs');
 run(read('live-quiz.js'), 'live-quiz.js');
+run(read('live-quiz-teacher.js'), 'live-quiz-teacher.js');
 run(read('live-changes.js'), 'live-changes.js');
 const G = (expr) => vm.runInContext(expr, box);
 

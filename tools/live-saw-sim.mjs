@@ -51,6 +51,7 @@ function load(local, session) {
   run(read('i18n.js'), 'i18n.js');
   run('var escHtml = s => String(s); var escAttr = s => String(s);', 'stubs');
   run(read('live-quiz.js'), 'live-quiz.js');
+  run(read('live-quiz-teacher.js'), 'live-quiz-teacher.js');
   run(read('live-changes.js'), 'live-changes.js');
   run(read('live-saw.js'), 'live-saw.js');
   run(`

@@ -972,7 +972,7 @@ function compileSite(root) {
   const add = f => { if (existsSync(join(root, f))) files.push(f); };
   ['config-main.js', 'class-activities.js', 'i18n.js', 'guitar-diagrams.js'].forEach(add);
   files.push(...siteParts('app.js', root));
-  ['practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'live-quiz.js', 'live-changes.js', 'live-hilo.js'].forEach(add);
+  ['practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'live-quiz.js', 'live-quiz-teacher.js', 'live-changes.js', 'live-hilo.js'].forEach(add);
   const scripts = [S('(made-up firebase-config)', "const IS_PRACTICE_COPY = false; const firebaseConfig = { projectId: 'stop-loop-sim', apiKey: 'none' }; const TEACHER_EMAIL = 'teacher@example.test';")];
   for (const f of files) scripts.push(S(f, read(f)));
   const lazy = new Map();

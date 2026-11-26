@@ -1,6 +1,7 @@
 ---
 paths:
   - "live-quiz.js"
+  - "live-quiz-teacher.js"
   - "live-changes.js"
   - "live-hilo.js"
   - "live-saw.js"
@@ -8,8 +9,9 @@ paths:
 
 ## Live quiz — the whole-class game
 
-`live-quiz.js` holds the quiz bank, the student overlay and the teacher's
-projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
+`live-quiz.js` holds the quiz bank and the student overlay; the teacher's
+projected stage (`?teacher=true` → **Live quiz**), its control strip and Preview are in `live-quiz-teacher.js`
+(split off it on 2026-11-25, loaded right after it wherever it loads). One game runs at a time, in
 `liveQuiz/current` (+ an `answers/{uid}` subcollection).
 
 - **The teacher is the only judge — for `mc` quizzes.** The bank has no answer
@@ -171,7 +173,7 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
     convenience, not game state.
   - Under 10 s the countdown shows tenths and ticks every 100 ms. `lqSecsLeft`
     returns exact seconds, not a ceiling.
-- **`live-quiz.js` also ships on the six `tabs/*.html` Journey pages**, where
+- **`live-quiz.js` (and `live-quiz-teacher.js` after it) also ships on the six `tabs/*.html` Journey pages**, where
   it shows the "a game is running" banner and nothing else (`lqCanPlayHere()`
   gates the rest). Those pages do not load the app script (`app/*.js`), so nothing in that file may
   come to depend on one: Firestore through `lqEnsureDb()`, the uid through
@@ -181,6 +183,6 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
 - **A reload keeps the round's clock** (2026-11-12): `lqRoundOpenedAt()` keeps the moment the tab first saw a
   question in sessionStorage (`lq-q-opened`), so the countdown and the speed points carry on after a reload.
   Not closed, on Jonathan's list: a NEW tab or another device starts a fresh clock, and two tabs open at once
-  can each answer (the last tap wins). After any change to `live-quiz.js`: `node tools/live-quiz-loop.mjs`
+  can each answer (the last tap wins). After any change to `live-quiz.js` or `live-quiz-teacher.js`: `node tools/live-quiz-loop.mjs`
   (about 20-35 s, Node only; exit 0 required). It counts, and does not fail on, a Reveal that comes before a slow or
   late student's own time is up (accepted by Jonathan, 2026-11-12).
