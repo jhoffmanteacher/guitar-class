@@ -552,8 +552,11 @@ function drillBoxInScope(box, scope){
 function sdAbortAll(scope){
   Object.keys(shuffleDrills).forEach(k => {
     if(scope && !drillBoxInScope(sdBox(k), scope)) return;
-    sdStop(k);
     const st = shuffleDrills[k];
+    /* The last card is answered and only its "next card" pause is left: the
+       round is over, so finish it (its best is saved) instead of losing it. */
+    if(st && st.phase === 'play' && st.locked && st.round >= st.cfg.rounds && sdBox(k)) return sdFinish(k);
+    sdStop(k);
     if(!st || st.phase !== 'play') return;
     st.phase = 'setup';
     const box = sdBox(k);

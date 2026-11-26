@@ -19,7 +19,7 @@ see `WORKFLOW.md` and the git commit log.
 - **Things stop when you leave them.** The Metronome stops when you switch to another tab. A Note Call, Call the
   chord, Name the power chord or Shuffle round ends when you close its card. A tab line that is playing stops when
   you move to another step or open In class.
-- **In-Class Activities answers a tap faster** on a step's "Got it" and Next buttons, most of all on a busy Chromebook.
+- **In-Class Activities answers a tap faster** on the step buttons, most of all on a busy Chromebook.
 
 
 ## 2026-11-25 — A check of the whole site: fixes, a song help pop-up, a simpler Metronome
