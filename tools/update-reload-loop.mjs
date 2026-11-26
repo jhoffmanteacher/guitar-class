@@ -196,6 +196,10 @@ const progress = { where: 'starting', at: Date.now() };
 const mark = (where) => { progress.where = where; progress.at = Date.now(); };
 let chromeProc = null, buildProc = null;
 const cleanup = [];
+/* The two site copies are also removed on a process.exit() that skips the finally below: browserSlot gives up with
+   exit 3 from inside a case (review R3-5). Only sync work can run on 'exit', so this is its own list. */
+const siteCopies = new Set();
+process.on('exit', () => { for (const d of siteCopies) { try { rmSync(d, { recursive: true, force: true }); } catch { /* best effort */ } } });
 const stopChrome = () => new Promise(res => {
   const p = chromeProc; chromeProc = null;
   if (!p || p.exitCode !== null || p.signalCode !== null) return res();
@@ -268,7 +272,7 @@ const MARK_RE = /('auth\.updating'\s*:\s*\{\s*en:\s*')([^']*)(',\s*es:\s*')([^']
 function copySite(src, label) {
   const dir = mkdtempSync(join(tmpdir(), `gc-update-reload-${label}-`));
   // Removed on any way out, a signal or the watchdog included, unless --keep / --build-only (which empty this list).
-  if (!KEEP) cleanup.push(() => rmSync(dir, { recursive: true, force: true }));
+  if (!KEEP) { cleanup.push(() => rmSync(dir, { recursive: true, force: true })); siteCopies.add(dir); }
   if (src === null) {
     const tar = execFileSync('git', ['-C', ROOT, 'archive', 'HEAD'], { maxBuffer: 1 << 30 });
     execFileSync('tar', ['-x', '-C', dir, '--exclude=audio'], { input: tar, maxBuffer: 1 << 30 });
@@ -1117,7 +1121,7 @@ try {
   }
   if (args.includes('--build-only')) {
     say(`update-reload: --build-only: version 1 ${V1} in ${v1}\nupdate-reload: --build-only: version 2 ${V2} in ${v2}${built ? ` (checks.mjs ${built.seconds} s, exit ${built.checksExit})` : ''}`);
-    cleanup.length = 0;
+    cleanup.length = 0; siteCopies.clear();
     throw Object.assign(new Error('built'), { built: true });
   }
   const { srv, port } = await serve(); cleanup.push(() => srv.close());
