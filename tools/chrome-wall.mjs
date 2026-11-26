@@ -29,16 +29,19 @@
 
    THE LOCK: browserSlot() before Chrome starts. At most GC_BROWSER_SLOTS (default 2) headless-Chrome runs at once
    on the machine (CLAUDE.md, Jonathan 2026-11-23: "make two the default"); a third prints one line and waits.
-   Slots are pid files in <tmpdir>/gc-browser-slots; a file whose process is gone (or older than 4 hours) is
-   removed. Skipped on GitHub Actions (CI is set: every job is its own machine). A tool started by a tool that
+   Slots are files in ~/.cache/gc-browser-slots (one folder per machine, whatever TMPDIR says), each holding its
+   process's pid and start time; a file whose process is gone, whose pid now belongs to a later process, or that
+   is older than 4 hours is removed, under a mutex so two waiters never clean the same file. While it waits, the
+   tool's watchdog is fed (onWait) and the wait is not counted in its timeout. Skipped on GitHub Actions (CI is set: every job is its own machine). A tool started by a tool that
    already holds a slot (GC_BROWSER_SLOT_HELD in its environment) does not take a second one.
 
    Never weaken the wall or a loop to make a run pass: a request the page really needs gets a local copy (vendor/)
    or a stub in the tool, never an allowed outside host.
 
      node tools/chrome-wall.mjs --self-test     the wall and the lock on a made-up page (Chrome; about 20 s) */
-import { mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync, statSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync, statSync, existsSync, mkdtempSync, rmSync, rmdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { tmpdir, homedir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -98,6 +101,7 @@ function makeRecord(tool, opts) {
   const apps = new Map();       // projectId -> Set(page)
   const seen = new Set();       // requestId|url, so a request two sessions both report counts once
   let total = 0, answeredQuiet = 0, done = false, watchedNow = () => 0;
+  const answeredIds = new Set();
   /* A tool that crashes, hangs into its watchdog or exits by a path that skips finish() still prints the verdict and
      cannot exit 0 past it: the record is read once more as the process exits (no last look at the pages then). */
   const onExit = (code) => { if (done) return; const c = rec.finish(code, watchedNow()); if (c !== code) process.exitCode = c; };
@@ -116,7 +120,9 @@ function makeRecord(tool, opts) {
       hosts.set(host, h);
     },
     /* An outside request that got a reply: the flags should make this impossible; counted to show they held. */
-    answered(url) {
+    answered(id, url) {
+      if (!url || answeredIds.has(id)) return;
+      answeredIds.add(id);
       const host = outsideHost(url), h = host && hosts.get(host);
       if (h) h.answered++;
       else if (host && isQuiet(url)) answeredQuiet++;
@@ -130,7 +136,9 @@ function makeRecord(tool, opts) {
       const bad = [];
       for (const [host, h] of hosts) bad.push(`${tool}: ✗ wall: ${[...h.pages].join(', ')} tried to reach ${host} (${h.n} request${h.n === 1 ? '' : 's'}, ${h.answered} answered). Tests may not reach outside hosts (tools/chrome-wall.mjs).`);
       for (const [id, pages] of apps) bad.push(`${tool}: ✗ wall: ${[...pages].join(', ')} initialised Firebase for ${id}${id === CLASS_PROJECT ? ' (the CLASS project)' : ''}. Tests may not start a Firebase app (tools/chrome-wall.mjs).`);
-      const q = [...quiet].map(([h, n]) => `${h} ×${n}`).join(', ') + (answeredQuiet ? ` (${answeredQuiet} ANSWERED)` : '');
+      /* A quiet file that got an ANSWER means this Chrome is not behind the flags (review R1-3): that fails too. */
+      if (answeredQuiet) bad.push(`${tool}: ✗ wall: ${answeredQuiet} request${answeredQuiet === 1 ? '' : 's'} to ${[...quiet.keys()].join(', ')} got an answer: this Chrome is not behind WALL_FLAGS (tools/chrome-wall.mjs).`);
+      const q = [...quiet].map(([h, n]) => `${h} ×${n}`).join(', ');
       if (bad.length) { for (const l of bad) console.error(l); return code || 1; }
       console.log(`${tool}: wall ✓ no request left 127.0.0.1 (${total} requests from ${watched} pages and workers watched${q ? `; blocked as expected: ${q}` : ''}), no Firebase app started`);
       return code;
@@ -157,6 +165,7 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
   const pending = new Map();
   const sessions = new Map();   // sessionId -> { type, url, ready:Promise, targetId }
   const ready = new Map();      // targetId -> Promise (Network on)
+  const urls = new Map();       // requestId -> URL, outside requests only (to name an ExtraInfo reply)
   const send = (method, params = {}, sessionId) => new Promise((res, rej) => {
     if (closed) return rej(new Error('closed'));
     const i = ++id; pending.set(i, { res, rej });
@@ -204,9 +213,13 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
     if (m.method === 'Network.requestWillBeSent') {
       const p = m.params;
       rec.request(p.requestId, p.request.url, p.documentURL || (s && s.url) || '?');
+      if (outsideHost(p.request.url)) urls.set(p.requestId, p.request.url);
       return;
     }
-    if (m.method === 'Network.responseReceived') { rec.answered(m.params.response.url); return; }
+    /* A reply counts once per request, whichever event reports it: responseReceived can be missing when Chrome
+       blocks the body (a script served as text/html), responseReceivedExtraInfo is sent for any reply off the wire. */
+    if (m.method === 'Network.responseReceived') { rec.answered(m.params.requestId, m.params.response.url); return; }
+    if (m.method === 'Network.responseReceivedExtraInfo') { rec.answered(m.params.requestId, urls.get(m.params.requestId)); return; }
     if (m.method === 'Network.webSocketCreated') { rec.request('ws:' + m.params.requestId, m.params.url, (s && s.url) || '?'); return; }
     if (m.method === 'Page.loadEventFired' && m.sessionId) { const sid = m.sessionId; setTimeout(() => probe(sid), 1500); }
   };
@@ -259,11 +272,32 @@ export async function wallPlaywright(context, tool, opts = {}) {
 }
 
 /* ── The lock ─────────────────────────────────────────────────────────────────────────────────────────────── */
-export const SLOT_DIR = join(tmpdir(), 'gc-browser-slots');
-const STALE_MS = 4 * 3600 * 1000;
+/* One folder per machine, under the home folder, so sessions with different TMPDIRs share it (review R1-5). */
+export const SLOT_DIR = join(homedir(), '.cache', 'gc-browser-slots');
+const STALE_MS = 4 * 3600 * 1000, MUTEX_STALE_MS = 10000;
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
-/* The live holders, with dead or too-old pid files removed. */
-export function slotHolders(dir = SLOT_DIR) {
+/* When a process started (ms), from `ps -o lstart=` (macOS and Linux; seconds only), or null where there is no ps
+   (Windows: the pid alone decides there). A slot file stores its holder's start, so a pid the system gave to another
+   process later does not keep a phantom slot (review R1-4). */
+export function processStart(pid) {
+  try {
+    const r = spawnSync('ps', ['-o', 'lstart=', '-p', String(pid)], { encoding: 'utf8', timeout: 3000 });
+    const t = Date.parse(String(r.stdout || '').trim());
+    return r.status === 0 && Number.isFinite(t) ? t : null;
+  } catch { return null; }
+}
+const OWN_START = Math.round(Date.now() - process.uptime() * 1000);
+/* A slot file: "<pid> <start ms or -> <tool> <iso time>". */
+const holderAlive = (txt, age) => {
+  const [pidS, startS] = txt.trim().split(/\s+/), pid = parseInt(pidS, 10);
+  if (!pid || age > STALE_MS || !alive(pid)) return false;
+  const want = Number(startS);
+  if (!Number.isFinite(want)) return true;
+  const now = processStart(pid);
+  return now === null || Math.abs(now - want) < 3000;
+};
+/* The live holders, with dead, reused-pid or too-old slot files removed. Call it inside withMutex(). */
+export function slotHolders(dir = SLOT_DIR, raceMs = 0) {
   let names = [];
   try { names = readdirSync(dir).filter(n => /^slot-\d+\.pid$/.test(n)); } catch { return []; }
   const live = [];
@@ -271,39 +305,73 @@ export function slotHolders(dir = SLOT_DIR) {
     const f = join(dir, n);
     let txt = '', age = 0;
     try { txt = readFileSync(f, 'utf8'); age = Date.now() - statSync(f).mtimeMs; } catch { continue; }
-    const pid = parseInt(txt, 10);
-    if (!pid || !alive(pid) || age > STALE_MS) { try { unlinkSync(f); } catch { /* another process got there first */ } continue; }
-    live.push({ file: n, pid, what: txt.trim().split(/\s+/).slice(1, 2).join('') });
+    if (!holderAlive(txt, age)) {
+      /* GC_SLOT_RACE_MS (the self-test only) holds the read-then-delete window open, so the race is played for sure. */
+      if (raceMs) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, raceMs);
+      try { unlinkSync(f); } catch { /* gone already */ }
+      continue;
+    }
+    const w = txt.trim().split(/\s+/);
+    live.push({ file: n, pid: parseInt(w[0], 10), what: w[2] || w[0] });
   }
   return live;
 }
+/* Cleaning stale files and taking a slot happen under one mutex (an atomic mkdir), so two waiters can never both
+   read the same dead file, one replace it and the other delete the new one (review R1-4: that gave three runs).
+   A mutex left by a process killed inside these few milliseconds is taken over after 10 s. */
+async function withMutex(dir, fn) {
+  const m = join(dir, '.mutex');
+  for (;;) {
+    try { mkdirSync(m); break; }
+    catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      try { if (Date.now() - statSync(m).mtimeMs > MUTEX_STALE_MS) rmdirSync(m); } catch { /* released meanwhile */ }
+      await sleep(25 + Math.random() * 50);
+    }
+  }
+  try { return fn(); } finally { try { rmdirSync(m); } catch { /* best effort */ } }
+}
 
-/* Takes a browser slot (waits for one) and returns its release; it is also released when the process exits. */
+/* Takes a browser slot (waits for one) and returns its release; it is also released when the process exits.
+   opts.onWait(ms waited so far) is called before every poll while it waits: a tool's stall watchdog marks progress
+   there, and the time spent waiting is left out of its whole-run timeout (review R1-1: a queued third run reported
+   HUNG instead of waiting). The release function carries .waitedMs. */
 export async function browserSlot(tool, opts = {}) {
   const env = opts.env || process.env;
-  if (env.CI) return () => {};
-  if (env.GC_BROWSER_SLOT_HELD) return () => {};
+  const none = Object.assign(() => {}, { waitedMs: 0 });
+  if (env.CI) return none;
+  if (env.GC_BROWSER_SLOT_HELD) return none;
   const slots = Math.max(1, parseInt(env.GC_BROWSER_SLOTS, 10) || 2);
   const dir = opts.dir || SLOT_DIR;
   const poll = opts.pollMs || 2000;
+  const start = opts.start === undefined ? OWN_START : opts.start;
   mkdirSync(dir, { recursive: true });
   let said = false;
+  const t0 = Date.now();
   for (;;) {
-    const live = slotHolders(dir);
-    if (live.length < slots) {
+    const got = await withMutex(dir, () => {
+      const live = slotHolders(dir, Number(env.GC_SLOT_RACE_MS) || 0);
+      if (live.length >= slots) return { live };
       for (let i = 0; i < slots; i++) {
         const f = join(dir, `slot-${i}.pid`);
-        try { writeFileSync(f, `${process.pid} ${tool} ${new Date().toISOString()}\n`, { flag: 'wx' }); }
+        try { writeFileSync(f, `${process.pid} ${start === null ? '-' : start} ${tool} ${new Date().toISOString()}\n`, { flag: 'wx' }); }
         catch (e) { if (e.code === 'EEXIST') continue; throw e; }
-        let gone = false;
-        const release = () => { if (gone) return; gone = true; try { if (readFileSync(f, 'utf8').startsWith(process.pid + ' ')) unlinkSync(f); } catch { /* already gone */ } };
-        process.once('exit', release);
-        env.GC_BROWSER_SLOT_HELD = String(process.pid);
-        if (said) console.error(`${tool}: got a browser slot`);
-        return release;
+        return { f };
       }
+      return { live };
+    });
+    if (got.f) {
+      const f = got.f, mine = `${process.pid} ${start === null ? '-' : start} `;
+      let gone = false;
+      const release = () => { if (gone) return; gone = true; try { if (readFileSync(f, 'utf8').startsWith(mine)) unlinkSync(f); } catch { /* already gone */ } };
+      process.once('exit', release);
+      env.GC_BROWSER_SLOT_HELD = String(process.pid);
+      release.waitedMs = Date.now() - t0;
+      if (said) console.error(`${tool}: got a browser slot after ${Math.round(release.waitedMs / 1000)} s`);
+      return release;
     }
-    if (!said) { console.error(`${tool}: waiting for a browser slot (${slots} in use: ${live.map(h => h.what || h.pid).join(', ')}; GC_BROWSER_SLOTS=${slots})`); said = true; }
+    if (!said) { console.error(`${tool}: waiting for a browser slot (${slots} in use: ${got.live.map(h => h.what).join(', ')}; GC_BROWSER_SLOTS=${slots})`); said = true; }
+    if (opts.onWait) opts.onWait(Date.now() - t0);
     await sleep(poll);
   }
 }
@@ -330,7 +398,42 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const r4 = await Promise.race([browserSlot('d', { dir, env: env(), pollMs: 100 }), sleep(1000).then(() => null)]);
   ok(!!r4, 'pid files of processes that are gone are removed'); if (r4) r4();
   ok(typeof (await browserSlot('e', { dir, env: { CI: 'true', GC_BROWSER_SLOTS: '0' } })) === 'function', 'CI skips the lock');
+  /* A live process holds its slot; a live pid whose start time is not the one written (a reused pid) does not. */
+  const holder = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'], { stdio: 'ignore' });
+  await sleep(1500);
+  const hs = processStart(holder.pid);
+  ok(hs !== null || process.platform === 'win32', `the start time of a live process is read (${hs === null ? 'no ps here' : new Date(hs).toISOString()})`);
+  writeFileSync(join(dir, 'slot-0.pid'), `${holder.pid} ${hs} fake-holder x\n`); writeFileSync(join(dir, 'slot-1.pid'), `${holder.pid} ${hs} fake-holder x\n`);
+  const waits = [];
+  let r5 = null;
+  const p5 = browserSlot('f', { dir, env: env(), pollMs: 100, onWait: ms => waits.push(ms) }).then(r => { r5 = r; });
+  await sleep(700);
+  ok(!r5 && waits.length >= 3 && waits.every((w, i) => !i || w >= waits[i - 1]), `a live holder keeps its slot, and the waiter's onWait ran on every poll (${waits.length} calls)`);
+  writeFileSync(join(dir, 'slot-1.pid'), `${holder.pid} ${hs - 60000} reused-pid x\n`);
+  await sleep(400);
+  ok(!!r5 && r5.waitedMs >= 600, `a pid now owned by a later process frees its slot (waited ${r5 ? r5.waitedMs : '?'} ms, carried on the release)`);
+  if (r5) r5();
+  holder.kill();
+  /* The race (review R1-4): eight processes start at once against two DEAD slot files; never more than two hold. */
+  rmSync(dir, { recursive: true, force: true }); mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, 'slot-0.pid'), '999999997 1 dead x\n'); writeFileSync(join(dir, 'slot-1.pid'), '999999996 1 dead x\n');
+  const log = join(dir, 'log.txt'), child = join(dir, 'child.mjs'), go = Date.now() + 1500;
+  writeFileSync(child, `import { browserSlot } from ${JSON.stringify(fileURLToPath(import.meta.url))};
+    import { appendFileSync } from 'node:fs';
+    while (Date.now() < ${go}) await new Promise(r => setTimeout(r, 1));
+    const rel = await browserSlot('race', { dir: ${JSON.stringify(dir)}, env: { GC_BROWSER_SLOTS: '2', GC_SLOT_RACE_MS: '200' }, pollMs: 20 });
+    appendFileSync(${JSON.stringify(log)}, process.hrtime.bigint() + ' +\\n');
+    await new Promise(r => setTimeout(r, 250));
+    appendFileSync(${JSON.stringify(log)}, process.hrtime.bigint() + ' -\\n');
+    rel();`);
+  await Promise.all(Array.from({ length: 8 }, () => new Promise(res => spawn(process.execPath, [child], { stdio: 'ignore' }).on('exit', res))));
+  const ev = readFileSync(log, 'utf8').trim().split('\n').map(l => l.split(' ')).sort((x, y) => (BigInt(x[0]) < BigInt(y[0]) ? -1 : 1));
+  let cur = 0, most = 0; for (const [, k] of ev) { cur += k === '+' ? 1 : -1; most = Math.max(most, cur); }
+  ok(ev.length === 16 && most <= 2, `8 runs started at once over 2 dead slot files: ${ev.length / 2} ran, at most ${most} at a time`);
   rmSync(dir, { recursive: true, force: true });
+  /* One lock folder whatever TMPDIR says (review R1-5): a run with another TMPDIR sees the same folder. */
+  const other = await new Promise(res => { let o = ''; const c = spawn(process.execPath, ['--input-type=module', '-e', `import { SLOT_DIR } from ${JSON.stringify(fileURLToPath(import.meta.url))}; console.log(SLOT_DIR)`], { env: { ...process.env, TMPDIR: '/var/tmp/elsewhere', TEMP: 'C:\\elsewhere', TMP: 'C:\\elsewhere' }, stdio: ['ignore', 'pipe', 'ignore'] }); c.stdout.on('data', d => { o += d; }); c.on('exit', () => res(o.trim())); });
+  ok(other === SLOT_DIR && !SLOT_DIR.startsWith(tmpdir()), `the lock folder is ${SLOT_DIR}, the same with another TMPDIR`);
   /* The wall: a page that fetches an outside host, and one that starts a Firebase app. */
   const chrome = process.env.CHROME || '/usr/bin/google-chrome';
   if (!existsSync(chrome)) { console.log('chrome-wall: no Chrome (set CHROME); the wall part is not tested'); process.exit(bad ? 1 : 0); }
@@ -340,13 +443,19 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     s.writeHead(200, { 'content-type': 'text/html' }); s.end(
     q.url.startsWith('/sw-page') ? `<script>navigator.serviceWorker.register(${JSON.stringify(q.url.includes('out') ? '/sw-out.js' : '/sw-in.js')}).then(r => navigator.serviceWorker.ready).then(() => { document.title = 'sw ready'; })</script>`
     : q.url.startsWith('/leak') ? `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script>fetch('https://firestore.googleapis.com/v1/x').catch(()=>{})</script>`
+    : q.url.startsWith('/quiet-answered') ? `<script src="http://quiet.test:${page.address().port}/q.js"></script><p>open</p>`
     : q.url.startsWith('/init') ? `<script>window.firebase={apps:[],initializeApp(c){this.apps.push({options:c})}};firebase.initializeApp({projectId:${JSON.stringify(CLASS_PROJECT)}})</script>`
     : `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><p>quiet</p>`); });
   await new Promise(r => page.listen(0, '127.0.0.1', r));
   const free = () => new Promise(r => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => r(p)); }); });
-  for (const [path, want] of [['/quiet', 0], ['/leak', 1], ['/init', 1], ['/sw-page-in', 0], ['/sw-page-out', 1]]) {
+  for (const [path, want] of [['/quiet', 0], ['/leak', 1], ['/init', 1], ['/sw-page-in', 0], ['/sw-page-out', 1], ['/quiet-answered', 1]]) {
     const cdp = await free(), prof = mkdtempSync(join(tmpdir(), 'gc-wall-test-'));
-    const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
+    /* /quiet-answered: a Chrome WITHOUT the flags whose resolver lets a quiet-listed host through to this server
+       (review R1-3): the quiet file gets an answer, and that must fail the run. */
+    const open = path === '/quiet-answered';
+    if (open) QUIET.push(`http://quiet.test:${page.address().port}/`);
+    const flags = open ? ['--no-proxy-server', '--host-resolver-rules=MAP quiet.test 127.0.0.1'] : WALL_FLAGS;
+    const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', ...flags, 'about:blank'], { stdio: 'ignore' });
     const wall = await wallWatch(cdp, 'self-test');
     const t = await (await fetch(`http://127.0.0.1:${cdp}/json/new?about:blank`, { method: 'PUT' })).json();
     await wall.page(t.id);
