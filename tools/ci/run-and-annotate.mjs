@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* Runs one slow browser tool on GitHub and makes its result readable without logging in (2026-11-13).
 
-   .github/workflows/browser.yml runs tools/smoke.mjs, slow-load.mjs, update-reload-loop.mjs and
-   playalong-loop.mjs through this. GitHub's public API does not serve a job's log text, but it does
-   serve the job's check-run annotations. So this wrapper:
+   .github/workflows/browser.yml runs tools/smoke.mjs, slow-load.mjs, update-reload-loop.mjs,
+   playalong-loop.mjs and speed-ladder-loop.mjs through this. GitHub's public API does not serve a
+   job's log text, but it does serve the job's check-run annotations. So this wrapper:
      - runs the command, passing its output through unchanged, and also writes it all to --log;
      - on success, prints ONE `::notice` line: the tool's summary line(s) (--summary picks them);
      - on failure, prints TWO `::error` lines (GitHub keeps at most 10 error annotations a step):
@@ -11,7 +11,7 @@
          2. the last --tail lines of the output (default 40), folded into one annotation with %0A;
      - writes the same text to the job summary page ($GITHUB_STEP_SUMMARY) when GitHub provides one;
      - exits with the tool's own exit code (1 when the tool was stopped by a signal).
-   The four tools share one meaning for their exit codes: 0 passed, 1 a check failed, 2 could not run
+   The five tools share one meaning for their exit codes: 0 passed, 1 a check failed, 2 could not run
    (bad arguments, no Chrome, nothing walked), 3 the tool's own watchdog stopped a hung run.
 
    --deadline <minutes>: if the tool is still running then, it is stopped (SIGTERM, then SIGKILL after

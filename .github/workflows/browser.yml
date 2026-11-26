@@ -1,11 +1,13 @@
 # The slow browser tests, on GitHub's computers instead of the Mac (2026-11-13).
 #
 # Each push to main runs tools/smoke.mjs in English as five jobs side by side, one
-# per area (the areas in the header of tools/smoke.mjs). Three slower tools run
+# per area (the areas in the header of tools/smoke.mjs). Four slower tools run
 # only when the push changed the files they guard:
 #   tools/slow-load.mjs           index.html, sw.js, app/boot.js, app/start.js
 #   tools/update-reload-loop.mjs  sw.js, app/start.js, app/boot.js, teacher-core.js
 #   tools/playalong-loop.mjs      app/cards.js, app/cards-sheet.js, app/cards-loop.js, app/cards-views.js, app/snippets.js, class-activities.js
+#   tools/speed-ladder-loop.mjs   the same files as playalong-loop (2026-11-26: playalong-loop leaves the ca-54 speed
+#                                 ladder to it since 2026-11-25; about 5 minutes, the audio plays in real time)
 # (and each when its own tool file, or this workflow, or tools/ci/ changed).
 # The full walk in both languages runs on a schedule (Friday evenings, see on:) and as a
 # manual run: Actions -> Browser tests -> Run workflow -> "full".
@@ -61,7 +63,7 @@ on:
         type: boolean
         default: false
       slow:
-        description: 'Run slow-load, update-reload and playalong whatever changed'
+        description: 'Run slow-load, update-reload, playalong and speed-ladder whatever changed'
         type: boolean
         default: true
   # The full walk alone (smoke-full; no English jobs, no slow lane), every Friday evening Pacific, so the
@@ -95,6 +97,7 @@ jobs:
       slow_load: ${{ steps.pick.outputs.slow_load }}
       update_reload: ${{ steps.pick.outputs.update_reload }}
       playalong: ${{ steps.pick.outputs.playalong }}
+      speed_ladder: ${{ steps.pick.outputs.speed_ladder }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -111,7 +114,7 @@ jobs:
           if [ "$EVENT" = "workflow_dispatch" ]; then
             all=false; [ "$RUN_SLOW" = "true" ] && all=true
             echo "A manual run: slow lane = $all"
-            { echo "slow_load=$all"; echo "update_reload=$all"; echo "playalong=$all"; } >> "$GITHUB_OUTPUT"
+            { echo "slow_load=$all"; echo "update_reload=$all"; echo "playalong=$all"; echo "speed_ladder=$all"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           base=""
@@ -121,7 +124,7 @@ jobs:
           if [ -z "$base" ] && git rev-parse -q --verify 'HEAD~1^{commit}' >/dev/null; then base="HEAD~1"; fi
           if [ -z "$base" ]; then
             echo "No commit to compare with: the whole slow lane runs."
-            { echo "slow_load=true"; echo "update_reload=true"; echo "playalong=true"; } >> "$GITHUB_OUTPUT"
+            { echo "slow_load=true"; echo "update_reload=true"; echo "playalong=true"; echo "speed_ladder=true"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed="$(git diff --name-only "$base" HEAD)"
@@ -133,8 +136,9 @@ jobs:
           slow_load="$(pick '^(index\.html|sw\.js|app/boot\.js|app/start\.js|tools/slow-load\.mjs)$')"
           update_reload="$(pick '^(sw\.js|app/start\.js|app/boot\.js|teacher-core\.js|tools/update-reload-loop\.mjs)$')"
           playalong="$(pick '^(app/cards(-sheet|-loop|-views)?\.js|app/snippets\.js|class-activities\.js|tools/playalong-loop\.mjs)$')"
-          echo "slow-load: $slow_load; update-reload: $update_reload; playalong: $playalong"
-          { echo "slow_load=$slow_load"; echo "update_reload=$update_reload"; echo "playalong=$playalong"; } >> "$GITHUB_OUTPUT"
+          speed_ladder="$(pick '^(app/cards(-sheet|-loop|-views)?\.js|app/snippets\.js|class-activities\.js|tools/speed-ladder-loop\.mjs)$')"
+          echo "slow-load: $slow_load; update-reload: $update_reload; playalong: $playalong; speed-ladder: $speed_ladder"
+          { echo "slow_load=$slow_load"; echo "update_reload=$update_reload"; echo "playalong=$playalong"; echo "speed_ladder=$speed_ladder"; } >> "$GITHUB_OUTPUT"
 
   # One English smoke walk per area, side by side. A newer push to the same
   # branch cancels the older one's smoke jobs.
@@ -471,6 +475,60 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playalong
+          path: ${{ runner.temp }}/ci-out/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # The ca-54 speed ladder, played for real (tools/speed-ladder-loop.mjs): playalong-loop leaves that card to it.
+  speed-ladder:
+    name: speed-ladder-loop
+    needs: changes
+    if: ${{ needs.changes.outputs.speed_ladder == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    concurrency:
+      group: browser-speed-ladder-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/speed-ladder-loop.mjs
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "speed-ladder" --log "$RUNNER_TEMP/ci-out/speed-ladder.log" --summary '^speed-ladder-loop: ' --deadline 15 -- node tools/speed-ladder-loop.mjs
+      - name: Keep the output
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: speed-ladder
           path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14

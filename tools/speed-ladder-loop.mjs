@@ -17,7 +17,9 @@
      node tools/speed-ladder-loop.mjs --fast             90, Practice again, Got it to 100: two and a half minutes
 
    Silent: Chrome is started with --mute-audio, so nothing plays out loud; the audio clock still runs in real time.
-   One browser run: count it with the smoke's. It serves the checkout it runs in. Exits 0 when every line holds. */
+   One browser run: count it with the smoke's. It serves the checkout it runs in. Exits 0 when every line holds.
+   GitHub runs it after a push that changes the files playalong-loop guards, or this file (.github/workflows/browser.yml,
+   job speed-ladder, 2026-11-26). */
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, existsSync, statSync, rmSync, writeFileSync } from 'node:fs';
