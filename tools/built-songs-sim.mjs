@@ -231,7 +231,7 @@ async function runCases(files){
       const rates = [...h.matchAll(/class="pc-speed-tick[^"]*"[^>]*data-rate="([^"]+)"/g)].map(m => m[1]);
       const want = [String(SLOWEST_RATE), '1', pcSlowRate(tr).toFixed(4), '1'];
       out.push({ id: a.id, ok: !/data-one-file/.test(h) && /<div class="pc" data-id="[^"]+" data-slow="" data-rate="1"/.test(h) && JSON.stringify(rates) === JSON.stringify(want) && !!tr.srcSlow }); } return out; })()`);
-    ok(res.length === 26 && res.every(r => r.ok), `zero: every coded practice card keeps its two-file stops (no data-one-file, opens on Normal, ${res.filter(r => r.ok).length} of ${res.length} cards; ${res.filter(r => !r.ok).map(r => r.id).join(', ')})`);
+    ok(res.length === 27 && res.every(r => r.ok), `zero: every coded practice card keeps its two-file stops (no data-one-file, opens on Normal, ${res.filter(r => r.ok).length} of ${res.length} cards; ${res.filter(r => !r.ok).map(r => r.id).join(', ')})`);
   }
 
   /* ── merge ── */

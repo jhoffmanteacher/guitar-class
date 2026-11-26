@@ -130,6 +130,14 @@
          lags the main element's place by exactly the gap its rate shows the page closing (twinFollow's gain, 0.5),
          within 4 ms. The lap and Build up speed walks also run with Guitar on where a track has a full mix (the
          full mixes' own offsets through a lap edge, the spare and every Build step; review R1-2, 2026-11-16).
+     R18 MEMORY FADE (card.fade, ca-56, 2026-11-26; app/fade.js): the card loops its section, and one time through is
+         the whole section (all its reps). Time p of N (from 1; N = fade.passes, 4 when not given) shows the chord
+         change i (0-based, in the order of the chart, over the whole card) when p < N and i is a multiple of 2^(p-1);
+         every other change's name is blank, and so are its frets; "Show it" shows them all until the next time
+         through. After time N the song stops by itself at the end of the section (once N - 1 laps are seen), and the
+         bar says it is done. The cursor and the count follow R7-R11 on blank names as on shown ones (the walk does
+         not change: only what is written in the name row). Every walk starts the card at time 1 (fadeReset), as a
+         freshly opened card does.
      R14 BASS NOTES (the rule in the BASS NOTES comment of app/activities.js): with the bass on, a chord-grid section
          carries ONE bass note on beat 1 of every bar: the root in the first bar of a chord (the first bar whose
          beat 1 falls inside it), the 5th in the next, alternating until the chord changes; a new chord starts again
@@ -432,6 +440,8 @@ const PAGE_SRC = String.raw`(() => {
     get src(){ return this._attr ? new URL(this._attr, location.href).href : ''; },
     set src(v){ this._attr = String(v == null ? '' : v); this._file = fileOf(this._attr); this._load(); },
     getAttribute: function(k){ return k === 'src' ? (this._attr || null) : null; },
+    /* As a real element: no src, no file (pcSparePark drops a spare this way; R18's fade ends on it). */
+    removeAttribute: function(k){ if (k === 'src'){ this._attr = ''; this._file = ''; } },
     get readyState(){ return this._ready; },
     get currentTime(){ return this._ct; },
     set currentTime(v){ if (this._ready < 1) return; this._ct = Math.max(0, Math.min(+v || 0, this._dur())); this.ended = false; },
@@ -632,6 +642,14 @@ const PAGE_SRC = String.raw`(() => {
       const rp = vis >= 0 ? R.reps[vis] : null;
       misc = vis + '~' + (rp && !rp.hidden ? rp.textContent : '') + '~' + R.status.textContent;
     }
+    /* R18: a fade card's time (its bar's data-pass, show, done), the chord names written blank (their data-seq) and the
+       blank frets. Before the speed control's part, which the judge reads off the end. */
+    if (R.fade){
+      const hid = []; R.fadeBtns = R.fadeBtns || R.pages[0].closest('.pc').querySelectorAll('.pc-tab .tab-chord-btn');
+      for (let i = 0; i < R.fadeBtns.length; i++){ const b = R.fadeBtns[i]; if (b.classList.contains('fade-hid') && hid.indexOf(b.dataset.seq) < 0) hid.push(b.dataset.seq); }
+      const fr = R.pages[0].closest('.pc').querySelectorAll('.pc-tab .tab-fret.fade-hid').length;
+      misc += '~F' + R.fade.dataset.pass + '|' + (R.fade.dataset.show || '0') + '|' + (R.fade.dataset.done || '0') + '|' + hid.sort(function(x, y){ return x - y; }).join(',') + '|' + fr;
+    }
     /* LOOP THIS PART / BUILD UP SPEED walks only: the speed control as the student sees it (the slider's value and
        its bold stop, or the two-way switch), so the judge can hold it to the speed playing at every step. */
     if (R.watch) misc += '~' + (R.range ? R.range.value + '/' + Array.prototype.findIndex.call(R.ticks, function(x){ return x.classList.contains('on'); }) : (R.sw && R.sw.getAttribute('aria-checked') === 'true' ? '1/1' : '0/0'));
@@ -752,13 +770,14 @@ const PAGE_SRC = String.raw`(() => {
       const root = theRoot();
       if (!root) return { fatal: 'no open card' };
       if (pcState) pcStop();
+      if (typeof fadeReset === 'function') fadeReset(root);   /* R18: every walk starts a fade card at time 1, as an opened card does */
       V.on = true; V.t = 0; V.timers = []; V.rafs = []; V.els = []; V.clicks = []; V.starts = []; V.errors = [];
       V.dur = plan.dur || {}; V.loadMs = plan.loadMs || 40; V.lateNeverLoad = !!plan.lateNeverLoad;
       const ctxWas = audioCtx;
       audioCtx = fctx;
       const sheet = !!root.querySelector('.pc-sheet');
       R = { sheet: sheet, runs: [], keys: [], keyIdx: new Map(), events: [], frames: 0, prev: [], litKey: '', lit: root.getElementsByClassName('beat-now'),
-        pages: root.querySelectorAll('.pc-page'), reps: [], status: root.querySelector('.pc-status'), watch: !!plan.watchSpeed,
+        pages: root.querySelectorAll('.pc-page'), reps: [], status: root.querySelector('.pc-status'), watch: !!plan.watchSpeed, fade: root.querySelector('.fade-bar'),
         range: root.querySelector('.pc-speed-range'), ticks: root.querySelectorAll('.pc-speed4 .pc-speed-tick'), sw: root.querySelector('.pc-player .pc-speed:not(.pc-guitar)') };
       R.pages.forEach(function(p){ R.reps.push(p.querySelector('.pc-rep')); });
       if (sheet){
@@ -1057,7 +1076,16 @@ function buildChart(view, meter) {
       }
     });
   }
-  return { secs, firstBar, endBar, totalBars: endBar - firstBar, place, problems, tok, changes, wholeSong: !!c.wholeSong, sheet: !!c.sheet, counts: !!c.counts, everyStrum: !!c.everyStrum, restWord: c.restWord !== false };
+  /* R18: a fade card's times through, and its chord changes in order: each one's data-seq (the section's first note
+     index over the card plus the change's first note) and how many frets it shows. */
+  let fade = 0, fadeChanges = null;
+  if (c.fade) {
+    fade = c.fade.passes === undefined ? 4 : c.fade.passes;
+    fadeChanges = [];
+    let off = 0;
+    secs.forEach(S => { S.events.forEach(ev => { if (!ev.rest) fadeChanges.push({ seq: off + ev.ni, frets: Object.keys(ev.frets).length }); }); off += S.notes.length; });
+  }
+  return { secs, firstBar, endBar, totalBars: endBar - firstBar, place, problems, tok, changes, fade, fadeChanges, wholeSong: !!c.wholeSong, sheet: !!c.sheet, counts: !!c.counts, everyStrum: !!c.everyStrum, restWord: c.restWord !== false };
 }
 
 /* R14: the bass note a chord-grid column must carry, or null. Only beat 1 of a bar; only a grid section; never in a
@@ -1398,6 +1426,23 @@ function planWalks(M) {
       walks.push({ kind: 'viewSwapStill', still: 'stop', si: sj, name: `Lyrics pressed after a stop · ${M.view.v.cv} -> lyrics · ${Sj.label} (section ${sj + 1} of ${ch.secs.length})`, stop: 'slower', guitar: hasFull, ops: halt, to: 'lyrics', span: 'none', metro: false, fresh: true });
     }
   }
+  /* R18 MEMORY FADE: every time through to the end, at the slowest stop and at Normal (guitar on, Metronome on); then
+     "Show it" pressed half a bar into time 2, judged through to half a bar into time 3. */
+  if (M.isBase && ch.fade) {
+    const S = ch.secs[0], once = msFor(M, 'normal', ch.firstBar - 1, ch.endBar - 1);
+    for (const stop of [stops[0], 'normal']) {
+      const ops = setup(stop, hasFull, true, null);
+      ops.push({ op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 } }, { op: 'untilAudible', max: 60000, dt: FINE_MS },
+        { op: 'untilSilent', max: msFor(M, stop, ch.firstBar - 1, ch.endBar - 1) * ch.fade + 8000, dt: STEP_MS });
+      walks.push({ kind: 'fade', name: `memory fade · all ${ch.fade} times through · ${stop}`, stop, guitar: hasFull, ops, span: 'lap', lapFrom: 0, laps: ch.fade - 1, fadeEnd: true, metro: true, fresh: true });
+    }
+    const len = msFor(M, 'slower', ch.firstBar - 1, ch.endBar - 1), half = msFor(M, 'slower', S.fromBar - 1, S.fromBar - 0.5);
+    const ops = setup('slower', hasFull, false, null);
+    ops.push({ op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 } }, { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: len + half, dt: STEP_MS },
+      { op: 'click', sel: '.fade-show', fadeShow: true }, { op: 'run', ms: len, dt: STEP_MS }, { op: 'click', sel: '.pc-play', stop: true });
+    walks.push({ kind: 'fade', name: 'memory fade · Show it on time 2 · slower', stop: 'slower', guitar: hasFull, ops, span: 'lap', lapFrom: 0, laps: 2, metro: false, fresh: true });
+    void once;
+  }
   return walks;
 }
 /* R17: a view switch mid-song. Each probe (the page as it stands: the element playing, its file and place, what is
@@ -1566,6 +1611,14 @@ function judge(M, W, res) {
   res.events.forEach(e => { if (e.timedOut) bad(`${W.ops[e.i].op === 'untilAudible' ? 'no file started playing' : W.ops[e.i].op === 'untilBefore' ? 'the song never came ' + W.ops[e.i].lead + ' ms before a count' : 'the song never stopped'} (step ${e.i + 1} of the walk)`); });
   let phase = 'idle', lastLit = '', lastAud = null, pendStart = null, pendSwitch = null, laps = 0, expStop = W.stop, expGuitar = W.guitar;
   let pendLoopFrom = 0, lastPlaceKey = null, order = -1, silentFrom = null, saidSilent = false;
+  /* R18: Show it pressed (until the next lap), the walk's fade end, and the fade checks' count. */
+  let fadeShow = false, fadeEnded = false, fadeLast = null;
+  const fadeWant = (p, show) => {
+    const n = ch.fade, hid = [], fr = [0];
+    ch.fadeChanges.forEach((c, i) => { if (!show && !(p < n && i % Math.pow(2, p - 1) === 0)) { hid.push(c.seq); fr[0] += c.frets; } });
+    return p + '|' + (show ? '1' : '0') + '|' + hid.sort((x, y) => x - y).join(',') + '|' + fr[0];
+  };
+  const fadeGot = (k) => { const m = /~F(\d+)\|([01]?)\|([01]?)\|([\d,]*)\|(\d+)/.exec(k.misc); return m ? { key: m[1] + '|' + (m[2] || '0') + '|' + m[4] + '|' + m[5], done: m[3] === '1' } : null; };
   /* --leads: the place lit at the end of the last run that had one file sounding (null after silence or a jump). */
   let leadPrev = null;
   const loadMs = W.loadMs || 40;
@@ -1591,6 +1644,7 @@ function judge(M, W, res) {
       }
     }
     if (o.op === 'click' || o.op === 'speed') switchUnresolved('the next control was used with the song still silent');
+    if (o.fadeShow) fadeShow = !fadeShow;
     if (o.op === 'speed' && o.stopName) expStop = o.stopName;
     if (o.op === 'speed' && !o.stopName) expStop = STOPS[o.i];
     if (o.sw === 'guitar') expGuitar = o.guitar;
@@ -1620,8 +1674,10 @@ function judge(M, W, res) {
           phase = 'ended';
           const T = lastAud && clk(lastAud.file);
           const endT = T ? T.clock.time(ch.endBar - 1) : 0;
-          if (!ch.wholeSong || LS) bad(`${at}: the song stopped by itself on a card that loops`);
+          const fadeOver = ch.fade && laps === ch.fade - 1;   // R18: after its last time through a fade card stops at the end
+          if ((!ch.wholeSong || LS) && !fadeOver) bad(`${at}: the song stopped by itself on a card that loops${ch.fade ? ` (a fade card stops after ${ch.fade - 1} laps; ${laps} seen)` : ''}`);
           else if (!lastAud || lastAud.ct < endT - 0.08) bad(`${at}: the song stopped ${lastAud ? (endT - lastAud.ct).toFixed(2) : '?'} s before the end of its last section`);
+          if (fadeOver) fadeEnded = true;
         } else {
           if (k.lit !== lastLit && !litEmpty(k)) bad(`${at}: the lit cell moved while no file was playing`);
           /* Silence while the card plays: only a file loading after a switch, never longer than the load. */
@@ -1676,6 +1732,8 @@ function judge(M, W, res) {
       if (ch.wholeSong && !LS) bad(`${at}: a whole-song card jumped back from ${lastAud.ct.toFixed(2)} s to ${c1a.toFixed(2)} s`);
       else {
         laps++;
+        if (ch.fade && laps > ch.fade - 1) bad(`${at}: a fade card came round a ${laps + 1}th time; it has ${ch.fade} times through`);
+        fadeShow = false;   // R18: Show it lasts until the next time through
         passFrom = passLap;
         if (lastAud.ct < endT - 0.06 - fine) bad(`${at}: the lap came ${(endT - lastAud.ct).toFixed(3)} s before the end of the last bar${LS ? ' of ' + LS.label : ''}`);
         if (lastAud.ct > endT + 0.03 + fine) bad(`${at}: the song ran ${(lastAud.ct - endT).toFixed(3)} s past the end of the last bar before the lap`);
@@ -1684,6 +1742,18 @@ function judge(M, W, res) {
       }
     }
     phase = 'play';
+    /* R18: the names written blank on this time through. Within 0.15 s of the lap's end the page may already be on the
+       next time (the lap is handed over a little before the bar line: THE SPARE). */
+    if (ch.fade) {
+      const g = fadeGot(k);
+      if (!g) bad(`${at}: a fade card with no fade bar state`);
+      else {
+        const p = Math.min(ch.fade, laps + 1), endT = T1.clock.time(loopEnd0);
+        const ok = g.key === fadeWant(p, fadeShow) || (endT - c1a < 0.15 * a1.rate + 0.05 && p < ch.fade && g.key === fadeWant(p + 1, false));
+        stats.fadeChecks = (stats.fadeChecks || 0) + 1;
+        if (!ok) bad(`${at}: time ${p} of ${ch.fade}${fadeShow ? ' with Show it on' : ''}: the page shows [${g.key}] (time|show|blank seqs|blank frets), want [${fadeWant(p, fadeShow)}]`, 'fade', 0, [String(p)]);
+      }
+    }
     /* The lit place at both ends of the run. */
     let leadEnd = null;
     for (const [ct, ct2, tt, isEnd] of [[c1a, c2a, t0, false], [c1b, c2b, t1, true]]) {
@@ -1784,7 +1854,13 @@ function judge(M, W, res) {
       bad(`${list.length} of the ${want.size} places of this walk were never lit, in ${S.label}; the first is ${names[0]}`, 'neverLit', si, names);
     }
   }
-  if (W.kind === 'lap' && laps < W.laps) bad(`${laps} laps seen, the walk is long enough for ${W.laps}`);
+  if ((W.kind === 'lap' || W.kind === 'fade') && laps < W.laps) bad(`${laps} laps seen, the walk is long enough for ${W.laps}`);
+  if (W.fadeEnd) {
+    const lastK = nRuns ? keys[R[(nRuns - 1) * 8]] : null, g = lastK && fadeGot(lastK);
+    if (!fadeEnded) bad(`the fade card did not stop by itself after its ${ch.fade}th time through (${laps} laps seen)`);
+    else if (!g || !g.done || g.key !== fadeWant(ch.fade, false)) bad(`after the last time through the bar should say it is done with every name blank; it shows [${g ? g.key + (g.done ? ' done' : ' not done') : 'nothing'}]`);
+  }
+  void fadeLast;
   stats.laps = laps;
   if (W.build && expStop !== W.build[W.build.length - 1]) bad(`Build up speed ended the walk at ${expStop}, not at ${W.build[W.build.length - 1]}`);
   if (W.kind === 'song' && !ch.wholeSong && laps < 1) bad('the card never came round to its first bar again');

@@ -12,7 +12,7 @@
    WHEN TO RUN IT. After adding or changing anything that starts sound, a timer, an rAF loop, a listener, the mic or a
    recorder (a drill, a card, a game, a floating tool, a live game), or a way out (activateSet, switchTabById, the hash
    router, caOnToggle / caCloseOpen, the visibilitychange handlers, toggleTranslate, signOut). Node only, no browser,
-   no network. The default 241 schedules (one per start × way-out pair) take about 50 s of CPU: 1 to 3 minutes on a
+   no network. The default 251 schedules (one per start × way-out pair) take about 50 s of CPU: 1 to 3 minutes on a
    shared machine (2026-11-25).
 
    FLAGS
@@ -65,7 +65,7 @@
 
    WHAT A START IS ("--list" prints them with their ways out): a tab's Play line on a set and on a card; Shuffle,
    Card Deck, Ear Spark, Find-the-Note (mid-round, and answered to the end then the language switch then Start again);
-   Note Call, Call the chord, Name the power chord, Echo (a made-up phrase and a record phrase); a practice card, a whole-song card, the ca-54 speed card; a
+   Note Call, Call the chord, Name the power chord, Echo (a made-up phrase and a record phrase); a practice card, a whole-song card, the ca-54 speed card, the ca-56 memory fade; a
    backing-track snippet and a private song still loading; the Module Review recorder; the floating Metronome, Timer
    and Tuner; the Listening Coach (open, Start, count-in, listening, with consented recording), and the Coach past its
    30 s recording cap; on the console, "Hear the chord change" in Preview and in a real game, left during the song's
@@ -1224,6 +1224,7 @@ const STARTS = [
   { id: 'practice-card@card', place: PLACE.card('ca-10'), press: inCard('ca-10', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'whole-song@card', place: PLACE.card('ca-24'), press: inCard('ca-24', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'speed-ladder@card', place: PLACE.card('ca-54'), press: inCard('ca-54', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
+  { id: 'memory-fade@card', place: PLACE.card('ca-56'), press: inCard('ca-56', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },   // the memory fade (app/fade.js, 2026-11-26)
   /* ca-34's band is a private song file (app/songfiles.js): the snippet start finds every tier already loaded on this page
      (sfUrls, as after an earlier press); song-loading@card presses Play with nothing loaded and a download that never ends. */
   { id: 'snippet@card', place: PLACE.card('ca-34'), setup: SONG_LOADED('ca-34'), press: inCard('ca-34', '[onclick^="snipToggle"]'), running: any('!!snipState'), window: [100, 4000] },

@@ -11571,7 +11571,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
    caOnToggle resets the switches when a card closes (pcLoopReset), so every opening starts off. Every string the
    part uses is in i18n.js in English and Spanish. The behaviour itself (laps on the bar line, the steps) is
    tools/playalong-loop.mjs's (R15) and the smoke's. */
-const EB_CARDS_WITH = 24, EB_CARDS_WITHOUT = 3;   // 2026-11-24: ca-54 (the speed ladder, ONE round) draws no section buttons and no switches (1fc)
+const EB_CARDS_WITH = 24, EB_CARDS_WITHOUT = 4;   // 2026-11-26: ca-56 (the memory fade, one section) draws no section buttons and no switches. 2026-11-24: ca-54 (the speed ladder, ONE round) draws no section buttons and no switches (1fc)
 const EB_STRINGS = ['pc.loop', 'pc.build', 'pc.buildTitle', 'pc.hold', 'pc.holdTitle', 'pc.looping', 'pc.lapOf', 'pc.lapAt', 'pc.keys.loop'];
 function checkLoopSpeed(ctx, i18nTable) {
   head('1eb. Loop this part / Build up speed: only on cards with section buttons, off by default, nothing stored');
@@ -11982,6 +11982,143 @@ function checkSpeedLadder(ctx, i18nTable) {
   if (asserts !== FC_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FC_ASSERTS} — a branch stopped running (or update the pin with the change)`);
   if (!bad) ok(`1fc: ${asserts} assertions on the real code — rounds, slowestRate, startStop and buildLaps are on ${FC_CARD} alone; its card draws in EN + ES (student and preview) on 90 · 100 · 112 · 125 (0.7× 0.8× 0.9× 1×), opens on the first stop, no round buttons or switches, a hidden prompt with Got it and Practice again; one lap a stop; the lap ends at bar 24 (verse + chorus); with the prompt on the card it pauses at every stop and never climbs by itself; the status line names the BPM; ca-33 still opens on Normal at 0.8 with two laps`);
 }
+/* 1fm. MEMORY FADE (ca-56, app/fade.js; Jonathan, 2026-11-26: "a memory fade activity for sweet child of mine").
+   card.fade is on the pinned cards alone (FM_CARDS: a new fade card is a decision). ca-56 plays ca-33's Verse 1 (the
+   same notes array, bars and laps) under a caption of its own that names no chord. RUN, not read: the card is drawn
+   in the 0b render context (EN + ES, student and console preview) and parsed into tools/sim-dom.mjs, where the REAL
+   fadeStarted / pcLoopLapDone (its fade hook) / fadeShowIt / fadeReset run on it: what opens (time 1 of 4, every name
+   shown, Show it off and disabled, the loop on), which chord changes are blank on each time through (pinned FM_PLAN),
+   the frets blank with their name, the cursor's data-beat cells and the count row never touched, Show it for one time
+   through, the last time through ending the loop, and pcFrame's end on that last time through landing in fadeSongEnd
+   (the done line). A page WITHOUT app/fade.js still draws the card with no fade bar and loops it (the hooks are
+   guarded). The browser walk (the cursor against the beat map on blank bars) is tools/playalong-loop.mjs (R18). */
+const FM_CARDS = ['ca-56'], FM_ASSERTS = 59;
+// Hidden chord changes (0-based, drawing order) on each time through of ca-56's verse (D5 C5 G5 D5): the rule in app/fade.js.
+const FM_PLAN = [[], [1, 3], [1, 2, 3], [0, 1, 2, 3]];
+async function checkMemoryFade(ctx, i18nTable) {
+  head('1fm. Memory fade (ca-56): the names fade time by time, the cursor and count untouched, Show it, the end');
+  let bad = 0, asserts = 0;
+  const flag = m => { err('1fm: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['fadeBarHtml', 'fadeStarted', 'fadeLapDone', 'fadeSongEnd', 'fadeShowIt', 'fadeReset', 'fadePassesOf', 'pcLoopLapDone', 'pcLoopReset', 'pcFrame', 'caCardBodyHtml', 'pcLayout'])
+    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1fm)'); return; }
+  const is = (cond, msg) => { asserts++; if (!cond) flag(msg); };
+  const { MDocument } = await import('./sim-dom.mjs');
+  const acts = run('(window.CLASS_ACTIVITIES || []).filter(a => a && a.card)');
+  const fadeIds = acts.filter(a => a.card.fade !== undefined).map(a => a.id);
+  is(JSON.stringify(fadeIds) === JSON.stringify(FM_CARDS), `card.fade is on [${fadeIds.join(', ')}], pinned [${FM_CARDS.join(', ')}] (a new fade card is a decision: pin it here)`);
+  const card = acts.find(a => a.id === 'ca-56'), host = acts.find(a => a.id === 'ca-33');
+  if (!card || !host) { flag('ca-56 or ca-33 not found'); return; }
+  const v1 = host.card.sections.find(x => x.label === 'Verse 1'), S = card.card.sections && card.card.sections[0];
+  is(card.card.sections.length === 1 && S && v1 && S.notes === v1.notes && S.fromBar === v1.fromBar && S.bars === v1.bars && S.reps === v1.reps && S.label === v1.label, 'ca-56 plays ca-33\'s Verse 1: one section, the same notes array, fromBar, bars, reps and label');
+  is(![card.card.caption, card.card.caption_es, S && S.caption, S && S.caption_es, card.intro, card.intro_es].some(x => /\b[A-G][#b]?5\b/.test(String(x || ''))), 'ca-56: a caption or the intro names a chord (the card is hiding them)');
+  is(card.card.chordGrid === true && fadeIds.length === 1 && run('fadePassesOf(window.CLASS_ACTIVITIES.find(a => a.id === "ca-56").card)') === 4, 'ca-56: a chord grid, four times through');
+  is(run('[fadePassesOf({ fade: {} }), fadePassesOf({ fade: { passes: 1 } }), fadePassesOf({ fade: { passes: 9 } }), fadePassesOf({ fade: { passes: 2.5 } }), fadePassesOf({}), fadePassesOf({ fade: { passes: 3 } })].join()') === '4,0,0,0,0,3', 'fadePassesOf: the default is 4, a count outside 2..8 or not whole is no fade');
+  const saveLang = run('getLang()');
+  const parse = html => { const doc = new MDocument(); doc.body.innerHTML = html; return { doc, root: doc.body.querySelector('.pc') }; };
+  const hiddenIdx = root => { const order = []; root.querySelectorAll('.pc-tab .tab-chord-btn').forEach(b => { if (!order.includes(b.dataset.seq)) order.push(b.dataset.seq); }); return order.map((s, i) => root.querySelector(`.pc-tab .tab-chord-btn[data-seq="${s}"]`).classList.contains('fade-hid') ? i : -1).filter(i => i >= 0); };
+  const fretsHid = root => root.querySelectorAll('.pc-tab .tab-cell .tab-fret.fade-hid').length;
+  let rendered = 0;
+  try {
+    for (const lang of ['en', 'es']) {
+      run('setLang(' + JSON.stringify(lang) + ')');
+      for (const preview of [false, true]) {
+        ctx.__fmCard = card;
+        const html = String(run('caCardBodyHtml(window.__fmCard' + (preview ? ', { preview: true }' : '') + ')'));
+        rendered++;
+        const w = `ca-56 (${lang}${preview ? ', console preview' : ''})`;
+        const { root } = parse(html);
+        const bars = root ? root.querySelectorAll('.fade-bar') : [];
+        const b = bars[0], btn = b && b.querySelector('.fade-show');
+        is(bars.length === 1 && b.dataset.pass === '1' && b.dataset.passes === '4' && b.dataset.show === '' && b.dataset.done === '', `${w}: one fade bar, on time 1 of 4, Show it off`);
+        is(!!b && b.querySelector('.fade-pass').textContent === (lang === 'en' ? 'Time 1 of 4' : 'Vez 1 de 4'), `${w}: the counter reads "${b && b.querySelector('.fade-pass').textContent}"`);
+        is(!!btn && btn.getAttribute('aria-pressed') === 'false' && btn.hasAttribute('disabled'), `${w}: Show it is drawn off and disabled (nothing is hidden on time 1)`);
+        is(!/fade-hid/.test(html) && root.querySelector('.pc-dir').textContent === run('t("ca.fadeDirections", {n: 4})'), `${w}: nothing drawn hidden, and the directions line is ca.fadeDirections with 4`);
+      }
+    }
+    // The real logic on the drawn card (English).
+    run('setLang("en")');
+    ctx.__fmCard = card;
+    const { doc, root } = parse(String(run('caCardBodyHtml(window.__fmCard)')));
+    ctx.__fmRoot = root;
+    const beats0 = root.querySelectorAll('.pc-tab [data-beat]').length, counts0 = root.querySelectorAll('.pc-tab .tab-count').map ? root.querySelectorAll('.pc-tab .tab-count').length : 0;
+    const names = []; root.querySelectorAll('.pc-tab .tab-chord-btn').forEach(x => names.push(x.textContent.replace(/\s+/g, '')));
+    is(names.join(' ') === 'D5 C5 G5 D5', `the grid names [${names.join(' ')}], want D5 C5 G5 D5 (the verse's four changes)`);
+    run(`window.__fmSt = { root: window.__fmRoot, L: pcLayout(caView(window.__fmCard)), loopFrom: 0, loopSi: -1, loopTo: 0, wholeSong: false, laps: 0, build: null, counting: false };`);
+    run('fadeStarted(window.__fmSt)');
+    is(run('window.__fmSt.loopSi') === 0 && run('window.__fmSt.wholeSong') === false, 'fadeStarted on time 1: the loop is on (loopSi 0), the song does not stop at its end');
+    /* The real pcStart calls it (a stand-in <audio> that never loads, so nothing plays): the loop on at time 1; at time 4
+       of 4 the loop off and the song ending at its end. pcStop after each. */
+    const viaStart = pass => run(`(() => { const A0 = window.Audio; window.Audio = function(){ return { readyState: 0, preload: '', loop: false, src: '', currentTime: 0, playbackRate: 1, defaultPlaybackRate: 1, addEventListener(){}, removeEventListener(){}, pause(){}, play(){ return Promise.resolve(); }, load(){} }; };
+      const F0 = pcFollow; pcFollow = () => {};   /* the scroll (no layout here); not what is tested */
+      const bar = window.__fmRoot.querySelector('.fade-bar'), was = bar.dataset.pass; bar.dataset.pass = '${pass}';
+      try { pcStart(window.__fmRoot, 0); const st = pcState; return st ? [st.loopSi, st.wholeSong] : null; }
+      finally { try { pcStop(); } catch (e) {} window.Audio = A0; pcFollow = F0; bar.dataset.pass = was; fadeApply(window.__fmRoot); } })()`);
+    is(JSON.stringify(viaStart(1)) === '[0,false]' && JSON.stringify(viaStart(4)) === '[-1,true]', `pcStart (its fade hook): time 1 loops, time 4 of 4 stops at its end — got ${JSON.stringify(viaStart(1))} / ${JSON.stringify(viaStart(4))}`);
+    for (let p = 1; p <= 4; p++) {
+      if (p > 1) run('pcLoopLapDone(window.__fmSt, null)');
+      const h = hiddenIdx(root);
+      is(JSON.stringify(h) === JSON.stringify(FM_PLAN[p - 1]), `time ${p}: changes [${h}] are blank, pinned [${FM_PLAN[p - 1]}]`);
+      const want = FM_PLAN[p - 1].length * 3;   // each power chord's three frets
+      is(fretsHid(root) === want, `time ${p}: ${fretsHid(root)} fret cells blank, want ${want} (three frets for each blank name)`);
+      is(root.querySelector('.fade-pass').textContent === `Time ${p} of 4`, `time ${p}: the counter reads "${root.querySelector('.fade-pass').textContent}"`);
+      is(root.querySelectorAll('.pc-tab [data-beat]').length === beats0 && root.querySelectorAll('.pc-tab [data-beat].fade-hid').length === 0 && root.querySelectorAll('.pc-tab .tab-count.fade-hid').length === 0, `time ${p}: a beat cell or the count row was touched`);
+      if (p === 2) {
+        const btn = root.querySelector('.fade-show');
+        is(!btn.hasAttribute('disabled'), 'time 2: Show it is enabled (names are hidden)');
+        run('fadeShowIt(window.__fmRoot.querySelector(".fade-show"))');
+        is(hiddenIdx(root).length === 0 && fretsHid(root) === 0 && btn.getAttribute('aria-pressed') === 'true', 'Show it: every name and fret back, the button pressed');
+        run('pcLoopLapDone(window.__fmSt, null)'); p++;
+        is(JSON.stringify(hiddenIdx(root)) === JSON.stringify(FM_PLAN[2]) && btn.getAttribute('aria-pressed') === 'false', 'Show it lasts one time through: time 3 hides again and the button is off');
+        is(root.querySelector('.fade-pass').textContent === 'Time 3 of 4', 'after Show it the counter still moves on (no penalty)');
+        is(run('window.__fmSt.loopSi') === 0, 'time 3: still looping');
+      }
+    }
+    is(run('window.__fmSt.loopSi') === -1 && run('window.__fmSt.wholeSong') === true, 'time 4 of 4: the loop is off, the song stops at its end');
+    // pcFrame's end on the last time through: pcStop, then fadeSongEnd (the done line).
+    ctx.__fmLog = [];
+    run(`(() => { const st = window.__fmSt; st.win = pcWindow(st.L, false, false); const end = st.win.end;
+      st.audio = { currentTime: end, playbackRate: 1, ended: false, paused: false, seeking: false, src: 'x', pause(){}, play(){ return Promise.resolve(); } };
+      st.timers = []; st.clicks = []; st.leaving = null; st.spare = null; st.raf = 0; st.sheet = false; st.passFrom = 0;
+      window.__fmRoot.isConnected = true; pcState = st; pcFrame(); })()`);
+    is(run('pcState') === null, 'pcFrame at the end of the last time through stops the song');
+    const bar = root.querySelector('.fade-bar');
+    is(bar.dataset.done === '1' && root.querySelector('.fade-pass').textContent === run('t("fade.done")') && hiddenIdx(root).length === 4, `the end: the bar says done ("${root.querySelector('.fade-pass').textContent}") and the names stay blank`);
+    // Play after the end starts at time 1; fadeReset (a card closing) too.
+    run('fadeStarted(window.__fmSt)');
+    is(bar.dataset.pass === '1' && bar.dataset.done === '' && hiddenIdx(root).length === 0 && run('window.__fmSt.loopSi') === 0, 'Play after the end: time 1, every name back, looping');
+    run('pcLoopLapDone(window.__fmSt, null)'); run('pcLoopLapDone(window.__fmSt, null)');
+    is(bar.dataset.pass === '3', 'two times through later: time 3');
+    run('fadeStarted(window.__fmSt)');
+    is(bar.dataset.pass === '3' && JSON.stringify(hiddenIdx(root)) === JSON.stringify(FM_PLAN[2]), 'Play after a Stop goes on at the time the student was on');
+    run('pcLoopReset({ querySelectorAll: sel => sel === ".pc" ? [window.__fmRoot] : [] })');
+    is(bar.dataset.pass === '1' && hiddenIdx(root).length === 0, 'closing the card (pcLoopReset) goes back to time 1');
+    // Another card is untouched by the hooks.
+    const other = acts.find(a => a.id === 'ca-33');
+    ctx.__fmOther = other;
+    const oh = String(run('caCardBodyHtml(window.__fmOther)'));
+    is(!/fade-/.test(oh) && run('fadeBarHtml(window.__fmOther)') === '', 'ca-33 draws no fade bar');
+    const o = parse(oh).root;
+    ctx.__fmORoot = o;
+    run(`window.__fmOSt = { root: window.__fmORoot, L: pcLayout(caView(window.__fmOther)), loopFrom: 1, loopSi: -1, loopTo: 1, wholeSong: true, laps: 0, build: null };`);
+    run('fadeStarted(window.__fmOSt)');
+    is(run('window.__fmOSt.loopSi') === -1 && run('window.__fmOSt.wholeSong') === true, 'fadeStarted on another card changes nothing');
+    is(run('fadeSongEnd(window.__fmOSt)') === false, 'fadeSongEnd on another card is not handled (the usual end line shows)');
+    for (const k of ['ca.fadeDirections', 'fade.pass', 'fade.show', 'fade.showTitle', 'fade.done']) { const e = i18nTable && i18nTable[k]; is(!!(e && e.en && e.es), `${k} is missing in English or Spanish`); }
+    is(rendered === 4 && counts0 > 0 && beats0 > 0, `rendered ${rendered} of 4 fade cards, ${beats0} beat cells, ${counts0} count cells`);
+    is((doc.selectorProblems || []).length === 0, `sim-dom could not read a selector: ${(doc.selectorProblems || []).join(', ')}`);
+  } catch (e) { flag('running the fade threw: ' + (e && e.stack || e)); }
+  finally { run('setLang(' + JSON.stringify(saveLang) + ')'); run('pcState = null'); for (const k of ['__fmCard', '__fmRoot', '__fmSt', '__fmLog', '__fmOther', '__fmORoot', '__fmOSt']) delete ctx[k]; }
+  // A page without app/fade.js (a failed load) still draws ca-56 and loops it: every hook is guarded.
+  try {
+    const P = appPage(ROOT, { without: ['app/fade.js'] });
+    const r = P.run(`(() => { const a = window.CLASS_ACTIVITIES.find(x => x.id === 'ca-56'); const h = caCardBodyHtml(a); return { h: String(h), fade: typeof fadeStarted }; })()`);
+    is(r.fade === 'undefined' && /<div class="pc" data-id="ca-56"/.test(r.h) && !/fade-bar/.test(r.h), 'a page without app/fade.js draws ca-56 as a plain card (no fade bar)');
+  } catch (e) { asserts++; flag('a page without app/fade.js: ' + e.message); }
+  if (asserts !== FM_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FM_ASSERTS} — a branch stopped running (or update the pin with the change)`);
+  if (!bad) ok(`1fm: ${asserts} assertions on the real code — card.fade on ${FM_CARDS.join(', ')} alone, ca-33's Verse 1 under a caption naming no chord; drawn EN + ES (student and preview) on time 1 of 4, Show it off; times 1-4 blank changes ${FM_PLAN.map(x => '[' + x + ']').join(' ')} with their frets, the beat cells and count row untouched; Show it for one time through; the last time through stops the loop and ends in the done line; Play after the end or a Stop, and closing the card, behave; a page without app/fade.js still draws the card`);
+}
 function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   head('1db. Practice-card keys (Space/K, arrows, < >) and the tick pop on a check-off');
   let bad = 0, teacherKeys = 0;
@@ -12130,7 +12267,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
    More Play Along songs), and the card counts no ticks (caTickKeys = [], so
    no "n of m", no nudge). A Focus ladder still ends in "Got it — next step"
    and Mark complete. Pinned card counts. */
-const NO_CHECKLIST_CARDS = 40, NO_CHECKLIST_EXTRA = 12;   // 2026-11-24: +2, ca-54 (EN + ES)
+const NO_CHECKLIST_CARDS = 42, NO_CHECKLIST_EXTRA = 12;   // 2026-11-26: +2, ca-56, the memory fade (EN + ES). 2026-11-24: +2, ca-54 (EN + ES)
 function checkNoChecklist(ctx) {
   head('1ct. Practice cards have no checklist, only Mark complete; extra songs have neither');
   let bad = 0, cards = 0, extra = 0;
@@ -12361,11 +12498,11 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
-const ONE_LINE_2A = 426, ONE_LINE_2C = 40, DRILL_SCREENS = 140;   // 2026-11-26: +2, +2, +2, ca-55 (Echo): its intro, the echo.intro line and its one drill screen (EN + ES). 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
+const ONE_LINE_2A = 432, ONE_LINE_2C = 42, DRILL_SCREENS = 140;   // 2026-11-26: 2A +6, 2C +2, ca-56 (the memory fade): its intro and two check texts, and ca.fadeDirections (EN + ES). 2026-11-26: +2, +2, +2, ca-55 (Echo): its intro, the echo.intro line and its one drill screen (EN + ES). 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
   'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth', 'echo.intro',
-  'ca.cardDirections', 'ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.sheetDirections'];
+  'ca.cardDirections', 'ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.sheetDirections', 'ca.fadeDirections'];
 const DRILL_DIRECTIONS_GONE = ['nc.descAnswer', 'nc.howCoachAnswer', 'nc.howCoach', 'nc.howTap', 'ncp.descAnswer', 'ncp.howCoachAnswer',
   'ncp.howCoach', 'ncp.howTap', 'pwn.howAnswer', 'pwn.howScored'];
 function checkOneLineDirections(ctx, i18nTable) {
@@ -15486,7 +15623,7 @@ const CHORD_GRID_BASS_CARDS = ['ca-35'];   // practice cards with an alternating
 const CHORD_GRID_BASS_START = { 'ca-35': 'on' };   // how each opens (Jonathan, 2026-10-27: start on Alternating bass) — a decision, not a default
 const CHORD_GRID_BASS_MARKS = 160;          // bass notes drawn, every bass card x chord view, bass on — see BASS NOTES in 1bv
 const CHORD_GRID_HELD_LABELS = 54;   // rows (both views) that open on a held "(Chord)" — see the column-0 check below
-const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42', 'ca-51'];
+const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42', 'ca-51', 'ca-56'];   // ca-56 (2026-11-26): the memory fade, ca-33's verse on a grid
 function checkChordGridCards(ctx) {
   head('1bv. Chord-grid practice cards');
   let bad = 0;
@@ -24278,6 +24415,7 @@ function checkNeverRules(sets) {
   checkCardKeysAndTickPop(rcCtx, rcSets, i18nTable);
   checkLoopSpeed(rcCtx, i18nTable);
   checkSpeedLadder(rcCtx, i18nTable);
+  await checkMemoryFade(rcCtx, i18nTable);
   await checkSongHelp(rcCtx, i18nTable);
   checkOneLineDirections(rcCtx, i18nTable);
   checkCardCaptionWords();

@@ -135,6 +135,7 @@ function pcLoopLapDone(st, nx){
   const b = st.build;
   if(b){ if(nx){ b.stop = nx.stop; b.laps = 0; } else b.laps++; }
   if(nx && st.twin) pcParkTwin(st);
+  if(typeof fadeLapDone === 'function') fadeLapDone(st);   // MEMORY FADE (app/fade.js): the next time through hides more
   pcLoopStatus(st);
 }
 /* The next stop is a private song not loaded yet (SONG FILES): stop, load it, then play the section from a
@@ -262,6 +263,7 @@ function pcLoopReset(scope){
   scope.querySelectorAll('.pc').forEach(root => {
     if(root.dataset.loop || root.dataset.build){ pcLoopSet(root, 'loop', false); pcLoopSet(root, 'build', false); }
     pcLadderAskHide(root);
+    if(typeof fadeReset === 'function') fadeReset(root);   // MEMORY FADE (app/fade.js): back to time 1
     if(root.dataset.round){ root.dataset.round = ''; root.querySelectorAll('.pc-round.cur').forEach(b => b.classList.remove('cur')); }   // ROUNDS: no round is picked when a card opens
   });
 }

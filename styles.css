@@ -3946,6 +3946,19 @@ span.tab-count-held{margin-left:var(--sp-4)}
 .pc-ask-got{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
 .pc-ask-got:hover{background:var(--brand-hover)}
 .pc-ask-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+/* MEMORY FADE (ca-56, app/fade.js, 2026-11-26): the bar under the player (the time counter and Show it), and a
+   hidden chord name: the same box, blank, so nothing on the grid moves; its frets go blank with it. */
+.fade-bar{margin:var(--sp-8) 0;display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-8) var(--sp-12)}
+.fade-pass{font-size:var(--fs-14);font-weight:700;color:var(--purple-text)}
+.fade-bar.fade-done .fade-pass{color:var(--green-text,var(--purple-text))}
+.fade-show{font-family:inherit;font-size:var(--fs-14);font-weight:700;min-height:36px;padding:var(--sp-4) var(--sp-12);border-radius:10px;cursor:pointer;border:1.5px solid var(--purple-border);background:var(--bg);color:var(--text)}
+.fade-show:hover:not(:disabled){background:var(--bg3)}
+.fade-show[aria-pressed="true"]{background:var(--purple-bg2);color:var(--purple-text)}
+.fade-show:disabled{opacity:.45;cursor:default}
+.fade-show:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.tab-note-btn.tab-chord-btn.fade-hid{color:transparent;background:var(--bg3);border-color:var(--border);pointer-events:none}
+.tab-note-btn.tab-chord-btn.fade-hid .tab-spkr{visibility:hidden}
+.tab-fret.fade-hid{visibility:hidden}
 .pc-secs{display:flex;flex-wrap:wrap;gap:var(--sp-6);margin-bottom:var(--sp-8)}
 .pc-sec{font-family:inherit;font-size:var(--fs-14);font-weight:600;min-height:36px;padding:0 var(--sp-14);border:1px solid var(--border2);border-radius:999px;background:var(--bg);color:var(--text);cursor:pointer}
 .pc-sec:hover{border-color:var(--purple-accent)}

@@ -519,10 +519,12 @@ function caCardBodyHtml(a, opts){
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}"${pcStartsSlowest(a.card, L.tr) ? ` data-slow="1" data-rate="${pcSlowestRate(a.card)}"` : PC_START_NORMAL ? ' data-slow="" data-rate="1"' : pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${a.card.buildLaps >= 1 ? ` data-build-laps="${Math.floor(a.card.buildLaps)}"` : ''}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a) + (typeof caViewSwitchHtml === 'function' ? caViewSwitchHtml(a) : '')   /* Chords / Tab / Lyrics: app/cards-views.js, a later part; guarded so a page that has the new cards.js without it still draws the card (W23 review R1-1) */
-    + `<p class="pc-dir">${escHtml(t(L.rounds ? 'ca.roundDirections' : sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
+    + `<p class="pc-dir">${escHtml((typeof fadeDirections === 'function' && fadeDirections(a)) || t(L.rounds ? 'ca.roundDirections' : sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
-    + pcPlayerHtml(a, L, preview) + pcLadderAskHtml(L) + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
+    + pcPlayerHtml(a, L, preview) + pcLadderAskHtml(L)
+    + (typeof fadeBarHtml === 'function' ? fadeBarHtml(a, preview) : '')   /* MEMORY FADE (ca-56): app/fade.js, a later part; '' on every other card */
+    + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
 }
 
@@ -768,6 +770,7 @@ function pcStart(root, si, rep, keepBuild){
                loopSi: root.dataset.loop === '1' ? si : -1, loopTo: rd ? rd.to : si, build, laps: 0,
                passFrom: L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar };   // where this pass began, in window bars (THE LEAD)
   pcState = st;
+  if(typeof fadeStarted === 'function') fadeStarted(st);   // MEMORY FADE (app/fade.js): the loop on, or the last time through ending at its end
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
   pcShowSection(root, L, si);
@@ -930,6 +933,7 @@ function pcFrame(){
     if(st.wholeSong && !(st.loopSi >= 0)){
       const root = st.root;
       pcStop();
+      if(typeof fadeSongEnd === 'function' && fadeSongEnd(st)) return;   // a memory fade's last time through (app/fade.js) says so in its own bar
       pcStatus(root, escHtml(t('ca.cardSongEnd')));
       return;
     }

@@ -662,6 +662,13 @@
                                  es: 'Eso fue a {bpm} BPM. Pulsa «Lo tengo» para tocarlo más rápido o «Practicar otra vez» para tocarlo a la misma velocidad.' },
     'pc.askLast':              { en: 'That was {bpm} BPM, record speed. Click “Got it” to finish or “Practice again” to play it once more.',
                                  es: 'Eso fue a {bpm} BPM, la velocidad de la grabación. Pulsa «Lo tengo» para terminar o «Practicar otra vez» para tocarlo una vez más.' },
+    // Memory fade (card.fade, ca-56, app/fade.js; 2026-11-26): the directions line, the pass counter, Show it, the end.
+    'ca.fadeDirections':       { en: 'Play with the band {n} times through as the chord names fade, and keep your place on the beat.',
+                                 es: 'Toca con la banda {n} veces mientras se borran los acordes y sigue el pulso sin perderte.' },
+    'fade.pass':               { en: 'Time {n} of {total}', es: 'Vez {n} de {total}' },
+    'fade.show':               { en: 'Show it', es: 'Mostrar' },
+    'fade.showTitle':          { en: 'Show the chord names again until the next time through.', es: 'Muestra los acordes otra vez hasta la próxima vez.' },
+    'fade.done':               { en: 'Done: you played it from memory. Press Play song to start again.', es: 'Listo: la tocaste de memoria. Presiona «Tocar la canción» para empezar otra vez.' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
     'ca.sheetDirections':      { en: 'Press Play song, strum the way the recording does and change chords on the word under each name.',
                                  es: 'Presiona «Tocar la canción», rasguea como la grabación y cambia de acorde en la palabra bajo cada nombre.' },
