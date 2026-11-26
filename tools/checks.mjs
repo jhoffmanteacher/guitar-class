@@ -6835,14 +6835,44 @@ function checkLiveSaw() {
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
    1fh. EVERY CHROME TOOL GOES THROUGH THE WALL (2026-11-26, tools/chrome-wall.mjs). A test page on 127.0.0.1 gets the
    CLASS Firebase project's settings; before the wall, ten tools' pages loaded the real SDK and four sent answered
-   requests to firestore.googleapis.com. Every .mjs under tools/ whose code launches a browser (spawns chrome / CHROME,
-   names google-chrome, chromium.launch, puppeteer or playwright, or passes --headless) must import chrome-wall.mjs:
-   its flags, its watch (a request off 127.0.0.1 or a Firebase app fails the run) and its two-run lock. Comments are
-   left out before matching (block comments and whole-line // comments), so a tool that only mentions Chrome is not
-   held to it. Fails with the tool's path. Pinned: at least 15 tools found, so a matcher that stops finding them shows.
+   requests to firestore.googleapis.com. Every .mjs under tools/ that launches a browser must USE the wall, not only
+   import it: WALL_FLAGS, wallWatch( or wallPlaywright(, and browserSlot( in its code.
+   "Launches a browser" is read from the RAW text, comments included, so nothing can hide it (review R1-2: a block-
+   comment stripper hid the code after 'tabs/*.html'): spawn of chrome / CHROME, process.env.CHROME,
+   --remote-debugging-port, google-chrome, chromium.launch…(, puppeteer, playwright / playwright-core, --headless.
+   A tool that only mentions one of them in a comment is held to the wall too: the safe side.
+   "Uses" is read from the code alone: wallCode() blanks comments and the inside of strings with a small tokenizer
+   that knows strings, template literals and regular expressions, and drops import statements, so a name in a
+   comment, a string or the import line counts for nothing.
+   Fails with the tool's path and what is missing. Pinned: at least 15 tools found.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
-const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|google-chrome|chromium\.launch\(|puppeteer|['"]playwright['"]|--headless/;
-const WALL_IMPORT_RE = /\bfrom\s+['"](?:\.{1,2}\/)+(?:tools\/)?chrome-wall\.mjs['"]/;
+const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|process\.env\.CHROME\b|--remote-debugging-port|google-chrome|chromium\.launch\w*\(|puppeteer|['"]playwright[-\w/]*['"]|--headless/;
+function wallCode(src) {
+  let out = '', i = 0, prev = '';
+  const n = src.length;
+  const sig = () => { for (let k = out.length - 1; k >= 0; k--) if (!/\s/.test(out[k])) return out[k]; return ''; };
+  while (i < n) {
+    const c = src[i], d = src[i + 1];
+    if (c === '/' && d === '/') { while (i < n && src[i] !== '\n') i++; continue; }
+    if (c === '/' && d === '*') { const e = src.indexOf('*/', i + 2); i = e < 0 ? n : e + 2; out += ' '; continue; }
+    if (c === '"' || c === "'" || c === '`') {
+      i++;
+      while (i < n && src[i] !== c) { if (src[i] === '\\') i++; else if (c !== '`' && src[i] === '\n') break; i++; }
+      i++; out += c + c; continue;
+    }
+    if (c === '/') {
+      prev = sig();
+      if (!prev || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /\b(return|typeof|case|in|of)$/.test(out)) {
+        i++; let cls = false;
+        while (i < n && src[i] !== '\n') { const x = src[i]; if (x === '\\') { i += 2; continue; } if (x === '[') cls = true; else if (x === ']') cls = false; else if (x === '/' && !cls) break; i++; }
+        i++; while (i < n && /[a-z]/i.test(src[i])) i++;
+        out += '/r/'; continue;
+      }
+    }
+    out += c; i++;
+  }
+  return out.replace(/^\s*import\b[^;]*;/gm, '');
+}
 function wallToolFiles(dir, rel = 'tools') {
   const out = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -6857,19 +6887,23 @@ function wallUnwalled(root) {
   const launchers = [], missing = [];
   for (const { p, r } of wallToolFiles(join(root, 'tools'))) {
     if (r === 'tools/chrome-wall.mjs' || r === 'tools/checks.mjs') continue;
-    const code = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
-    if (!WALL_LAUNCH_RE.test(code)) continue;
+    const raw = readFileSync(p, 'utf8');
+    if (!WALL_LAUNCH_RE.test(raw)) continue;
     launchers.push(r);
-    if (!WALL_IMPORT_RE.test(code)) missing.push(r);
+    const code = wallCode(raw), lacks = [];
+    if (!/\bWALL_FLAGS\b/.test(code)) lacks.push('WALL_FLAGS');
+    if (!/\b(?:wallWatch|wallPlaywright)\s*\(/.test(code)) lacks.push('wallWatch( or wallPlaywright(');
+    if (!/\bbrowserSlot\s*\(/.test(code)) lacks.push('browserSlot(');
+    if (lacks.length) missing.push(`${r} (no ${lacks.join(', no ')})`);
   }
   return { launchers, missing };
 }
 function checkChromeWall() {
   head('1fh. Every tool that launches Chrome goes through tools/chrome-wall.mjs (the wall and the two-run lock)');
   const { launchers, missing } = wallUnwalled(ROOT);
-  for (const r of missing) { err(`1fh: ${r} launches a browser but does not import tools/chrome-wall.mjs: use WALL_FLAGS, wallWatch (or wallPlaywright) and browserSlot, as tools/smoke.mjs does`); problems++; }
+  for (const r of missing) { err(`1fh: ${r} launches a browser but does not use tools/chrome-wall.mjs: pass WALL_FLAGS, call wallWatch (or wallPlaywright) and browserSlot, as tools/smoke.mjs does`); problems++; }
   if (launchers.length < 15) { err(`1fh: found ${launchers.length} tools that launch a browser (pinned: at least 15): the matcher may have stopped finding them`); problems++; }
-  if (!missing.length && launchers.length >= 15) ok(`${launchers.length} of ${launchers.length} tools that launch a browser import tools/chrome-wall.mjs`);
+  if (!missing.length && launchers.length >= 15) ok(`${launchers.length} of ${launchers.length} tools that launch a browser use tools/chrome-wall.mjs (WALL_FLAGS, the watch, browserSlot)`);
 }
 function checkToneTest() {
   head('1cx. The pitch detectors read made-up tones as they did (tools/tone-test.mjs)');
