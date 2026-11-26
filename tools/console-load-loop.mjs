@@ -31,7 +31,7 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Twenty-two families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Twenty-three families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
    booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
@@ -60,7 +60,8 @@
    60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it; since
    review M3 nothing else happens before that retry, and the write is Hidden or a release date, so every list case
    plays it: a default run is red without the landing's redraw, teacher-core.js loadAllStudents).
-   Review R5 added denied (the rules refuse the progress read for 3 minutes; a tab return at 64 s inside the first
+   Review R5 added busyload (a release date or Move-to list typed in while a load the teacher does not wait on is
+   out: Refresh while the roster is down, a blocked view's own read, or the first load, which then fails), denied (the rules refuse the progress read for 3 minutes; a tab return at 64 s inside the first
    counted minute, a roster view opened, a Refresh while refused, a Refresh once fixed) and archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
    1.6 s, so that view's own settings read fails before the roster lands; then a roster view).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
@@ -100,7 +101,11 @@
            most, one read each, plus one redraw read when the settings come back) and NONE while hidden; never two
            progress reads, nor two first-load settings reads, out at once; while the roster is down on a view that
            reads it, with the tab visible, the minute timer is running or a read is out (the retry never stops).
-     R2-busy   a retry that lands while the teacher types is thrown away: the box typed in is never drawn over.
+     R2-busy   a retry that lands while the teacher types is thrown away, and a load the teacher did not wait on (Refresh
+               while the roster is down, a blocked view's own read, a first load that fails) is drawn once the typing is
+               over: the box typed in is never drawn over (review M5). While the teacher types or drags, and 1.5 s after,
+               the grid may still show what it showed before (R3-1's roster failure line, R4-1 are not checked then);
+               after that every check holds again.
      R1-dead   no view left on a "Loading…" line with nothing left to run.
      R1-empty  a GOOD but empty class never shows a failure line or the note.
      R1-live   on Live In-Class Games the stage (#lq-stage) is always there and is never replaced while the view stays.
@@ -949,7 +954,7 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite', 'archkept', 'denied'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite', 'archkept', 'denied', 'busyload'];
 const MIN = 60000, SEC = 1000;
 const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true }, deny: { cfg: false, prog: true, deny: true } };
 const stName = s => s.deny ? 'progress refused' : s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
@@ -998,6 +1003,14 @@ function genCase(seed, k, famOverride) {
   // A view's own settings read fails while the first load's slow progress read is out (review R5-2): the first load's
   // settings read was good, so its archived list must still hide the archived student when the roster lands.
   else if (fam === 'archkept') { heal = 2 * MIN; c.noResume = true; boot = 'activities'; c.progExtra = 5000; const d = r.int(400, 900); slot(d, d + 1600, ST.cfg); c.earlyView = ['games', 'songs', 'manage'][nth % 3]; c.earlyAt = d + r.int(50, 300); }
+  /* A box typed in while a load the teacher did not wait on is out (review M5), three ways in turn: (a) Refresh pressed
+     while the roster is down, the read lands while typing; (b) a blocked roster view opened (its own load), then Class
+     activities opened and typed in while that read is out; (c) the first load out, Class activities opened and typed in,
+     then the load FAILS (the view drawn while loading is drawn again). The box must survive; the view is drawn after. */
+  else if (fam === 'busyload') {
+    heal = 2 * MIN; boot = 'activities'; c.noResume = true; c.progExtra = 3000; c.variant = ['a', 'b', 'c'][nth % 3];
+    if (c.variant === 'c') slot(0, 20 * SEC, ST.prog); else slot(0, 20 * SEC, ST.prog);
+  }
   // The rules refuse the progress read for 3 minutes (review M4): no automatic retry, the Refresh button offered.
   else if (fam === 'denied') { heal = 3 * MIN; boot = ['activities', 'games', 'skills', 'manage', 'students', 'songs'][nth % 6]; slot(0, heal, ST.deny); }
   else if (fam === 'chaos') { heal = 6 * MIN; for (let t = 0; t < heal; t += r.int(2, 20) * SEC) { const x = r(); slot(t, t + 20 * SEC, x < 0.3 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
@@ -1041,6 +1054,11 @@ function genCase(seed, k, famOverride) {
        view still up and visible (a random view, hide or box typed in left 27 of 32 cases without it), and the write
        60 ms before the roster lands is one whose own read waits: Hidden or a release date, in turn. */
     c.landPrefer = nth % 2 ? 'date' : 'hidden';
+  } else if (fam === 'busyload') {
+    const typed = { dur: r.int(8, 14) * SEC, guard: true, prefer: 'date' };
+    if (c.variant === 'a') { add(25 * SEC, 'view', { v: 'activities' }); add(30 * SEC, 'refresh'); add(30.6 * SEC, 'type', typed); }
+    else if (c.variant === 'b') { add(25 * SEC, 'view', { v: r.pick(['skills', 'trouble', 'students']) }); add(25.3 * SEC, 'view', { v: 'activities' }); add(25.9 * SEC, 'type', typed); }
+    else { add(0.4 * SEC, 'view', { v: 'activities', early: true }); add(1 * SEC, 'type', typed); }
   } else if (fam === 'denied') {
     /* A tab return inside the first counted minute (60-120 s, no click) must not read; then a roster view opened (no read)
        and a Refresh click (one read, refused again); once the rules are fixed, Refresh loads. */
@@ -1181,7 +1199,7 @@ async function runCase(seed, k, o) {
   const c = genCase(seed, k, o.family);
   const r = makeRng(seed, k, 11);
   const clock = new VClock();
-  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0, deniedChecks: 0 } };
+  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0, deniedChecks: 0, workingChecks: 0 } };
   W.server = new FakeServer({ clock, rng: makeRng(seed, k, 2), docs: seedDocs(c.empty, c.emptyKind), netAt: c.netAt });
   W.server.fixedLat = c.lat || 0; W.server.progExtra = c.progExtra || 0; W.modMs = c.modMs || 0;
   if (c.boot === 'livequiz' || c.fam === 'live') W.server.docs.set('liveQuiz/current', { state: 'question', quizId: 'string-id', qIndex: 0, sessionId: 'sess-1', limitSec: 20, scores: {}, mode: 'class' });
@@ -1285,10 +1303,14 @@ async function runCase(seed, k, o) {
     const cfgOut = W.server.reads.some(rd => rd.kind === 'cfg' && !rd.done);
     const lastCfg = newestDone('cfg');
     if (!cfgOut && /Could not read the class settings/.test(text) && lastCfg && lastCfg.ok) fail('R3-1', `${p.view}: "Could not read the class settings" on screen while the newest settings read (${mmss(lastCfg.t1)}) was good${quiet ? '' : ' (a progress read is out)'}`);
+    /* While the teacher types or drags, and 1.5 s after, the view may still show what it showed before a load landed or
+       failed: the console draws it once that is over, never over the box (review M5; R2-busy guards the box). */
+    const working = !!busy || (W.unbusyAt !== undefined && clock.now - W.unbusyAt < 1500);
+    if (working) W.stats.workingChecks++;
     if (quiet) {
       if (noteEl && p.studentsAt) fail('R3-1', `${p.view}: the "student progress did not load" note while the roster is loaded`);
       if (noteEl && /class settings did load/.test(noteTxt) && lastCfg && !lastCfg.ok) fail('R3-1', `${p.view}: the note says the class settings loaded, while the newest settings read (${mmss(lastCfg.t1)}) failed`);
-      if (/Could not load (student data|the student list)/.test(text) && p.studentsAt) fail('R3-1', `${p.view}: a roster failure line while the roster is loaded`);
+      if (/Could not load (student data|the student list)/.test(text) && p.studentsAt && !working) fail('R3-1', `${p.view}: a roster failure line while the roster is loaded`);
     }
     // "Could not load student data" only after a progress read failed: also while one is out (a retry after a settings failure).
     const lastProg = newestDone('prog');
@@ -1346,9 +1368,9 @@ async function runCase(seed, k, o) {
       else { if (W.stageEl && W.stageEl !== stage) fail('R1-live', 'the Live In-Class Games stage was replaced while the view stayed'); W.stageEl = stage; }
     } else W.stageEl = null;
     // R4-1: the roster-missing lines ("did not load" / "Loading student progress") only while it is missing.
-    if (quiet && p.studentsAt && /Student progress did not load|Loading student progress/.test(text + ' ' + noteTxt)) fail('R4-1', `${p.view}${p.screen ? '/' + p.screen : ''}: a "student progress did not load / loading" line while the roster is loaded`);
+    if (quiet && !working && p.studentsAt && /Student progress did not load|Student progress was refused|Loading student progress/.test(text + ' ' + noteTxt)) fail('R4-1', `${p.view}${p.screen ? '/' + p.screen : ''}: a "student progress did not load / loading" line while the roster is loaded`);
     // ...and "Loading" only while no progress read has failed: a view drawn while loading is drawn again when the load fails.
-    if (quiet && rosterDown && /Loading student progress/.test(text)) fail('R4-1', `${p.view}${p.screen ? '/' + p.screen : ''}: "Loading student progress…" on screen after the progress read failed (nothing is loading)`);
+    if (quiet && !working && rosterDown && /Loading student progress/.test(text)) fail('R4-1', `${p.view}${p.screen ? '/' + p.screen : ''}: "Loading student progress…" on screen after the progress read failed (nothing is loading)`);
     // R3-2 / M2: the skills summary strip is roster fact too.
     const summ = A.doc.getElementById('t-summary');
     if (!p.studentsAt && p.view === 'skills' && summ && /\d/.test(textOf(summ)) && !(summ._style && summ._style.display === 'none')) fail('R3-2', `skills: the summary strip shows "${clip(textOf(summ), 80)}" while the roster has not loaded`);
@@ -1434,7 +1456,9 @@ async function runCase(seed, k, o) {
       case 'show': { const q = A.peek(); if (c.fam === 'detail' && q.screen === 'detail' && !q.ok) { W.stats.detailKept++; say('a card page drawn from a failed settings read is on screen (its controls too)'); } }
         hidden = false; A.doc.hidden = false; A.doc.visibilityState = 'visible'; say('the tab is back'); A.fire(A.doc, 'visibilitychange'); break;
       case 'type': {
-        const g = grid(); const boxes = g ? g.querySelectorAll('input, select, textarea').filter(el => !el.matches('[data-ta-search]')) : [];
+        const g = grid(); let boxes = g ? g.querySelectorAll('input, select, textarea').filter(el => !el.matches('[data-ta-search]')) : [];
+        // A half-typed release date or a Move-to list, where the finding saw it (review M5), when one is on screen.
+        if (ev.prefer === 'date') { const d = boxes.filter(el => el.matches('input[data-set-activity-date], select[data-move-activity]')); if (d.length) boxes = d; }
         if (boxes.length) { const el = r.pick(boxes); A.doc.activeElement = el; busy = 'type'; if (ev.guard) { W.guard = el; W.stats.busyGuards++; } say(`typing in ${ctrlInfo(el).sel} for ${Math.round(ev.dur / 1000)} s${ev.guard ? ' (started while a retry is out)' : ''}`); queue.push({ t: ev.t + ev.dur, kind: 'unbusy' }); }
         else say('typing: no box on screen'); break;
       }
@@ -1442,7 +1466,7 @@ async function runCase(seed, k, o) {
         if (grid() && grid().querySelector('.t-board')) { A.ctx.__setDrag('ca-1'); busy = 'drag'; say(`dragging a card for ${Math.round(ev.dur / 1000)} s`); queue.push({ t: ev.t + ev.dur, kind: 'unbusy' }); }
         else say('dragging: no board on screen'); break;
       }
-      case 'unbusy': if (W.guard && !W.guard.isConnected) fail('R2-busy', 'a retry drew the view over the box being typed in'); W.guard = null; if (busy === 'drag') A.ctx.__setDrag(null); A.doc.activeElement = A.doc.body; say(`the ${busy} ends`); busy = null; break;
+      case 'unbusy': if (W.guard && !W.guard.isConnected) fail('R2-busy', 'a retry drew the view over the box being typed in'); W.guard = null; W.unbusyAt = clock.now; if (busy === 'drag') A.ctx.__setDrag(null); A.doc.activeElement = A.doc.body; say(`the ${busy} ends`); busy = null; break;
       case 'B': W.server.external(bPatch(r, W.server.docs.get('config/class') || {}, ev.cells)); say(`the second console writes (${ev.cells})`); break;
       case 'write': clickWrite(ev); break;
       case 'heal': W.rosterAtHeal = !!A.peek().studentsAt; say(`the network is healthy from here on${W.rosterAtHeal ? ' (the roster is loaded: no recovery to check)' : ''}`); break;
@@ -1505,7 +1529,7 @@ async function main() {
   const t0 = Date.now();
   SITE = compileSite(resolve(opt('--root', REPO)));
   const ks = only !== null ? [Number(only)] : Array.from({ length: n }, (_, i) => i);
-  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0, deniedChecks: 0 }, rate: {} };
+  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0, deniedChecks: 0, workingChecks: 0 }, rate: {} };
   for (const k of ks) {
     heartbeat(`case ${k}`, true);
     const { c, W } = await runCase(seed, k, { verbose: flag('--verbose'), family });
@@ -1538,7 +1562,7 @@ async function main() {
   }
   floors.forEach(f => console.log(`  ✗ [coverage] ${f}`));
   const rate = Object.keys(out.rate).sort().map(x => `${x} ${out.rate[x]}`).join(', ');
-  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.loadingChecks} while it was loading; ${st.deniedChecks} while the rules refused it; ${st.hiddenMinutes} minutes hidden throughout; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry; ${st.healthyStale} stale-control writes outside this tool (a write's or a view's own read); most reads in a quiet minute: ${rate || '—'}`;
+  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.loadingChecks} while it was loading; ${st.deniedChecks} while the rules refused it; ${st.hiddenMinutes} minutes hidden throughout; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry or a load (${st.workingChecks} checks while typing); ${st.healthyStale} stale-control writes outside this tool (a write's or a view's own read); most reads in a quiet minute: ${rate || '—'}`;
   process.stderr.write(`console-load-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s\n`);
   if (out.failed.length || floors.length) {
     console.log(`console-load-loop: ✗ ${out.failed.length} of ${ks.length} cases failed (${Object.keys(out.byTag).sort().map(t => t + ' ' + out.byTag[t]).join(', ') || 'coverage'}) — ${detail}`);
