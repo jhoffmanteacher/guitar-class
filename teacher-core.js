@@ -741,6 +741,14 @@ async function loadAllStudents(opts){
   }
   teacherRefreshing=false; teacherRefreshFailed=false; teacherRosterDenied=false;
   teacherStudentsAt=Date.now();
+  /* A load the teacher does not wait on (Refresh while the roster is down, a blocked view's own read) can land while a
+     box is being typed in or a card dragged: the roster is kept, and the view is drawn once that is over (review M5). */
+  if(teacherRefreshBlocker()){ teacherPaintRosterNote(); teacherPaintRefreshBar(); teacherRedrawWhenFree(teacherDrawLanded); teacherRefreshReportsBadge(); return; }
+  teacherDrawLanded();
+  teacherRefreshReportsBadge();
+}
+/* What a roster that has just landed draws: the view, the summary strip and the refresh bar. */
+function teacherDrawLanded(){
   // Rendering is deliberately OUTSIDE the fetch try/catch above — a bug in
   // renderTeacherBody/renderTeacherSummary shouldn't be reported to the
   // teacher as a Firestore permissions problem, which sends debugging in
@@ -756,7 +764,19 @@ async function loadAllStudents(opts){
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Something went wrong displaying this data. Check the browser console for details.</div>';
   }
   teacherPaintRefreshBar();
-  teacherRefreshReportsBadge();
+}
+/* A draw that would wipe what the teacher is in the middle of (teacherRefreshBlocker: a drag, the rename box, a box
+   being typed in, a selection) waits until that is over, looked at every second (review M5). One waits at a time, the
+   newest; any draw of the view first (renderTeacherBody) drops it. */
+let teacherRedrawWait=null;
+function teacherRedrawWhenFree(draw){
+  if(teacherRedrawWait) clearTimeout(teacherRedrawWait);
+  const tick=()=>{
+    if(teacherRefreshBlocker()){ teacherRedrawWait=setTimeout(tick, 1000); return; }
+    teacherRedrawWait=null;
+    draw();
+  };
+  teacherRedrawWait=setTimeout(tick, 1000);
 }
 
 /* The roster before its first load lands: still out (loading) or failed (review R1-4, R2-1, R2-4, R4-1). Nothing
@@ -801,6 +821,8 @@ function teacherWhoListHtml(a, cfg){
 function teacherRosterBlocks(v){ return teacherRosterMissing() && teacherViewUsesRoster(v) && !(teacherClassConfigReadOk && TEACHER_SETTINGS_VIEWS.includes(v)); }
 function teacherPaintRosterMissing(){
   teacherSyncAutoRefresh();
+  // Not over a box being typed in or a card dragged: the note now, the box once that is over (review M5).
+  if(teacherBodyDrawn && teacherRefreshBlocker()){ teacherPaintRosterNote(); teacherRedrawWhenFree(teacherPaintRosterMissing); return; }
   if(!teacherRosterBlocks(teacherView)){
     // A view the settings draw, drawn while the roster was still loading, is stale once the load has failed: emptied and drawn again (R4-1).
     const stale=teacherBodyDrawn && !teacherBodyDrawnDown && teacherRosterDown() && TEACHER_SETTINGS_VIEWS.includes(teacherView);
@@ -1534,6 +1556,8 @@ function renderTeacherBody(){
      view, fills it like the student site (site-fill.js, Jonathan 2026-11-16). Before the view paints. */
   if(typeof siteFillStage==='function') siteFillStage(teacherView==='livequiz');
   teacherSyncAutoRefresh();   // the progress timer runs on Class activities, and on a roster view after a failed first load
+  // This draw is the one a waiting draw was for (review M5).
+  if(teacherRedrawWait){ clearTimeout(teacherRedrawWait); teacherRedrawWait=null; }
   teacherBodyDrawn=true; teacherRosterBoxFailed=false; teacherBodyDrawnDown=teacherRosterDown();
   /* No roster yet (still loading, or the first read failed): a view drawn from it would say "No student data yet".
      Say what is going on instead; after a failure read again, and one that lands draws this view (review R1-4, R4-1).
