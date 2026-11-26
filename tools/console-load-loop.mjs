@@ -60,8 +60,8 @@
    60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it; since
    review M3 nothing else happens before that retry, and the write is Hidden or a release date, so every list case
    plays it: a default run is red without the landing's redraw, teacher-core.js loadAllStudents).
-   Review R5 added denied (the rules refuse the progress read for 3 minutes; a tab return, a roster view opened, a
-   Refresh while refused, a Refresh once fixed) and archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
+   Review R5 added denied (the rules refuse the progress read for 3 minutes; a tab return at 64 s inside the first
+   counted minute, a roster view opened, a Refresh while refused, a Refresh once fixed) and archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
    1.6 s, so that view's own settings read fails before the roster lands; then a roster view).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
    board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
@@ -1042,10 +1042,11 @@ function genCase(seed, k, famOverride) {
        60 ms before the roster lands is one whose own read waits: Hidden or a release date, in turn. */
     c.landPrefer = nth % 2 ? 'date' : 'hidden';
   } else if (fam === 'denied') {
-    // A tab return must not read again; a Refresh click reads once (refused again); once the rules are fixed, Refresh loads.
-    add(40 * SEC, 'hide'); add(45 * SEC, 'show');
-    add(r.int(100, 115) * SEC, 'view', { v: r.pick(['skills', 'students', 'trouble', 'responses']), noRead: true });
-    add(r.int(130, 150) * SEC, 'refresh');
+    /* A tab return inside the first counted minute (60-120 s, no click) must not read; then a roster view opened (no read)
+       and a Refresh click (one read, refused again); once the rules are fixed, Refresh loads. */
+    add(62 * SEC, 'hide'); add(64 * SEC, 'show');
+    add(r.int(125, 128) * SEC, 'view', { v: r.pick(['skills', 'students', 'trouble', 'responses']), noRead: true });
+    add(r.int(150, 165) * SEC, 'refresh');
     c.refreshAtHeal = true;
   } else if (fam === 'archkept') {
     add(c.earlyAt, 'view', { v: c.earlyView, early: true });
