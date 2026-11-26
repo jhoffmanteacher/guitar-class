@@ -157,13 +157,23 @@ CHANGELOG 2026-11-25; the code side:
   rounds with no right note (review R3-2); 4 of 552 nothing-played melody rounds still reach Good (two noise readings
   counted as right on 3- and 4-beat drills; a rule change, needs takes). More takes wanted: 20+ melody takes from a
   loud period, 10+ chord takes, one slow-tempo take (`node tools/mic-sim/takes-in.mjs`).
-- **Not shipped: "the console recovers by itself after a failed load."** Five review rounds each found something;
-  round 5 found the empty-roster fault above (already on main, fixed alone) and one regression (R5-2:
-  `teacherArchivedKept` is null until a roster filter runs on a good read, so an archived student can show for
-  minutes). The work is kept on the remote branch `wip/console-recover-2026-11-25` with its loop
-  (`tools/console-load-loop.mjs`, 160 cases). To finish: apply R5-2 (set it right after the good read in
-  `loadAllStudents`), make the loop's fake server answer EMPTY when offline, give its `landwrite` family more cases,
-  then one review. Until then a failed console read needs a reload, as before.
+- **Shipped late 2026-11-25: "the console recovers by itself after a failed load"** (Reviewed, `site-reviewer-deep`,
+  6 rounds; the sixth found no BLOCKER or MAJOR). A failed roster, class-settings or accounts read is retried by
+  itself; until a good read lands nothing made from a failed or empty read is shown as fact or offered as a control;
+  a refused progress read stops retrying and says so; a landing redraw waits while the teacher types. The accounts
+  reads ask the server. `tools/console-load-loop.mjs` (160 cases; its fake answers offline reads like the real SDK:
+  a collection `get()` resolves EMPTY unless `{source:'server'}`) runs on GitHub (`checks.yml`). Open, all MINOR
+  (out-of-date lines on screen, no data): R6-1 a failed then a refused progress read leaves "It is read again every
+  minute" on the roster spots (teacher-core.js, the `teacherBodyDrawn && !teacherRosterBoxFailed && !stale` line:
+  count a change in the denied state as stale); R6-2 a card opened from Songs before the first roster read, whose
+  own settings read fails, keeps "Loading student progress…" until Refresh; R6-3 the landing draw sits inside the
+  fetch `try`, so a render that throws is reported as "Could not load student data" (give it its own try); R6-4 that
+  redraw skips the typing check; a refused class-settings read still retries every minute; the loop misses two
+  plants ("refused" never cleared by a later network failure; the oldest waiting draw kept). Already on main before
+  this, still open: the Delete dialog's song-request step run offline gets an empty list and counts as done
+  (teacher-remove.js, its `songRequests` reads should ask the server); the Reports and Song-requests badges and the
+  Error log show "nothing here" offline. The remote branch `wip/console-recover-2026-11-25` is now behind main and
+  can be deleted (Jonathan deletes remote branches).
 - **Still open from the sweep** (none is live-breaking):
   the per-Chromebook reset marker (a stopped consent "yes", unsent practice seconds and old ticks can come back from
   a second Chromebook after a Delete; save path, Always Reviewed); a doc re-created after a Delete without
