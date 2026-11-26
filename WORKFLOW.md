@@ -109,91 +109,27 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 Update this block whenever an item opens or closes.
 
-**Done 2026-11-25: the whole-site sweep, push 1 (Reviewed, `site-reviewer-deep` on Opus, up to 3 rounds per area).**
-Jonathan: "it's time for you to do a full review of the website for code and content." 21 read-only auditors (Opus,
-high) read the site by area (about 98,000 lines); the lead verified each serious finding in the code; six fixers and
-three review rounds followed. Run from a cloud session on a clone (nothing on the Mac). What shipped is in
-CHANGELOG 2026-11-25; the code side:
-- **Update reload** (`app/start.js`): a tab that loaded with no controlling worker skips only its OWN worker's first
-  takeover (it used to never reload for a later deploy); the reload never goes ahead over unsaved or in-flight work
-  (a give-up rule bounds it); `tools/kill-switch/proof.mjs` now runs that block with the real save code (its line
-  still ends "14 of 14 mutations caught"). 15,000 random schedules: 0 reloads over untold work, 0 double reloads.
-- **Save path** (`app/save.js`): after a Start over or a Delete, a second Chromebook's local practice-log copy is
-  ignored and cleared (Jonathan chose "ignore the old device copy"; cost: reps made after a reset whose save never
-  landed are dropped); legacy ticks kept at a Start-over sign-in. save-loop S14-S18.
-- **Play-along cards**: a built song's lyric sheet that starts on a rest no longer throws on Play; a 6/8 sheet's
-  strip counts 1-6. No coded card had either.
-- **Song builder**: edits survive the 15 s re-read and a song switch; "Level it again" leaves a live song's file
-  alone; leaving mid-encode no longer locks the builder; whole-beat moves shift every bar line; all three draft
-  writers, Delete draft and Delete… check in a transaction that the stored draft is the one this tab read (two tabs).
-  A refused Level deletes nothing (round 3: the delete could take another tab's copy).
-- **Console**: Delete dialog unticks kept through a failed re-read, Close and a console reload; the update reload held
-  while a Delete runs; mic evaluation no longer hangs on a bad sample rate; "Higher or lower?" cannot reopen a closed
-  game; ties at the Top 3 cut.
-- **The song help pop-up** (`app/songhelp.js`, `checks.mjs` 1fe) and the Metronome without time-signature buttons.
-- **Browser tools behind a proxy**: `--no-proxy-server` beside `--host-resolver-rules` in update-reload-loop, golden,
-  playalong-loop, slow-load and speed-ladder-loop. In a cloud session `HTTPS_PROXY` is set, Chrome sent every request
-  to it, the block stopped nothing, the Firebase SDK loaded and its late "signed out" answer signed the dev user out
-  mid-case (16 of 29 on a sound site; 29 of 29 with the flag). **Those test pages opened a Listen channel to the
-  class project; it was refused (no data, nothing written).** update-reload-loop now stops if the SDK loaded.
-- **GitHub** (`checks.yml`) also runs kill-switch proof, tuning-sim-proof, access-sim, backup-proof, stay-proof and
-  mic-sim/micrec-clock after every push.
-- **Pushes 2 to 4, same day** (CHANGELOG, the top 2026-11-25 entry): every click the same sound; typed answers off
-  in all modules (`TYPED_RESPONSES_ENABLED`, `checks.mjs` 1ff; two Module 9 steps wait for Jonathan's wording, 1ff
-  prints them); a Focus step tap redraws only the open card (`caRedrawOpenCard`, `tools/focus-tap-diff.mjs`: 2,112 of
-  2,112 taps byte-identical to a full render); "stop everything you leave" (drill rounds on a card close, a tab line
-  on a step move, the Module Review recorder on every way out, the Metronome on a hidden tab); the new loops
-  `tools/stop-loop.mjs` (221 start x way-out pairs, 0 known), `tools/built-song-loop.mjs`, `tools/sb-draft-loop.mjs`;
-  `playalong-loop` leaves a speed-ladder card (ca-54) to `speed-ladder-loop`; the console's roster read asks the
-  server (`get({source:'server'})`: with no network a plain get resolved EMPTY and real students showed as "not in
-  the roster"); the two splits: `app/activities-list.js` (the gate, the list, its folds, `flushOnHide`) out of
-  `app/activities-2.js`, and `live-quiz-teacher.js` (the stage, the control strip, Preview) out of `live-quiz.js`.
-- **The Listening Coach, "the notes decide" (Reviewed, `site-reviewer-deep`, 3 rounds; its own push so it can be
-  rolled back alone: revert the commits from "Listening Coach: the notes decide" through the 1fg ones).** Report card
-  only (`coach-score.js`): no detector, onset, matcher or slot verdict moved (0 of 17,280 synthetic and 0 of 562
-  real-take verdicts differ; the other games 0). A melody round opens the check-off gate only when the Coach read
-  the notes as right; a round it is not sure of gets the "not sure" screen, no level and no save; a round in a locked
-  set's preview saves nothing; the report shows the lowest row first. Real takes: takes holding 0 of the 8 written
-  notes graded Good 22 -> 0; right-playing takes with the gate open 29 -> 26 of 33 (told Not yet 4 -> 0, told "not
-  sure" 0 -> 7). Nothing played: gate open 211 -> 4 of 552 (melody), 27 -> 6 of 72 (chords). Accepted cost: in the
-  two harsh synthetic rooms far fewer right players get a grade (room7 76 -> 22, room4 70 -> 1 of 80): they see "not
-  sure" and use "Mark it anyway". Guard: `checks.mjs` 1fg (A to H). Open: 1fg does not yet count `saveProgress` /
-  streak saves on a not-sure round, check each unread line against the round's mode, or pin `needsMelodyNone` to
-  rounds with no right note (review R3-2); 4 of 552 nothing-played melody rounds still reach Good (two noise readings
-  counted as right on 3- and 4-beat drills; a rule change, needs takes). More takes wanted: 20+ melody takes from a
-  loud period, 10+ chord takes, one slow-tempo take (`node tools/mic-sim/takes-in.mjs`).
-- **Shipped late 2026-11-25: "the console recovers by itself after a failed load"** (Reviewed, `site-reviewer-deep`,
-  6 rounds; the sixth found no BLOCKER or MAJOR). A failed roster, class-settings or accounts read is retried by
-  itself; until a good read lands nothing made from a failed or empty read is shown as fact or offered as a control;
-  a refused progress read stops retrying and says so; a landing redraw waits while the teacher types. The accounts
-  reads ask the server. `tools/console-load-loop.mjs` (160 cases; its fake answers offline reads like the real SDK:
-  a collection `get()` resolves EMPTY unless `{source:'server'}`) runs on GitHub (`checks.yml`). Open, all MINOR
-  (out-of-date lines on screen, no data): R6-1 a failed then a refused progress read leaves "It is read again every
-  minute" on the roster spots (teacher-core.js, the `teacherBodyDrawn && !teacherRosterBoxFailed && !stale` line:
-  count a change in the denied state as stale); R6-2 a card opened from Songs before the first roster read, whose
-  own settings read fails, keeps "Loading student progress…" until Refresh; R6-3 the landing draw sits inside the
-  fetch `try`, so a render that throws is reported as "Could not load student data" (give it its own try); R6-4 that
-  redraw skips the typing check; a refused class-settings read still retries every minute; the loop misses two
-  plants ("refused" never cleared by a later network failure; the oldest waiting draw kept). Already on main before
-  this, still open: the Delete dialog's song-request step run offline gets an empty list and counts as done
-  (teacher-remove.js, its `songRequests` reads should ask the server); the Reports and Song-requests badges and the
-  Error log show "nothing here" offline. The remote branch `wip/console-recover-2026-11-25` is now behind main and
-  can be deleted (Jonathan deletes remote branches).
-- **Still open from the sweep** (none is live-breaking):
-  the per-Chromebook reset marker (a stopped consent "yes", unsent practice seconds and old ticks can come back from
-  a second Chromebook after a Delete; save path, Always Reviewed); a doc re-created after a Delete without
-  `migrations.swap45` (app and `tabs/journey.js`); a class settings change redraws under an open card; "Next: Set N"
-  on a locked set; Unpublish from an old copy and the Import notice (Song builder); the lyric sheet's `server` line;
-  6/8 on the student Metronome for 6/8 cards; the Journey pages' "didn't load" handling; eight Chrome tools with no
-  network block (the smoke among them); `tools/speed-ladder-loop.mjs` is not run on GitHub; the two permanent
-  detectors (unused top-level names; quoted-`escAttr` handler arguments); Card Deck and Ear Spark rounds are left as
-  they are on a hidden tab (the 2026-11-09 choice; stop-loop lists them as documented survivors); stale comments
-  that still name `activities-2.js` (teacher-students.js:441, tabs/journey.js, app/songfiles.js:498,
-  app/review.js:467, teacher-livemusic.js:21).
-- **Jonathan's calls still open:** the Module 8 fingerpicking video (K2Z3RZc5t-A is titled "Travis Finger Picking";
-  the step's hint and quiz are about p-i-m-a-m-i), ca-34's intro open G vs ca-35's solo D-string fret 4 ("Vuelve a la
-  Vida"), Module 9 Set 1's re-tests shown twice, a privacy-page sentence for "request to join", the Module 2 thumb
-  sketch (the image says index finger; the text says middle).
+**Done 2026-11-25: the whole-site sweep** (Jonathan: "it's time for you to do a full review of the website for code
+and content"). What shipped is in CHANGELOG 2026-11-25 and in git; only what a later session needs is kept here.
+- **Listening Coach, "the notes decide"** (`coach-score.js`, report card only; guard `checks.mjs` 1fg). Roll back
+  alone: revert the commits from "Listening Coach: the notes decide" through the 1fg ones. Accepted cost: in a very
+  loud room most right players see "not sure" and use "Mark it anyway". Wanted when Jonathan has them: 20+ melody
+  takes from a loud period, 10+ chord takes, one slow-tempo take (`node tools/mic-sim/takes-in.mjs`).
+- **Typed answers are off in all modules** (`TYPED_RESPONSES_ENABLED`, 1ff). One step keeps its box:
+  `response.keepTyped` on Module 9 Set 3's Challenge 2 (Jonathan: "keep").
+- **The console recovers by itself after a failed load** (`tools/console-load-loop.mjs`, on GitHub). Console reads
+  that are treated as fact ask the server (`get({source:'server'})`): offline, a plain collection `get()` resolves
+  EMPTY.
+- **New tools:** `stop-loop`, `built-song-loop`, `sb-draft-loop`, `console-load-loop`, `focus-tap-diff`, `stay-proof`.
+  A Chrome tool run where `HTTPS_PROXY` is set needs `--no-proxy-server` beside `--host-resolver-rules`.
+- **New parts:** `app/songhelp.js`, `app/activities-list.js` (holds `flushOnHide`), `live-quiz-teacher.js`.
+- **Still open, worth doing:** after a Delete, a second Chromebook can bring back a little old data (a stopped
+  consent "yes", unsent practice seconds, old ticks): a per-Chromebook reset marker, save path, Always Reviewed; a
+  doc re-created after a Delete lacks `migrations.swap45` (app and `tabs/journey.js`); a class settings change
+  redraws under an open card; `tools/speed-ladder-loop.mjs` is not run on GitHub; ca-34's intro open G vs ca-35's
+  solo D-string fret 4 ("Vuelve a la Vida": needs ears); a privacy-page sentence for "request to join" once the
+  access rules are published.
+- Jonathan, 2026-11-26: offline-only faults and other trivia are not tracked here.
 
 **Done 2026-11-23: W15, the design-values tidy (Reviewed, `site-reviewer` on Opus, 2 rounds).** Text sizes (`--fs-*`,
 13), layers (`--z-*`, 9) and spacings (`--sp-*`, 11) have names equal to today's values; students see nothing (no
