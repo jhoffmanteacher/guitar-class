@@ -126,8 +126,6 @@ const STUB = String.raw`(() => {
 })()`;
 
 async function main(){
-  const watchdog = setTimeout(() => { console.log('song-files-e2e: ✗ HUNG (10 minutes)'); process.exit(3); }, 600000);
-  watchdog.unref();
   if (!CHROME || !existsSync(CHROME)) { console.error('song-files-e2e: no Chrome for Testing: set CHROME or pass --chrome <path>'); return 2; }
   if (/\/Applications\/Google Chrome\.app\//.test(CHROME)) { console.error('song-files-e2e: refusing /Applications/Google Chrome.app (use Chrome for Testing)'); return 2; }
   if (spawnSync('ffmpeg', ['-version']).status !== 0) { console.error('song-files-e2e: needs ffmpeg'); return 2; }
@@ -135,6 +133,10 @@ async function main(){
   const work = mkdtempSync(join(tmpdir(), 'gc-songfiles-e2e-'));
   const { srv, port } = await serve(ROOT);
   await browserSlot('song-files-e2e');
+  /* The 10 minutes start once the browser slot is held: a queued run waits for its turn, not into its watchdog
+     (review R1-1). */
+  const watchdog = setTimeout(() => { console.log('song-files-e2e: ✗ HUNG (10 minutes)'); process.exit(3); }, 600000);
+  watchdog.unref();
   const prof = join(work, 'chrome');
   const cdp = await freePort();
   const proc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu',

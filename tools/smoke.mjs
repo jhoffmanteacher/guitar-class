@@ -139,7 +139,8 @@ const say = (...a) => { if (!QUIET) console.log(...a); };
    step it was on, closes its Chrome and its servers, deletes its temp folders and exits 3. */
 const numOpt = (name, dflt) => { const v = opt(name); if (v == null) return dflt; const n = Number(v); if (!(n > 0)) { console.error(`smoke: ${name} needs a number of seconds, got "${v}"`); process.exit(2); } return n; };
 const STALL_S = numOpt('--stall', 120), TIMEOUT_S = numOpt('--timeout', 2400);
-const progress = { where: 'starting', at: Date.now() }, t0 = Date.now();
+const progress = { where: 'starting', at: Date.now() };
+let t0 = Date.now();
 const mark = (where) => { progress.where = where; progress.at = Date.now(); };
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
@@ -3529,7 +3530,9 @@ const watchdog = setInterval(() => {
 watchdog.unref();
 try {
   mark('setup: waiting for a browser slot');
-  await browserSlot('smoke');
+  /* While it waits for a browser slot, each poll marks progress (the stall watchdog stays fed) and the wait is left out
+     of --timeout's total (review R1-1). */
+  t0 += (await browserSlot('smoke', { onWait: () => mark('setup: waiting for a browser slot') })).waitedMs;
   mark('setup: starting Chrome');
   const prof = mkdtempSync(join(tmpdir(), 'gc-smoke-chrome-'));
   const cdp = await freePort();

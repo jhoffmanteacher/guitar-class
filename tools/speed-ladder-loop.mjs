@@ -89,6 +89,7 @@ async function main() {
   if (!chrome || !existsSync(chrome)) { console.error('speed-ladder-loop: no Chrome for Testing: set CHROME or pass --chrome <path>'); return 2; }
   if (typeof WebSocket === 'undefined') { console.error('speed-ladder-loop: needs Node 22+ (global WebSocket)'); return 2; }
   await browserSlot('speed-ladder-loop');
+  armWatchdog();
   const prof = mkdtempSync(join(tmpdir(), 'gc-ladder-chrome-'));
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   const cdp = await freePort();
@@ -220,7 +221,10 @@ async function main() {
   say(problems.length ? `speed-ladder-loop: ✗ ${problems.length} problem(s)` : `speed-ladder-loop: ✓ ${plan.length} times through played for real: first stop 90, every stop its BPM, one time through each, the prompt after each`);
   return problems.length ? 1 : 0;
 }
-const watchdog = setTimeout(() => { console.error('speed-ladder-loop: ✗ HUNG (13 minutes)'); done(3); }, 13 * 60 * 1000);
-watchdog.unref();
+/* The 13 minutes start again once the browser slot is held (armWatchdog in main): a queued run waits for its turn, not
+   into its watchdog (review R1-1). */
+let watchdog = null;
+const armWatchdog = () => { clearTimeout(watchdog); watchdog = setTimeout(() => { console.error('speed-ladder-loop: ✗ HUNG (13 minutes)'); done(3); }, 13 * 60 * 1000); watchdog.unref(); };
+armWatchdog();
 const finish = async code => done(wall ? await wall.finish(code) : code);
 main().then(finish, e => { console.error('speed-ladder-loop: ✗ ' + (e && e.stack || e)); return finish(2); });

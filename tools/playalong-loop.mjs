@@ -2130,7 +2130,8 @@ async function main() {
   if (!existsSync(join(ROOT, 'index.html'))) { console.error(`playalong-loop: ${ROOT} is not a copy of the site (no index.html)`); return 2; }
   const t0 = Date.now();
   mark('setup: waiting for a browser slot');
-  await browserSlot('playalong-loop');
+  /* While it waits for a browser slot, each poll marks progress, so the stall watchdog stays fed (review R1-1). */
+  await browserSlot('playalong-loop', { onWait: () => mark('setup: waiting for a browser slot') });
   mark('setup: starting Chrome');
   const prof = mkdtempSync(join(tmpdir(), 'gc-playalong-chrome-'));
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));

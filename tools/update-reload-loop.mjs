@@ -747,7 +747,8 @@ async function runCase(cs, env) {
   const check = (name, ok, shown) => res.checks.push([name, !!ok, shown]);
   site.dir = env.v1;
   mark(`${cs.name}: waiting for a browser slot`);
-  await browserSlot('update-reload');
+  /* While it waits for a browser slot, each poll marks progress, so the stall watchdog stays fed (review R1-1). */
+  await browserSlot('update-reload', { onWait: () => mark(`${cs.name}: waiting for a browser slot`) });
   mark(`${cs.name}: starting Chrome`);
   const prof = mkdtempSync(join(tmpdir(), 'gc-update-reload-chrome-'));
   env.profiles.push(prof);
