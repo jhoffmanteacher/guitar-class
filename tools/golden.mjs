@@ -441,7 +441,9 @@ function serve(dir) {
 
 /* ── the watchdog (review R2-6) ──────────────────────────────────────── */
 let chromeProc = null, exitCode = 0, stepName = 'start', stepAt = Date.now(); const cleanup = [];
-let t0 = Date.now();
+const T0 = Date.now();
+/* t0 moves on by the time spent waiting for a browser slot, during the wait too (review R2-1). */
+let t0 = T0;
 function hang(why) {
   console.log(`golden: ✗ HUNG (${why}). Stuck at "${stepName}"`);
   try { if (chromeProc) chromeProc.kill('SIGKILL'); } catch { /* gone */ }
@@ -866,7 +868,7 @@ if (!chrome || !existsSync(chrome)) { console.error(`golden: no Chrome or Chromi
 try {
   /* While it waits for a browser slot, each poll marks progress (the stall watchdog stays fed) and the wait is left out
      of --timeout's total (review R1-1). */
-  t0 += (await browserSlot('golden', { onWait: () => stepStart('waiting for a browser slot') })).waitedMs;
+  t0 = T0 + (await browserSlot('golden', { onWait: (ms) => { stepStart('waiting for a browser slot'); t0 = T0 + ms; } })).waitedMs;
   const prof = mkdtempSync(join(tmpdir(), 'gc-golden-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',

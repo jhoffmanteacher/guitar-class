@@ -88,7 +88,7 @@ async function main() {
   const chrome = opt('--chrome') || process.env.CHROME;
   if (!chrome || !existsSync(chrome)) { console.error('speed-ladder-loop: no Chrome for Testing: set CHROME or pass --chrome <path>'); return 2; }
   if (typeof WebSocket === 'undefined') { console.error('speed-ladder-loop: needs Node 22+ (global WebSocket)'); return 2; }
-  await browserSlot('speed-ladder-loop');
+  await browserSlot('speed-ladder-loop', { onWait: armWatchdog });
   armWatchdog();
   const prof = mkdtempSync(join(tmpdir(), 'gc-ladder-chrome-'));
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
@@ -221,8 +221,8 @@ async function main() {
   say(problems.length ? `speed-ladder-loop: ✗ ${problems.length} problem(s)` : `speed-ladder-loop: ✓ ${plan.length} times through played for real: first stop 90, every stop its BPM, one time through each, the prompt after each`);
   return problems.length ? 1 : 0;
 }
-/* The 13 minutes start again once the browser slot is held (armWatchdog in main): a queued run waits for its turn, not
-   into its watchdog (review R1-1). */
+/* The 13 minutes start again on every poll while it waits for a browser slot and once the slot is held (armWatchdog in
+   main): a queued run waits for its turn, not into its watchdog (review R1-1, R2-1). */
 let watchdog = null;
 const armWatchdog = () => { clearTimeout(watchdog); watchdog = setTimeout(() => { console.error('speed-ladder-loop: ✗ HUNG (13 minutes)'); done(3); }, 13 * 60 * 1000); watchdog.unref(); };
 armWatchdog();

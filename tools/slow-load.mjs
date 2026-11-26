@@ -153,7 +153,8 @@ const EVENTS = `(() => {
 const chrome = findChrome();
 if (!chrome) { console.error('slow-load: no Chrome or Chromium found (use --chrome <path>)'); process.exit(2); }
 let chromeProc = null, prof = null, exitCode = 0, site = null, browser = null;
-let wall = null;   // the wall (tools/chrome-wall.mjs), set once Chrome is up
+/* The wall (tools/chrome-wall.mjs), set once Chrome is up. */
+let wall = null;
 let step = 'starting Chrome', lastProgress = Date.now();
 const mark = (s) => { step = s; lastProgress = Date.now(); if (VERBOSE) console.log(`    · ${s}`); };
 const shutdown = () => {
