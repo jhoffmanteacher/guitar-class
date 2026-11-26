@@ -20,9 +20,9 @@
    view shows while the roster is missing (CLAUDE.md "Teacher console"); not in checks.mjs.
 
    WHAT IS REAL. One console: a vm context holding the site's scripts unchanged, in index.html's order: config-main.js,
-   class-activities.js, i18n.js, guitar-diagrams.js, the app parts, practice-minutes, live-quiz.js, then the whole
-   console script (siteSource('teacher.js')), the module files when showTeacherApp asks for them, and index.html's
-   <body> as its DOM. It boots through the real showTeacherApp, on the view an update reload's note names (the real
+   class-activities.js, i18n.js, guitar-diagrams.js, the app parts, practice-minutes, live-quiz.js and
+   live-quiz-teacher.js, then the whole console script (siteSource('teacher.js')), the module files when
+   showTeacherApp asks for them, and index.html's <body> as its DOM. It boots through the real showTeacherApp, on the view an update reload's note names (the real
    teacherResumeApply). Every click goes through the console's own listeners: a sidebar button, Arrange board, Back
    to list, a list row, a Songs Preview, Refresh, and every write control on screen (fire(), section 6: the click,
    change or inline onclick the browser would run). The tab is hidden and shown through the real visibilitychange
@@ -758,7 +758,8 @@ function makeDb(server, label) {
 
 /* ════════════════════════════════════════════════════════════════════════
    6. The console: one vm context with the site's own scripts (as
-   tools/two-consoles-loop.mjs section 6), plus live-quiz.js. Stubbed: `db`,
+   tools/two-consoles-loop.mjs section 6), plus live-quiz.js and its teacher
+   side, live-quiz-teacher.js (split off 2026-11-25). Stubbed: `db`,
    confirm() (OK), alert() (recorded), prompt() (nothing). fire() plays a
    browser event: the target's inline on<type> handler, then every listener on
    it and on each ancestor up to the document.
@@ -770,7 +771,7 @@ function compileSite(root) {
   const scripts = [S('(made-up firebase-config)', "var TEACHER_EMAIL = 'teacher@example.test';")];
   for (const f of ['config-main.js', 'class-activities.js', 'i18n.js', 'guitar-diagrams.js']) scripts.push(S(f, read(f)));
   scripts.push(S('app (all parts)', siteSource('app.js', root)));
-  for (const f of ['practice-minutes-config.js', 'practice-minutes.js', 'live-quiz.js']) if (existsSync(join(root, f))) scripts.push(S(f, read(f)));
+  for (const f of ['practice-minutes-config.js', 'practice-minutes.js', 'live-quiz.js', 'live-quiz-teacher.js']) if (existsSync(join(root, f))) scripts.push(S(f, read(f)));
   scripts.push(S('console (all teacher-*.js parts)', siteSource('teacher.js', root)));
   const modules = {};
   readdirSync(root).filter(f => /^module-\d+\.js$/.test(f)).forEach(f => { modules[/\d+/.exec(f)[0]] = S(f, read(f)); });
