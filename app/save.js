@@ -529,13 +529,15 @@ function progressRepsRedraw(){
   refreshReviewCards();
 }
 /* The copy set aside (progressDeviceUnsure) with what the page logged since, as logPracticeRep would have built it
-   from the copy: reps and today's count added, the later day and time, the higher best. */
+   from the copy: reps added, the later day and time, the higher best, and today's count from each side that is
+   today's (repsToday reads it only when lastDay is today; the next rep starts it again on another day). */
 function progressLogMerge(old, cur){
-  const out = Object.assign({}, old);
+  const out = Object.assign({}, old), today = dayStr(new Date());
+  const todays = e => (e.lastDay === today ? (e.todayCount || 0) : 0);
   Object.keys(cur).forEach(k => {
     const a = old[k], b = cur[k];
     if(!a || typeof a !== 'object' || !b || typeof b !== 'object'){ out[k] = b; return; }
-    const e = Object.assign({}, a, b, { reps: (a.reps || 0) + (b.reps || 0), todayCount: (a.lastDay === b.lastDay ? (a.todayCount || 0) : 0) + (b.todayCount || 0) });
+    const e = Object.assign({}, a, b, { reps: (a.reps || 0) + (b.reps || 0), todayCount: todays(a) + todays(b) });
     if(a.best != null || b.best != null) e.best = Math.max(a.best || 0, b.best || 0);
     out[k] = e;
   });
