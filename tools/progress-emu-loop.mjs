@@ -55,9 +55,11 @@
    Summary lines: "✓ firestore.rules: N passed, 0 failed" and "✓ K of K breaks caught".
    WHAT IT PRINTS AS IT GOES: as tools/signin-loop.mjs (its header): a line as each case starts (▶) and ends (■), a
    case past --case-ms (default 50 s; the offline cases have their own) fails as "HUNG at <step>", --deadline
-   (default 540 s) ends the run with "HUNG at <case>" and exit 3, and a preflight stops it at once (exit 2) when the
-   SDK cannot reach both emulators (--no-preflight skips it).
-   Last run: not yet (built 2026-11-26 in a cloud session whose network could not fetch the Firestore emulator). */
+   (default 540 s) ends the run with "HUNG at <case>" and exit 3, so does --stall (default 30 s with the event loop
+   blocked; both kept by a worker thread, which prints where the tool was stuck), and a preflight stops it at once
+   (exit 2) when the SDK cannot reach both emulators (--no-preflight skips it).
+   Last run: 2026-11-26, a cloud session with the emulator jar fetched by hand (firebase-tools 15.36.0, Firestore
+   emulator 1.22.0): 45 passed, 0 failed, 6 of 6 breaks caught, 92 s. GitHub run 45885160639: the same counts, 83 s. */
 import { readFileSync } from 'node:fs';
 import { emuArgs, loadSdk, emulator, makeWorld, makeDevice, makePage, rawClient, signInPage, waitScreen, until, sleep, waitSaved, closeAll, setOnline, wall, makeRunner, step, watchdog, preflight } from './emu-site.mjs';
 
@@ -82,7 +84,7 @@ const same = (a, b) => canon(a) === canon(b);
 const short = v => { const s = canon(v); return s && s.length > 220 ? s.slice(0, 220) + '…' : s; };
 
 let CUR = null;
-watchdog('progress-emu-loop', DEADLINE, () => (CUR ? { pass: CUR.pass, fail: CUR.fail } : { pass: 0, fail: 0 }));
+await watchdog('progress-emu-loop', DEADLINE, () => (CUR ? { pass: CUR.pass, fail: CUR.fail } : { pass: 0, fail: 0 }), Number(A.val('stall')) || 30);
 
 async function suite(groups, plant, quiet, prefix){
   const R = makeRunner({ quiet, prefix, caseMs: CASE_MS });

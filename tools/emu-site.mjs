@@ -26,7 +26,9 @@
    - The DOM: a stub (the shape of shared-chromebook-loop's). It records what the site writes; it does not lay
      anything out. getElementById gives a stub for every id EXCEPT the ids the site creates itself
      (`.id = '...'` in an app part: the access screen, the paused screen, the notices, the period question),
-     which exist only once the site appends them, as in the browser.
+     which exist only once the site appends them, as in the browser. element.querySelector finds an element the site
+     drew into that element's innerHTML (one compound selector; see `found` in makePage); document.querySelector and
+     querySelectorAll find nothing.
    - Timers are real (the site's 800 ms save debounce really waits), so each case takes seconds.
 
    THE REALM BRIDGE. The SDK runs in the tool's own realm; the site runs in a vm realm. The SDK refuses an object
@@ -357,12 +359,49 @@ export function makePage(world, device, opts = {}){
       getAttribute(k){ return Object.prototype.hasOwnProperty.call(e.attrs, k) ? e.attrs[k] : null; },
       removeAttribute(k){ delete e.attrs[k]; if (k === 'data-i18n' && e.__saveInd) page.saveMsgs.push({ at: Date.now(), key: '' }); },
       hasAttribute(k){ return Object.prototype.hasOwnProperty.call(e.attrs, k); }, toggleAttribute(){},
-      querySelector(){ return null; }, querySelectorAll(){ return []; }, closest(){ return null; }, matches(){ return false; },
+      querySelector(sel){ return found(e, sel); }, querySelectorAll(){ return []; }, closest(){ return null; }, matches(){ return false; },
       focus(){}, blur(){}, click(){}, scrollIntoView(){}, scrollTo(){}, insertAdjacentHTML(){}, insertAdjacentElement(){},
       cloneNode(){ return mkEl('', tag); }, contains(){ return false; }, play(){ return Promise.resolve(); }, pause(){}, load(){},
       getBoundingClientRect(){ return { top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0 }; },
     };
+    /* innerHTML as a property that forgets what querySelector found in the old text. */
+    let html = '';
+    Object.defineProperty(e, 'innerHTML', { get: () => html, set: v => { html = String(v); e.q = null; }, enumerable: true });
     return e;
+  };
+  /* element.querySelector: an element the site drew into this element's innerHTML is found, and it is the same stub
+     on every call until the innerHTML changes. Only one compound selector (tag, #id, .class, [attr], [attr="v"]); a
+     selector with a space, >, or : finds nothing, as before. GitHub run 45885160639 (2026-11-26): with every
+     querySelector answering null, the console's split view (renderTeacherActivityDetail, teacher-activities-2.js)
+     drew [data-ta-detail] and then never found it, so it drew the split again, a promise round with no timer,
+     forever: the whole tool stopped. */
+  const found = (e, sel) => {
+    const s = String(sel || '');
+    if (!/^[\w-]*(?:#[\w-]+|\.[\w-]+|\[[\w-]+(?:="[^"]*")?\])*$/.test(s) || !s) return null;
+    e.q = e.q || new Map();
+    if (e.q.has(s)) return e.q.get(s);
+    const tagWant = (/^[\w-]+/.exec(s) || [])[0], parts = [...s.matchAll(/#([\w-]+)|\.([\w-]+)|\[([\w-]+)(?:="([^"]*)")?\]/g)];
+    let hit = null;
+    for (const m of e.innerHTML.matchAll(/<([a-zA-Z][\w-]*)((?:\s+[\w:-]+(?:="[^"]*"|='[^']*')?)*)\s*\/?>/g)){
+      const attrs = {};
+      for (const a of m[2].matchAll(/([\w:-]+)(?:="([^"]*)"|='([^']*)')?/g)) attrs[a[1]] = a[2] !== undefined ? a[2] : (a[3] !== undefined ? a[3] : '');
+      if (tagWant && m[1].toLowerCase() !== tagWant.toLowerCase()) continue;
+      const cls = String(attrs.class || '').split(/\s+/);
+      if (parts.every(p => (p[1] ? attrs.id === p[1] : p[2] ? cls.includes(p[2]) : p[3] in attrs && (p[4] === undefined || attrs[p[3]] === p[4])))){ hit = { tag: m[1], attrs }; break; }
+    }
+    let el = null;
+    if (hit){
+      el = hit.attrs.id && page.els[hit.attrs.id] ? page.els[hit.attrs.id] : mkEl(hit.attrs.id || '', hit.tag);
+      el.parentNode = e; el.className = hit.attrs.class || '';
+      String(hit.attrs.class || '').split(/\s+/).filter(Boolean).forEach(c => el.classList.add(c));
+      for (const [k, v] of Object.entries(hit.attrs)){
+        if (k.startsWith('data-')) el.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v;
+        if (k !== 'class' && k !== 'id') el.attrs[k] = v;
+      }
+      if (hit.attrs.id) page.els[hit.attrs.id] = el;
+    }
+    e.q.set(s, el);
+    return el;
   };
   const saveInd = mkEl('save-ind'); saveInd.__saveInd = true;
   const body = mkEl('body', 'body');
@@ -548,11 +587,13 @@ export function makeRunner(opts = {}){
   R.note = s => R.out('  ~ ' + s);
   R.check = (name, ok, why) => {
     if (ok) R.pass++; else { R.fail++; R.red.push(name); }
+    if (RUN.beat) RUN.beat();
     if (!R.quiet){ if (!ok && why) console.log('      ' + String(why).slice(0, 320)); console.log((ok ? '  ✓ ' : '  ✗ ') + name); }
     return ok;
   };
   R.case = async (name, fn, ms = R.caseMs) => {
     RUN.current = R.prefix + name;
+    if (RUN.beat) RUN.beat();
     console.log(`  ▶ ${el()}  ${R.prefix}${name}`);
     const t = Date.now();
     let res;
@@ -569,14 +610,81 @@ export function makeRunner(opts = {}){
 }
 /* One await on the SDK or an emulator inside a case, with its own limit and name. */
 export const step = (p, what, ms = 15000) => bounded(p, ms, what);
-export function watchdog(tool, seconds, tally){
-  const h = setTimeout(() => {
-    const t = tally();
-    console.log(`\n✗ ${tool}: HUNG at "${RUN.current}" (the run passed its ${seconds} s deadline): ${t.pass} passed, ${t.fail + 1} failed`);
-    process.exit(3);
-  }, seconds * 1000);
-  h.unref();
+/* The deadline, kept by a WORKER THREAD (GitHub run 45885160639, 2026-11-26: signin-loop went silent for 9.5
+   minutes and neither its case limit nor its deadline fired, so this thread's own event loop was blocked: a timer
+   here never runs then). This thread writes a heartbeat, the case it is in and its counts into shared memory once a
+   second; the worker reads them. When the run passes `seconds`, or no heartbeat came for `stall` seconds (a blocked
+   loop: a synchronous loop, or promises that never yield), the worker pauses this thread through its own inspector
+   port (127.0.0.1, a free port, opened here; a pause interrupts running code), prints where it was stuck and the
+   HUNG line, and ends the process with exit 3 (a SIGKILL if that does not take within 5 s). Awaited: the worker
+   must be running before anything can block. */
+export async function watchdog(tool, seconds, tally, stall = 30){
+  const { Worker } = await import('node:worker_threads');
+  const inspector = (await import('node:inspector')).default;
+  if (!inspector.url()) inspector.open(0, '127.0.0.1', false);
+  const sab = new SharedArrayBuffer(4 * 4 + 1024);
+  const nums = new Int32Array(sab, 0, 4), name = new Uint8Array(sab, 16);
+  const enc = new TextEncoder();
+  const beat = () => {
+    let t = { pass: 0, fail: 0 };
+    try { t = tally(); } catch { /* keep the last counts */ }
+    Atomics.store(nums, 0, Math.floor((Date.now() - RUN.t0) / 1000));
+    Atomics.store(nums, 1, t.pass); Atomics.store(nums, 2, t.fail);
+    const b = enc.encode(String(RUN.current)).slice(0, name.length - 1);
+    name.fill(0); name.set(b);
+    Atomics.store(nums, 3, b.length);
+  };
+  beat();
+  /* The runner calls it too, as each case starts and at each check: a loop blocked right after would otherwise be
+     reported under the case before. */
+  RUN.beat = beat;
+  const w = new Worker(WATCHDOG_WORKER, { eval: true, workerData: { tool, seconds, stall, sab, url: inspector.url(), t0: RUN.t0 } });
+  await new Promise((res, rej) => { w.once('online', res); w.once('error', rej); });
+  w.unref();
+  setInterval(beat, 1000).unref();
 }
+const WATCHDOG_WORKER = String.raw`
+const { workerData: D } = require('node:worker_threads');
+const fs = require('node:fs');
+const nums = new Int32Array(D.sab, 0, 4), name = new Uint8Array(D.sab, 16);
+const out = s => { try { fs.writeSync(1, s + '\n'); } catch {} };
+let fired = false;
+const tick = setInterval(() => {
+  if (fired) return;
+  const now = Math.floor((Date.now() - D.t0) / 1000), last = Atomics.load(nums, 0);
+  const why = now >= D.seconds ? 'the run passed its ' + D.seconds + ' s deadline'
+    : now - last >= D.stall ? 'nothing else could run for ' + (now - last) + ' s: the event loop was blocked' : '';
+  if (!why) return;
+  fired = true;
+  const at = Buffer.from(name.slice(0, Atomics.load(nums, 3))).toString('utf8');
+  const line = where => '\n✗ ' + D.tool + ': HUNG at "' + at + '" (' + why + (where ? '; stuck in ' + where : '') + '): ' + Atomics.load(nums, 1) + ' passed, ' + (Atomics.load(nums, 2) + 1) + ' failed';
+  const bye = () => { out(line('')); setTimeout(() => process.kill(process.pid, 'SIGKILL'), 5000); };
+  let ws;
+  try { ws = new WebSocket(D.url); } catch (e){ out('      (no stack: ' + e.message + ')'); return bye(); }
+  const urls = {};
+  let id = 0, done = false;
+  const send = (method, params) => ws.send(JSON.stringify({ id: ++id, method, params: params || {} }));
+  const fallback = setTimeout(() => { if (!done){ done = true; out('      (no stack: the pause did not answer in 15 s)'); bye(); } }, 15000);
+  /* Three samples 300 ms apart, each with its async callers: a loop of promises shows its whole round. */
+  const samples = [];
+  const where = f => (f.functionName || '(anonymous)') + ' ' + String(urls[f.scriptId || (f.location && f.location.scriptId)] || f.url || '?').replace(/^file:\/\/.*\//, '') + ':' + (((f.location ? f.location.lineNumber : f.lineNumber) || 0) + 1);
+  ws.onopen = () => { send('Debugger.enable'); send('Debugger.setAsyncCallStackDepth', { maxDepth: 16 }); setTimeout(() => send('Debugger.pause'), 300); };
+  ws.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+    if (m.method === 'Debugger.scriptParsed') urls[m.params.scriptId] = m.params.url;
+    if (m.method !== 'Debugger.paused' || done) return;
+    const fr = m.params.callFrames.slice(0, 10).map(where);
+    for (let a = m.params.asyncStackTrace, k = 0; a && k < 4; a = a.parent, k++) fr.push('[' + (a.description || 'async') + '] ' + (a.callFrames || []).slice(0, 4).map(where).join(' < '));
+    samples.push(fr);
+    if (samples.length < 3){ send('Debugger.resume'); setTimeout(() => send('Debugger.pause'), 300); return; }
+    done = true; clearTimeout(fallback);
+    samples.forEach((f, k) => out('      stuck in (sample ' + (k + 1) + ' of 3): ' + f.join(' < ')));
+    out(line(samples[0].slice(0, 3).join(' < ')));
+    send('Runtime.evaluate', { expression: 'process.exit(3)' });
+    setTimeout(() => process.kill(process.pid, 'SIGKILL'), 5000);
+  };
+}, 1000);
+`;
 /* Before any case: the SDK must reach BOTH emulators (a sign-in, then a server read through a device relay), each
    within 15 s. '' = fine; otherwise what failed, and the tool stops (exit 2) instead of running every case into
    its limit. */
