@@ -30,6 +30,10 @@ Twelve shapes, a few more than a rough first guess: shapes 1 to 5 are all `view:
 carries different fields and is held by different checks (below), so a copy from the wrong one breaks a check or
 the board.
 
+After the inventory, "Proposed shapes (not built yet)" lists eight formats the bank does not use yet (P1 to P8),
+Jonathan's four picks first; most need new site code (P1, P5 and P8 also have a rough version buildable today). SKILL.md's "Building a new activity" says how
+to offer all of these to Jonathan as a menu.
+
 **Rules every shape shares** (each is stated in CLAUDE.md or `SKILL.md`; follow the citation for the detail):
 - Every display string has its `_es` twin in the same edit (CLAUDE.md "i18n"; the file's header: "Never ship an
   English-only string").
@@ -701,3 +705,206 @@ in order: you have done all of them before." A new review circuit copies the ste
 | ca-54 | Sweet Child O' Mine — Speed Ladder | 5 Speed ladder |
 
 Counts: shape 1: 5 · 2: 11 · 3: 3 · 4: 7 · 5: 1 · 6: 4 · 7: 6 · 8: 3 · 9: 2 · 10: 1 · 11: 5 · 12: 2 · none: 1 = 51.
+
+---
+
+## Proposed shapes (not built yet)
+
+Formats the 51 cards do not use yet (Jonathan, 2026-11-26, through the lead). Each was checked against the bank above
+and the site's drills and games: the Games hub (`coach-*.js`: Note Hunt, Change Up, Power Chord Switch, Chord Blitz,
+Chord Detective, Name That Riff, Pentatonic Simon and its guitar twin, Fret Zap, Strum Hero, Riff Roulette, Strum
+Radar, Riff Runner and its Wait Mode, Note Runner, Finger Gym: The Ladder, Pattern Detective, Build-a-Chord), the Live
+In-Class Games (`live-quiz.js` and its Hear the Chord Change, Higher or lower? and Saw chase), the step drills (Shuffle,
+Card Deck, Ear Spark, Note Call, Call the chord, Name the power chord), Find-the-Note, and the practice card's own
+switches (versions, recordings, views, Loop this part, Build up speed, the speed ladder, paths).
+
+**The room's limits, for every proposal** (Jonathan, 2026-11-26, through the lead): the mic does not work in his
+classroom, so nothing here is graded by listening: a student's playing is self-checked ("Got it" / "Again") or the
+answer is a tap. Chromebook 1366×657. One direction line, verb first. Hook like a game: rounds, a streak, a reveal.
+
+A new drill type or a new card switch is new site code. CLAUDE.md "Where the code lives" applies to all of them: a
+new feature gets its OWN part (`app/<x>.js`, in `index.html`'s `site-parts:app.js` block and the `sw.js` lists), its
+strings go in `i18n.js` EN and ES, its direction lines join 1cs's `DRILL_DIRECTION_KEYS`, and "a new control or
+default → pin the default in `checks.mjs` and make `tools/smoke.mjs` click it and reload" ("Start here" step 4). A
+drill type needs no change to the console preview: `renderTeacherActivityDetail` already draws `s.drill` through the
+same dispatcher, `renderShuffleDrill` (`teacher-activities-2.js`, its drill line). Anything that touches a card's audio
+"must handle `st.spare` and `st.leaving` as well as `st.audio`" (`SKILL.md`, THE SPARE), and is proved with
+`node tools/playalong-loop.mjs`. Sizes: small = one part's worth of code and one check; medium = a new part, a check
+and a smoke walk; large = a renderer change shared with the modules or the console, or new audio work.
+
+### Jonathan's picks
+
+#### P1. Echo (call and response)
+
+**Teaches:** playing by ear, short-term musical memory, the first notes of a riff (Modules 1 to 3: single notes, then
+riffs on the low E and A strings; the class's riffs are Seven Nation Army, "the cure", "Luna").
+
+**What the student sees and does:**
+1. One line: "Listen, then play it back; tap Got it when yours matched, three in a row." The tab is hidden: a row of
+   empty boxes, one per note.
+2. They tap ▶ Listen; the site plays a one-bar phrase in the guitar voice the tab players use.
+3. They play it back on their guitar, as many tries as they like (▶ Listen again is free).
+4. They tap Show me: the tab appears and plays once more with the cursor, so they can check themselves.
+5. They tap Got it or Again. Three Got its in a row grow the phrase by one bar (Pentatonic Simon's growing
+   sequence); the streak shows like the games' streaks. Nothing is stored but the step's tick.
+
+**Data:** `drill: { type: 'echo', card: 'ca-10', section: 'The riff', bars: 1, grow: true }` (reads a practice card's
+own section by label, the way `chordcall` reads `ca-29`'s Verse 1), or `drill: { type: 'echo', phrases: [ { notes:
+[…] }, … ] }` with the step-tab note shape, for a tune with no card (Happy Birthday's lines in `ca-1`).
+
+**Grows from:** Ear Spark (a hidden sequence, then the reveal: "The sequence is never shown before the reveal — that
+hiddenness IS the drill", `app/drills.js`), Pentatonic Simon (a growing sequence, `coach-ear.js`), Riff Roulette (the
+student is the judge: "Honesty is the whole game", `coach-strum.js`). None of them asks for the phrase on the guitar
+with no mic: Ear Spark and Simon take taps, Simon's guitar twin needs the mic.
+
+**Can it be built today?** A rough version from existing fields, small: a step with a `snippet` of the band and no
+tab ("Listen to bars 1–2, then play them back three times in a row"), then a step with the `tab` of the same bars.
+It loses the hidden-then-revealed moment and the growing phrase. The real one is a new drill type in its own part,
+`app/drills-echo.js`: medium (`playSequence` already plays a list of midi notes; the tab drawing is `buildTab`'s).
+
+**Example on a course song:** Seven Nation Army's riff from `ca-10` ("The riff", bars 1–2, all on the A string): bar 1 is
+E E G E D (frets 7, 7, 10, 7, 5; the last three a triplet over beats 3 and 4), bar 2 is C B (frets 3, 2, two beats each).
+Echo bar 1, then both bars, then the riff four times.
+
+#### P2. Fill the gap (one bar left silent)
+
+**Teaches:** keeping the beat through a stop, and owning one part of the song (any module with a practice card; first
+with the single-note cards of Modules 2 and 3, later with chords).
+
+**What the student sees and does:**
+1. On any practice card, a new switch beside Loop this part: "Fill the gap". Off by default.
+2. Switched on, one bar in each line of the chart is marked YOU (the cell outlined, the word over it).
+3. They press Play song. The band plays, and on the YOU bar the band goes silent: only the site's Metronome click
+   keeps going, and the cursor keeps moving.
+4. They play that bar alone; the band comes back in on the next bar line, on time, whether they were there or not.
+5. With Loop this part on, each lap moves the gap one bar later (bar 4, then 3, then 2), so the whole line gets
+   played alone once.
+
+**Data:** none required (a switch on every card, the way Loop this part needs no data). Optional per card: `card.gap:
+{ bar: 4, of: 4 }` (the 4th bar of every 4) where a song's phrase calls for another place.
+
+**Grows from:** the card's Metronome (a click the site makes, so it can keep going while the band is silent), Loop this
+part and its lap count (`app/cards-loop.js`), and the Guitar toggle's idea that the student carries the part ("Record
+plays it" / "You play it", skill `audio-and-snippets`). Not a duplicate: the Guitar toggle's off state "turns the part
+DOWN rather than removing it" and lasts the whole song; nothing in the site silences the band for one bar.
+
+**New code:** medium. In `app/cards.js` / `app/cards-loop.js`: the band's volume to 0 from one bar line to the next
+on the playing element AND the spare, back to full on every stop, leave, section tap and speed change; the YOU mark in
+both chart views (tab and chord grid) and the sheet's "This bar"; a `playalong-loop.mjs` walk that the band is silent
+exactly on the YOU bar and the click is not.
+
+**Example on a course song:** "the cure" (`ca-18`), Intro and 2 Verses (bars 1–20, a chord change every bar): the
+band drops out on bar 4 of every four, so the student plays the last C of each "A C A C" line alone.
+
+#### P3. Spot the mistake
+
+**Teaches:** reading tab or a chord chart while listening; hearing a wrong note or chord (any module; no guitar needed,
+so it also works on a day with no guitars or as a warm-up on the projector).
+
+**What the student sees and does:**
+1. One line: "Tap the note that sounds wrong; get 8 of 10." The tab of a riff (or a chord chart) is on screen, as
+   written.
+2. They tap ▶ Play; the site plays it with ONE note changed (a fret or two away on the same string), or one chord
+   swapped.
+3. They tap the note (the column) or the bar where it went wrong. Right: the column flashes green and the wrong and
+   right notes both play. Wrong: the right column is shown.
+4. Ten rounds, a streak, a pass line under Start ("8 of 10", the shape `chordcall` uses).
+
+**Data:** `drill: { type: 'spot', card: 'ca-10', section: 'The riff', rounds: 10 }` for notes; `drill: { type:
+'spot', card: 'ca-29', section: 'Verse 1', chords: true, rounds: 10 }` for chords. The wrong note is made at random by
+a rule in the code (same string, one or two frets away, never the same pitch), so no answers are typed into the data.
+
+**Grows from:** Pattern Detective (one bar shown, one played, "match / no match", `coach-more.js`) and Chord Detective
+(a chord by ear). Not a duplicate: Pattern Detective judges a whole strum bar yes or no; this asks WHERE, on a song's
+own tab, which is the skill of following the page. `chordcall` already reads a card's sections (`ca-48`).
+
+**New code:** medium: a new drill type in its own part, `app/drills-spot.js` (`playSequence` for notes,
+`strumChord` for chords; each tab column already has a note-name button under it, the file's `finger` note). A Live In-Class Games
+version for the projector later is a further, larger step (`live-quiz.js` and its rule that nothing on the stage
+reveals the answer, `.claude/rules/live-quiz.md`).
+
+**Example on a course song:** `ca-10`'s riff, frets 7 7 10 7 5 3 2 on the A string; a round plays 7 7 10 7 **6** 3 2
+and the student taps the fifth note. For chords: Watchtower's Verse 1 from `ca-29` (A5 G5 F5 G5) played with one G5
+as an A5.
+
+#### P4. Memory fade
+
+**Teaches:** playing a part from memory (any module; best on a short loop the class already knows).
+
+**What the student sees and does:**
+1. On a practice card, a new switch: "Fade the tab". Off by default; switching it on turns on Loop this part.
+2. Lap 1: the whole chart shows.
+3. At each new lap, one more bar's fret numbers (or chord names) fade to a "?" box, from the end of the line back to
+   its start, while the cursor keeps moving over the empty boxes.
+4. When every bar is faded they play one more lap from memory; the card then says "From memory!" (a small
+   celebration, as the games have).
+5. Peek (or a tap on a box) shows that bar again for one lap.
+
+**Data:** none required (a switch). Optional `card.fade: { from: 'end' | 'start' }`.
+
+**Grows from:** Loop this part and its lap count (`app/cards-loop.js`), and `revealDelay`, the only hide the site has
+today ("it hides the board while the student reads the step", the file's schema note; it hides the whole tab once,
+before playing). `ca-12`'s "Cover the screen and play all four lines of Happy Birthday from memory without stopping."
+is the paper version of the same idea.
+
+**New code:** small to medium: a class per bar cell, set from the lap count, in both chart views (tab, chord grid);
+Peek; a smoke walk; a `playalong-loop.mjs` walk that a faded cell is still lit on time. The Focus ladders' tabs
+(`buildTab`, shared with the modules) are NOT in scope: that would be a large shared-renderer change.
+
+**Example on a course song:** "Luna" (`ca-20`), "The loop · F F A A · 1 pluck per bar", 4 bars × 4 laps: lap 1 shows
+all four, lap 2 hides bar 4, lap 3 bars 3–4, lap 4 bars 2–4, then a lap with all four hidden.
+
+### More proposals
+
+#### P5. Duet (partner split)
+
+**Teaches:** playing your own part against another part (Module 3 on: roots against power chords). Two students, one
+track: one plays the roots, the other the power chords. **Data-only version today (small):** two cards that share
+their sections bar for bar already exist, `ca-24` (roots) and `ca-30` (power chords), "the cure", 10 sections with the
+same `fromBar` / `bars`; the pair opens one card on ONE Chromebook and each reads their own part (a step or card intro
+says who plays what). **Built version (large):** a "Duet" view stacking the two parts' charts under one cursor —
+`otherViews` already shows another view of the same sections, but one at a time; two at once is a renderer change, and
+the height at 1366×657 is tight. Grows from `otherViews` (`app/cards-views.js`). Nothing in the bank or the games puts
+two parts on one screen.
+
+#### P6. Song-form arrange
+
+**Teaches:** a song's form (intro, verse, chorus, bridge) and listening for sections (Module 2 on, with the Core
+songs). Tiles with a song's section names come up shuffled; ▶ on a tile plays its first two bars from the record; the
+student taps them into order, then Check; then "Play it" opens the whole-song card. **Data:** `drill: { type: 'form',
+card: 'ca-24' }` (the card's own `sections`, labels and bars). **New code:** medium, a drill type in its own part
+(snippet windows are bars, so a tile's two bars come from `fromBar`). Grows from `chordcall` (reads a card's sections)
+and Build-a-Chord (place, then Check). Nothing existing asks for a song's order.
+
+#### P7. Make your own loop
+
+**Teaches:** chord changes in a progression the student chose (Module 3 power chords, Module 4 open chords). Four
+empty bars and a row of chord buttons the class knows (`D5 C5 G5 A5`); the student fills the bars, presses ▶ Play
+strum and plays along, then changes one bar and goes again; a partner can try their loop. **Data:** a `strum` step with
+`pick: ['D5', 'C5', 'G5', 'A5']` in place of fixed `bars`. **New code:** small to medium, but `buildStrum` (`app/tab.js`)
+is shared with the modules and the console preview (1d pins both renderers), so it is a shared-renderer change. Grows
+from `ca-53` / `ca-46` (the strum board already plays a chord per bar). Not a duplicate: every strum board today has
+fixed `bars`.
+
+#### P8. Improvise over a loop
+
+**Teaches:** soloing with the A minor pentatonic box (Module 5, Pentatonic). The band loops one section; the box is a
+tab run; the student plays any notes from the box and ends each lap on A. **Data-only version today (small):** a tab
+step with the box (`PS_NOTES` in `coach-ear.js` is "one octave of Am pentatonic Pattern 1 at fret 5") and a `snippet`
+of the band's bars, the pairing `ca-34`'s requinto steps use; the song must fit A minor pentatonic (skill `song-facts`;
+ask Jonathan). Activities carry no figures (**1d** errors on `figure`), so the box is shown as tab, not a diagram.
+**Closest existing:** the Journey pages' Layer 5 (Pentatonic Solo) and the Songs tile's "Backing track for solos";
+this only brings it into an activity with the record looping the bars, so it is the least new of the eight.
+
+### Top 3 to build first (my view)
+
+1. **Memory fade (P4).** The smallest code of the four picks, no new data, and it turns all 27 practice cards into a
+   memory game at once (25 of them have more than one section, so Loop this part is already there).
+2. **Fill the gap (P2).** Also a switch on every existing card with no new data; it reuses the Metronome and the lap
+   count, and gives each student "their" bar, the most game-like of the four in the room.
+3. **Spot the mistake (P3).** Works with no guitar in hand and is tap-graded, so it is the one proposal that gives a
+   real score without the mic; it reads the cards' sections, so every song the class knows is content on day one.
+
+Where this differs from Jonathan's picks: **Echo (P1)** is not in my top 3. Without the mic its check is the
+student's own word, which Riff Roulette and Ear Spark already cover in spirit, and the rough version can be built
+today from a `snippet` step and a `tab` step with no code, so it can be tried in class before any code is written.

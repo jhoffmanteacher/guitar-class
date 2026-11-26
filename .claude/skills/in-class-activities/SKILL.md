@@ -6,15 +6,57 @@ description: How the guitar site's In-Class Activities page, activity gate, exit
 ## Building a new activity: start from a shape
 
 Every new In-Class Activity starts from one of the ready-made shapes in `shapes.md` beside this file (Jonathan,
-2026-11-26): a song part card, a whole-song play-along, a lyric-sheet card, a library play-along, the speed ladder,
-a tab ladder, a Finger Gym circuit, a note-names ladder, a strum-pattern ladder, the strum-pattern check, a drill
-ladder or an exit check. Jonathan still builds each one with you.
-1. Pick the shape with Jonathan (its row in the table at the top of `shapes.md`), and ask him that shape's
-   questions.
-2. Copy the exemplar card it names from `class-activities.js`, with the next unused id, and change only the per-song
-   values its skeleton marks. A copy adds no new field, so neither step renderer changes.
-3. Write each direction as one line, EN and ES, the way that shape's quoted examples do, keeping the count.
-4. Run the common checks and that shape's own tools (listed in its section), and read its traps first.
+2026-11-26). Jonathan still builds each one with you, and it starts the way his reading-article skill does: **you ask
+him which format to use before you write anything.**
+
+**The menu: ask first, with the AskUserQuestion tool** (2 to 4 options a question, one question at a time, your
+recommended option first with "(Recommended)" after its label, a one-line description on each option):
+1. **The skill or goal**, only if his message does not already say it ("an activity for G to C changes" says it;
+   "something for Thursday" does not). Options: the skills his message and the class's current module point to.
+2. **The format.** Offer the 3 or 4 shapes that fit that skill, built shapes first (the table below; each shape's row
+   in `shapes.md`). A proposed shape (`shapes.md`, "Proposed shapes (not built yet)") may be offered only if it fits
+   the skill better than every built one, labelled "new format: needs building first" in its description; picking it
+   starts a code change, not a copy.
+
+Then build from the chosen shape:
+- Ask that shape's "Ask Jonathan" questions (its section in `shapes.md`).
+- Copy the exemplar card it names from `class-activities.js`, with the next unused id, and change only the per-song
+  values its skeleton marks. A copy adds no new field, so neither step renderer changes.
+- Write each direction as one line, EN and ES, the way that shape's quoted examples do, keeping the count.
+- Read its traps, then run the common checks and that shape's own tools (listed in its section).
+
+| The skill | Built shapes that fit (shape number in `shapes.md`) | Proposed, not built |
+|---|---|---|
+| Chord changes (open or power) | 9 strum-pattern ladder, 6 tab ladder (chords, as `ca-34`), 1 song part card, 11 drill ladder (Call the chord) | P7 make your own loop |
+| A song with the band | 1 song part card, 2 whole-song play-along, 3 lyric-sheet card, 4 library play-along | P2 fill the gap, P4 memory fade, P5 duet |
+| Getting a passage up to speed | 5 speed ladder (see its pin), 1 song part card (its Build up speed switch) | — |
+| A riff or tune from tab | 6 tab ladder, 1 song part card | P1 echo, P3 spot the mistake, P4 memory fade |
+| Note names on a string | 8 note-names ladder, 11 drill ladder (Note Call), 12 exit check | — |
+| Power-chord names | 11 drill ladder (Note Call power, Name the power chord) | — |
+| Strumming | 9 strum-pattern ladder | P7 make your own loop |
+| Fretting-hand technique | 7 Finger Gym circuit | — |
+| Reading TAB | 6 tab ladder (as `ca-21`) | P3 spot the mistake |
+| Song form, listening | 11 drill ladder (Call the chord) | P6 song-form arrange, P3 spot the mistake |
+| Soloing | — | P8 improvise over a loop |
+| End-of-period check | 12 exit check | — |
+
+**Worked example.** Jonathan: "make an activity for G to C changes". The skill is clear (open G and C, Module 4's
+Group 1, the order `CHORD_RANK` in `coach-chordcards.js` gives), so skip question 1 and ask only the format:
+```
+question: "Which format for the G to C changes activity?"
+header:   "Format"
+options:
+  - label: "Strum-pattern ladder (Recommended)"
+    description: "Copy ca-53: strum on muted strings, then G and C two bars each, then one bar each, the pattern never stopping."
+  - label: "Chord tab ladder"
+    description: "Copy ca-34: pick G, then C, one string at a time, then change between them on the tab."
+  - label: "Song part card"
+    description: "Copy ca-18: one part of a song he names that changes G to C, played with the band (needs its track)."
+```
+Had he written "something for Thursday", question 1 would come first ("What should Thursday's activity practise?",
+header "Skill"), its options the skills his message or the module the class is in point to, and question 2 after his
+answer.
+
 Four builds are not a plain copy, and their sections say why: a second strum-pattern check (code and the 1eh pin), a
 second speed ladder (the 1fc pin and `tools/speed-ladder-loop.mjs`), a new drill type, and a new deck (code and
 `i18n.js`). Say so to Jonathan before building one. A library play-along is typed by `tools/new-playalong.mjs`
