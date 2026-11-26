@@ -6,6 +6,16 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-25 — Module 8 and 9 fixes
+
+- **Module 9, Set 3: Challenge 2 has its typing box back.** Writing the TAB is the task there, and Challenge 4 reads it
+  back a day later.
+- **Module 9, Set 1 shows the six re-tests once**, not twice.
+- **Module 8, "Count the 6-note cycle" has a new video** that teaches the p-i-m-a-m-i pattern.
+- **Module 2: the hand-position sketch no longer says the thumb sits behind the index finger.** The step's words are
+  right: keep it behind the neck, about behind the middle finger.
+
+
 ## 2026-11-25 — The Listening Coach says so when it is not sure what it heard
 
 - **On a melody drill, the Listening Coach has to hear the right notes.** Playing on the beat all the way through is not

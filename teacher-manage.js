@@ -393,7 +393,7 @@ function setShortResponses(w){
          slots read as live and Jonathan can't tell "nobody has done this
          yet" from "this prompt left the course". */
       const live=new Set(visibleSteps(sec,w.moduleNum).map(p=>p.idx));
-      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,typedOff||secRetired||st.hidden===true||!live.has(i)));
+      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,(typedOff&&!(st.response&&st.response.keepTyped))||secRetired||st.hidden===true||!live.has(i)));
     });
     else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i,typedOff||st.hidden===true));
   });

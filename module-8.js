@@ -333,8 +333,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: count the 6-note cycle', label_es: 'Mira: cuenta el ciclo de 6 notas',
-            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisit 0:54–4:00). This time, watch one full pattern cycle and count the notes out loud with him.',
-            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisita 0:54–4:00). Esta vez, mira un ciclo completo del patrón y cuenta las notas en voz alta con él.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=99yx4Mn1NN0" target="_blank">P I M A M I Lesson – Southwestern University Guitar Tutorials</a>. Watch one full pattern cycle and count the notes out loud with the teacher.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=99yx4Mn1NN0" target="_blank">P I M A M I Lesson – Southwestern University Guitar Tutorials</a>. Mira un ciclo completo del patrón y cuenta las notas en voz alta con el maestro.',
             hint: 'The "p-i-m-a-m-i" cycle (6 notes per bar) is one of the most-used patterns in folk and pop. It creates a flowing, arpeggiated feel under a chord.',
             hint_es: 'El ciclo "p-i-m-a-m-i" (6 notas por compás) es uno de los patrones más usados en folk y pop. Crea una sensación fluida y arpegiada debajo de un acorde.',
             skills: [1, 2],

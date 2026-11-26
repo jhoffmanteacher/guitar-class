@@ -8626,10 +8626,12 @@ const TYPED_TEXT_RE = [
   /\ben el (?:cuadro|recuadro)\b/i, /\bcuadro de (?:abajo|arriba)\b/i, /\bescrib\w*\b[^.]{0,80}\babajo\b/i, /\banót\w*/i,
   /(?:^|[.:]\s*)Abajo,\s/, /\blo que (?:escribiste|tecleaste)\b/i, /\bteclea\w*/i, /\(o escribe\b/i,
 ];
-// NEEDS-LEAD (2026-11-25): Module 9 Set 3 is the TAB-writing set; its Challenge 2 is writing TAB into the box and
-// Challenge 4 plays back, a day later, what was typed there. No task is left without typing: Jonathan decides.
+// KEPT (Jonathan, 2026-11-25: "keep"): Module 9 Set 3 is the TAB-writing set. Its Challenge 2 is writing TAB into the
+// box (`response.keepTyped: true`, the only step that still draws one) and Challenge 4 plays back, a day later, what
+// was typed there. These two may talk about typing; exactly TYPED_BOX_KEPT may draw a box.
+const TYPED_BOX_KEPT = ['m9w3-c-sec1-0'];
 const TYPED_TEXT_PENDING = {
-  'm9w3-c-sec1-0': 'Challenge 2 — write "Seven Nation Army" as TAB in the box (writing IS the task)',
+  'm9w3-c-sec1-0': 'Challenge 2 — write "Seven Nation Army" as TAB in the box (writing IS the task; its box is kept)',
   'm9w3-c-sec3-0': 'Challenge 4 — play back what you typed in Challenge 2 a day later',
 };
 function checkTypedResponsesOff(sets, buildSet, ctx) {
@@ -8666,7 +8668,7 @@ function checkTypedResponsesOff(sets, buildSet, ctx) {
   }
   if (shown.length < TYPED_VISIBLE_FLOOR) { err(`1ff sees only ${shown.length} visible steps with a short response (floor ${TYPED_VISIBLE_FLOOR}) — the walk over storageSections/visibleSteps changed and the box test is going blind; update this check`); problems++; bad++; }
 
-  const boxes = [], missing = [], wording = [], pendingSeen = new Set();
+  const boxes = [], missing = [], wording = [], pendingSeen = new Set(), keptSeen = new Set();
   let steps = 0;
   try {
     for (const lang of ['en', 'es']) {
@@ -8685,7 +8687,7 @@ function checkTypedResponsesOff(sets, buildSet, ctx) {
           if (done > 0) li = li.slice(0, done);
           const key = m[1];
           steps++; found.add(key);
-          if (/step-resp-input|<textarea\b|\soninput="[^"]*onResponseChange\(/.test(li)) boxes.push(`${key} (${lang})`);
+          if (/step-resp-input|<textarea\b|\soninput="[^"]*onResponseChange\(/.test(li)) { if (TYPED_BOX_KEPT.includes(key)) keptSeen.add(`${key} ${lang}`); else boxes.push(`${key} (${lang})`); }
           const plain = decodeHtmlEntities(li.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
           const hit = TYPED_TEXT_RE.map(re => re.exec(plain)).find(Boolean);
           if (!hit) return;
@@ -8703,9 +8705,10 @@ function checkTypedResponsesOff(sets, buildSet, ctx) {
   if (wording.length > 12) err(`…and ${wording.length - 12} more`);
   if (boxes.length || missing.length || wording.length) { problems++; bad++; }
   for (const [key, why] of Object.entries(TYPED_TEXT_PENDING)) {
-    if (pendingSeen.has(key)) warn(`1ff pending (Jonathan decides the wording): ${key} — ${why}`);
+    if (pendingSeen.has(key)) continue;
     else { err(`TYPED_TEXT_PENDING lists ${key}, but its rendered text no longer asks for typing (or it is gone) — remove the entry`); problems++; bad++; }
   }
+  for (const key of TYPED_BOX_KEPT) for (const lang of ['en', 'es']) if (!keptSeen.has(`${key} ${lang}`)) { err(`${key} (${lang}) is a kept typed step (response.keepTyped, Jonathan 2026-11-25) but draws no box`); problems++; bad++; }
   if (!bad) ok(`TYPED_RESPONSES_ENABLED is false: ${steps} rendered steps across ${sets.length} sets × EN/ES draw no typed box; all ${shown.length} visible steps with a short response found in both languages; ${dataCount} short responses kept in the data (pinned); ${Object.keys(TYPED_TEXT_PENDING).length} pending wording, no other step asks for typing`);
 }
 
@@ -15711,7 +15714,7 @@ function checkChordGridCards(ctx) {
      name, and that total is pinned (POWER_CHORD_SCOPE_LINKS) so the
      check cannot go blind or lose its scope silently;
    - m9w0's other text keeps its chord links (the scope is one skill, not the set). */
-const POWER_CHORD_SCOPE_LINKS = 107;
+const POWER_CHORD_SCOPE_LINKS = 99;   // 107 until 2026-11-25: Module 9 Set 1's first pass of the re-tests was hidden ("one pass")
 function checkPowerChordPopups(sets, ctx) {
   head('1by. Power-chord names open no pop-up where the two-finger shape is taught');
   let bad = 0;

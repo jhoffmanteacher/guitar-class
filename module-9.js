@@ -31,11 +31,17 @@ SETS.push(
             title_es: 'Los seis repasos',
             steps: [
               {
+                // Hidden 2026-11-25 (Jonathan: "one pass"): Set 1 showed the six re-tests twice, here with a
+                // solid / shaky / gone question and again in the practice part with the checklist. The practice
+                // part's pass is the one kept. Every step of this station stays in the array (progress keys).
+                hidden: true,
                 label: 'How the re-tests work', label_es: 'Cómo funcionan los repasos',
                 text: '<ol><li>Play six things from before the break.</li><li>Mark each one solid, shaky, or gone.</li></ol>Not graded. Practice the "gone" ones first.',
                 text_es: '<ol><li>Toca seis cosas de antes del receso.</li><li>Marca cada una como sólida, insegura, o perdida.</li></ol>No se califica. Practica primero las "perdidas".'
               },
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Re-test 1: open chords', label_es: 'Repaso 1: acordes abiertos',
                 text: 'Re-test 1 — Open chords (Module 4): loop C → G → Am → F, two bars each at 60 BPM. Can you still land every change on beat 1 without breaking the strum?',
                 text_es: 'Repaso 1 — Acordes abiertos (Módulo 4): repite C → G → Am → F, dos compases cada uno a 60 BPM. ¿Todavía puedes caer en cada cambio justo en el tiempo 1 sin romper el rasgueo?',
@@ -45,6 +51,8 @@ SETS.push(
                 response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Re-test 2: strumming', label_es: 'Repaso 2: rasgueo',
                 text: 'Re-test 2 — Strumming (Module 6): D-DU-UDU over a G → C change at 70 BPM. Does the pattern keep running while the chord moves, or does it break at the change?',
                 text_es: 'Repaso 2 — Rasgueo (Módulo 6): D-DU-UDU sobre un cambio de G → C a 70 BPM. ¿El patrón sigue corriendo mientras cambia el acorde, o se rompe en el cambio?',
@@ -54,6 +62,8 @@ SETS.push(
                 response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Re-test 3: pentatonic Pattern 1', label_es: 'Repaso 3: Patrón pentatónico 1',
                 text: 'Re-test 3 — Pentatonic (Module 5): Pattern 1, up and back down, from memory. No diagram, every note on a 60 BPM click?',
                 text_es: 'Repaso 3 — Pentatónica (Módulo 5): Patrón 1, hacia arriba y de vuelta hacia abajo, de memoria. ¿Sin diagrama, cada nota en el clic a 60 BPM?',
@@ -63,6 +73,8 @@ SETS.push(
                 response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Re-test 4: power chords', label_es: 'Repaso 4: acordes de potencia',
                 text: 'Re-test 4 — Power chords (Module 3): move the two-finger shape E5 → G5 → A5, one change per bar, landing on the beat and naming each chord as you land it.',
                 text_es: 'Repaso 4 — Acordes de potencia (Módulo 3): mueve la forma de dos dedos E5 → G5 → A5, un cambio por compás, cayendo en el tiempo y nombrando cada acorde al caer en él.',
@@ -72,6 +84,8 @@ SETS.push(
                 response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Re-test 5: TAB at first sight', label_es: 'Repaso 5: TAB a primera vista',
                 text: 'Re-test 5 — TAB reading (Module 2):<ol><li>Open any Song Journey page and find a section you\'ve never played.</li><li>Read 4 bars at first sight (at first sight = playing it the very first time you see it, no practice) — right strings, right frets, left to right.</li></ol>',
                 text_es: 'Repaso 5 — Lectura de TAB (Módulo 2):<ol><li>Abre cualquier página de Recorrido de la canción y busca una sección que nunca hayas tocado.</li><li>Lee 4 compases a primera vista (a primera vista = tocarlo la primera vez que lo ves, sin práctica) — cuerdas correctas, trastes correctos, de izquierda a derecha.</li></ol>',
@@ -81,6 +95,8 @@ SETS.push(
                 response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Re-test 6: fingerpicking', label_es: 'Repaso 6: fingerpicking',
                 text: 'Re-test 6 — Fingerpicking (Module 8):<ol><li>Fingerpick p-i-m-a over Am, thumb on the A string, without stopping.</li><li>Then change Em → Am and let the thumb switch bass strings while i-m-a stay in place.</li></ol>',
                 text_es: 'Repaso 6 — Fingerpicking (Módulo 8):<ol><li>Toca con fingerpicking p-i-m-a sobre Am, pulgar en la cuerda La, sin detenerte.</li><li>Luego cambia Em → Am y deja que el pulgar cambie de cuerda grave mientras i-m-a se quedan quietos.</li></ol>',
@@ -97,6 +113,8 @@ SETS.push(
             title_es: 'Punto de control',
             steps: [
               {
+                // Hidden 2026-11-25 (one pass: the practice part's re-tests are the ones kept)
+                hidden: true,
                 label: 'Pick your weakest re-test', label_es: 'Elige tu repaso más débil',
                 text: 'Look at your six answers. Which ONE re-test most needs more practice before you go deeper into Module 9? That\'s the first thing you practice next session — the original module\'s sets are all still there when you need them.',
                 text_es: 'Mira tus seis respuestas. ¿Cuál ÚNICO repaso necesita más práctica antes de profundizar en el Módulo 9? Eso es lo primero que practicas la próxima sesión — las unidades del módulo original siguen ahí cuando las necesites.',
@@ -1024,7 +1042,7 @@ SETS.push(
                 levelUp: 'Write a second 4-bar riff of your choice from memory, or write the riff transposed to a different starting fret.',
                 levelUp_es: 'Escribe un segundo riff de 4 compases de tu elección de memoria, o escribe el riff transportado a un traste de partida distinto.',
                 skills: [2, 3],
-                response: { type: 'short', prompt: 'Write the riff as one-string TAB (string, then frets in order):',
+                response: { type: 'short', keepTyped: true, prompt: 'Write the riff as one-string TAB (string, then frets in order):',
                   prompt_es: 'Escribe el riff como TAB de una cuerda (cuerda, luego trastes en orden):',
                   placeholder: 'e.g. D|—0—2—3—2—0— (string, then frets in order)', placeholder_es: 'p. ej. D|—0—2—3—2—0— (cuerda, y luego los trastes en orden)' }
               }

@@ -298,7 +298,8 @@ function buildLesson(w){
       const labelHtml = `<div class="step-resp-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${t('step.yourResponse')}</div>`;
       if(s.response.type === 'short'){
         // Switched off (TYPED_RESPONSES_ENABLED, below): no box, so nothing is ever written for this step.
-        if(!TYPED_RESPONSES_ENABLED) return '';
+        // `keepTyped` is the one kind of step that keeps its box: writing IS the task there.
+        if(!TYPED_RESPONSES_ENABLED && !s.response.keepTyped) return '';
         const ph = s.response.placeholder ? tf(s.response,'placeholder') : t('step.answerPlaceholder');
         const prAttrs = isPR ? ` onblur="onResponsePRBlur('${key}')"` : '';
         return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value${isPR?', true':''})"${prAttrs}>${escHtml(stored)}</textarea></div>`;
@@ -1351,8 +1352,11 @@ const DAILY5_ENABLED = false;
    students already typed, which the console's Responses view still shows
    (setShortResponses() in teacher-manage.js tags each slot "(retired)" while
    this is off). The tick never depended on the box: "Mark done" works the same.
-   Keyed and unkeyed multiple choice are not part of this switch. checks.mjs
-   1ff pins it off and finds no step text that still asks the student to type. */
+   Keyed and unkeyed multiple choice are not part of this switch. A step whose
+   response says `keepTyped: true` keeps its box (Jonathan, 2026-11-25, "keep":
+   Module 9 Set 3's Challenge 2, where writing the TAB IS the task; Challenge 4
+   reads it back a day later). checks.mjs 1ff pins the switch off, pins which
+   steps keep a box, and finds no other step text that asks the student to type. */
 const TYPED_RESPONSES_ENABLED = false;
 /* Daily 5 — today's 5-minute warm-up for the current module. Same drill for
    everyone on the same date (rotated by day of year). Read-only. */
