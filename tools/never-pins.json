@@ -67,12 +67,12 @@
   },
   "tabs/journey.js|flushSave": {
    "value": [
-    "340b12099fbe",
+    "18c7b579a5b6",
     "0aef25b39c41",
     "2acf19daee29"
    ],
-   "why": "a Journey page's \"I'm ready\" saves into the student's own doc (pinned at origin/main 2f9041a)",
-   "date": "2026-11-13"
+   "why": "sweep JOURNEY-3 (2026-11-26, the lead's fix brief): the Journey fast-path set() carries migrations.swap45, so a record a page re-creates after a teacher Delete is born marked and the next app sign-in does not swap Layers 4/5; save-loop S20. Danger zone, Always Reviewed",
+   "date": "2026-11-26"
   },
   "trainer-site-adapter.js|(top level)": {
    "value": [

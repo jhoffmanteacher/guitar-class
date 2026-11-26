@@ -20,7 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
-     --reset            only the reset cases (Start over / Delete, S1-S18, and Z1-Z5: Song Journey ticks; see "the reset
+     --reset            only the reset cases (Start over / Delete, S1-S21, and Z1-Z5: Song Journey ticks; see "the reset
                         cases" below); a full default run runs them too
      --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
      --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
@@ -2333,6 +2333,9 @@ function actionCode(a){
         S15, the Start-over twin of S12: the legacy activity ticks adopted at that sign-in are kept (a Start over keeps
         activities). S18 (review R1-4) the other side: a record never reset that holds no practice log still reads the
         Chromebook's copy back (a doc that predates the field)
+     S19-S21 (2026-11-26, sweep JOURNEY-3) the Module 4/5 marker on a record created after a Delete: S19 the app's save
+        from a page open across the Delete, S20 a Song Journey page's, S21 a sign-in after the Delete; the next sign-in
+        keeps Module 4 (Layer 4) as Module 4
      S6 a deleted student signs in again on the Chromebook holding their old copies: a new student, nothing old
         re-uploaded at sign-in
      S7 THE LIMIT, documented: a page left open writes its old copy back, after a Start over and after a Delete
@@ -2799,6 +2802,56 @@ async function resetCases(){
         ['the next rep saved the copy whole with the new rep', !!doc && keys(doc.practiceLog) === keys(Object.assign({ [NEW_REP]: 1 }, OLD.practiceLog)) && canon(doc.practiceLog['m6w1-s1']) === canon(OLD.practiceLog['m6w1-s1']), JSON.stringify(doc && doc.practiceLog)],
         ['the page says nothing', !tabs[0].notice, String(tabs[0].notice)] ];
     } };
+  });
+  /* S19-S21 (2026-11-26, sweep JOURNEY-3): the Module 4/5 marker on a record created after a Delete. A record with no
+     migrations.swap45 is read as OLD-numbered (app/save.js swap45OnLoad), so one that today's code creates must carry
+     it, or the next sign-in swaps its Module 4/5 keys (Layers 4/5) the wrong way. S19 the app's save from a page left
+     open across the Delete (the stated limit re-creates the record: here only its numbering is judged); S20 a Song
+     Journey page's; S21 a sign-in after the Delete (the record is born marked through swap45Commit; passes on main
+     too, kept as the guard of the order the lead named). */
+  const M4 = 'm4w1-b-sec0-0', M4NEW = 'm4w2-b-sec1-0';
+  const with4 = () => { const d = clone(OLD); d.completed[M4] = true; d.songReady = { 'the-cure': { 4: true } }; return d; };
+  const no5 = o => !Object.keys(o || {}).some(k => /^m5w/.test(k));
+  await scenario('S19', 'Module 4/5: a page open across a Delete re-creates the record; it is marked, and the next sign-in keeps Module 4 as Module 4', c => {
+    seed(c.world, with4());
+    const A = c.dev('A'), B = c.dev('B');
+    c.boot('A', A, 0);
+    c.teacher(3000, 'del');
+    c.act('A', 5000, `onCompleteChange(${JSON.stringify(M4NEW)}, true)`);
+    c.vis('A', 7000, true);
+    c.at(9000, () => { c.world.s19m = clone(((c.world.docs.get('progress/' + USER.uid) || {}).data || {}).migrations || null); });
+    c.boot('B', B, 10000);
+    c.at(14000, () => { c.tab('B').s19 = c.tab('B').run(`JSON.stringify([completed[${JSON.stringify(M4)}] === true, completed[${JSON.stringify(M4NEW)}] === true, Object.keys(completed).some(k => /^m5w/.test(k))])`); });
+    return { endMs: 20000, check: (doc, w, tabs) => [
+      ['the record the open page re-created carries migrations.swap45 (read before the next sign-in)', !!w.s19m && w.s19m.swap45 === true, JSON.stringify(w.s19m)],
+      ['the stored ticks are still Module 4 (no m5w key)', !!doc && !!doc.completed && doc.completed[M4] === true && doc.completed[M4NEW] === true && no5(doc.completed), JSON.stringify(doc && doc.completed)],
+      ["…and B's page shows them as Module 4", tabs.find(t => t.name === 'B').s19 === '[true,true,false]', String(tabs.find(t => t.name === 'B').s19)] ] };
+  });
+  await scenario('S20', 'Module 4/5: a Song Journey page open across a Delete re-creates the record; it is marked, and the next sign-in keeps Layer 4 as Layer 4', c => {
+    seed(c.world, with4());
+    const J = c.dev('J'), B = c.dev('B');
+    c.jboot('J', J, 0);
+    c.teacher(3000, 'del');
+    c.jtick('J', 5000, 2);
+    c.at(9000, () => { c.world.s20m = clone(((c.world.docs.get('progress/' + USER.uid) || {}).data || {}).migrations || null); });
+    c.boot('B', B, 10000);
+    return { endMs: 20000, check: (doc, w) => [
+      ['the record the Journey page re-created carries migrations.swap45 (read before the next sign-in)', !!w.s20m && w.s20m.swap45 === true, JSON.stringify(w.s20m)],
+      ['Layer 4 is still Layer 4 after the next sign-in (and Layer 2 ticked)', jR(doc)[4] === true && jR(doc)[5] !== true && jR(doc)[2] === true, JSON.stringify(doc && doc.songReady)] ] };
+  });
+  await scenario('S21', 'Module 4/5: Delete, sign in, work, sign in again: the record is born marked and the keys stay as they were', c => {
+    seed(c.world, with4());
+    const A = c.dev('A');
+    c.teacher(100, 'del');
+    c.boot('A', A, 1000);
+    c.act('A', 4000, `onCompleteChange(${JSON.stringify(M4NEW)}, true)`);
+    c.vis('A', 6000, true); c.kill('A', 6100);
+    c.boot('A2', A, 8000);
+    c.at(12000, () => { c.tab('A2').s21 = c.tab('A2').run(`JSON.stringify(Object.keys(completed).sort())`); });
+    return { endMs: 15000, check: (doc, w, tabs) => [
+      ['the record is marked', !!doc && !!doc.migrations && doc.migrations.swap45 === true, JSON.stringify(doc && doc.migrations)],
+      ['it holds the one new Module 4 tick, as Module 4', !!doc && Object.keys(doc.completed || {}).join() === M4NEW, JSON.stringify(doc && doc.completed)],
+      ['the next sign-in shows it as Module 4', tabs.find(t => t.name === 'A2').s21 === JSON.stringify([M4NEW]), String(tabs.find(t => t.name === 'A2').s21)] ] };
   });
   await scenario('S7', 'THE LIMIT (expected, documented): an open page writes its old copy back after a Start over and after a Delete', c => {
     seed(c.world, OLD);

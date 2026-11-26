@@ -16180,6 +16180,9 @@ function checkJourneyRetired() {
        only sentinels must still go) and before the .set(payload). */
 const LOAD_FAILED_MAPS_EXPECTED = ['skills', 'responses', 'completed', 'classActivities', 'caSteps'];
 const PAYLOAD_SCALARS = ['lastModule', 'lastSet', 'period'];
+/* Fields flushSave() sends as a constant map that is never empty: migrations = { swap45: true } (2026-11-26, sweep
+   JOURNEY-3: a record a page re-creates after a Delete is born marked). It can replace nothing. */
+const PAYLOAD_CONSTANT_MAPS = ['migrations'];
 function checkLoadFailedMaps() {
   head('1bo. A failed progress load cannot wipe a saved map');
   let bad = 0;
@@ -16209,7 +16212,7 @@ function checkLoadFailedMaps() {
   const fields = [...body.matchAll(/\bpayload\.(\w+)\s*=(?!=)/g)].map(m => m[1]);
   if (fields.length === 0) { flag('1bo found no `payload.X =` in flushSave() — it cannot see what it is supposed to guard'); return; }
   for (const f of new Set(fields)) {
-    if (maps.includes(f) || PAYLOAD_SCALARS.includes(f) || held.includes(f)) continue;
+    if (maps.includes(f) || PAYLOAD_SCALARS.includes(f) || PAYLOAD_CONSTANT_MAPS.includes(f) || held.includes(f)) continue;
     flag(`app.js: flushSave() sends payload.${f}, which is neither on LOAD_FAILED_EMPTY_MAPS, a held-back LOAD_DEPENDENT_SAVE_KEYS category, nor a known scalar — after a failed load an empty map there would replace the student's whole record`);
   }
   for (const f of maps) if (!fields.includes(f)) flag(`app.js: LOAD_FAILED_EMPTY_MAPS names ${f}, but flushSave() never sends payload.${f} — stale entry`);

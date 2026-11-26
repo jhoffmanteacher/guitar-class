@@ -37,7 +37,13 @@ let classConfigLoadDenied = false;
        new-numbered key can merge into an unmarked doc (the next load would
        swap it the wrong way) even when the load-time commit failed. A
        student with no doc yet gets it created already marked by that first
-       save; loading writes nothing for them.
+       save; loading writes nothing for them. Every save carries the marker
+       too, so a page still open after the teacher's Delete re-creates the
+       doc marked (2026-11-26). The two other writes that can create a doc,
+       the Songs row's songOpens +1 (app/explore.js) and Hear It First's
+       trainer field, do not: what they create holds no Module 4/5 key, so
+       the next load marks it with nothing to move, and either one can land
+       on an unmarked doc that is still old-numbered.
      - swap45Commit() is a transaction: it re-reads the doc, does nothing if
        another tab already marked it, and otherwise REPLACES each affected
        field with its remapped copy and sets the marker in the same write.
@@ -968,6 +974,11 @@ async function flushSave(){
        marker) lands first. Resolves at once after the first success; a
        rejection is an ordinary failed save, retried below. See swap45Commit. */
     await swap45Commit();
+    /* So the stored doc is now marked, or gone: a page that read it marked (swap45Done) and is still open after the
+       teacher's Delete re-creates it with this write (the stated limit, teacher-remove.js). It must be born marked,
+       or the next sign-in reads this page's new-numbered maps as old and swaps them (sweep JOURNEY-3, 2026-11-26).
+       Merging the marker into a marked doc changes nothing. */
+    payload.migrations = { swap45: true };
     /* The delete sentinels are stamped in HERE, after ensureDb(), and not
        where the payload is assembled: `firebase.firestore` doesn't exist
        until the Firestore SDK has actually loaded, so building them earlier

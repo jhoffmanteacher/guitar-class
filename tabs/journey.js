@@ -1173,7 +1173,8 @@ function queueSave(){
    the same transaction as the write, so a main-app tab that moves the doc
    meanwhile cannot be caught out. A doc this page creates is born in the
    new numbering and carries the marker. Once the doc is known to be
-   marked, saves go back to the plain set().
+   marked, saves go back to the plain set(), which carries the marker too
+   (a teacher's Delete after the read: that set re-creates the doc, 2026-11-26).
    Safe to remove with app/save.js's swap45 block (summer reset at the latest). */
 var swap45DocNew = false;   // the stored doc is known to carry migrations.swap45
 function swap45IsMarked(d){ return !!(d && d.migrations && d.migrations.swap45 === true); }
@@ -1206,8 +1207,11 @@ function flushSave(closing){
   };
   var uid = fbUser.uid, gen = loadGen;
   var ref = fbDb.collection('progress').doc(uid);
+  /* The plain set() carries the marker too: the doc was read marked or made marked here, so it is marked or gone, and
+     a teacher's Delete after that read leaves it gone; this set then creates it, and it must be born marked (sweep
+     JOURNEY-3, 2026-11-26), or the next app sign-in reads these Layer 4/5 ticks as old and swaps them. */
   var write = swap45DocNew
-    ? ref.set(build(false, false), { merge: true })
+    ? ref.set(build(false, true), { merge: true })
     : fbDb.runTransaction(function(tx){
         return tx.get(ref).then(function(snap){
           var d = snap.exists ? snap.data() : null;
