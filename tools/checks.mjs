@@ -22993,8 +22993,8 @@ function checkBuiltSongs(ctx) {
        in English and in Spanish.
    ════════════════════════════════════════════════════════════════════ */
 const PRIVACY_NOTICE_SHA = {
-  en: 'e083550119eaffc292bb37787e8c2c65b76044bafff5d093e7f1185a7f021e7d',
-  es: '5f2f97dd09817bd97b2349605a66a34ee73378b8a3c90fed0bdafc186b94804c',
+  en: '1964a281efbd8bd966682a72918363f05ecdc530adb0abbba187e8265942a2ce',
+  es: 'fde4cc32d6e1d74ca8b3ed70ed3f49557afdd2c9ba5cf4f4cfc262cf3c5b9089',
 };
 function privacyNoticeText(html, lang) {
   const m = html.match(new RegExp(`<section data-notice lang="${lang}"[^>]*>([\\s\\S]*?)</section>`));

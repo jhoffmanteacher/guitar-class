@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-26 — The privacy page
+
+- **The privacy page now says what "Ask your teacher to let me in" saves:** your name and email, so your teacher can
+  answer. This is only for an account from outside the school.
+
+
 ## 2026-11-25 — Module 8 and 9 fixes
 
 - **Module 9, Set 3: Challenge 2 has its typing box back.** Writing the TAB is the task there, and Challenge 4 reads it

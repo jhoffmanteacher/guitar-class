@@ -126,9 +126,7 @@ and content"). What shipped is in CHANGELOG 2026-11-25 and in git; only what a l
 - **Still open, worth doing:** after a Delete, a second Chromebook can bring back a little old data (a stopped
   consent "yes", unsent practice seconds, old ticks): a per-Chromebook reset marker, save path, Always Reviewed; a
   doc re-created after a Delete lacks `migrations.swap45` (app and `tabs/journey.js`); a class settings change
-  redraws under an open card; `tools/speed-ladder-loop.mjs` is not run on GitHub; ca-34's intro open G vs ca-35's
-  solo D-string fret 4 ("Vuelve a la Vida": needs ears); a privacy-page sentence for "request to join" once the
-  access rules are published.
+  redraws under an open card; `tools/speed-ladder-loop.mjs` is not run on GitHub.
 - Jonathan, 2026-11-26: offline-only faults and other trivia are not tracked here.
 
 **Done 2026-11-23: W15, the design-values tidy (Reviewed, `site-reviewer` on Opus, 2 rounds).** Text sizes (`--fs-*`,
