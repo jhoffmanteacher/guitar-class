@@ -22,7 +22,10 @@ CLAUDE.md.
   `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block and
   `tools/built-songs-rules-test.mjs --breaks` for the built-songs block (their headers say how; GitHub runs them after
   every push, `.github/workflows/rules.yml`). A case named "today: …" turning red means a rule was tightened: make sure
-  that was the point.
+  that was the point. And on the Firestore AND Auth emulators (`emulators:exec --only firestore,auth`): `node
+  tools/signin-loop.mjs --plants` (who gets in and can save, about 2.5 minutes) and `node tools/progress-emu-loop.mjs
+  --plants` (the progress save, about 1.5 minutes): the site's own pages on the real Firebase SDK
+  (`tools/emu-site.mjs`); setup in `signin-loop.mjs`'s header; GitHub job `emu-loops` in `rules.yml`.
 - **A rules edit re-pins `RULES_FILE_SHA256`** (`checks.mjs` 1dt) in the same commit. 1dt also pins the `isSchool()`
   gate.
 - Practice minutes: its rules blocks must be published BEFORE the code that writes them; `dayCeilingSeconds()` moves

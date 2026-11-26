@@ -27,6 +27,15 @@ Moved from CLAUDE.md (2026-11-26). Each tool's header explains what it covers.
   per-student localStorage or sessionStorage key: read the header of `tools/shared-chromebook-loop.mjs`. After any
   change: `node tools/shared-chromebook-loop.mjs` (Node only, about 75 s; it should exit 0 with KNOWN K-TAB inside its
   printed band).
+- **On the emulators too** (2026-11-26; the site's own pages on the real Firebase SDK against the Firestore and Auth
+  emulators with the real `firestore.rules`, `tools/emu-site.mjs`): after a change to the save path, `node
+  tools/progress-emu-loop.mjs --plants` (about 1.5 minutes); after one to sign-in, the access screen,
+  `ACCESS_SCHOOL_RE` / `accessIsSchoolUser` or `teacher-accounts.js`, `node tools/signin-loop.mjs --plants` (about 2.5
+  minutes). To start the emulators: Java 21; in an empty folder outside the repo `npm i --legacy-peer-deps
+  firebase-tools@15.36.0 firebase@10.12.2`, a `firebase.json` and a copy of `firestore.rules`, then `npx firebase
+  emulators:exec --only firestore,auth --project demo-gc "node <repo>/tools/<tool> --deps . --site <repo> --plants"`
+  (the exact `firebase.json`, and what to do when the jar will not download: `signin-loop.mjs`'s header). GitHub runs
+  both after every push (`rules.yml` job `emu-loops`).
 - **The Modules 4/5 swap** (`swap45*`, `flushSave()`): keep all halves (`modules.md`).
 - **Every answer writer needs `isPeekedResponseKey()`** (1bl): a locked set is a read-only preview.
 - **Start over** (`teacher-remove.js`): its markers are `progressStartOver` / `progressDeleted` in `config/class`; a

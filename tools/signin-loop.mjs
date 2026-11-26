@@ -51,7 +51,10 @@
    In an empty scratch folder (NOT inside the repo):
      npm init -y
      npm i --legacy-peer-deps firebase-tools@15.36.0 firebase@10.12.2
-     # firebase.json: { "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8089 }, "auth": { "port": 9099 }, "ui": { "enabled": false } } }
+     # firebase.json: { "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8089, "host": "127.0.0.1" }, "auth": { "port": 9099, "host": "127.0.0.1" }, "ui": { "enabled": false } } }
+     # If firebase-tools' own download of the Firestore emulator jar fails (it crashed mid-stream in a cloud session,
+     # 2026-11-26), fetch it with curl from the remoteUrl in node_modules/firebase-tools/lib/emulator/
+     # downloadableEmulatorInfo.json into ~/.cache/firebase/emulators/ and compare its sha256 with that file's.
      cp <repo>/firestore.rules .
      npx firebase emulators:exec --only firestore,auth --project demo-gc "node <repo>/tools/signin-loop.mjs --deps . --site <repo> --plants"
    (--deps: the folder whose node_modules holds firebase; --site: the checkout under test, default this one; --rules:
@@ -73,7 +76,7 @@
    with exit 2 if not (--no-preflight skips it: to watch every case run into its limits, as when diagnosing the tool
    itself).
    Last run: 2026-11-26, a cloud session with the emulator jar fetched by hand (firebase-tools 15.36.0, Firestore
-   emulator 1.22.0): 56 passed, 0 failed, 8 of 8 breaks caught, 140 s (the bulk group 8 s). */
+   emulator 1.22.0): 56 passed, 0 failed, 10 of 10 breaks caught, 151 s (the bulk group of 320 addresses 8 s). */
 import { readFileSync } from 'node:fs';
 import { emuArgs, loadSdk, emulator, makeWorld, makeDevice, makePage, signInPage, waitScreen, until, sleep, closeAll, wall, makeRunner, step, watchdog, preflight } from './emu-site.mjs';
 

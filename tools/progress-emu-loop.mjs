@@ -59,7 +59,7 @@
    blocked; both kept by a worker thread, which prints where the tool was stuck), and a preflight stops it at once
    (exit 2) when the SDK cannot reach both emulators (--no-preflight skips it).
    Last run: 2026-11-26, a cloud session with the emulator jar fetched by hand (firebase-tools 15.36.0, Firestore
-   emulator 1.22.0): 45 passed, 0 failed, 6 of 6 breaks caught, 92 s. GitHub run 45885160639: the same counts, 83 s. */
+   emulator 1.22.0): 45 passed, 0 failed, 7 of 7 breaks caught, 89 s. GitHub run 45885160639 (6 plants then): 45 passed, 6 of 6, 83 s. */
 import { readFileSync } from 'node:fs';
 import { emuArgs, loadSdk, emulator, makeWorld, makeDevice, makePage, rawClient, signInPage, waitScreen, until, sleep, waitSaved, closeAll, setOnline, wall, makeRunner, step, watchdog, preflight } from './emu-site.mjs';
 
