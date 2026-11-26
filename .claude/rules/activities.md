@@ -1,6 +1,7 @@
 ---
 paths:
   - "class-activities.js"
+  - "i18n.js"
   - "app/activities*.js"
   - "app/cards*.js"
   - "app/explore.js"

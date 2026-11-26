@@ -2,6 +2,7 @@
 paths:
   - "styles.css"
   - "index.html"
+  - "app/audio-ui.js"
 ---
 
 ### ⚠️ The set band carries the lesson chrome, and the rail packs itself

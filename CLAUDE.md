@@ -1,6 +1,6 @@
 # Guitar Class Website — Claude Instructions
 
-Rules every session needs. Area rules load from `.claude/rules/*.md` with the files they govern; skills hold the rest
+Rules every session needs. Area rules load from `.claude/rules/*.md` with their files; skills hold the rest
 ("Lazy-loaded guidance"). Why: `WORKFLOW.md` → "Rationale behind the CLAUDE.md rules". Open now: `WORKFLOW.md` →
 "Where things stand". History: `docs/workflow-history-*.md`.
 
@@ -23,8 +23,7 @@ Which loop after which change: `docs/which-loop.md`.
      before and after: `node tools/golden.mjs --out <dir> --shots` twice (`--root <folder>` for another checkout),
      then `--compare <dirA> <dirB>`; about 30 minutes each. "Identical" says nothing about code a run never reached:
      read its coverage counts and the header's "not covered" list.
-   - **The full walk** (both languages, every area) runs on GitHub on Fridays, and when Jonathan asks for **"the
-     end-of-day smoke"**: `node tools/smoke.mjs --baseline $(git rev-list -1 --before='today 00:00' origin/main)` on
+   - **The full walk** (both languages, every area): GitHub on Fridays; on request, **"the end-of-day smoke"**: `node tools/smoke.mjs --baseline $(git rev-list -1 --before='today 00:00' origin/main)` on
      `origin/main`; for each new error find the commit (`--only <area>`), fix, push, report.
    - Run a smoke with `run_in_background` from a detached worktree at the commit (`git worktree add --detach <dir> <hash>`). `smoke: ✗ HUNG … Stuck at "<walk>: <step>"` (exit 3) is a finding: report the step. A run
      killed from outside can leave Chrome behind: `pkill -f gc-smoke-chrome`.
@@ -49,8 +48,8 @@ Which loop after which change: `docs/which-loop.md`.
    - Conflict in `CHANGELOG.md` or `WORKFLOW.md` where each side only ADDED lines at the same spot: keep both whole,
      yours on top, blank line between, delete the markers, `git add`, `git rebase --continue`. If either side changed
      or removed an existing line, it is an "other conflict".
-   - These cases may stop the same rebase: handle each. Any other conflict (another `sw.js` hunk, a `module-N.js`, a
-     danger-zone file), or any other file conflicting too: `git rebase --abort` and ask Jonathan.
+   - Handle each such case in the same rebase. Any other conflict (another `sw.js` hunk, a `module-N.js`, a danger-zone
+     file, any other file): `git rebase --abort` and ask Jonathan.
    - Never force-push; never a merge commit without asking. After the rebase: full `node tools/checks.mjs` on the
      rebased tip (plus the smoke when those commits touch files you changed), commit the `sw.js` it rewrote, push only
      when `git status` is clean. After pushing: `node tools/checks.mjs --live`.
@@ -80,8 +79,8 @@ Whatever a tool reads, lists, prints or screenshots is sent to Anthropic. Jonath
 - Never open the real teacher console, the Firebase console, Gmail, Drive or Classroom with the Chrome extension or a
   Google connector. Site checks use headless Chrome for Testing with the stub Firestore.
 - Never print a student's name, email or uid from a transcript or log: count, don't quote. Test data is made up.
-- `.claude/hooks/no-student-data.mjs` blocks those reads (1dc keeps it wired); it is a guard rail, this rule binds. A
-  Bash heredoc that merely NAMES one of those paths is blocked too: write that code with Edit / Write.
+- `.claude/hooks/no-student-data.mjs` blocks those reads (1dc); it is a guard rail, this rule binds. A Bash heredoc
+  that merely NAMES one of those paths is blocked too: write that code with Edit / Write.
 
 ## Project
 
@@ -129,9 +128,8 @@ Find a function: `grep -n "function name" app/*.js coach-*.js teacher-*.js`. Eac
 - **A Fast change never stops to split a part**: over 2,000 lines → one line in the report, ship. A split (one banner
   section, whole, into a new part loaded right after it; then `node tools/slow-load.mjs`) is its own change at a quiet
   moment. Warn Jonathan before a part nears 2,600. `coach-core.js` is split only with him.
-- **A new part file** goes in `index.html`'s `site-parts:app.js` block (app) or `COACH_JS_PARTS` / `TEACHER_JS_PARTS`
-  (`app/boot.js`), and an app or arcade part also in the `sw.js` lists (a console part stays OUT; `checks.mjs`
-  enforces both). Name it `app/<x>.js`, `coach-<x>.js` or `teacher-<x>.js`. Never edit `tools/split-plan.json`
+- **A new part file** goes in `index.html`'s `site-parts:app.js` block or `COACH_JS_PARTS` / `TEACHER_JS_PARTS`
+  (`app/boot.js`); an app or arcade part also in the `sw.js` lists, a console part never (`checks.mjs` enforces both). Name it `app/<x>.js`, `coach-<x>.js` or `teacher-<x>.js`. Never edit `tools/split-plan.json`
   (record only, with `tools/split-site.mjs`).
 
 ## Pushing and checks
@@ -139,9 +137,8 @@ Find a function: `grep -n "function name" app/*.js coach-*.js teacher-*.js`. Eac
 - "Push to GitHub" / "Save progress with a note: [msg]" → checks, fix flags, commit, push, confirm.
 - **Cowork can't push**: patch + `APPLY-<name>.md` as ONE zip (skill `session-handoff`).
 - Touching `index.html`, `styles.css`, an `app/*.js` part, `tuner.js`, a `teacher-*.js` part, `config-main.js` or a
-  `module-N.js`: `node tools/checks.mjs` must exit 0 (syntax, data, about 240 links: run it before every push even
-  when no link changed; the automatic `CACHE_VERSION` bump, 1bt). Flags: `--skip-links`, `--check` (changes
-  nothing), `--live`.
+  `module-N.js`: `node tools/checks.mjs` must exit 0 (syntax, data, about 240 links even when none changed, the
+  `CACHE_VERSION` bump, 1bt). Flags: `--skip-links`, `--check` (changes nothing), `--live`.
 - After you edit a cached file, "shell cache stale" is expected (exit 1; the pre-commit hook refuses the commit) until
   the full `node tools/checks.mjs` rewrites `sw.js`. Any other ✗, including "audio hash map in sw.js is stale", is a
   real failure.
@@ -156,47 +153,43 @@ Find a function: `grep -n "function name" app/*.js coach-*.js teacher-*.js`. Eac
 ## Three regimes (module progress)
 
 `FROZEN_THROUGH` = 3, `OPEN_THROUGH` = 6. Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) when the class
-ENTERS a module; never lower either (1dl): module progress never resets unless Jonathan does it. What each regime
-allows, the Modules 4/5 swap and keyed MCs: `.claude/rules/modules.md` (loads with `module-*.js`). Content and
-wording rules: `.claude/rules/content.md`.
+ENTERS a module; never lower either (1dl): module progress never resets unless Jonathan does it. Each regime, the 4/5
+swap, keyed MCs: `.claude/rules/modules.md`.
 
 ## Other standing rules
 
 - **Practice copy** (`guitar-class-practice`, made-up data only): never add a second project to `.firebaserc`; never
   deploy to the class project from this repo. Details: `.claude/rules/firestore.md`.
 - **A bad day** (a push broke the site, students stuck on a broken cached copy, work lost): `BREAK-GLASS.md`. Google sign-in or saving down: `docs/when-google-is-down.md`.
-- **Lint** (`node tools/lint.mjs`, report-only on GitHub): run it before deleting or renaming a shared function. Never add a name to `OUTSIDE_GLOBALS` in `eslint.config.mjs` unless
+- **Lint** (`node tools/lint.mjs`): run it before deleting or renaming a shared function. Never add a name to `OUTSIDE_GLOBALS` in `eslint.config.mjs` unless
   it exists at run time.
 - **Sweep ratchet:** 3+ instances of a mechanically-detectable error class → a permanent `checks.mjs` detector, same
   session; it must render/execute, match UNESCAPED strings (`unescapeJs()`), and be seen failing in a scratch copy.
-- **Accessibility scan** (`node tools/smoke.mjs --only a11y`, axe-core) runs report-only on GitHub after every push.
-  Its ratchet (`--a11y-ratchet`, `tools/a11y-baseline.json`) stays OFF until a week of GitHub runs show 0 new
-  signatures and a reviewer has passed the switch-on.
-- **Plant a fault** (weekly on GitHub, report-only): replay an escape with `node tools/plant-a-fault.mjs --replay <id>`.
-  Harmless → a one-line reason in `tools/plant-a-fault-known.json`; a real gap → a test in the tool that should catch
-  it. 1ea warns when its table names a renamed function: update the table.
-- **Activity order and placement** live on the console board (`config/class.activityBoard`, `caBoardOrder()`,
-  `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). Details: `.claude/rules/activities.md`
-  (also **Play-along first** and the **TWO step renderers**).
+- **Accessibility scan** (`node tools/smoke.mjs --only a11y`) is report-only on GitHub. Its ratchet (`--a11y-ratchet`,
+  `tools/a11y-baseline.json`) stays OFF until a week of runs show 0 new signatures and a reviewer passes the switch-on.
+- **Plant a fault** (weekly, report-only): replay an escape with `node tools/plant-a-fault.mjs --replay <id>`. Harmless
+  → a one-line reason in `tools/plant-a-fault-known.json`; a real gap → a test in the tool that should catch it. 1ea
+  warns of a renamed function in its table: update it.
+- **Activity order and placement** live on the console board (`caBoardOrder()`, `teacherMoveActivity()`); a digit in
+  a title is a SERIES number (1d, 1l). More, with **Play-along first** and the **TWO step renderers**:
+  `.claude/rules/activities.md`.
 
 ## Habits that catch the expensive bugs
 
 - Grep before you edit: the same bug lives in sibling copies and in comments that describe the old behaviour. Fix
   them together.
-- Unsure whether a change is allowed? Run the proof tool; don't reason it out.
+- Unsure if a change is allowed? Run the proof tool; don't reason it out.
 - A check fails → fix the cause. Never loosen the check or add an allowlist entry to get green.
-- Report what you verified with the denominator ("306 handlers compiled"), not "looks fine". A script that finds 0
-  in both the old and new tree proves nothing. Report real numbers, not the premise; name the prior decision a
-  request reverses.
-- Product calls and rules that contradict each other go to Jonathan (AskUserQuestion); don't pick silently.
-- **Don't repeat verification that passed on the same code**: not after an agent pasted it (spot-check one number at
-  most), not in an agent whose change did not touch what it covers. A fixer re-runs only the faults and cases its
-  change affects, plus ONE final run. A low-stakes tool (an ungraded game's test, a small test fix) ships on its
-  fixer's proof; reviewers are for the save path, load order, listening and anything a student's work or screen
-  depends on. The push rules still apply.
-- **Browser checks run in Chrome for Testing**, headless through `CHROME` with a small script (like
-  `tools/console-layout-smoke.mjs`; its stub Firestore reaches the console). The Claude in Chrome extension only for a
-  person-style click-through of the real page.
+- Report what you verified with the denominator ("306 handlers compiled"), not "looks fine"; a script that finds 0 in
+  both trees proves nothing. Report real numbers, not the premise; name the prior decision a request reverses.
+- Product calls and contradicting rules go to Jonathan (AskUserQuestion); don't pick silently.
+- **Don't repeat verification that passed on the same code** (after an agent pasted it, spot-check one number at
+  most). A fixer re-runs only the cases its change affects, plus ONE final run. A low-stakes tool (an ungraded game's
+  test, a small test fix) ships on its fixer's proof; reviewers are for the save path, load order, listening and
+  anything a student's work or screen depends on. Push rules still apply.
+- **Browser checks run in Chrome for Testing**, headless via `CHROME` and a small script (like
+  `tools/console-layout-smoke.mjs`, whose stub Firestore reaches the console); the Chrome extension only for a
+  person-style click-through.
 
 ## Keep the Mac's load "just right"
 
@@ -206,29 +199,32 @@ spawning an agent, a browser run, a full `checks.mjs`, a proof loop or a golden 
 - **4 to 8** → just right: nothing new that is heavy (one light, Node-only job is fine).
 - **over 8** → start nothing.
 - **over 12 for 5 minutes** → pause the job that can best wait; tell Jonathan in one line.
-- **At once on the Mac:** the lead, at most 2 local agents, at most 2 headless-Chrome runs (the second only while the
-  load is under 8). A 3rd local agent only when the load is under 4 and it is Node-only. Each agent's brief says: one
-  job at a time, no sub-agents, and wait while `uptime` shows over 8 (10 minutes at most, then go on and say so).
+- **Prefer the cloud for agent work** when the lead is on the Mac (cloud agents or a cloud session); cloud agents may
+  use sub-agents freely.
+- **Local agents on the Mac:** the lead, at most 2 local agents, at most 2 headless-Chrome runs (the second only while
+  the load is under 8). A 3rd local agent only when the load is under 4 and it is Node-only. A local agent's brief
+  says: one job at a time; no sub-agents, except that an Opus builder may hand simple parts to ONE Sonnet sub-agent at
+  a time; wait while `uptime` shows over 8 (10 minutes at most, then go on and say so).
 - **Where work goes, decided before the brief is written:** work that need not happen today and needs no Mac-only
-  file → the "For Windows" section at the top of `WORKFLOW.md` (headless Chrome included). Repo-only, Node-only work
-  for today → the CLOUD (a routine set to run once, skill `schedule`; push its branch first). The Mac keeps what only
-  it can do: student takes, audio and other Mac-only files (`Claude outputs/`), and the lead.
-- Windows reads `WORKFLOW.md` about hourly while awake; it adds a "started" line under an item it picks up and a DONE
-  note. No "started" line 2 hours after the item was added → treat Windows as asleep and say so.
+  file → the "For Windows" section at the top of `WORKFLOW.md` (headless Chrome included). Repo-only work for today,
+  Node or headless Chrome, defaults to the CLOUD (a routine set to run once, skill `schedule`; push its branch first).
+  The Mac keeps what only it can do: student takes, audio and other Mac-only files (`Claude outputs/`), and the lead.
+- Windows reads `WORKFLOW.md` hourly while awake and adds a "started" line, then a DONE note. No "started" line 2 hours
+  after an item was added → treat Windows as asleep and say so.
 - On the Mac, every report that ran agents or long jobs ends with one line: the load at the start and the highest seen.
 
 ## How to work with Jonathan
 
 - **AskUserQuestion, not free text** (2–4 options), one question per turn unless truly independent.
-- **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you… / how do I… / should this be…" about
-  code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork or an irreversible /
+- **Don't ask "should I proceed?"**: do the obvious, reversible work ("can you… / how do I… / should this be…" about
+  code = do it). In doubt: pick a default, proceed, say why. Pause only for a real fork or an irreversible or
   outward-facing action.
 - **Pushing to `main` is not a pause point:** checks pass and a fast-forward is what you'd recommend → push, say what
   landed, `checks.mjs --live`. Ask for a merge commit, a conflict you cannot resolve mechanically (step 8), failing
   checks, or unready work.
-- **Work for another session → give the blurb the first time:** when your answer means another Claude session must
-  do, avoid or know something, end that message with the text to paste to it, in a code block, complete enough to act
-  on alone. Give a new one when the facts change.
+- **Work for another session → give the blurb the first time:** when another Claude session must do, avoid or know
+  something, end your message with the text to paste to it, in a code block, complete enough to act on alone; a new one
+  when the facts change.
 - New unrelated topic → AskUserQuestion once: fresh chat or continue?
 - **"Next steps for Power Chord Switch"** → read `WORKFLOW.md` "Power Chord Switch: where we stopped" first.
 
@@ -240,12 +236,13 @@ Review trigger = 3+ files, 50+ strings, or a danger-zone file:
 - coach detection in ANY `coach-*.js` part: onset and pitch detectors and grading rules (ratios, gates, windows) —
   mostly `coach-core.js`, `coach-score.js` and `ccLoop()` / `ccResolvePend()` / `ccFinish()` in `coach-chords.js`,
   but each game's own loop and judge too; not a game's screens, wording, tempo controls or count-in;
-- the app's save path (`app/save.js`, and any other direct write to `progress/{uid}`);
+- the app's save path (`app/save.js`, and any other direct write to `progress/{uid}`). Any write to `progress/{uid}`
+  or any per-student storage key → `node tools/save-loop.mjs` and `node tools/shared-chromebook-loop.mjs`;
 - `firestore.rules`.
 
-Not counted: `CHANGELOG.md`, the `sw.js` version lines and `AUDIO_HASHES` block (written by `checks.mjs`; a new song's
-audio is not danger-zone), a file name added to or removed from an `sw.js` list (list-only ships Fast), a string's
-Spanish twin, pin-only `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof
+Not counted: `CHANGELOG.md`, the `sw.js` version lines and `AUDIO_HASHES` block (a new song's audio is not
+danger-zone), a file name added to or removed from an `sw.js` list (ships Fast), a Spanish twin, pin-only `checks.mjs`
+edits. A guard on a new default, or extending what a check reads: break-it proof
 only (paste the output). A new KIND of check, or changed logic/matching: a trigger (`site-reviewer`, high) plus
 break-it.
 
@@ -259,7 +256,8 @@ break-it.
   "<reviewer>, <N> rounds"` (1dw warns on a mixed range or a Fast danger-zone file).
 - **Always Reviewed, same day, never Fast:** a danger-zone file; a new kind of check that ships on its own (a ratchet
   or detector; a check that guards the feature it ships with gets break-it proof only); a sub-agent sweep;
-  moving/adding/removing a section or step. A product change Jonathan asks for (a renderer, a game's flow, a console
+  adding or removing a step where the three regimes allow it. Moving an existing section or step is never allowed
+  ("Never" list). A product change Jonathan asks for (a renderer, a game's flow, a console
   view) ships Fast unless it touches one of those. Jonathan says "review this" / "Reviewed" → review same day.
 - Both splits are unproven: a Friday check finds a Fast change that hurt students → move that kind to
   Always-Reviewed; a high review lets a real bug through → move that kind to `site-reviewer-deep`.
@@ -273,10 +271,9 @@ Friday check, a sub-agent sweep), spawn the reviewers at once without asking; th
 doubt, don't spawn". A Fast change gets none.
 - **Parallel by area:** one reviewer per independent area, all spawned in one message. `site-reviewer-deep` for a
   danger-zone file, 50+ strings or any sub-agent sweep (failing scenario first); otherwise `site-reviewer`.
-- **Re-review every fix round with a fresh agent**, never the one that found the bug. Stop after the first round with
-  no BLOCKER or MAJOR (severity words: `.claude/skills/site-sweep/reviewer.md`); fix its MINORs with a break-it proof
-  and start no new round. At most 3 rounds: if round 3 still finds a BLOCKER or MAJOR, ask Jonathan (ship, revert or
-  keep going).
+- **Re-review every fix round with a fresh agent.** Stop after the first round with no BLOCKER or MAJOR (severity
+  words: `.claude/skills/site-sweep/reviewer.md`); fix its MINORs with a break-it proof, no new round. Round 3 still
+  finds a BLOCKER or MAJOR → ask Jonathan (ship, revert or keep going).
 - **Fixers:** findings in one file family → fix them yourself. Spawn `site-fixer` only when they span two or more
   independent file families: create its worktree first, then cherry-pick its commits. Before spawning more than 3
   agents, read skill `site-sweep`. **Sweeps (50+ items):** a second agent told to *find problems* audits the FIXES.
@@ -285,22 +282,21 @@ doubt, don't spawn". A Fast change gets none.
   breaking the code and pasting the red line, and re-derives a suggested fix on the real code. Product choices found in
   a review go to Jonathan (AskUserQuestion).
 
-**Agents for ordinary work too:** spawn agents (they may use sub-agents) whenever that is faster, without asking; who
-reviews what is unchanged. A few tool calls or one file family: do it yourself. Read the load and choose cloud,
+**Agents for ordinary work too:** spawn agents whenever that is faster, without asking; who reviews what is unchanged.
+Sub-agents: cloud agents may use them freely; a local agent on the Mac follows "Keep the Mac's load just right". A few tool calls or one file family: do it yourself. Read the load and choose cloud,
 Windows or the Mac first.
 
-**Every brief states:** its size (how many agents or sub-agents, how many browser runs); its own worktree only (created
-first; you cherry-pick); no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while two browser runs are
-already going (check with `pgrep`, step 3); a final message of 20 lines at most (verdict or tip first; counts with
-denominators; what needs the lead or Jonathan), with tables, quoted lines, proofs and logs in ONE details file in the
-session scratchpad (a reviewer: its scratch folder), path given. Only a reviewer's one line per BLOCKER / MAJOR
-(file:line) may pass the cap.
+**Every brief states:** its size (agents, sub-agents, browser runs); its own worktree only (created first; you
+cherry-pick); no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while two browser runs go (`pgrep`, step
+3); a final message of 20 lines at most (verdict or tip first, counts with denominators, what needs the lead or
+Jonathan), everything else in ONE details file in the session scratchpad, path given. Only a reviewer's one line per
+BLOCKER / MAJOR (file:line) may pass the cap.
 
 ### Opusplan: choosing model and effort
 
 The chat may run on Fable to plan; agents execute. **Every spawn names its `model` and `effort`.** A spawn with no
-`model`, and every `subagent_type: "fork"`, runs on the chat's model: with a Fable chat use a named agent type, never a
-fork.
+`model`, and every `subagent_type: "fork"`, runs on the chat's model: with a Fable chat use a named agent type or
+`general-purpose`, never a fork.
 
 | Job | Agent type | Model | Effort |
 |---|---|---|---|
@@ -309,26 +305,26 @@ fork.
 | The save path, `firestore.rules`, listening code, a fix whose cause is unknown, a design with real choices | `site-fixer` / `general-purpose` | opus | xhigh |
 | Review (ordinary) | `site-reviewer` | opus | high |
 | Review: danger zone, 50+ strings, any sweep | `site-reviewer-deep` | opus | xhigh |
+| Read-only audit of one area (a sweep's auditor) | `site-auditor` | opus | high |
 | Friday check | (skill `friday-check`) | opus | xhigh |
-| Run a tool or proof and report; a search or inventory with counts; copy or move files | `site-runner` | sonnet | low |
-| Screenshots from a written list; a rebase or re-pin; test cases from a settled list; one scripted wording change in many places | `site-runner` | sonnet | medium |
+| Run-a-tool-and-report (a tool or a proof, its numbers), a search or a file copy | `site-runner` | sonnet | low |
+| The rest of the list: an inventory with counts, moving files, screenshots from a written list, a rebase or a re-pin, test cases from a list someone else settled, one scripted wording change in many places (only when no student sees the text; otherwise Opus) | `site-runner` | sonnet | medium |
 
-- Never `max`. Sonnet only for work that is mechanical, fully specified and proved by a tool, through `site-runner`
-  (not `general-purpose` on Opus); one that seems to need `high` is not a Sonnet job. Opus always for design or any
-  choice, the save path, `firestore.rules`, listening code, load order, `sw.js` code, a renderer a student sees, an
-  unknown cause, and every review. Unsure → Opus. A Sonnet report is a claim: read its proof before it ships.
-- An Opus builder may hand its own simple parts to ONE Sonnet sub-agent at a time on the Mac (the load rule); its
-  brief still says "no sub-agents" when the lead wants none.
+- Never `max`. Sonnet only for mechanical, fully specified, tool-proved work, through `site-runner` (not
+  `general-purpose` on Opus); one that seems to need `high` is not a Sonnet job. Opus always for any choice, the save
+  path, `firestore.rules`, listening code, load order, `sw.js` code, a renderer a student sees, an unknown cause, every
+  review. Unsure → Opus. Read a Sonnet report's proof before its work ships.
+- Sub-agents: in the cloud, freely; a local agent on the Mac, only an Opus builder's ONE Sonnet sub-agent at a time
+  ("Keep the Mac's load just right"). A brief may still say "no sub-agents" when the lead wants none.
 - **Fable only when Jonathan names a Fable review** (`model: 'fable'`); recommend one in a report (save path,
   listening, a sweep), never start one unasked.
 - The chat's own `/model` and effort are Jonathan's to set. Session effort: `medium` routine, `high` bug fixes / JS /
   keyed MCs, `xhigh` danger-zone and sweeps. A job a tier above the session → ask for `/effort`.
-- How many agents run at once on the Mac: "Keep the Mac's load just right".
+- Agents at once on the Mac: "Keep the Mac's load just right".
 
 ## Lazy-loaded guidance
 
-Rule files (`.claude/rules/`) load on their own with the files they name; read a skill or header first. Their ⚠️ rules
-bind.
+Rule files (`.claude/rules/`) load with the files they name; read a skill or header first. Their ⚠️ rules bind.
 
 | Area | Read | Most critical rule |
 |---|---|---|
@@ -342,7 +338,7 @@ bind.
 | Progress save, sign-in, per-student storage, practice minutes | `save-and-sign-in.md` | Save change: `node tools/save-loop.mjs`, Always Reviewed |
 | `sw.js`, load order, kill switch | `sw-and-loading.md` | Load-order change: `node tools/slow-load.mjs` |
 | `firestore.rules`, the practice copy | `firestore.md` | Tell Jonathan to paste; re-pin 1dt same commit |
-| How a game LISTENS, pitch detectors | `listening.md`; `tools/mic-sim/README.md` | Real student takes outrank synthetic rooms |
+| How a game LISTENS, pitch detectors | `listening.md`; `tools/mic-sim/README.md` | Before proposing a listening rule: `node tools/mic-sim/closed-loop.mjs --rooms=room7,room4`, then the same with `--no-guitar`; real student takes outrank the synthetic rooms |
 | Teacher console, each part's tool | `teacher-console.md` | `config/class` only via `teacherWriteConfig()` |
 | Live quiz and its games | `live-quiz.md` | Nothing on the stage reveals the answer early |
 | Set band, left rail, nav grid | `rail-layout.md` | The two-column nav grid is permanent |
@@ -352,4 +348,4 @@ bind.
 | Cloud pushes, Cowork handoff, hooks | skill `session-handoff` | Cowork can't push; the web can |
 | The Friday check | skill `friday-check` | Ends by committing `last-run.txt`; never move a tag |
 | Audits, many-file refactors, 50+ strings | skill `site-sweep` | Pre-create worktrees; cherry-pick; review the fixes |
-| "Hear It First" trainer (`trainer-*.js`) | header of `trainer-core.js` | Hidden from students; after a `trainer-core.js` change `node tools/trainer-sim.mjs` (not in checks); only the adapter touches site globals; never change `coach-*.js` / `tuner.js` for it |
+| "Hear It First" trainer (`trainer-*.js`) | header of `trainer-core.js` | Hidden; after a `trainer-core.js` change `node tools/trainer-sim.mjs` (not in checks); only the adapter touches site globals; never change `coach-*.js` / `tuner.js` for it |

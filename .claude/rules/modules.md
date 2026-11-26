@@ -2,6 +2,7 @@
 paths:
   - "module-*.js"
   - "config-main.js"
+  - "class-activities.js"
   - "app/save.js"
   - "app/lesson.js"
   - "app/review.js"
@@ -26,8 +27,8 @@ A progress key is `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX
 - **Above 6:** step count and order fixed; a rename prints.
 - **Every regime:** SECTIONS fixed (count, order, kind); a section TITLE may be reworded (it prints) unless it has a
   `kind` or is the tuning warm-up title.
-- **Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) when the class ENTERS a module** (ask Jonathan which module
-  that is); the keyed quizzes of the module after it are frozen automatically (1dl). **Never lower either** (1dl):
+- **Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) when the class ENTERS a module**; the keyed quizzes of the
+  module after it are frozen automatically (1dl). **Never lower either** (1dl):
   module progress never resets unless Jonathan does it.
 - A locked set is a read-only preview; every answer writer needs `isPeekedResponseKey()` (1bl).
 - A blocked fix → the Summer reset list (skill `summer-reset`) the same day. It waits there until a declared old key →

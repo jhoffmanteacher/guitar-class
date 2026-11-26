@@ -7,6 +7,8 @@ paths:
   - "app/activities.js"
   - "app/activities-2.js"
   - "app/activities-list.js"
+  - "app/explore.js"
+  - "coach-*.js"
   - "practice-minutes.js"
   - "practice-minutes-config.js"
   - "teacher-remove.js"

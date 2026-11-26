@@ -594,6 +594,12 @@ govern). The dated reasons it carried, one line each:
   general-purpose agents at 25%).
 - **Give the blurb for another session the first time** (Jonathan, 2026-11-11: "just give me the blurb the first
   time").
+- **Cloud agents when the lead is on the Mac** (Jonathan, 2026-11-26: "cloud agents/sub agents encouraged when using
+  mac to keep load down"). Local agents on the Mac keep their caps and sub-agent limit.
+- **Three contradictions settled in the rewrite (lead, 2026-11-26):** sub-agents (cloud agents freely; a local Mac
+  agent none, except an Opus builder's one Sonnet sub-agent); moving an existing section or step is never allowed,
+  while adding or removing a step where a regime allows it is Always Reviewed; GitHub's `browser.yml` walk is the
+  Fast change's smoke.
 - **Preserve the author's words in module text** (Jonathan, 2026-07-25); the per-set Songs tab was removed 2026-08-27;
   the rail's slim default is Look 1, Part 5 (2026-11-17).
 

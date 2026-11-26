@@ -5,6 +5,7 @@ paths:
   - "live-changes.js"
   - "live-hilo.js"
   - "live-saw.js"
+  - "i18n.js"
 ---
 
 ## Live quiz — the whole-class game

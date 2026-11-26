@@ -1,5 +1,6 @@
 ---
 paths:
+  - "class-activities.js"
   - "app/songfiles.js"
   - "app/songhelp.js"
   - "app/builtsongs.js"
