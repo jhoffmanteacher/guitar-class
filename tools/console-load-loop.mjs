@@ -31,7 +31,7 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Twenty families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Twenty-one families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
    booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
@@ -58,6 +58,8 @@
    the minute timer's retry, or booted on Live In-Class Games, Mic recordings' own read bringing the settings back,
    then a roster view opened) and landwrite (a card's page or the list with progress down for 10-25 s, every latency
    60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it).
+   Review R5 added archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
+   1.6 s, so that view's own settings read fails before the roster lands; then a roster view).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
    board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
    a card dragged for 10-90 s, the second console's writes (dates, Hidden, Optional, Play Along, Keep in Today, pins,
@@ -934,7 +936,7 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite', 'archkept'];
 const MIN = 60000, SEC = 1000;
 const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true } };
 const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
@@ -980,6 +982,9 @@ function genCase(seed, k, famOverride) {
   // A write still open when the retry's roster lands (review R4-1 (d), the reviewer's chaos case 30): every latency
   // 60 ms and a click 60 ms before the slow progress read lands, so the view's own read waits for the write.
   else if (fam === 'landwrite') { heal = 3 * MIN; boot = 'activities'; c.lat = 60; c.progExtra = r.int(1500, 3000); slot(0, r.int(10, 25) * SEC, ST.prog); c.writeAtProgLand = true; }
+  // A view's own settings read fails while the first load's slow progress read is out (review R5-2): the first load's
+  // settings read was good, so its archived list must still hide the archived student when the roster lands.
+  else if (fam === 'archkept') { heal = 2 * MIN; c.noResume = true; boot = 'activities'; c.progExtra = 5000; const d = r.int(400, 900); slot(d, d + 1600, ST.cfg); c.earlyView = ['games', 'songs', 'manage'][nth % 3]; c.earlyAt = d + r.int(50, 300); }
   else if (fam === 'chaos') { heal = 6 * MIN; for (let t = 0; t < heal; t += r.int(2, 20) * SEC) { const x = r(); slot(t, t + 20 * SEC, x < 0.3 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
   c.boot = boot;
   c.bootSub = fam === 'detail' ? 'detail' : fam === 'landwrite' ? (nth % 2 ? 'split' : 'detail') : fam === 'failedread' ? (nth % 2 ? 'split' : 'detail') : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
@@ -1016,6 +1021,9 @@ function genCase(seed, k, famOverride) {
     add(c.earlyAt, 'view', { v: c.earlyView, early: true });
     add(r.int(20, 40) * SEC, 'write', {});
     if (r.chance(0.5)) add(r.int(5, 15) * SEC, 'B', { cells: 'mix' });
+  } else if (fam === 'archkept') {
+    add(c.earlyAt, 'view', { v: c.earlyView, early: true });
+    add(r.int(20, 40) * SEC, 'view', { v: r.pick(['students', 'skills', 'trouble']) });
   } else if (fam === 'summary') {
     add(r.int(5, 10) * SEC, 'view', { v: 'skills' });
     add(r.int(12, 20) * SEC, 'period');
