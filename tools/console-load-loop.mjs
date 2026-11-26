@@ -7,7 +7,7 @@
    and the student-progress read (the progress collection) fail and come back on a schedule, while a teacher clicks
    views, hides the tab, types, drags, and a second console writes config/class.
 
-     node tools/console-load-loop.mjs                       160 cases, seed 1 (about 15-30 s)
+     node tools/console-load-loop.mjs                       160 cases, seed 1 (about 12 s, 2026-11-25)
      node tools/console-load-loop.mjs --seed S --cases N     another seed / count
      node tools/console-load-loop.mjs --case K --verbose     replay ONE case: every event, read, write and check
      --family F     only that family (names below)            --root DIR    another site folder (a break-it copy)
@@ -17,7 +17,8 @@
    its case, its finding id and its replay command) or a coverage floor missed. 2: the tool itself broke.
    3: the watchdog: no step for --stall seconds; it prints the step it was on.
    Run it after any change to the console's first load, its retry, the "student progress did not load" line, or what a
-   view shows while the roster is missing (CLAUDE.md "Teacher console"); not in checks.mjs.
+   view shows while the roster is missing (CLAUDE.md "Teacher console"); not in checks.mjs, but GitHub runs it after
+   every push to main (.github/workflows/checks.yml, job proofs, since 2026-11-25).
 
    WHAT IS REAL. One console: a vm context holding the site's scripts unchanged, in index.html's order: config-main.js,
    class-activities.js, i18n.js, guitar-diagrams.js, the app parts, practice-minutes, live-quiz.js and
