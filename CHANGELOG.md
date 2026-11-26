@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-26 — A new kind of activity: Memory Fade
+
+- **New activity: Memory Fade.** Play the Sweet Child O' Mine verse with the band four times while the chord names
+  disappear a few at a time, until you play it from memory. Tap Show it if you get lost. (It shows up once your teacher
+  posts it.)
+
 ## 2026-11-26 — A new kind of activity: Echo
 
 - **New activity: Echo.** The site plays a short power-chord strum, you play it back in the gap, then the next one. It
