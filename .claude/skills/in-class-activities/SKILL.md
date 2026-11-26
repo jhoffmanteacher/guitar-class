@@ -3,6 +3,23 @@ name: in-class-activities
 description: How the guitar site's In-Class Activities page, activity gate, exit checks and practice cards work: caBlockers/caIsVisible, Today's activity, Open-through, optional/CAS, clears, archive/delete, Journey gating, four-step/two-line rules, view:'card' practice cards and whole-song cards, Play Along now, Songs Core rows, render-time hiding (visibleSteps/visibleSections, section kinds), the two step renderers (caStepHtml / renderTeacherActivityDetail), the activity board and numbering (activityBoard, caBoardOrder, teacherMoveActivity, series numbers in titles), and the play-along-first song links (openSongLink, songsPlayAlongCard, TAKE_TO_SONG_ENABLED). Read BEFORE editing class-activities.js, the ca*/ec*/pc* code in the app/*.js parts (app/activities.js, app/cards.js, app/activities-2.js, app/activities-list.js), the teacher-*.js activity/console code, or tabs/journey.js gating.
 ---
 
+## Building a new activity: start from a shape
+
+Every new In-Class Activity starts from one of the ready-made shapes in `shapes.md` beside this file (Jonathan,
+2026-11-26): a song part card, a whole-song play-along, a lyric-sheet card, a library play-along, the speed ladder,
+a tab ladder, a Finger Gym circuit, a note-names ladder, a strum-pattern ladder, the strum-pattern check, a drill
+ladder or an exit check. Jonathan still builds each one with you.
+1. Pick the shape with Jonathan (its row in the table at the top of `shapes.md`), and ask him that shape's
+   questions.
+2. Copy the exemplar card it names from `class-activities.js`, with the next unused id, and change only the per-song
+   values its skeleton marks. A copy adds no new field, so neither step renderer changes.
+3. Write each direction as one line, EN and ES, the way that shape's quoted examples do, keeping the count.
+4. Run the common checks and that shape's own tools (listed in its section), and read its traps first.
+Four builds are not a plain copy, and their sections say why: a second strum-pattern check (code and the 1eh pin), a
+second speed ladder (the 1fc pin and `tools/speed-ladder-loop.mjs`), a new drill type, and a new deck (code and
+`i18n.js`). Say so to Jonathan before building one. A library play-along is typed by `tools/new-playalong.mjs`
+(skill `new-playalong`), not copied by hand.
+
 ## Exit checks — the end-of-period product
 
 An exit check is a class activity with `kind: 'check'` (schema at the top of
