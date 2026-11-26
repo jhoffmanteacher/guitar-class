@@ -70,9 +70,13 @@ function coachMinHeard(slotCount){
 }
 
 /* The skill this round is for still waits on the Coach: toggleSkill (app/audio-ui.js) would show the check-off gate, whose
-   "Mark it anyway" the "could not read" screen names. typeof: the gate lives in app/audio-ui.js, not in the coach parts. */
+   "Mark it anyway" the "could not read" screen names. Not in a locked set's read-only preview: toggleSkill refuses
+   "I've got it!" there (isSetPeeking), so no gate opens. The card sits inside the set's panel (coachOpen puts it next to its
+   button, in a lesson step or the checklist's practice panel, both of the skill's own set), so the panel's .set-peek is read
+   from the card, as app/lesson.js does from a button. typeof: the gate lives in app/audio-ui.js, not in the coach parts. */
 function coachGateWaiting(){
   if (typeof skillIsCoachGated !== 'function' || typeof coachSkillBest !== 'function') return false;
+  if (coach.card && typeof coach.card.closest === 'function' && coach.card.closest('.week-panel.set-peek')) return false;
   return (coach.skillIds || []).some(sid => skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL
     && !(typeof progress !== 'undefined' && progress && progress[sid] === 'gotit'));
 }
