@@ -11571,7 +11571,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
    caOnToggle resets the switches when a card closes (pcLoopReset), so every opening starts off. Every string the
    part uses is in i18n.js in English and Spanish. The behaviour itself (laps on the bar line, the steps) is
    tools/playalong-loop.mjs's (R15) and the smoke's. */
-const EB_CARDS_WITH = 24, EB_CARDS_WITHOUT = 4;   // 2026-11-26: ca-56 (the memory fade, one section) draws no section buttons and no switches. 2026-11-24: ca-54 (the speed ladder, ONE round) draws no section buttons and no switches (1fc)
+const EB_CARDS_WITH = 24, EB_CARDS_WITHOUT = 4;   // 2026-11-26: ca-56 (the memory fade) draws no section buttons and no switches. 2026-11-24: ca-54 (the speed ladder, ONE round) draws no section buttons and no switches (1fc)
 const EB_STRINGS = ['pc.loop', 'pc.build', 'pc.buildTitle', 'pc.hold', 'pc.holdTitle', 'pc.looping', 'pc.lapOf', 'pc.lapAt', 'pc.keys.loop'];
 function checkLoopSpeed(ctx, i18nTable) {
   head('1eb. Loop this part / Build up speed: only on cards with section buttons, off by default, nothing stored');
@@ -11588,8 +11588,8 @@ function checkLoopSpeed(ctx, i18nTable) {
       run('setLang(' + JSON.stringify(lang) + ')');
       for (const a of acts) {
         ctx.__ebCard = a;
-        // A one-round card (ca-54) draws no section buttons and so no switches: Play starts its ladder (1fc).
-        const n = run('(() => { const L = pcLayout(caView(window.__ebCard)); return !L ? 0 : pcOneRound(L) ? 1 : L.sections.length; })()');
+        // A one-round card (ca-54) and a memory fade (ca-56) draw no section buttons and so no switches: Play starts them (1fc, 1fm).
+        const n = run('(() => { const L = pcLayout(caView(window.__ebCard)); return !L ? 0 : pcOneRound(L) || window.__ebCard.card.fade ? 1 : L.sections.length; })()');
         for (const preview of [false, true]) {
           const html = String(run('caCardBodyHtml(window.__ebCard' + (preview ? ', { preview: true }' : '') + ')'));
           renders++;
@@ -11983,8 +11983,8 @@ function checkSpeedLadder(ctx, i18nTable) {
   if (!bad) ok(`1fc: ${asserts} assertions on the real code — rounds, slowestRate, startStop and buildLaps are on ${FC_CARD} alone; its card draws in EN + ES (student and preview) on 90 · 100 · 112 · 125 (0.7× 0.8× 0.9× 1×), opens on the first stop, no round buttons or switches, a hidden prompt with Got it and Practice again; one lap a stop; the lap ends at bar 24 (verse + chorus); with the prompt on the card it pauses at every stop and never climbs by itself; the status line names the BPM; ca-33 still opens on Normal at 0.8 with two laps`);
 }
 /* 1fm. MEMORY FADE (ca-56, app/fade.js; Jonathan, 2026-11-26: "a memory fade activity for sweet child of mine").
-   card.fade is on the pinned cards alone (FM_CARDS: a new fade card is a decision). ca-56 plays ca-33's Verse 1 (the
-   same notes array, bars and laps) under a caption of its own that names no chord. RUN, not read: the card is drawn
+   card.fade is on the pinned cards alone (FM_CARDS: a new fade card is a decision). ca-56 plays ca-33's Verse 1 and
+   Chorus 1 (the same notes arrays, bars and laps) under captions of its own that names no chord. RUN, not read: the card is drawn
    in the 0b render context (EN + ES, student and console preview) and parsed into tools/sim-dom.mjs, where the REAL
    fadeStarted / pcLoopLapDone (its fade hook) / fadeShowIt / fadeReset run on it: what opens (time 1 of 4, every name
    shown, Show it off and disabled, the loop on), which chord changes are blank on each time through (pinned FM_PLAN),
@@ -11992,9 +11992,9 @@ function checkSpeedLadder(ctx, i18nTable) {
    through, the last time through ending the loop, and pcFrame's end on that last time through landing in fadeSongEnd
    (the done line). A page WITHOUT app/fade.js still draws the card with no fade bar and loops it (the hooks are
    guarded). The browser walk (the cursor against the beat map on blank bars) is tools/playalong-loop.mjs (R18). */
-const FM_CARDS = ['ca-56'], FM_ASSERTS = 59;
-// Hidden chord changes (0-based, drawing order) on each time through of ca-56's verse (D5 C5 G5 D5): the rule in app/fade.js.
-const FM_PLAN = [[], [1, 3], [1, 2, 3], [0, 1, 2, 3]];
+const FM_CARDS = ['ca-56'], FM_ASSERTS = 60;
+// Hidden chord changes (0-based, drawing order) on each time through of ca-56 (verse D5 C5 G5 D5, chorus A5 C5 D5): the rule in app/fade.js.
+const FM_PLAN = [[], [1, 3, 5], [1, 2, 3, 5, 6], [0, 1, 2, 3, 4, 5, 6]];
 async function checkMemoryFade(ctx, i18nTable) {
   head('1fm. Memory fade (ca-56): the names fade time by time, the cursor and count untouched, Show it, the end');
   let bad = 0, asserts = 0;
@@ -12010,9 +12010,9 @@ async function checkMemoryFade(ctx, i18nTable) {
   is(JSON.stringify(fadeIds) === JSON.stringify(FM_CARDS), `card.fade is on [${fadeIds.join(', ')}], pinned [${FM_CARDS.join(', ')}] (a new fade card is a decision: pin it here)`);
   const card = acts.find(a => a.id === 'ca-56'), host = acts.find(a => a.id === 'ca-33');
   if (!card || !host) { flag('ca-56 or ca-33 not found'); return; }
-  const v1 = host.card.sections.find(x => x.label === 'Verse 1'), S = card.card.sections && card.card.sections[0];
-  is(card.card.sections.length === 1 && S && v1 && S.notes === v1.notes && S.fromBar === v1.fromBar && S.bars === v1.bars && S.reps === v1.reps && S.label === v1.label, 'ca-56 plays ca-33\'s Verse 1: one section, the same notes array, fromBar, bars, reps and label');
-  is(![card.card.caption, card.card.caption_es, S && S.caption, S && S.caption_es, card.intro, card.intro_es].some(x => /\b[A-G][#b]?5\b/.test(String(x || ''))), 'ca-56: a caption or the intro names a chord (the card is hiding them)');
+  const own = ['Verse 1', 'Chorus 1'].map(l => host.card.sections.find(x => x.label === l)), S = card.card.sections || [];
+  is(S.length === 2 && own.every((v, i) => v && S[i] && S[i].notes === v.notes && S[i].fromBar === v.fromBar && S[i].bars === v.bars && S[i].reps === v.reps && S[i].label === v.label), 'ca-56 plays ca-33\'s Verse 1 then Chorus 1: the same notes arrays, fromBar, bars, reps and labels');
+  is(![card.card.caption, card.card.caption_es, ...S.flatMap(x => [x.caption, x.caption_es]), card.intro, card.intro_es].some(x => /\b[A-G][#b]?5\b/.test(String(x || ''))), 'ca-56: a caption or the intro names a chord (the card is hiding them)');
   is(card.card.chordGrid === true && fadeIds.length === 1 && run('fadePassesOf(window.CLASS_ACTIVITIES.find(a => a.id === "ca-56").card)') === 4, 'ca-56: a chord grid, four times through');
   is(run('[fadePassesOf({ fade: {} }), fadePassesOf({ fade: { passes: 1 } }), fadePassesOf({ fade: { passes: 9 } }), fadePassesOf({ fade: { passes: 2.5 } }), fadePassesOf({}), fadePassesOf({ fade: { passes: 3 } })].join()') === '4,0,0,0,0,3', 'fadePassesOf: the default is 4, a count outside 2..8 or not whole is no fade');
   const saveLang = run('getLang()');
@@ -12044,9 +12044,10 @@ async function checkMemoryFade(ctx, i18nTable) {
     ctx.__fmRoot = root;
     const beats0 = root.querySelectorAll('.pc-tab [data-beat]').length, counts0 = root.querySelectorAll('.pc-tab .tab-count').map ? root.querySelectorAll('.pc-tab .tab-count').length : 0;
     const names = []; root.querySelectorAll('.pc-tab .tab-chord-btn').forEach(x => names.push(x.textContent.replace(/\s+/g, '')));
-    is(names.join(' ') === 'D5 C5 G5 D5', `the grid names [${names.join(' ')}], want D5 C5 G5 D5 (the verse's four changes)`);
+    is(names.join(' ') === 'D5 C5 G5 D5 A5 C5 D5', `the grid names [${names.join(' ')}], want D5 C5 G5 D5 A5 C5 D5 (the verse's four changes, the chorus's three)`);
     run(`window.__fmSt = { root: window.__fmRoot, L: pcLayout(caView(window.__fmCard)), loopFrom: 0, loopSi: -1, loopTo: 0, wholeSong: false, laps: 0, build: null, counting: false };`);
     run('fadeStarted(window.__fmSt)');
+    is(run('window.__fmSt.loopTo') === 1 && run('pcLoopEndBars(window.__fmSt)') === run('window.__fmSt.L.totalBars') && root.querySelectorAll('.pc-sec, .pc-loop-sw').length === 0, 'one time through is the verse and the chorus: the loop ends at the card\'s end, and no section buttons or Loop switches are drawn');
     is(run('window.__fmSt.loopSi') === 0 && run('window.__fmSt.wholeSong') === false, 'fadeStarted on time 1: the loop is on (loopSi 0), the song does not stop at its end');
     /* The real pcStart calls it (a stand-in <audio> that never loads, so nothing plays): the loop on at time 1; at time 4
        of 4 the loop off and the song ending at its end. pcStop after each. */
@@ -12084,7 +12085,7 @@ async function checkMemoryFade(ctx, i18nTable) {
       window.__fmRoot.isConnected = true; pcState = st; pcFrame(); })()`);
     is(run('pcState') === null, 'pcFrame at the end of the last time through stops the song');
     const bar = root.querySelector('.fade-bar');
-    is(bar.dataset.done === '1' && root.querySelector('.fade-pass').textContent === run('t("fade.done")') && hiddenIdx(root).length === 4, `the end: the bar says done ("${root.querySelector('.fade-pass').textContent}") and the names stay blank`);
+    is(bar.dataset.done === '1' && root.querySelector('.fade-pass').textContent === run('t("fade.done")') && hiddenIdx(root).length === 7, `the end: the bar says done ("${root.querySelector('.fade-pass').textContent}") and the names stay blank`);
     // Play after the end starts at time 1; fadeReset (a card closing) too.
     run('fadeStarted(window.__fmSt)');
     is(bar.dataset.pass === '1' && bar.dataset.done === '' && hiddenIdx(root).length === 0 && run('window.__fmSt.loopSi') === 0, 'Play after the end: time 1, every name back, looping');
@@ -12117,7 +12118,7 @@ async function checkMemoryFade(ctx, i18nTable) {
     is(r.fade === 'undefined' && /<div class="pc" data-id="ca-56"/.test(r.h) && !/fade-bar/.test(r.h), 'a page without app/fade.js draws ca-56 as a plain card (no fade bar)');
   } catch (e) { asserts++; flag('a page without app/fade.js: ' + e.message); }
   if (asserts !== FM_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FM_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1fm: ${asserts} assertions on the real code — card.fade on ${FM_CARDS.join(', ')} alone, ca-33's Verse 1 under a caption naming no chord; drawn EN + ES (student and preview) on time 1 of 4, Show it off; times 1-4 blank changes ${FM_PLAN.map(x => '[' + x + ']').join(' ')} with their frets, the beat cells and count row untouched; Show it for one time through; the last time through stops the loop and ends in the done line; Play after the end or a Stop, and closing the card, behave; a page without app/fade.js still draws the card`);
+  if (!bad) ok(`1fm: ${asserts} assertions on the real code — card.fade on ${FM_CARDS.join(', ')} alone, ca-33's Verse 1 and Chorus 1 as one time through, under captions naming no chord; drawn EN + ES (student and preview) on time 1 of 4, Show it off; times 1-4 blank changes ${FM_PLAN.map(x => '[' + x + ']').join(' ')} with their frets, the beat cells and count row untouched; Show it for one time through; the last time through stops the loop and ends in the done line; Play after the end or a Stop, and closing the card, behave; a page without app/fade.js still draws the card`);
 }
 function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   head('1db. Practice-card keys (Space/K, arrows, < >) and the tick pop on a check-off');

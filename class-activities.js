@@ -389,7 +389,8 @@
    `ca-52` is "Strum Pattern check" (2026-11-14); `ca-53` is "Strum
    Pattern — The Chorus" (2026-11-16); `ca-54` is "Sweet Child O' Mine —
    Speed Ladder" (2026-11-24); `ca-55` is "Echo — Power Chord
-   Strums" (2026-11-26); the next new activity is `ca-56`.
+   Strums" (2026-11-26); `ca-56` is "Sweet Child O' Mine —
+   Memory Fade" (2026-11-26); the next new activity is `ca-57`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7685,12 +7686,13 @@ window.CLASS_ACTIVITIES = [
     steps: [],
   },
   /* ca-56 — Sweet Child O' Mine — Memory Fade (Jonathan, 2026-11-26: "a memory fade activity for sweet child of
-     mine"). MEMORY FADE (`card.fade`, app/fade.js): the play-along card loops one section with the record, and after
+     mine"). MEMORY FADE (`card.fade`, app/fade.js): the play-along card loops the verse and chorus with the record, and after
      each time through more chord names leave the chord grid, until the last time through shows none. The material
-     is ca-33's Verse 1 (bars 25-40, D5 D5 C5 C5 G5 G5 D5 D5 twice, power chords): that progression is also the
-     song's intro and both riffs, so it is most of the song (and half of the Unit 3 assessment's verse and chorus).
-     Its own caption is joined after the array (the shared one names the chords). ONE time through = the whole
-     section, both laps (16 bars). Four times through: every name, every other name, the first name only, no names;
+     is ca-33's Verse 1 and Chorus 1 (bars 25-48: D5 D5 C5 C5 G5 G5 D5 D5 twice, then A5 C5 D5 D5 twice, power
+     chords): the Unit 3 assessment's verse and chorus. The chorus was added the same day (Jonathan: "add chorus to
+     ca-56 too"; he picked "verse into chorus"). The captions are this card's own, joined after the array (the shared
+     ones name the chords). ONE time through = the verse then the chorus without stopping (24 bars): so the card draws
+     no section buttons and no Loop switches. Four times through: every name, every other name, the first name only, no names;
      the cursor and the count keep moving over the blank boxes, and "Show it" brings the names back for the rest of
      that time through. After the fourth the song stops. Nothing is stored. Unplaced: on no board until Jonathan
      places it. */
@@ -7699,20 +7701,20 @@ window.CLASS_ACTIVITIES = [
     view:  'card',    // one screen: Play song + chord grid — see CARD above
     title:    'Sweet Child O\' Mine — Memory Fade',
     title_es: 'Sweet Child O\' Mine — De memoria',
-    intro:    'Play the verse four times with the band as the chord names fade, until you play it from memory.',
-    intro_es: 'Toca la estrofa cuatro veces con la banda mientras se borran los acordes, hasta tocarla de memoria.',
+    intro:    'Play the verse and chorus four times as the chord names fade, until you know them by heart.',
+    intro_es: 'Toca la estrofa y el coro cuatro veces mientras se borran los acordes, hasta tocarlos de memoria.',
     card: {
       track: 'sweet-child-o-mine',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only — see CARD above
       slowest: true,    // four-way speed control: Slowest / Slower / Slow / Normal
       fade: { passes: 4 },   // MEMORY FADE (app/fade.js): four times through, the names fading
-      caption:    'The verse from memory',
-      caption_es: 'La estrofa de memoria',
-      sections: null,   // ca-33's Verse 1, with its own caption — joined after the array, below
+      caption:    'The verse and chorus from memory',
+      caption_es: 'La estrofa y el coro de memoria',
+      sections: null,   // ca-33's Verse 1 and Chorus 1, with their own captions — joined after the array, below
       checks: [
         { label: 'From memory', label_es: 'De memoria',
-          text:    'Play the verse with the band four times through, the last time with no chord names.',
-          text_es: 'Toca la estrofa con la banda cuatro veces, la última sin nombres de acordes.' },
+          text:    'Play the verse and chorus four times through, the last time with no chord names.',
+          text_es: 'Toca la estrofa y el coro cuatro veces, la última sin nombres de acordes.' },
         { levelUp: true,
           card: 'ca-33',    // its button opens the whole-song card in power chords
           text:    'Play the whole song on the Whole Song card.',
@@ -7744,13 +7746,17 @@ window.CLASS_ACTIVITIES = [
   if(from && to) to.card.sections = ['Verse 1', 'Chorus 1'].map(l => from.card.sections.find(sec => sec.label === l)).filter(Boolean);
 })();
 
-/* ca-56 (the memory fade) plays ca-33's Verse 1: its bars and its notes array are ca-33's own (not a copy), so it cannot
-   drift; only the caption is its own, because ca-33's names the chords the card is hiding. */
+/* ca-56 (the memory fade) plays ca-33's Verse 1 and Chorus 1: their bars and notes arrays are ca-33's own (not copies),
+   so it cannot drift; only the captions are its own, because ca-33's name the chords the card is hiding. */
 (function(){
   const list = window.CLASS_ACTIVITIES;
   const from = list.find(a => a.id === 'ca-33'), to = list.find(a => a.id === 'ca-56');
-  const v = from && from.card.sections.find(sec => sec.label === 'Verse 1');
-  if(v && to) to.card.sections = [{ ...v, caption: 'Verse — 2 laps', caption_es: 'Estrofa — 2 vueltas' }];
+  const own = [['Verse 1', 'Verse — 2 laps', 'Estrofa — 2 vueltas'], ['Chorus 1', 'Chorus — 2 laps', 'Coro — 2 vueltas']];
+  const secs = own.map(([label, caption, caption_es]) => {
+    const sec = from && from.card.sections.find(x => x.label === label);
+    return sec && { ...sec, caption, caption_es };
+  }).filter(Boolean);
+  if(to && secs.length === own.length) to.card.sections = secs;
 })();
 
 /* CARD VIEWS (Jonathan, 2026-11-17: "chords/tab switch"; see otherViews in the

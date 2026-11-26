@@ -130,8 +130,8 @@
          lags the main element's place by exactly the gap its rate shows the page closing (twinFollow's gain, 0.5),
          within 4 ms. The lap and Build up speed walks also run with Guitar on where a track has a full mix (the
          full mixes' own offsets through a lap edge, the spare and every Build step; review R1-2, 2026-11-16).
-     R18 MEMORY FADE (card.fade, ca-56, 2026-11-26; app/fade.js): the card loops its section, and one time through is
-         the whole section (all its reps). Time p of N (from 1; N = fade.passes, 4 when not given) shows the chord
+     R18 MEMORY FADE (card.fade, ca-56, 2026-11-26; app/fade.js): the card loops its sections as one, and one time
+         through is every section in order (all their reps); it draws no section buttons. Time p of N (from 1; N = fade.passes, 4 when not given) shows the chord
          change i (0-based, in the order of the chart, over the whole card) when p < N and i is a multiple of 2^(p-1);
          every other change's name is blank, and so are its frets; "Show it" shows them all until the next time
          through. After time N the song stops by itself at the end of the section (once N - 1 laps are seen), and the
@@ -1214,7 +1214,9 @@ function planWalks(M) {
     if (M.open.hasCounts && counts != null) ops.push({ op: 'click', sel: '.pc-counts', attr: 'aria-checked', want: counts ? 'true' : 'false', counts });
     return ops;
   };
-  const startOp = (si) => (ch.secs.length > 1 && si != null ? { op: 'click', sel: '.pc-sec', i: si, start: { si, rep: 0 } } : { op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 } });
+  /* A fade card draws no section buttons: every play starts at the top (R18). */
+  const tap = ch.secs.length > 1 && !ch.fade;
+  const startOp = (si) => (tap && si != null ? { op: 'click', sel: '.pc-sec', i: si, start: { si, rep: 0 } } : { op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 } });
   const song = (stop, guitar, extra = {}) => {
     const ops = setup(stop, guitar, true, extra.counts);
     ops.push({ op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 } }, { op: 'untilAudible', max: 60000, dt: FINE_MS });
@@ -1233,10 +1235,10 @@ function planWalks(M) {
   /* Every section button, the speed changing from one to the next: the count-in, then the section's first bar. In every view. */
   {
     const ops = setup('slower', hasFull, false, null);
-    ch.secs.forEach((S, si) => {
+    (ch.fade ? ch.secs.slice(0, 1) : ch.secs).forEach((S, si) => {
       const stop = stops[si % stops.length];
       ops.push({ op: 'speed', i: STOPS.indexOf(stop), stopName: stop });
-      ops.push(ch.secs.length > 1 ? { op: 'click', sel: '.pc-sec', i: si, start: { si, rep: 0 }, stopName: stop } : { op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 }, stopName: stop });
+      ops.push(tap ? { op: 'click', sel: '.pc-sec', i: si, start: { si, rep: 0 }, stopName: stop } : { op: 'click', sel: '.pc-play', start: { si: 0, rep: 0 }, stopName: stop });
       ops.push({ op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: msFor(M, stop, S.fromBar - 1, S.fromBar), dt: FINE_MS, cover: { si, rep: 0, bars: 1 } });
     });
     ops.push({ op: 'click', sel: '.pc-play', stop: true });
@@ -1246,7 +1248,7 @@ function planWalks(M) {
      the twin already playing. At every stop of the slider (Slowest and Slow play their file at another rate). After
      each press the next bar and a half must light, place by place. */
   if (hasFull && (M.isBase || M.recAlt)) for (const stop of (M.isBase ? stops : ['slower'])) {
-    const si = Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, stop, S.fromBar - 1, S.fromBar);
+    const si = ch.fade ? 0 : Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, stop, S.fromBar - 1, S.fromBar);
     const ops = setup(stop, true, false, null);
     let pos = barsAfter(stop, S.fromBar - 1, bar * 1.4);
     ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: bar * 1.4, dt: FINE_MS });
@@ -1260,7 +1262,7 @@ function planWalks(M) {
   }
   /* The speed slider moved while the song plays: every stop, and back. */
   if (M.isBase && M.open.hasSlider) {
-    const si = Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, 'slower', S.fromBar - 1, S.fromBar);
+    const si = ch.fade ? 0 : Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, 'slower', S.fromBar - 1, S.fromBar);
     const ops = setup('slower', hasFull, false, null);
     let pos = barsAfter('slower', S.fromBar - 1, bar * 1.3);
     ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: bar * 1.3, dt: FINE_MS });
@@ -1275,7 +1277,7 @@ function planWalks(M) {
   /* The switches again with the Metronome ON: every count the song passes must get one click, none doubled, around
      every switch. */
   if (M.isBase && (hasFull || M.open.hasSlider)) {
-    const si = Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, 'slower', S.fromBar - 1, S.fromBar);
+    const si = ch.fade ? 0 : Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, 'slower', S.fromBar - 1, S.fromBar);
     const ops = setup('slower', hasFull, true, null);
     let pos = barsAfter('slower', S.fromBar - 1, bar * 1.3), stop = 'slower';
     ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: bar * 1.3, dt: FINE_MS });
@@ -1303,7 +1305,7 @@ function planWalks(M) {
      clock), and the judge checks that each press met a queued click. */
   if (M.isBase) {
     const AQUEUE = 40;
-    const si = Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, 'slower', S.fromBar - 1, S.fromBar);
+    const si = ch.fade ? 0 : Math.min(1, ch.secs.length - 1), S = ch.secs[si], bar = msFor(M, 'slower', S.fromBar - 1, S.fromBar);
     const times = {};
     for (const [f, fi] of Object.entries(M.files)) {
       if (fi.key !== M.view.track) continue;
@@ -1322,9 +1324,10 @@ function planWalks(M) {
   /* The lap, from the last section, with the spare ready and with a spare that never loads (the old seek); and once
      from a section in the MIDDLE of the card, which must come back to that section, not to the first. */
   if (!ch.wholeSong && M.isBase) for (const stop of ['slower', 'normal']) for (const spare of [true, false]) for (const g of (hasFull && spare ? [false, true] : [false])) {
-    const si = ch.secs.length - 1, len = msFor(M, stop, lastSec.fromBar - 1, ch.endBar - 1);
+    /* A fade card's lap is the whole card, from the top (R18). */
+    const si = ch.fade ? 0 : ch.secs.length - 1, from = ch.secs[si], len = msFor(M, stop, from.fromBar - 1, ch.endBar - 1);
     const ops = setup(stop, g, true, null);
-    ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: len * 2 + msFor(M, stop, lastSec.fromBar - 1, lastSec.fromBar) * 0.75, dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true });
+    ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: len * 2 + msFor(M, stop, from.fromBar - 1, from.fromBar) * 0.75, dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true });
     walks.push({ kind: 'lap', name: `lap · ${stop} · ${spare ? 'the spare ready' : 'no spare (the seek)'}${g ? ' · guitar on' : ''}`, stop, guitar: g, ops, span: 'lap', lapFrom: si, laps: 2, lateNeverLoad: !spare, metro: true, fresh: true });
   }
   if (!ch.wholeSong && M.isBase && ch.secs.length >= 3) {
@@ -1603,7 +1606,7 @@ function judge(M, W, res) {
   /* A stretch of the song (bars from bar 1's downbeat): every place it passes through, sampled every 1/96 bar. */
   const addRange = (from, to) => { for (let b = from; b <= to + 1e-9; b += 1 / 96) { const p = ch.place(Math.min(b, to)); if (p) want.add(p.key); } };
   if (W.span === 'all') ch.secs.forEach(S => { for (let r = 0; r < S.reps; r++) addSpan(S.i, r, S.bars); });
-  if (W.span === 'lap') { const S = ch.secs[W.lapFrom]; for (let r = 0; r < S.reps; r++) addSpan(S.i, r, S.bars); }
+  if (W.span === 'lap') (ch.fade ? ch.secs : [ch.secs[W.lapFrom]]).forEach(S => { for (let r = 0; r < S.reps; r++) addSpan(S.i, r, S.bars); });   // a fade card's lap is every section
   if (W.span === 'cover') W.ops.forEach(o => { if (o.cover && o.cover.si != null) addSpan(o.cover.si, o.cover.rep, o.cover.bars); else if (o.cover) addRange(o.cover.from, o.cover.to); });
 
   const evAt = new Map();
@@ -2479,7 +2482,7 @@ async function main() {
   });
   stale.forEach(K => console.log(`✗ the KNOWN list names a fault that this full run did not see: ${K.card === '*' ? 'every card' : K.card + ' ' + K.section} (${K.kinds.join(', ')}). If it was fixed, delete its entry.`));
   const failed = totals.failed + (dataIssues.length ? 1 : 0) + (realErrors.length ? 1 : 0) + stale.length;
-  const loopCards = cards.filter(a => !builtIds.has(a.id) && allViews.some(y => y.a.id === a.id && y.v.base && y.chart.secs.length > 1)).length;
+  const loopCards = cards.filter(a => !builtIds.has(a.id) && allViews.some(y => y.a.id === a.id && y.v.base && y.chart.secs.length > 1 && !y.chart.fade)).length;
   const none = !failed && !totalsLoop.failed && !totalsBuilt.failed && !SWAPV.failed && (unwalked.length > 0 || (!totals.walks && !totalsLoop.walks && !totalsBuilt.walks && !SWAPV.walks && !(SETTING && 'drawing'.includes(SETTING))));
   console.log(`\nplayalong-loop: ${failed || none ? '✗' : '✓'} ${totals.cards} cards, ${totals.views} views, ${totals.pages} pages read, ${totals.walks} walks (card-setting pairs), ${totals.steps.toLocaleString('en-US')} places lit and compared, ${totals.frames.toLocaleString('en-US')} steps of the fake clock, ${totals.clicks.toLocaleString('en-US')} clicks: ${failed ? failed + ' with a mismatch' + ` (${totals.onlyQueued} only the queued Metronome click, scheduled before a press and sounding after it; ${failed - totals.onlyQueued} with anything else)` : '0 mismatches'}${totals.known ? ', ' + totals.known + ' known (listed, not fixed)' : ''} · ${secs} s`);
   /* The Loop and Build walks (R15): their own line, after the summary above. */

@@ -198,7 +198,7 @@ function pcLoopStatus(st){
   } else if(b){
     const stops = pcBuildStops(st.root), speed = t(stops[Math.min(b.stop, stops.length - 1)].key), n = b.laps + 1, total = pcBuildLaps(st.root);
     txt = pcLoopFlag(st.root, 'hold') || b.stop >= stops.length - 1 || total < 2 ? t('pc.lapAt', {n, speed}) : t('pc.lapOf', {n, total, speed});
-  } else txt = t('pc.looping', {section: rd ? tf(rd, 'what') : tf(st.L.sections[st.loopSi].s, 'label')});
+  } else txt = t('pc.looping', {section: rd ? tf(rd, 'what') : st.L.sections.slice(st.loopSi, Math.max(st.loopTo, st.loopSi) + 1).map(S => tf(S.s, 'label')).join(' + ')});   // a memory fade loops more than one section
   pcStatus(st.root, escHtml(txt));
 }
 // The section playing now, read off the file (not the cursor's lead); during the count-in, the one counted in.

@@ -1,7 +1,7 @@
 /* ══ MEMORY FADE — a play-along whose chord names leave, time by time (Jonathan, 2026-11-26; ca-56) ══════════════
    A practice card with `card.fade` ({ passes: N }, 2 to 8, default FADE_PASSES) on a chord grid. Play plays the card's
-   section with the record on a loop (the card's own lap: THE SPARE in app/cards.js, ONE time through = the whole
-   section, all its reps); after each time through more chord names are hidden, until the last time through shows
+   sections with the record on a loop (the card's own lap: THE SPARE in app/cards.js, ONE time through = every
+   section in order, all their reps; the card draws no section buttons); after each time through more chord names are hidden, until the last time through shows
    none, and after the last the song stops by itself. Nothing here plays, times or loops anything: the player does,
    and this part only says which names show.
      WHICH NAMES     the chord CHANGES of the card, in drawing order (a chord still ringing at a row start shares its
@@ -71,13 +71,13 @@ function fadeApply(root){
   }
 }
 /* pcStart, right after the player's state is made: the loop is on, or, on the last time through, off so the song
-   stops at the end of the section (the whole-song stop in pcFrame). After a finished run Play starts at time 1. */
+   stops at the end of the card (the whole-song stop in pcFrame). After a finished run Play starts at time 1. */
 function fadeStarted(st){
   const bar = fadeBar(st && st.root);
   if(!bar) return;
   if(bar.dataset.done === '1'){ bar.dataset.pass = '1'; bar.dataset.done = ''; bar.dataset.show = ''; }
   const n = parseInt(bar.dataset.passes, 10) || FADE_PASSES, p = parseInt(bar.dataset.pass, 10) || 1;
-  st.loopTo = st.loopFrom;
+  st.loopTo = st.L.sections.length - 1;   // one time through is every section of the card, in order
   if(p < n){ st.loopSi = st.loopFrom; st.wholeSong = false; }
   else { st.loopSi = -1; st.wholeSong = true; }
   fadeApply(st.root);

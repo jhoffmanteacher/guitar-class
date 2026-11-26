@@ -2,11 +2,12 @@
 
 A new In-Class Activity starts from one of these shapes: pick the shape with Jonathan, copy its exemplar card from
 `class-activities.js`, change only the per-song values, then run the shape's tools. Every quote below is from
-`class-activities.js`, `i18n.js` or the skill and rule files it names, as of 2026-11-26 (`origin/main` `ecee6ac`).
+`class-activities.js`, `i18n.js` or the skill and rule files it names, as of 2026-11-26 (`origin/main` `ecee6ac`); shapes 13 and 14 were added later
+the same day, when Echo (`ca-55`) and Memory Fade (`ca-56`) were built.
 
-The file holds **51 activities** (ids `ca-1` to `ca-54`; `ca-9`, `ca-16` and `ca-47` are retired, the file's
+The file holds **53 activities** (ids `ca-1` to `ca-56`; `ca-9`, `ca-16` and `ca-47` are retired, the file's
 "RETIRED IDS" note). Built songs (`sb-` ids) live in the database, not in the file, and are not counted here: they are
-made in the console's Song builder or by skill `new-playalong` `--built`. The next new id is `ca-55` (the file's
+made in the console's Song builder or by skill `new-playalong` `--built`. The next new id is `ca-57` (the file's
 RETIRED IDS note names it; read it again before you use it).
 
 | # | Shape | Use it for | Copy this card | Count |
@@ -23,15 +24,17 @@ RETIRED IDS note names it; read it again before you use it).
 | 10 | Strum-pattern check | the mic listens to the pattern for two full rounds | `ca-52` Strum Pattern check | 1 |
 | 11 | Drill ladder | four steps of one on-screen drill: Note Call, Call the chord, Name the power chord | `ca-23` Low E and A Notes in Time | 5 |
 | 12 | Exit check | the end-of-period five-question quiz, one try | `ca-15` Notes on the Low E String (next-note: `ca-14`) | 2 |
+| 13 | Echo (call and response) | hear a short strum, play it back in time, up a ladder to two parts of a song | `ca-55` Echo — Power Chord Strums | 1 |
+| 14 | Memory fade | a verse and chorus with the record while the chord names leave, until it is from memory | `ca-56` Sweet Child O' Mine — Memory Fade | 1 |
 | — | Fits no shape | `ca-12` Sub Day Circuit | — | 1 |
-| | | | **Total** | **51** |
+| | | | **Total** | **53** |
 
-Twelve shapes, a few more than a rough first guess: shapes 1 to 5 are all `view: 'card'` practice cards, but each
+Fourteen shapes, more than a rough first guess: shapes 1 to 5 are all `view: 'card'` practice cards, but each
 carries different fields and is held by different checks (below), so a copy from the wrong one breaks a check or
 the board.
 
-After the inventory, "Proposed shapes (not built yet)" lists eight formats the bank does not use yet (P1 to P8),
-Jonathan's four picks first; most need new site code (P1, P5 and P8 also have a rough version buildable today). SKILL.md's "Building a new activity" says how
+After the inventory, "Proposed shapes (not built yet)" lists six formats the bank does not use yet (P2, P3 and P5 to P8;
+P1 and P4 are built, shapes 13 and 14), Jonathan's picks first; most need new site code (P5 and P8 also have a rough version buildable today). SKILL.md's "Building a new activity" says how
 to offer all of these to Jonathan as a menu.
 
 **Rules every shape shares** (each is stated in CLAUDE.md or `SKILL.md`; follow the citation for the detail):
@@ -639,6 +642,84 @@ follows the one-line rule.
 
 ---
 
+## 13. Echo (call and response)
+
+**For:** playing by ear and in time: the site plays a short power-chord strum, the student plays it back in the gap
+(`app/echo.js`; its header is the schema). Nothing listens, grades or is saved: the student taps Got it, Again or Next
+phrase. The ladder goes from made-up phrases up to the song's own strum patterns, and the last phrases are the record.
+
+**Skeleton** (from `ca-55`; per-song values marked):
+```js
+{
+  id: 'ca-57', view: 'focus',
+  title: 'Echo — …', title_es: 'Eco — …',            // does NOT name the song: the last screen reveals it
+  intro: 'Hear a short power-chord strum, then play it back in time.', intro_es: '…',
+  steps: [ {
+    label: 'Practice — Echo, phrase by phrase', label_es: '…',    // no step text: the drill's own line says it
+    drill: {
+      type: 'echo',
+      card: 'ca-33',                                  // per song: the practice card whose track and sections are used
+      chords: { D5: { frets: [['A',5],['D',7],['G',7]], midi: [50,57,62] }, … },   // per song
+      phrases: [                                      // per song, easiest first
+        { pattern: 'D.D.D.D.', bars: ['D5','D5'], bpm: 80 },                       // made-up: the site strums it
+        { pattern: 'D.DU.UDU', bars: ['D5', …], record: { section: 'Verse 1', fromBar: 25 } }   // the record
+      ]
+    }
+  } ]
+}
+```
+
+**Ask Jonathan:** the song and its card, which two parts end it, the chords, how many made-up phrases.
+
+**Traps:**
+- A record phrase's `bars` must be the chords the card plays in those bars (`echoModel` refuses; **1fi** fails).
+- **1fi** pins ONE echo drill: `ca-55`, 13 phrases (11 made-up), its two record phrases, and no song name in the
+  title or intro. A second Echo card means widening that check in the same commit.
+- A made-up pattern is eight slots a bar (D down, U up, . miss, - stop).
+
+**Tools:** the common ones, `node tools/stop-loop.mjs` (start `echo@card`) after a change to the part, and ears on
+each record phrase.
+
+---
+
+## 14. Memory fade
+
+**For:** playing a part from memory (`app/fade.js`; its header is the rules). A chord-grid practice card plays its
+sections with the record on a loop; each time through more chord names go blank (frets too), until the last shows none.
+"Show it" brings them back for that time through. Nothing is saved.
+
+**Skeleton** (from `ca-56`):
+```js
+{
+  id: 'ca-57', view: 'card',
+  title: '… — Memory Fade', title_es: '… — De memoria',
+  intro: 'Play the verse and chorus four times as the chord names fade, until you know them by heart.', intro_es: '…',
+  card: {
+    track: 'sweet-child-o-mine',         // per song
+    chordGrid: true, slowest: true,      // required: the fade works on a chord grid
+    fade: { passes: 4 },                 // 2 to 8 times through
+    caption: '…', caption_es: '…',       // names no chord
+    sections: null,                      // another card's sections, joined by label after the array, own captions
+    checks: [ { label: 'From memory', … }, { levelUp: true, card: 'ca-33', … } ]
+  },
+  steps: [],
+}
+```
+
+**One time through** is every section in order, all their laps, so the card draws no section buttons and no Loop
+switches (Jonathan, 2026-11-26: "verse into chorus"). Sections must follow each other on the record.
+
+**Ask Jonathan:** the song, which sections in order, how many times through.
+
+**Traps:**
+- No caption, intro or title may name a chord (the card is hiding them).
+- **1fm** pins `card.fade` to `ca-56` (`FM_CARDS`), which chord changes are blank each time (`FM_PLAN`) and the
+  assertion count; `tools/playalong-loop.mjs` R18 walks it. A second fade card widens that pin in the same commit.
+
+**Tools:** `node tools/playalong-loop.mjs --only <id>` and the common ones.
+
+---
+
 ## Fits no shape: `ca-12` Sub Day Circuit
 
 Six steps mixing three shapes for a day with a substitute: shape 8's two drills (the same "Name the fret" and "Find
@@ -648,7 +729,7 @@ in order: you have done all of them before." A new review circuit copies the ste
 
 ---
 
-## Inventory: all 51, by id
+## Inventory: all 53, by id
 
 | id | Title | Shape |
 |---|---|---|
@@ -703,14 +784,16 @@ in order: you have done all of them before." A new review circuit copies the ste
 | ca-52 | Strum Pattern check | 10 Strum-pattern check |
 | ca-53 | Strum Pattern — The Chorus | 9 Strum-pattern ladder |
 | ca-54 | Sweet Child O' Mine — Speed Ladder | 5 Speed ladder |
+| ca-55 | Echo — Power Chord Strums | 13 Echo |
+| ca-56 | Sweet Child O' Mine — Memory Fade | 14 Memory fade |
 
-Counts: shape 1: 5 · 2: 11 · 3: 3 · 4: 7 · 5: 1 · 6: 4 · 7: 6 · 8: 3 · 9: 2 · 10: 1 · 11: 5 · 12: 2 · none: 1 = 51.
+Counts: shape 1: 5 · 2: 11 · 3: 3 · 4: 7 · 5: 1 · 6: 4 · 7: 6 · 8: 3 · 9: 2 · 10: 1 · 11: 5 · 12: 2 · 13: 1 · 14: 1 · none: 1 = 53.
 
 ---
 
 ## Proposed shapes (not built yet)
 
-Formats the 51 cards do not use yet (Jonathan, 2026-11-26, through the lead). Each was checked against the bank above
+Formats the cards do not use yet (Jonathan, 2026-11-26, through the lead). Each was checked against the bank above
 and the site's drills and games: the Games hub (`coach-*.js`: Note Hunt, Change Up, Power Chord Switch, Chord Blitz,
 Chord Detective, Name That Riff, Pentatonic Simon and its guitar twin, Fret Zap, Strum Hero, Riff Roulette, Strum
 Radar, Riff Runner and its Wait Mode, Note Runner, Finger Gym: The Ladder, Pattern Detective, Build-a-Chord), the Live
@@ -734,37 +817,7 @@ and a smoke walk; large = a renderer change shared with the modules or the conso
 
 ### Jonathan's picks
 
-#### P1. Echo (call and response)
-
-**Teaches:** playing by ear, short-term musical memory, the first notes of a riff (Modules 1 to 3: single notes, then
-riffs on the low E and A strings; the class's riffs are Seven Nation Army, "the cure", "Luna").
-
-**What the student sees and does:**
-1. One line: "Listen, then play it back; tap Got it when yours matched, three in a row." The tab is hidden: a row of
-   empty boxes, one per note.
-2. They tap ▶ Listen; the site plays a one-bar phrase in the guitar voice the tab players use.
-3. They play it back on their guitar, as many tries as they like (▶ Listen again is free).
-4. They tap Show me: the tab appears and plays once more with the cursor, so they can check themselves.
-5. They tap Got it or Again. Three Got its in a row grow the phrase by one bar (Pentatonic Simon's growing
-   sequence); the streak shows like the games' streaks. Nothing is stored but the step's tick.
-
-**Data:** `drill: { type: 'echo', card: 'ca-10', section: 'The riff', bars: 1, grow: true }` (reads a practice card's
-own section by label, the way `chordcall` reads `ca-29`'s Verse 1), or `drill: { type: 'echo', phrases: [ { notes:
-[…] }, … ] }` with the step-tab note shape, for a tune with no card (Happy Birthday's lines in `ca-1`).
-
-**Grows from:** Ear Spark (a hidden sequence, then the reveal: "The sequence is never shown before the reveal — that
-hiddenness IS the drill", `app/drills.js`), Pentatonic Simon (a growing sequence, `coach-ear.js`), Riff Roulette (the
-student is the judge: "Honesty is the whole game", `coach-strum.js`). None of them asks for the phrase on the guitar
-with no mic: Ear Spark and Simon take taps, Simon's guitar twin needs the mic.
-
-**Can it be built today?** A rough version from existing fields, small: a step with a `snippet` of the band and no
-tab ("Listen to bars 1–2, then play them back three times in a row"), then a step with the `tab` of the same bars.
-It loses the hidden-then-revealed moment and the growing phrase. The real one is a new drill type in its own part,
-`app/drills-echo.js`: medium (`playSequence` already plays a list of midi notes; the tab drawing is `buildTab`'s).
-
-**Example on a course song:** Seven Nation Army's riff from `ca-10` ("The riff", bars 1–2, all on the A string): bar 1 is
-E E G E D (frets 7, 7, 10, 7, 5; the last three a triplet over beats 3 and 4), bar 2 is C B (frets 3, 2, two beats each).
-Echo bar 1, then both bars, then the riff four times.
+P1 (Echo) and P4 (Memory fade) were built on 2026-11-26: shapes 13 and 14 above.
 
 #### P2. Fill the gap (one bar left silent)
 
@@ -827,33 +880,6 @@ reveals the answer, `.claude/rules/live-quiz.md`).
 and the student taps the fifth note. For chords: Watchtower's Verse 1 from `ca-29` (A5 G5 F5 G5) played with one G5
 as an A5.
 
-#### P4. Memory fade
-
-**Teaches:** playing a part from memory (any module; best on a short loop the class already knows).
-
-**What the student sees and does:**
-1. On a practice card, a new switch: "Fade the tab". Off by default; switching it on turns on Loop this part.
-2. Lap 1: the whole chart shows.
-3. At each new lap, one more bar's fret numbers (or chord names) fade to a "?" box, from the end of the line back to
-   its start, while the cursor keeps moving over the empty boxes.
-4. When every bar is faded they play one more lap from memory; the card then says "From memory!" (a small
-   celebration, as the games have).
-5. Peek (or a tap on a box) shows that bar again for one lap.
-
-**Data:** none required (a switch). Optional `card.fade: { from: 'end' | 'start' }`.
-
-**Grows from:** Loop this part and its lap count (`app/cards-loop.js`), and `revealDelay`, the only hide the site has
-today ("it hides the board while the student reads the step", the file's schema note; it hides the whole tab once,
-before playing). `ca-12`'s "Cover the screen and play all four lines of Happy Birthday from memory without stopping."
-is the paper version of the same idea.
-
-**New code:** small to medium: a class per bar cell, set from the lap count, in both chart views (tab, chord grid);
-Peek; a smoke walk; a `playalong-loop.mjs` walk that a faded cell is still lit on time. The Focus ladders' tabs
-(`buildTab`, shared with the modules) are NOT in scope: that would be a large shared-renderer change.
-
-**Example on a course song:** "Luna" (`ca-20`), "The loop · F F A A · 1 pluck per bar", 4 bars × 4 laps: lap 1 shows
-all four, lap 2 hides bar 4, lap 3 bars 3–4, lap 4 bars 2–4, then a lap with all four hidden.
-
 ### More proposals
 
 #### P5. Duet (partner split)
@@ -896,15 +922,9 @@ ask Jonathan). Activities carry no figures (**1d** errors on `figure`), so the b
 **Closest existing:** the Journey pages' Layer 5 (Pentatonic Solo) and the Songs tile's "Backing track for solos";
 this only brings it into an activity with the record looping the bars, so it is the least new of the eight.
 
-### Top 3 to build first (my view)
+### Which to build next (my view)
 
-1. **Memory fade (P4).** The smallest code of the four picks, no new data, and it turns all 27 practice cards into a
-   memory game at once (25 of them have more than one section, so Loop this part is already there).
-2. **Fill the gap (P2).** Also a switch on every existing card with no new data; it reuses the Metronome and the lap
-   count, and gives each student "their" bar, the most game-like of the four in the room.
-3. **Spot the mistake (P3).** Works with no guitar in hand and is tap-graded, so it is the one proposal that gives a
+1. **Fill the gap (P2).** A switch on every existing card with no new data; it reuses the Metronome and the lap
+   count, and gives each student "their" bar, the most game-like of the proposals in the room.
+2. **Spot the mistake (P3).** Works with no guitar in hand and is tap-graded, so it is the one proposal that gives a
    real score without the mic; it reads the cards' sections, so every song the class knows is content on day one.
-
-Where this differs from Jonathan's picks: **Echo (P1)** is not in my top 3. Without the mic its check is the
-student's own word, which Riff Roulette and Ear Spark already cover in spirit, and the rough version can be built
-today from a `snippet` step and a `tab` step with no code, so it can be tried in class before any code is written.

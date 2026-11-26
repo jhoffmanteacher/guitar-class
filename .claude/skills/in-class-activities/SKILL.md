@@ -28,15 +28,15 @@ Then build from the chosen shape:
 | The skill | Built shapes that fit (shape number in `shapes.md`) | Proposed, not built |
 |---|---|---|
 | Chord changes (open or power) | 9 strum-pattern ladder, 6 tab ladder (chords, as `ca-34`), 1 song part card, 11 drill ladder (Call the chord) | P7 make your own loop |
-| A song with the band | 1 song part card, 2 whole-song play-along, 3 lyric-sheet card, 4 library play-along | P2 fill the gap, P4 memory fade, P5 duet |
+| A song with the band | 1 song part card, 2 whole-song play-along, 3 lyric-sheet card, 4 library play-along, 14 memory fade | P2 fill the gap, P5 duet |
 | Getting a passage up to speed | 5 speed ladder (see its pin), 1 song part card (its Build up speed switch) | — |
-| A riff or tune from tab | 6 tab ladder, 1 song part card | P1 echo, P3 spot the mistake, P4 memory fade |
+| A riff or tune from tab | 6 tab ladder, 1 song part card | P3 spot the mistake |
 | Note names on a string | 8 note-names ladder, 11 drill ladder (Note Call), 12 exit check | — |
 | Power-chord names | 11 drill ladder (Note Call power, Name the power chord) | — |
-| Strumming | 9 strum-pattern ladder | P7 make your own loop |
+| Strumming | 9 strum-pattern ladder, 13 echo | P7 make your own loop |
 | Fretting-hand technique | 7 Finger Gym circuit | — |
 | Reading TAB | 6 tab ladder (as `ca-21`) | P3 spot the mistake |
-| Song form, listening | 11 drill ladder (Call the chord) | P6 song-form arrange, P3 spot the mistake |
+| Song form, listening | 11 drill ladder (Call the chord), 13 echo | P6 song-form arrange, P3 spot the mistake |
 | Soloing | — | P8 improvise over a loop |
 | End-of-period check | 12 exit check | — |
 
@@ -57,8 +57,9 @@ Had he written "something for Thursday", question 1 would come first ("What shou
 header "Skill"), its options the skills his message or the module the class is in point to, and question 2 after his
 answer.
 
-Four builds are not a plain copy, and their sections say why: a second strum-pattern check (code and the 1eh pin), a
-second speed ladder (the 1fc pin and `tools/speed-ladder-loop.mjs`), a new drill type, and a new deck (code and
+Six builds are not a plain copy, and their sections say why: a second strum-pattern check (code and the 1eh pin), a
+second speed ladder (the 1fc pin and `tools/speed-ladder-loop.mjs`), a second Echo (the 1fi check), a second Memory
+fade (the 1fm pins), a new drill type, and a new deck (code and
 `i18n.js`). Say so to Jonathan before building one. A library play-along is typed by `tools/new-playalong.mjs`
 (skill `new-playalong`), not copied by hand.
 

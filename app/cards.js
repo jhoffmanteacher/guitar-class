@@ -381,7 +381,7 @@ function pcPlayerHtml(a, L, preview){
 function pcTabHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
-  const chips = many && !pcOneRound(L)
+  const chips = many && !pcOneRound(L) && !c.fade   /* a memory fade plays every section through (app/fade.js): nothing to tap */
     ? `<p class="pc-hint">${escHtml(t(L.rounds ? 'ca.roundHint' : 'ca.cardSectionHint'))}</p><div class="pc-secs">`
       + pcSecButtonsHtml(L, preview)
       + pcLoopHtml(L, preview) + `</div>`

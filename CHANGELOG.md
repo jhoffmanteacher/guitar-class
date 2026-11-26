@@ -8,8 +8,8 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-26 — A new kind of activity: Memory Fade
 
-- **New activity: Memory Fade.** Play the Sweet Child O' Mine verse with the band four times while the chord names
-  disappear a few at a time, until you play it from memory. Tap Show it if you get lost. (It shows up once your teacher
+- **New activity: Memory Fade.** Play the Sweet Child O' Mine verse and chorus with the band four times while the chord
+  names disappear a few at a time, until you play them from memory. Tap Show it if you get lost. (It shows up once your teacher
   posts it.)
 
 ## 2026-11-26 — A new kind of activity: Echo
