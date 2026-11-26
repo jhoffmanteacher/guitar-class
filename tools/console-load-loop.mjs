@@ -31,7 +31,7 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Twenty-one families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Twenty-two families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
    booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
@@ -60,7 +60,8 @@
    60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it; since
    review M3 nothing else happens before that retry, and the write is Hidden or a release date, so every list case
    plays it: a default run is red without the landing's redraw, teacher-core.js loadAllStudents).
-   Review R5 added archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
+   Review R5 added denied (the rules refuse the progress read for 3 minutes; a tab return, a roster view opened, a
+   Refresh while refused, a Refresh once fixed) and archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
    1.6 s, so that view's own settings read fails before the roster lands; then a roster view).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
    board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
@@ -109,6 +110,10 @@
                settings read is on screen once the console is quiet (a view drawn from the empty copy it leaves).
      R4-archived  an archived student never comes back into the roster the views draw from after a failed settings read.
      R4-games  during a progress outage with the settings read good, Games still offers the class games On / Off switch.
+     M4        the rules REFUSE the progress read (permission-denied, family denied): no read in a quiet minute (visible or
+               hidden), none when a roster view is opened; the console thinks so only when the newest progress read was
+               refused; the screen says to check the security rules, never "read again every minute", and an enabled
+               Refresh button is offered; after the rules are fixed, Refresh loads the roster.
      R5-1      the screen against the fake's REAL data, not the console's flags (a collection read answered EMPTY from the
                cache looks like a good read to the console, section 5): while the server holds students, no "No students
                yet" / "No student data yet" / "0 roster accounts" / "of 0 students", no summary strip counting 0 students,
@@ -118,7 +123,8 @@
    COVERAGE FLOORS (a full run, 64+ cases, no --family): every family ran; 40+ write clicks reached the server; 4+
    window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks;
    5+ Who pickers opened; 3+ card pages kept over a failed read when a retry starts; 3+ boxes typed in during a retry;
-   100+ checks while the first progress read was out; 3+ minutes measured with the tab hidden throughout.
+   100+ checks while the first progress read was out; 3+ minutes measured with the tab hidden throughout; 20+ checks
+   while the rules refused the progress read.
 
    NOT COVERED: anything a browser adds (layout, CSS: a pane hidden by CSS counts as on screen here; focus moves;
    real event order); the update reload itself (the resume note is set, the reload is not played); a settings read
@@ -596,7 +602,8 @@ function docDiff(a, b) {
    EMPTY list from the tab's cache unless it asked {source:'server'}, which
    rejects ('unavailable'); a DOC read rejects either way ("Failed to get
    document because the client is offline": no copy of it in the cache); a
-   transaction's get and commit on config/class reject. NOT modelled: a doc
+   transaction's get and commit on config/class reject. A REFUSED outage (review M4) is the rules saying no: the
+   progress read rejects with 'permission-denied', whatever its options. NOT modelled: a doc
    held in the cache by a listener or a pending write, the offline write queue
    (a write resolves at once), security rules, batched writes, server
    timestamps.
@@ -618,6 +625,7 @@ class FakeServer {
   log(text) { this.events.push({ t: this.clock.now, text }); }
   down(kind) { const s = this.netAt(this.clock.now); return kind === 'cfg' ? !!s.cfg : kind === 'prog' ? !!s.prog : !!(s.cfg && s.prog); }
   unavailable(what) { return Object.assign(new Error('fake server: ' + what + ' is unavailable (the planned outage)'), { code: 'unavailable' }); }
+  refused(kind) { return kind === 'prog' && !!this.netAt(this.clock.now).deny; }
   snap(path) { const ex = this.docs.has(path); return { exists: ex, data: ex ? sortedClone(this.docs.get(path)) : undefined, ver: this.ver.get(path) || 0 }; }
   version(path) { return this.ver.get(path) || 0; }
   // The truth the R5-1 checks hold the screen to: who is in the progress collection, how many requests wait.
@@ -649,14 +657,16 @@ class FakeServer {
     if (rec.kind === 'prog') { this.progInflight++; this.maxProgInflight = Math.max(this.maxProgInflight, this.progInflight); }
     try {
       await this.clock.sleep(this.latency() + (rec.kind === 'prog' ? this.progExtra || 0 : 0), { kind: 'server' });
-      const cut = this.down(rec.kind), fail = cut && rec.server;
-      rec.cache = cut && !rec.server;
+      rec.denied = this.refused(rec.kind);
+      const cut = this.down(rec.kind), fail = rec.denied || (cut && rec.server);
+      rec.cache = cut && !rec.server && !rec.denied;
       let out = fail ? null : rec.cache ? [] : [...this.docs.keys()].filter(k => k.startsWith(prefix + '/') && k.slice(prefix.length + 1).indexOf('/') < 0).sort().map(p => ({ path: p, ...this.snap(p) }));
       if (out) (filters || []).forEach(([f, op, v]) => { if (op === '==') out = out.filter(d => getPath(d.data || {}, f) === v); });
       await this.clock.sleep(this.latency(), { kind: 'server' });
       rec.ok = !fail; rec.t1 = this.clock.now; rec.done = true;
-      this.log(`read ${prefix}/*${rec.load ? ' (first load / retry)' : ''}: ${fail ? 'FAILED (outage)' : rec.cache ? 'EMPTY, answered from the cache (offline, no {source:\'server\'})' : out.length + ' docs'}`);
+      this.log(`read ${prefix}/*${rec.load ? ' (first load / retry)' : ''}: ${rec.denied ? 'REFUSED (permission-denied)' : fail ? 'FAILED (outage)' : rec.cache ? 'EMPTY, answered from the cache (offline, no {source:\'server\'})' : out.length + ' docs'}`);
       if (this.onRead) this.onRead(rec);
+      if (rec.denied) throw Object.assign(new Error('fake server: ' + prefix + ' refused by the rules (the planned outage)'), { code: 'permission-denied' });
       if (fail) throw this.unavailable(prefix);
       return out;
     } finally { this.inflight--; if (rec.kind === 'prog') this.progInflight--; }
@@ -880,7 +890,8 @@ function makeConsole(W) {
     globalThis.__peek = () => ({ view: teacherView, studentsAt: teacherStudentsAt, failed: teacherRefreshFailed, refreshing: teacherRefreshing,
       timer: !!teacherAutoRefreshTimer, cfg: teacherClassConfig, v: teacherConfigVersion, ok: teacherClassConfigReadOk,
       board: activityBoardMode, screen: (typeof teacherActivityScreen === 'function' && teacherView === 'activities') ? teacherActivityScreen() : '',
-      raw: allStudentsRaw.length, uids: allStudents.map(s => s.uid), showArch: teacherShowArchived, drag: typeof boardDragId !== 'undefined' ? boardDragId : null });
+      raw: allStudentsRaw.length, uids: allStudents.map(s => s.uid), showArch: teacherShowArchived, drag: typeof boardDragId !== 'undefined' ? boardDragId : null,
+      denied: typeof teacherRosterDenied !== 'undefined' && teacherRosterDenied });
     globalThis.__setDrag = v => { boardDragId = v; };
     globalThis.__resume = n => { swResumeNote = n; };
   `, ctx);
@@ -938,10 +949,10 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite', 'archkept'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite', 'archkept', 'denied'];
 const MIN = 60000, SEC = 1000;
-const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true } };
-const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
+const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true }, deny: { cfg: false, prog: true, deny: true } };
+const stName = s => s.deny ? 'progress refused' : s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
 
 function genCase(seed, k, famOverride) {
   const r = makeRng(seed, k, 7);
@@ -987,6 +998,8 @@ function genCase(seed, k, famOverride) {
   // A view's own settings read fails while the first load's slow progress read is out (review R5-2): the first load's
   // settings read was good, so its archived list must still hide the archived student when the roster lands.
   else if (fam === 'archkept') { heal = 2 * MIN; c.noResume = true; boot = 'activities'; c.progExtra = 5000; const d = r.int(400, 900); slot(d, d + 1600, ST.cfg); c.earlyView = ['games', 'songs', 'manage'][nth % 3]; c.earlyAt = d + r.int(50, 300); }
+  // The rules refuse the progress read for 3 minutes (review M4): no automatic retry, the Refresh button offered.
+  else if (fam === 'denied') { heal = 3 * MIN; boot = ['activities', 'games', 'skills', 'manage', 'students', 'songs'][nth % 6]; slot(0, heal, ST.deny); }
   else if (fam === 'chaos') { heal = 6 * MIN; for (let t = 0; t < heal; t += r.int(2, 20) * SEC) { const x = r(); slot(t, t + 20 * SEC, x < 0.3 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
   c.boot = boot;
   c.bootSub = fam === 'detail' ? 'detail' : fam === 'landwrite' ? (nth % 2 ? 'split' : 'detail') : fam === 'failedread' ? (nth % 2 ? 'split' : 'detail') : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
@@ -1028,6 +1041,12 @@ function genCase(seed, k, famOverride) {
        view still up and visible (a random view, hide or box typed in left 27 of 32 cases without it), and the write
        60 ms before the roster lands is one whose own read waits: Hidden or a release date, in turn. */
     c.landPrefer = nth % 2 ? 'date' : 'hidden';
+  } else if (fam === 'denied') {
+    // A tab return must not read again; a Refresh click reads once (refused again); once the rules are fixed, Refresh loads.
+    add(40 * SEC, 'hide'); add(45 * SEC, 'show');
+    add(r.int(100, 115) * SEC, 'view', { v: r.pick(['skills', 'students', 'trouble', 'responses']), noRead: true });
+    add(r.int(130, 150) * SEC, 'refresh');
+    c.refreshAtHeal = true;
   } else if (fam === 'archkept') {
     add(c.earlyAt, 'view', { v: c.earlyView, early: true });
     add(r.int(20, 40) * SEC, 'view', { v: r.pick(['students', 'skills', 'trouble']) });
@@ -1098,6 +1117,8 @@ function genCase(seed, k, famOverride) {
   c.healAt = healAt;
   if (r.chance(0.3)) add(healAt + r.int(20, 100) * SEC, 'B', { cells: 'mix' });
   add(healAt, 'heal');
+  // A refused read waits for the teacher's Refresh by design (review M4): pressed once the rules are fixed.
+  if (c.refreshAtHeal) add(healAt + 5 * SEC, 'refresh');
   add(healAt + 125 * SEC, 'recover');
   // After the check: a few more clicks on a healthy network.
   const tail = healAt + 130 * SEC;
@@ -1159,7 +1180,7 @@ async function runCase(seed, k, o) {
   const c = genCase(seed, k, o.family);
   const r = makeRng(seed, k, 11);
   const clock = new VClock();
-  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0 } };
+  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0, deniedChecks: 0 } };
   W.server = new FakeServer({ clock, rng: makeRng(seed, k, 2), docs: seedDocs(c.empty, c.emptyKind), netAt: c.netAt });
   W.server.fixedLat = c.lat || 0; W.server.progExtra = c.progExtra || 0; W.modMs = c.modMs || 0;
   if (c.boot === 'livequiz' || c.fam === 'live') W.server.docs.set('liveQuiz/current', { state: 'question', quizId: 'string-id', qIndex: 0, sessionId: 'sess-1', limitSec: 20, scores: {}, mode: 'class' });
@@ -1302,7 +1323,17 @@ async function runCase(seed, k, o) {
       if (stale.length) fail('R3-3', `${p.view}${p.screen ? '/' + p.screen : ''}: a first-load / retry read moved the copy to v${W.bgCopy.v} at ${mmss(W.bgCopy.t)} and ${stale.length} write control(s) on screen are still drawn from an older copy (${clip([...new Set(stale.map(e => ctrlInfo(e).sel))].join(', '), 120)})`);
     }
     // R2-reads: the retry never stops while the roster is down, visible, on a view that reads it.
-    if (quiet && rosterDown && !hidden && usesRoster(p.view) && !p.timer && !p.refreshing) fail('R2-reads', `${p.view}: the roster is down and nothing will read it again (no minute timer, no read out)`);
+    if (quiet && rosterDown && !hidden && usesRoster(p.view) && !p.timer && !p.refreshing && !p.denied) fail('R2-reads', `${p.view}: the roster is down and nothing will read it again (no minute timer, no read out)`);
+    /* M4: refused only when the newest progress read WAS refused (a network failure keeps retrying); while refused, the
+       screen says to check the security rules and the Refresh button is offered, enabled. */
+    if (quiet && p.denied && !(lastProg && lastProg.denied)) fail('M4', `${p.view}: the console stopped retrying as if the rules refused the read, but the newest progress read ${lastProg ? 'was not refused' : 'was never made'}`);
+    if (quiet && rosterDown && lastProg && lastProg.denied && !TOOL_VIEWS.includes(p.view)) {
+      W.stats.deniedChecks++;
+      const bar = A.doc.getElementById('t-refresh-bar'), btn = bar && bar.querySelector('[data-refresh-students]');
+      if (!btn || btn.disabled || (bar._style && bar._style.display === 'none')) fail('M4', `${p.view}: the rules refused the progress read and no enabled Refresh button is offered`);
+      if (!/security rules/.test(text + ' ' + noteTxt + ' ' + textOf(bar))) fail('M4', `${p.view}: the rules refused the progress read and nothing on screen says to check the security rules ("${clip(text, 80)}")`);
+      if (/read again every minute/.test(text + ' ' + noteTxt)) fail('M4', `${p.view}: the rules refused the progress read, yet the screen says it is read again every minute`);
+    }
     // R2-busy: a retry that lands while the teacher types is thrown away, never drawn over the box (review R2-4).
     if (W.guard && !W.guard.isConnected) { fail('R2-busy', `${p.view}: a retry drew the view over the box being typed in`); W.guard = null; }
     // R1-empty / R1-live.
@@ -1370,7 +1401,12 @@ async function runCase(seed, k, o) {
     if (queue.some(e => e.injected && e.t < ev.t)) { queue.push(ev); continue; }
     const sb = A.doc.getElementById('t-side');
     switch (ev.kind) {
-      case 'view': { const b = sb && sb.querySelector(`[data-view="${ev.v}"]`); say(`click: ${ev.v}`); if (b) A.fire(b, 'click'); break; }
+      case 'view': {
+        const b = sb && sb.querySelector(`[data-view="${ev.v}"]`), n0 = W.server.reads.length; say(`click: ${ev.v}`); if (b) A.fire(b, 'click');
+        // M4: a roster view opened while the rules refuse the progress read reads nothing (only Refresh does).
+        if (ev.noRead) { await advanceTo(clock.now + 1); if (W.server.reads.slice(n0).some(rd => rd.kind === 'prog')) fail('M4', `${ev.v}: opening it read student progress again while the rules refuse that read`); }
+        break;
+      }
       case 'sub': {
         const g = grid(); let t = null;
         if (ev.what === 'board') t = g && g.querySelector('[data-ta-board-open]');
@@ -1449,6 +1485,7 @@ async function runCase(seed, k, o) {
     W.rate[key] = Math.max(W.rate[key] || 0, reads);
     if (allHidden) W.stats.hiddenMinutes++;
     if (allHidden && reads) fail('R2-reads', `${reads} reads in the minute from ${mmss(t)} with the tab hidden (${stName(s0)} down): want 0`);
+    if (s0.deny && reads) fail('M4', `${reads} reads in the minute from ${mmss(t)} while the rules refuse the progress read (no click): want 0, only Refresh reads again`);
     if (!allHidden && reads > 6) fail('R2-reads', `${reads} reads in the minute from ${mmss(t)} (${stName(s0)} down, no click${hides.some(e => e.t >= t && e.t < t + MIN) ? ', the tab hidden and shown' : ''}): want at most 6`);
   }
   W.stats.refused = A.alerts.filter(a => /Nothing was saved/.test(a.msg)).length;
@@ -1467,7 +1504,7 @@ async function main() {
   const t0 = Date.now();
   SITE = compileSite(resolve(opt('--root', REPO)));
   const ks = only !== null ? [Number(only)] : Array.from({ length: n }, (_, i) => i);
-  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0 }, rate: {} };
+  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0, deniedChecks: 0 }, rate: {} };
   for (const k of ks) {
     heartbeat(`case ${k}`, true);
     const { c, W } = await runCase(seed, k, { verbose: flag('--verbose'), family });
@@ -1496,10 +1533,11 @@ async function main() {
     if (st.detailKept < 3) floors.push(`only ${st.detailKept} cards kept on screen over a failed settings read (floor 3)`);
     if (st.hiddenMinutes < 3) floors.push(`only ${st.hiddenMinutes} minutes measured with the tab hidden throughout (floor 3)`);
     if (st.loadingChecks < 100) floors.push(`only ${st.loadingChecks} checks while the first progress read was out (floor 100)`);
+    if (st.deniedChecks < 20) floors.push(`only ${st.deniedChecks} checks while the rules refused the progress read (floor 20)`);
   }
   floors.forEach(f => console.log(`  ✗ [coverage] ${f}`));
   const rate = Object.keys(out.rate).sort().map(x => `${x} ${out.rate[x]}`).join(', ');
-  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.loadingChecks} while it was loading; ${st.hiddenMinutes} minutes hidden throughout; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry; ${st.healthyStale} stale-control writes outside this tool (a write's or a view's own read); most reads in a quiet minute: ${rate || '—'}`;
+  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.loadingChecks} while it was loading; ${st.deniedChecks} while the rules refused it; ${st.hiddenMinutes} minutes hidden throughout; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry; ${st.healthyStale} stale-control writes outside this tool (a write's or a view's own read); most reads in a quiet minute: ${rate || '—'}`;
   process.stderr.write(`console-load-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s\n`);
   if (out.failed.length || floors.length) {
     console.log(`console-load-loop: ✗ ${out.failed.length} of ${ks.length} cases failed (${Object.keys(out.byTag).sort().map(t => t + ' ' + out.byTag[t]).join(', ') || 'coverage'}) — ${detail}`);
