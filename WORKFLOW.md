@@ -64,6 +64,11 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   **Windows: SCHEDULE** for 2026-11-26 at 7:00 AM Pacific, model `claude-sonnet-5-5` (reading and counting only;
   the public pages need no sign-in and no browser).
   Windows: scheduled https://claude.ai/code/routines/trig_011u2gbkdE7fC3GsUzfnLyYh for 2026-11-26 7:00 AM Pacific.
+  Result (cloud routine, 2026-11-26): 79 of 81 pushes to main since 2026-11-19 had an a11y job that finished and
+  printed its annotation (2 were cancelled, 2026-11-23 17:31 and 17:51 UTC: not run). Runs with a new signature: 0 of 79
+  (every one reads "0 new signatures, 0 gone"), so no rule, element or first commit to list. All 79 print the same scan
+  line: "0 rules with findings, 0 elements, on 0 of 12 screens scanned (axe-core 4.14.0, English only)"; the ratchet is
+  still off. Not switched on.
   **Read early on 2026-11-24 (Claude on Windows, with `gh`; Jonathan asked for it): 73 runs of "Browser tests" on main
   since 2026-11-19 (first push 11ef3268, last 982194ea).** The "a11y scan" job ran in 68 of them: all 68 say "0 rules
   with findings, 0 elements, on 0 of 12 screens" and "0 new signatures, 0 gone". The other 5 did not run it: 2 were
