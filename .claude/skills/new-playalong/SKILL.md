@@ -121,7 +121,7 @@ A JSON file in the scratchpad; `perdon-mama.example.json` beside this file is a 
 ## 6. Ship (Fast) and report
 A private song first: Jonathan uploads both files in the console (Manage → Song files: Upload, then Verify); push only
 after Verify says both match the list. A new song is not a danger-zone change: commit with the `Review: Fast` trailer, then CLAUDE.md "Start here" step 8
-(fetch, rebase, full checks on the tip, push, `node tools/checks.mjs --live`). GitHub's Browser tests then run the
+(fetch, rebase, full checks on the tip, push, `node tools/checks.mjs --live`, then `node tools/live-files.mjs` for every file). GitHub's Browser tests then run the
 English smoke and the whole `playalong-loop.mjs` (class-activities.js changed): read the result and report it.
 
 Tell Jonathan, in plain words: the card id and where it is (Songs → More Play Along songs, live for everyone now;

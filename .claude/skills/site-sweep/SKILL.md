@@ -77,7 +77,7 @@ general-purpose agent with `model: opus` and `effort: high`; a reviewer gets `mo
       If origin moved, `git rebase origin/main` and re-run the checks.
    4. `git push origin HEAD:main`.
    5. `node tools/checks.mjs --live` (retry: a big audio push takes several
-      minutes).
+      minutes), then `node tools/live-files.mjs` for every file.
 8. **Clean up.** Fast-forward the main checkout (`git merge --ff-only
    origin/main`; leave Jonathan's untracked files alone). Delete a fix branch only
    after `git cherry origin/main <branch>` shows no `+` lines; remove the

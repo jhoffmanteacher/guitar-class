@@ -9,8 +9,9 @@ of Cowork only.
 
 - **Claude Code on the web pushes normally**, `main` included. Three limits:
   - There is no `gh` CLI; use the GitHub MCP tools instead.
-  - The sandbox proxy blocks the live site, so `checks.mjs --live` comes back
-    HTTP 403. The deploy has to be confirmed from a local machine.
+  - `checks.mjs --live` may be blocked from a cloud session (it worked from
+    one on 2026-11-26). If it comes back HTTP 403, the deploy has to be
+    confirmed from a local machine.
   - **The credentials push commits but cannot delete refs** (`git push
     origin --delete` fails with `RPC failed; HTTP 403`; the GitHub MCP server
     has no delete-branch tool). Hand Jonathan the command (or the repo's

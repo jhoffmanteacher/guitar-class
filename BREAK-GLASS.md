@@ -33,6 +33,7 @@ Before any of them: `git switch main && git pull --ff-only`, then `git status` m
    the push until you tell Jonathan to paste the old rules back and add the line it prints to `RULES-PASTE.md`.
 5. Confirm, one or two minutes later: `node tools/checks.mjs --live` must print
    "live site is serving this exact version". If it says "does not match", wait a minute and run it again.
+   Then `node tools/live-files.mjs` checks every file, byte for byte.
 6. Open tabs reload themselves once (after a drill, recording, exit check or playing card ends; at
    most 5 minutes). Anyone still seeing the problem reloads the page.
 
@@ -56,6 +57,7 @@ site straight from the internet.
 5. `git push --no-verify`
 6. Confirm: `node tools/checks.mjs --live` must print "live site is serving this exact version
    (guitar-class-kill-switch)". GitHub can take up to about 10 minutes to hand out the new file.
+   `node tools/live-files.mjs` then checks every file.
 7. Each Chromebook switches the next time it opens or reloads the site. Open tabs reload once by
    themselves. While the kill switch is live the site needs the internet (no offline copy), and backing
    tracks come from the internet; the copies students already have stay on the Chromebook for later.
@@ -65,7 +67,8 @@ site straight from the internet.
 10. Full `node tools/checks.mjs`: it must exit 0. If it changed `sw.js`:
     `git add sw.js && git commit -m "Cache version: the real service worker is back"`.
 11. `git push` (normal hooks this time), then `node tools/checks.mjs --live` must show a normal
-    version (`guitar-class-<date>-<code>`), and `node tools/kill-switch/proof.mjs` must still pass.
+    version (`guitar-class-<date>-<code>`), `node tools/live-files.mjs` must match every file, and
+    `node tools/kill-switch/proof.mjs` must still pass.
     Open tabs reload once more by themselves; the backing tracks are still on every Chromebook.
 
 ## (c) Student work was damaged or deleted

@@ -133,7 +133,7 @@ For each confirmed finding, decide:
 
      Repeat until a round finds nothing real, at most 3 rounds.
   3. A clean round → rebase on `origin/main`, full `node tools/checks.mjs`,
-     fast-forward push to `main`, and `checks.mjs --live`.
+     fast-forward push to `main`, `checks.mjs --live`, and `node tools/live-files.mjs` (every file).
   4. Still not clean after 3 rounds, or a finding that is a product call → do
      NOT merge: push the branch, put the open finding in WORKFLOW.md's Open
      work, and say in the report that it is waiting for Jonathan and why.
@@ -149,8 +149,9 @@ teacher dashboard on live data), edit `firestore.rules`, or hand-edit the `sw.js
 version lines. CLAUDE.md's "Never,
 whatever the task says" list applies too.
 
-`checks.mjs --live` returns 403 from a cloud session. Say in the report that
-the deploy needs confirming from a local machine.
+`checks.mjs --live` may be blocked from a cloud session (it worked from one on
+2026-11-26). If it is, say in the report that the deploy needs confirming from a
+local machine.
 
 ## 4. Re-check
 
