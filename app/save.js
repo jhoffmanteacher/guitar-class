@@ -191,6 +191,7 @@ function resetLoadedProgress(){
   progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={};
   streak={ count:0, lastDay:null }; practiceLog=unsure ? {} : loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod='';
   progressLogFromDevice = !unsure;
+  progressLogAside = unsure ? progressLogCopy() : null;
   if(!unsure) restoreLocalPlace();
 }
 async function loadProgress(){
@@ -246,6 +247,7 @@ function progressApplyDoc(doc){
       const stale = progressDeviceLogStale(), unsure = !data.practiceLog && !stale && progressDeviceSure === false;
       practiceLog   = data.practiceLog || (stale || unsure ? {} : loadLocalPracticeLog());
       progressLogFromDevice = !data.practiceLog && !stale && !unsure;
+      progressLogAside = unsure ? progressLogCopy() : null;
       if(!unsure) savePracticeLogLocal();
       songReady     = data.songReady || {};
       songReadyAt   = data.songReadyAt || {};
@@ -472,11 +474,12 @@ function progressClearDevice(del){
    Not when the teacher emptied the record: the doc says a Start over was applied (startOverApplied), or this load's
    class settings hold a Delete for the student (the doc is then one re-created since). The copy is then the old log
    another Chromebook kept, and reading it back would upload it whole with the next rep (sweep APP-CORE-2; Jonathan,
-   2026-11-25: "ignore the old device copy"). The price: reps made on this Chromebook after the reset whose save never
-   landed are dropped with it, as a sign-in with no doc after a Delete already drops them (progressClearDevice).
+   2026-11-25: "ignore the old device copy"). Only a reset this Chromebook had not cleared its copies for when it read
+   this one (progressDeviceReadSeen, the per-Chromebook marker below, 2026-11-26): a copy on a Chromebook that already
+   cleared for it is the student's own work since, whose save has not landed yet, and stays (review reset-1 R1-3).
    A doc that never had the field and was never reset keeps the fallback. */
 function progressDeviceLogStale(){
-  return progressDocFound && !progressDocHasLog && (progressStartOverApplied > 0 || (progressMarkers.ok && progressMarkers.del > 0));
+  return progressDocFound && !progressDocHasLog && (progressStartOverApplied > progressDeviceReadSeen || (progressMarkers.ok && progressMarkers.del > progressDeviceReadSeen));
 }
 
 /* ── This Chromebook's copies after a Start over or a Delete: the per-Chromebook marker (2026-11-26) ──
@@ -512,12 +515,32 @@ let progressDeviceSure = null;       // null: this sign-in has not compared yet;
 let progressDeviceReadSeen = 0;      // the stored marker when this page last read the copies (progressApplyDoc / resetLoadedProgress)
 let progressLogFromDevice = false;   // practiceLog came from this Chromebook's copy, not from the record
 let progressDeviceCleared = 0;       // copies a Delete's comparison removed before the app was drawn (the 'del' notice)
+let progressLogAside = null;         // a practice log copy set aside while it was not known (progressDeviceUnsure)
+function progressLogCopy(){ const c = loadLocalPracticeLog(); return Object.keys(c).length ? c : null; }
 function progressSeenGet(uid){
   try{ return Number(localStorage.getItem(RESET_SEEN_KEY + ':' + uid)) || 0; }catch(e){ return 0; }
 }
 /* PM_HOST.localOk (app/boot.js), Hear It First, caAdoptLocalTicks: may something kept on this Chromebook for the
    student be used now? The localhost dev bypass reads no class settings and has no marker: always. */
 function progressDeviceLocalOk(){ return progressDeviceSure === true || isDevBypassUser(); }
+/* Rep strips and review cards from practiceLog again, when it changed under a drawn app. */
+function progressRepsRedraw(){
+  document.querySelectorAll('.rep-strip[data-sid]').forEach(el => refreshRepStrips(el.dataset.sid));
+  refreshReviewCards();
+}
+/* The copy set aside (progressDeviceUnsure) with what the page logged since, as logPracticeRep would have built it
+   from the copy: reps and today's count added, the later day and time, the higher best. */
+function progressLogMerge(old, cur){
+  const out = Object.assign({}, old);
+  Object.keys(cur).forEach(k => {
+    const a = old[k], b = cur[k];
+    if(!a || typeof a !== 'object' || !b || typeof b !== 'object'){ out[k] = b; return; }
+    const e = Object.assign({}, a, b, { reps: (a.reps || 0) + (b.reps || 0), todayCount: (a.lastDay === b.lastDay ? (a.todayCount || 0) : 0) + (b.todayCount || 0) });
+    if(a.best != null || b.best != null) e.best = Math.max(a.best || 0, b.best || 0);
+    out[k] = e;
+  });
+  return out;
+}
 /* Called with the markers of a settings read that worked (loadClassConfig), while this page has not compared. */
 function progressDeviceReset(){
   const uid = currentUser && currentUser.uid;
@@ -532,19 +555,31 @@ function progressDeviceReset(){
   if(top > progressDeviceReadSeen){
     if(progressLogFromDevice){
       practiceLog = {}; progressLogFromDevice = false;
-      if(drawn){ document.querySelectorAll('.rep-strip[data-sid]').forEach(el => refreshRepStrips(el.dataset.sid)); refreshReviewCards(); }
+      if(drawn) progressRepsRedraw();
     }
     if(!progressDocFound && !drawn){ lastModuleNum = 1; lastSetId = null; }
     progressDeviceReadSeen = top;
+  } else if(progressLogAside){
+    /* Nothing waits that this Chromebook had not cleared for: the copy set aside while it was not known is the
+       student's own, and comes back as it would have at sign-in, with the reps logged since on top (review reset-1
+       R1-1). Those reps went out alone; the whole log goes out again. */
+    const logged = Object.keys(practiceLog || {}).length > 0;
+    practiceLog = progressLogMerge(progressLogAside, practiceLog || {});
+    savePracticeLogLocal();
+    if(logged) queueSave('practiceLog');
+    if(drawn) progressRepsRedraw();
   }
+  progressLogAside = null;
   progressDeviceSure = true;
 }
 /* The sign-in's settings read failed (progressStartOverAtSignIn): nothing kept on the Chromebook stands in for the
-   record until a settings read works. The copies themselves stay where they are. */
+   record until a settings read works. The copies themselves stay where they are; the practice log copy is also kept
+   aside in memory, so the first read that works can put it back (progressDeviceReset) even if a rep has written over it
+   on the Chromebook meanwhile. */
 function progressDeviceUnsure(){
   progressDeviceSure = false;
   if(progressLoadFailed) return;
-  if(progressLogFromDevice){ practiceLog = {}; progressLogFromDevice = false; }
+  if(progressLogFromDevice){ progressLogAside = Object.keys(practiceLog || {}).length ? practiceLog : null; practiceLog = {}; progressLogFromDevice = false; }
   if(!progressDocFound){ lastModuleNum = 1; lastSetId = null; }
 }
 /* Called once per sign-in, after loadProgress() and loadClassConfig() (app/start.js). Never throws. */

@@ -20,7 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
-     --reset            only the reset cases (Start over / Delete, S1-S26, and Z1-Z5: Song Journey ticks; see "the reset
+     --reset            only the reset cases (Start over / Delete, S1-S30, ZJ1-ZJ2, and Z1-Z5: Song Journey ticks; see "the reset
                         cases" below); a full default run runs them too
      --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
      --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
@@ -2348,6 +2348,11 @@ function actionCode(a){
         reset, settings read failing (the copy is not used then and stays for the next sign-in), S26 a Start over
         removes only B's lesson copies. A case can make one tab's reads of one path fail or answer late for a while
         (world.failReads, in the fake's read)
+     S27-S30 (2026-11-26, review reset-1): S27/S28 a never-reset student's practice log copy, set aside while the
+        settings read failed, comes back at the tab's next read that works (before a rep / after one); S29/S30 a
+        Chromebook that already cleared for the Delete / Start over keeps the copy made since
+     ZJ1-ZJ2 a Song Journey page's practice-minutes hold (tabs/journey.js PM_HOST.localOk): no marker, a sign-out, a
+        Delete while out, the read late or failed, a Start over only
      S6 a deleted student signs in again on the Chromebook holding their old copies: a new student, nothing old
         re-uploaded at sign-in
      S7 THE LIMIT, documented: a page left open writes its old copy back, after a Start over and after a Delete
@@ -2424,7 +2429,8 @@ function makeJourneyTab(world, name, device){
     addEventListener: (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); }, removeEventListener(){},
     t: k => k, getLang: () => 'en', setLang(){}, applyI18n(){},
     firebase: { initializeApp(){}, auth: () => auth, firestore: Object.assign(() => db, { FieldValue: { delete: () => DELETE } }) },
-    firebaseConfig: {}, TEACHER_EMAIL: 'teacher@example.test', SONG_ID: 'the-cure', navigator: { onLine: true, userAgent: 'save-loop' } };
+    firebaseConfig: {}, TEACHER_EMAIL: 'teacher@example.test', SONG_ID: 'the-cure', navigator: { onLine: true, userAgent: 'save-loop' },
+    localStorage: device.localStorage };
   win.window = win;
   vm.createContext(win);
   vm.runInContext(`(function(){ const D = Date, clock = __clock; function FakeDate(...a){ if (!new.target) return new D(clock()).toString(); return a.length ? new D(...a) : new D(clock()); } FakeDate.prototype = D.prototype; FakeDate.now = () => clock(); FakeDate.UTC = D.UTC; FakeDate.parse = D.parse; globalThis.Date = FakeDate; })();`, Object.assign(win, { __clock: () => world.now }));
@@ -2432,6 +2438,8 @@ function makeJourneyTab(world, name, device){
   tab.win = win;
   tab.boot = () => { for (const fn of (listeners.load || []).slice()) call(() => fn({})); auth.currentUser = { uid: USER.uid, email: USER.email, displayName: USER.displayName }; call(() => authCb && authCb(auth.currentUser)); };
   tab.tick = n => { if (!tab.alive || tab.reloaded) return; boxes[n].checked = !boxes[n].checked; call(() => win.readyChanged(boxes[n])); };
+  /* Firebase signs this page out (null) or in again (2026-11-26, ZJ1): the page's own auth callback. */
+  tab.auth = signedIn => { if (!tab.alive) return; auth.currentUser = signedIn ? { uid: USER.uid, email: USER.email, displayName: USER.displayName } : null; call(() => authCb && authCb(auth.currentUser)); };
   tab.close = () => { tab.unloading = true; for (const fn of (listeners.pagehide || []).slice()) call(() => fn({})); world.at(world.now, () => { tab.alive = false; world.killTimers(tab); }, null, 'script'); };
   return tab;
 }
@@ -2623,10 +2631,11 @@ async function resetCases(){
         ['the failed sign-in cleared nothing: the device copy made since coming back is still there before the retry', s8.failed === true && /m7w1-s1/.test(String(s8.copy)), JSON.stringify(s8)],
         /* No Start over waits on a doc that exists (the sign-in would do nothing either): the retry applies it. */
         ['the retried read then loaded the doc the student came back with', tabs[0].run('progressLoadFailed') === false && tabs[0].run('completed[' + JSON.stringify(NEW_TICK) + ']') === true],
-        /* 2026-11-25 (sweep APP-CORE-2, Jonathan: "ignore the old device copy"): a record re-created after a Delete that
-           holds no practice log never takes this Chromebook's copy in its place. Nothing tells a copy made since coming
-           back (whose save never landed, as here) from one kept since before the Delete, so this one goes too. */
-        ["…and, the record holding no practice log after a Delete, did not read the device copy back", tabs[0].run('JSON.stringify(practiceLog)') === '{}', tabs[0].run('JSON.stringify(practiceLog)')],
+        /* 2026-11-25 (sweep APP-CORE-2): a record re-created after a Delete that holds no practice log never takes an OLD
+           copy in its place. Since 2026-11-26 (review reset-1 R1-3) the per-Chromebook marker tells them apart: this
+           Chromebook had already cleared for the Delete (gc-resetSeen), so its copy is the student's work since coming
+           back, whose save never landed, and the late load reads it back (S29, S30: the same with both reads working). */
+        ["…and, this Chromebook having cleared for the Delete already, read back the copy made since coming back", tabs[0].run('JSON.stringify(practiceLog)') === JSON.stringify({ 'm7w1-s1': { reps: 2 } }), tabs[0].run('JSON.stringify(practiceLog)')],
         ['the doc is untouched', !!doc && doc.completed && doc.completed[NEW_TICK] === true && !w.landed.some(l => l.tx)] ];
     } };
   });
@@ -3005,6 +3014,126 @@ async function resetCases(){
         ['the legacy tick is folded in (a Start over keeps activities)', s.legacy === true && !!doc && !!doc.caSteps && doc.caSteps['ca-20:c1'] === true, JSON.stringify(doc && doc.caSteps)],
         ['applied once, on A; B says nothing', applies(w) === 1 && !b.notice, String(applies(w))] ];
     } };
+  });
+  /* S27-S30 (2026-11-26, review reset-1). S27/S28 (R1-1): a never-reset student, a record with no practice log, this
+     Chromebook's copy, and a sign-in whose settings read fails: the copy is set aside, and the tab's next read that
+     works puts it back (S27: before any rep, the reviewer's X1; S28: after a rep that wrote over the copy on the
+     Chromebook). S29/S30 (R1-3): a Chromebook that already cleared for the Delete / Start over keeps the copy made
+     since, when the record has no log. */
+  await scenario('S27', 'never reset: no practice log in the record; the settings read fails at sign-in, the tab comes back with it working, then a rep: the copy is back and saved with the rep', c => {
+    const noLog = clone(OLD); delete noLog.practiceLog;
+    seed(c.world, noLog);
+    const A = c.dev('A');
+    oldLogOn(A);
+    c.world.failReads = [{ path: 'config/class', tab: 'A', from: T0 + 1000, until: T0 + 6000 }];
+    c.boot('A', A, 1000);
+    c.vis('A', 7000, true); c.vis('A', 8000, false);
+    c.at(11000, () => { const t = c.tab('A'); t.s27 = { ok: t.run('progressMarkers.ok'), log: t.run('JSON.stringify(practiceLog)') }; });
+    c.act('A', 12000, `logPracticeRep(${JSON.stringify(NEW_REP)})`);
+    c.vis('A', 14000, true);
+    return { endMs: 20000, check: (doc, w, tabs) => {
+      const a = tabs.find(t => t.name === 'A').s27 || {};
+      const keys = o => Object.keys(o || {}).sort().join();
+      return [
+        ["after the read that works, the page shows the Chromebook's copy", a.ok === true && a.log === JSON.stringify(OLD.practiceLog), JSON.stringify(a)],
+        ['the record holds the copy and the new rep', keys(doc && doc.practiceLog) === keys(Object.assign({ [NEW_REP]: 1 }, OLD.practiceLog)) && canon(doc.practiceLog['m6w1-s1']) === canon(OLD.practiceLog['m6w1-s1']), JSON.stringify(doc && doc.practiceLog)],
+        ["the Chromebook's copy still holds the old entries", !noOldIn(copyNow(A)), String(copyNow(A))] ];
+    } };
+  });
+  await scenario('S28', 'never reset: as S27, but a rep is logged BEFORE the tab comes back (it writes over the copy on the Chromebook): the copy set aside comes back, added to that rep', c => {
+    const noLog = clone(OLD); delete noLog.practiceLog;
+    seed(c.world, noLog);
+    const A = c.dev('A');
+    oldLogOn(A);
+    c.world.failReads = [{ path: 'config/class', tab: 'A', from: T0 + 1000, until: T0 + 6000 }];
+    c.boot('A', A, 1000);
+    c.act('A', 4000, "logPracticeRep('m6w1-s1')");
+    c.vis('A', 5000, true);
+    c.at(5500, () => { c.tab('A').s28a = copyNow(A); });
+    c.vis('A', 7000, false);
+    c.at(10000, () => { c.tab('A').s28 = c.tab('A').run('JSON.stringify(practiceLog)'); });
+    c.vis('A', 11000, true);
+    return { endMs: 16000, check: (doc, w, tabs) => {
+      const t = tabs.find(x => x.name === 'A'), want = OLD.practiceLog['m6w1-s1'].reps + 1;
+      let page = {}; try { page = JSON.parse(t.s28 || '{}'); } catch {}
+      return [
+        ['the rep during the failed read wrote over the copy on the Chromebook (the case is real)', noOldIn(t.s28a) || /"reps":1[,}]/.test(String(t.s28a)), String(t.s28a)],
+        ["after the read that works, the page's log is the copy plus that rep", !!page['m6w1-s1'] && page['m6w1-s1'].reps === want && page['m6w1-s1'].best === OLD.practiceLog['m6w1-s1'].best, String(t.s28)],
+        ['…and so is the record', !!doc && !!doc.practiceLog && !!doc.practiceLog['m6w1-s1'] && doc.practiceLog['m6w1-s1'].reps === want && doc.practiceLog['m6w1-s1'].best === OLD.practiceLog['m6w1-s1'].best, JSON.stringify(doc && doc.practiceLog)],
+        ["…and the Chromebook's copy", /"reps":48/.test(String(copyNow(A))), String(copyNow(A))] ];
+    } };
+  });
+  const SINCE = { 'm7w1-s1': { reps: 2, todayCount: 2, lastDay: '2026-11-11', last: T0 - 60000 } };
+  await scenario('S29', 'a Chromebook that already cleared for the Delete; the record (re-created) has no practice log: the copy made since is kept and saved with the next rep', c => {
+    const A = c.dev('A');
+    c.teacher(100, 'del');
+    c.at(1000, () => seed(c.world, { name: USER.displayName, email: USER.email, migrations: { swap45: true }, completed: { [NEW_TICK]: true } }));
+    A.localStorage.setItem('gc-resetSeen:' + USER.uid, String(T0 + 100));
+    A.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify(SINCE));
+    c.boot('A', A, 3000);
+    c.at(6000, () => { c.tab('A').s29 = c.tab('A').run('JSON.stringify(practiceLog)'); });
+    c.act('A', 7000, "logPracticeRep('m7w1-s1')");
+    c.vis('A', 9000, true);
+    return { endMs: 14000, check: (doc, w, tabs) => [
+      ['both sign-in reads worked', tabs[0].run('progressMarkers.ok') === true && tabs[0].failedAtBoot === false],
+      ["the page shows the copy made since the Delete", tabs[0].s29 === JSON.stringify(SINCE), String(tabs[0].s29)],
+      ['the record holds it with the new rep', !!doc && !!doc.practiceLog && !!doc.practiceLog['m7w1-s1'] && doc.practiceLog['m7w1-s1'].reps === 3, JSON.stringify(doc && doc.practiceLog)],
+      ['nothing was cleared again (the marker is the one stored)', A.localStorage.getItem('gc-resetSeen:' + USER.uid) === String(T0 + 100)] ] };
+  });
+  await scenario('S30', 'a Chromebook that already cleared for the Start over; the record (emptied) has no practice log: the copy made since is kept and saved with the next rep', c => {
+    const A = c.dev('A');
+    const emptied = clone(OLD); MODULE_FIELDS.forEach(f => { delete emptied[f]; }); emptied.startOverApplied = T0 + 100;
+    seed(c.world, emptied);
+    c.teacher(100, 'over');
+    A.localStorage.setItem('gc-resetSeen:' + USER.uid, String(T0 + 100));
+    A.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify(SINCE));
+    c.boot('A', A, 3000);
+    c.at(6000, () => { c.tab('A').s30 = c.tab('A').run('JSON.stringify(practiceLog)'); });
+    c.act('A', 7000, "logPracticeRep('m7w1-s1')");
+    c.vis('A', 9000, true);
+    return { endMs: 14000, check: (doc, w, tabs) => [
+      ["the page shows the copy made since the Start over", tabs[0].s30 === JSON.stringify(SINCE), String(tabs[0].s30)],
+      ['the record holds it with the new rep', !!doc && !!doc.practiceLog && !!doc.practiceLog['m7w1-s1'] && doc.practiceLog['m7w1-s1'].reps === 3, JSON.stringify(doc && doc.practiceLog)],
+      ['no Start over applied again', applies(w) === 0 && !tabs[0].notice, String(applies(w))] ] };
+  });
+  /* ZJ1/ZJ2 (2026-11-26, review reset-1 R1-2, R1-4): a Song Journey page's practice-minutes host (tabs/journey.js
+     PM_HOST.localOk, from its own class-settings read) lets the engine pick up other pages' seconds only when no Delete
+     waits that this Chromebook has not cleared for; a sign-out forgets that read. Read from the real page. */
+  const jOk = t => { try { return t.win.PM_HOST.localOk(); } catch (e) { return 'threw: ' + e.message; } };
+  await scenario('ZJ1', 'Journey page: no marker -> allowed; signed out -> not; a Delete while out, back in with the read late -> not until it answers, then not until this Chromebook cleared for it', c => {
+    seed(c.world, OLD);
+    c.teacher(50, 'del', 'uid-someone-else');
+    const J = c.dev('J');
+    c.jboot('J', J, 0);
+    const L = {};
+    c.at(3000, () => { L.a = jOk(c.tab('J')); });
+    c.at(3500, () => c.tab('J').auth(false));
+    c.at(3600, () => { L.b = jOk(c.tab('J')); });
+    c.teacher(4000, 'del');
+    c.world.failReads = [{ path: 'config/class', tab: 'J', from: T0 + 4400, until: T0 + 5000, delay: 4000 }];
+    c.at(4500, () => c.tab('J').auth(true));
+    c.at(6000, () => { L.c = jOk(c.tab('J')); });
+    c.at(11000, () => { L.d = jOk(c.tab('J')); });
+    c.at(11500, () => { J.localStorage.setItem('gc-resetSeen:' + USER.uid, String(c.world.marker)); });
+    c.at(12000, () => { L.e = jOk(c.tab('J')); });
+    return { endMs: 14000, check: () => [
+      ['no marker for this student: allowed', L.a === true, String(L.a)],
+      ['signed out: not', L.b === false, String(L.b)],
+      ['signed in again, its settings read not back yet: not (the read before the sign-out is forgotten)', L.c === false, String(L.c)],
+      ['the read says a Delete this Chromebook has not cleared for: not', L.d === false, String(L.d)],
+      ['…allowed once the main site cleared for it (gc-resetSeen)', L.e === true, String(L.e)] ] };
+  });
+  await scenario('ZJ2', 'Journey page: a Start over only -> allowed (minutes are kept); its settings read failing -> not', c => {
+    seed(c.world, OLD);
+    c.teacher(50, 'over');
+    const J1 = c.dev('J1'), J2 = c.dev('J2');
+    c.world.failReads = [{ path: 'config/class', tab: 'J2', from: T0, until: T0 + 8000 }];
+    c.jboot('J1', J1, 0); c.jboot('J2', J2, 0);
+    const L = {};
+    c.at(4000, () => { L.one = jOk(c.tab('J1')); L.two = jOk(c.tab('J2')); });
+    return { endMs: 6000, check: () => [
+      ['a Start over only: allowed', L.one === true, String(L.one)],
+      ['the settings read failed: not', L.two === false, String(L.two)] ] };
   });
   await scenario('S7', 'THE LIMIT (expected, documented): an open page writes its old copy back after a Start over and after a Delete', c => {
     seed(c.world, OLD);

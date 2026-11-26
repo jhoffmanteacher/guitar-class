@@ -200,8 +200,9 @@
      R9 (family reset, 2026-11-26) The teacher Deleted A's data and this Chromebook never saw it: none of A's old copies
         is used or sent. The 240 s an old page left queued never reach minutes/A; the legacy tick is never folded in
         (record or screen); after a settings read that works, the old recording answer, queue, legacy key, picks,
-        practice log and place are gone from the device and it remembers the marker (gc-resetSeen:A); while A's
-        settings read fails, no take can be recorded and the copies are left as they were.
+        practice log and place are gone from the device, it remembers the marker (gc-resetSeen:A) and Hear It First
+        may open (its own signedIn(), run on the page); while A's settings read fails, no take can be recorded, Hear It
+        First does not open, and the copies are left as they were.
 
    THE FAMILIES (--list): last-action (A's last action of 8 kinds right before Sign out, network up / slow /
    refused once / offline / stalled; the student who sees the not-saved notice either takes "Sign out anyway" or
@@ -1254,6 +1255,14 @@ const FAMILIES = {
 };
 const LOAD_RETRY_CASES = 6;
 const RESET_CASES = 3;
+/* R9: Hear It First's signedIn() (trainer-site-adapter.js), cut out whole by its braces and run on the page. */
+const HIF_SIGNED_IN = (() => {
+  let src = ''; try { src = readFileSync(join(ROOT, 'trainer-site-adapter.js'), 'utf8'); } catch { return null; }
+  const i = src.indexOf('function signedIn()'); if (i < 0) return null;
+  let j = src.indexOf('{', i), d = 0;
+  for (; j < src.length; j++){ if (src[j] === '{') d++; else if (src[j] === '}'){ d--; if (!d) break; } }
+  return j < src.length ? src.slice(i, j + 1) : null;
+})();
 const OUT_OF_ROBIN = ['load-retry', 'reset'];
 const ACTION_KINDS = ['tick', 'untick', 'answer', 'rep', 'check', 'path', 'pr', 'card'];
 const NET_KINDS = ['up', 'slow', 'refused', 'offline', 'stall'];
@@ -1654,12 +1663,14 @@ async function runFamily(world, dev, sc, H){
     siteRun(tab1.page, 'ensureCoachJs()');
     await world.sleep(3000);
     const seenNow = () => dev.localStorage._d['gc-resetSeen:' + A.uid];
-    world.r9 = { early: { consent: dev.localStorage._d['micRecConsent:' + A.uid] || null, wanted: safeEval(tab1.page, 'typeof micRecWanted === "function" ? micRecWanted() : "no coach"'), seen: seenNow() } };
+    /* Hear It First (trainer-site-adapter.js) opens only when its signedIn() says so: its own text, run on this page. */
+    const hifNow = () => HIF_SIGNED_IN ? safeEval(tab1.page, '(function(){ ' + HIF_SIGNED_IN + ' return signedIn(); })()') : 'signedIn() not found';
+    world.r9 = { early: { consent: dev.localStorage._d['micRecConsent:' + A.uid] || null, wanted: safeEval(tab1.page, 'typeof micRecWanted === "function" ? micRecWanted() : "no coach"'), seen: seenNow(), hif: hifNow() } };
     await H.act(tab1, A, actionFor(sc, 'tick', sc.r, A));
     await world.sleep(sc.rsKind === 'config-fails' ? 42000 : 8000);
     if (sc.rsKind === 'config-fails'){ await H.hide(tab1); await world.sleep(1000); await H.show(tab1); await world.sleep(4000); }
     const ls = dev.localStorage._d, v = k => (k in ls ? ls[k] : null);
-    world.r9.late = { seen: seenNow(), consent: v('micRecConsent:' + A.uid), queue: v('pm:q:' + A.uid + ':p0ldpage0001'), legacy: v('caStepsToday:' + A.uid),
+    world.r9.late = { hif: hifNow(), seen: seenNow(), consent: v('micRecConsent:' + A.uid), queue: v('pm:q:' + A.uid + ':p0ldpage0001'), legacy: v('caStepsToday:' + A.uid),
       picks: v('gc-srPicks:' + A.uid), log: v('practiceLog:' + A.uid), set: v('gc-lastSet:' + A.uid) };
     await H.signOut(tab1, A, 'wait');
     await world.sleep(3000);
@@ -2251,9 +2262,11 @@ function oracle(sc, world, dev){
     const stale = [['the recording answer', L.consent !== null], ['the old page\'s unsent seconds', L.queue !== null], ['the legacy tick key', L.legacy !== null],
       ['the Keep-it-sharp picks', oldIn(L.picks, /m9w2-s1/)], ['the practice log', oldIn(L.log, /zz-ama-note|"reps":41/)], ['the place', L.set === 'm9w2']].filter(x => x[1]).map(x => x[0]);
     if (stale.length) fail('R9', `A's old copies still on the Chromebook after a settings read that worked: ${stale.join(', ')}`);
+    if (L.hif !== true) fail('R9', `after a settings read that worked, Hear It First would not open (its signedIn() = ${JSON.stringify(L.hif)})`);
     if (world.sc.rsKind === 'config-fails'){
       const E = r9.early || {};
       if (E.wanted !== false) fail('R9', `while A's settings read fails, a take could be recorded (micRecWanted = ${JSON.stringify(E.wanted)})`);
+      if (E.hif !== false) fail('R9', `while A's settings read fails, Hear It First would open with A's old copy (its signedIn() = ${JSON.stringify(E.hif)})`);
       if (E.consent !== 'yes' || E.seen != null) fail('R9', `while A's settings read fails, the copies must be left as they were (recording answer ${JSON.stringify(E.consent)}, marker ${JSON.stringify(E.seen)})`);
     }
   }

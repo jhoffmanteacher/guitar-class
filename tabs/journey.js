@@ -15,7 +15,7 @@ var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
    week's minutes under the student's class period too. */
 var pmDocPeriod = '', pmDocPeriodUid = '';
 /* The teacher's Delete marker for the student, from this page's class-settings read (pmLoadWeekGoals): { uid, del }.
-   null until that read answers. */
+   null until that read answers, and again from a sign-out (a later sign-in reads it afresh). */
 var pmResetRead = null;
 window.PM_HOST = {
   ui: false,
@@ -51,11 +51,12 @@ window.PM_HOST = {
    PM_HOST.localOk); a failed read leaves it unknown, and other pages' seconds wait. */
 function pmLoadWeekGoals(db){
   var uid = fbUser && fbUser.uid;   // the student this read is for: the auth handler sets fbUser just before the call
+  var gen = loadGen;                // a read that answers after a sign-out or another sign-in says nothing about this one
   try {
     db.collection('config').doc('class').get().then(function(snap){
       if(snap && snap.exists && window.PM && typeof PM.setWeekGoals === 'function') PM.setWeekGoals((snap.data() || {}).pmWeekGoals);
       var del = Number((((snap && snap.exists && snap.data()) || {}).progressDeleted || {})[uid]);
-      if(uid) pmResetRead = { uid: uid, del: isFinite(del) && del > 0 ? del : 0 };
+      if(uid && gen === loadGen) pmResetRead = { uid: uid, del: isFinite(del) && del > 0 ? del : 0 };
     }).catch(function(){});
   } catch(e) {}
 }
@@ -1400,6 +1401,7 @@ window.addEventListener('load', function(){
     // held for whoever signs in next.
     loadGen++;
     readState = 'pending';
+    pmResetRead = null;   // practice minutes: this sign-in's settings read decides again (PM_HOST.localOk)
     if(!user){
       var wasSettled = authSettled;
       authSettled = true; pendingSave = false; setSaveMsg('journey.signin');
