@@ -6851,6 +6851,11 @@ function checkLiveSaw() {
    A HELPER: a tool with no launch call of its own that calls a name imported from another tools/ .mjs which itself
    launches Chrome and passes all of this is through the wall too (so a shared launcher is not a false red).
    Fails with the tool's path and what is missing. Pinned: at least 15 tools found.
+   KNOWN LIMITS (stated, not fixed; review R3-2): the launch-call test follows WALL_FLAGS only when it is spread in
+   the launch call itself or through ONE direct const/let/var whose value names it (a second name built from that
+   one, const b = [...a], is not followed: a false red); and a .sh / .py under tools/ that names
+   Chrome anywhere, a comment included, counts as a launcher. The fix for a tool author is to spread ...WALL_FLAGS
+   in the launch call itself.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|process\.env\.CHROME\b|--remote-debugging-port|google-chrome|chromium\.launch\w*\(|puppeteer|['"](?:@playwright\/[-\w/]*|playwright[-\w/]*)['"]|npx\s+playwright|--headless/;
 const WALL_SCRIPT_RE = /google-chrome|chromium|--headless|--remote-debugging-port|playwright|puppeteer|\bCHROME\b/;
@@ -6951,7 +6956,7 @@ function wallUnwalled(root) {
 function checkChromeWall() {
   head('1fh. Every tool that launches Chrome goes through tools/chrome-wall.mjs (the wall and the two-run lock)');
   const { launchers, missing } = wallUnwalled(ROOT);
-  for (const r of missing) { err(`1fh: ${r} launches a browser but does not go through tools/chrome-wall.mjs as tools/smoke.mjs does`); problems++; }
+  for (const r of missing) { err(`1fh: ${r} launches a browser but does not go through tools/chrome-wall.mjs as tools/smoke.mjs does. Known limit: 1fh follows WALL_FLAGS only when it is spread in the launch call or through one direct const, and a .sh/.py that names Chrome anywhere counts as a launcher; spread ...WALL_FLAGS in the launch call itself`); problems++; }
   if (launchers.length < 15) { err(`1fh: found ${launchers.length} tools that launch a browser (pinned: at least 15): the matcher may have stopped finding them`); problems++; }
   if (!missing.length && launchers.length >= 15) ok(`${launchers.length} of ${launchers.length} tools that launch a browser use tools/chrome-wall.mjs (WALL_FLAGS, the watch, browserSlot)`);
 }

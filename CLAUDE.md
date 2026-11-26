@@ -191,7 +191,8 @@ swap, keyed MCs: `.claude/rules/modules.md`.
   `tools/console-layout-smoke.mjs`, whose stub Firestore reaches the console); the Chrome extension only for a
   person-style click-through. Every Chrome tool goes through `tools/chrome-wall.mjs`: the wall (no request may leave
   127.0.0.1 and no Firebase app may start, or the run fails) and the two-run lock (`GC_BROWSER_SLOTS`, skipped on
-  GitHub; checks.mjs 1fh). Never weaken a loop or the wall to make a run pass.
+  GitHub; checks.mjs 1fh). Never weaken a loop or the wall to make a run pass. 1fh follows `WALL_FLAGS` only when
+  it is spread in the launch call or through one direct const: spread `...WALL_FLAGS` in the launch call itself.
 
 ## Keep the Mac's load "just right"
 
