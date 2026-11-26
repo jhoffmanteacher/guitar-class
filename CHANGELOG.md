@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-26 — Your other Chromebooks
+
+- **After your teacher starts you over or deletes your work, your other Chromebooks no longer bring old work back.**
+
+
 ## 2026-11-26 — Las Mañanitas intro
 
 - **Las Mañanitas: one note in the intro tab is fixed.** The sixth note is now F# on the D string, fret 4, the same
