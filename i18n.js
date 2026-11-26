@@ -1785,6 +1785,9 @@
       es: 'El micrófono todavía no captaba bien el sonido del acorde — revisa que cada dedo esté en la punta, luego rasguea despacio y deja que el sonido siga sonando.' },
     'coach.crit.pitch.needsMelody': { en: 'I only caught {good} of {total} notes landing — drop the BPM way down and say each note name as you play it.',
       es: 'Solo capté {good} de {total} notas — baja mucho el BPM y di el nombre de cada nota mientras la tocas.' },
+    // coach-score.js coachScorePitch, melody, Not yet with no right note (always at least one wrong one): needsMelody would say "I only caught 0 of 8"
+    'coach.crit.pitch.needsMelodyNone': { en: 'None of the notes I heard were the written ones. Drop the BPM way down and say each note name as you play it.',
+      es: 'Ninguna de las notas que escuché era la escrita. Baja mucho el BPM y di el nombre de cada nota mientras la tocas.' },
     'coach.crit.pitch.needsQuietChords': { en: 'The chord tones sounded right on {good} of {total} beats. I could not hear the rest clearly. Strum each chord firmly, close to the mic.',
       es: 'Las notas del acorde sonaron bien en {good} de {total} tiempos. No pude escuchar el resto con claridad. Rasguea cada acorde con firmeza, cerca del micrófono.' },
     // coach-score.js coachScorePitch, chords, Not yet with no right strum and no wrong one (some unclear, the rest silent): needsQuietChords would say "right on 0 of 8 beats"

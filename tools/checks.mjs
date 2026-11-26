@@ -19332,8 +19332,9 @@ function checkCoachVerdicts() {
         sounds at all: the mic hint), in any round;
      F. a graded report draws one row per criterion that has a level (none for a level-0 criterion such as "no chord changes in this
         drill"), lowest level first, "Right notes" first on a tie, each with its own level (read from the HTML);
-     G. a graded round with no right note never shows a "right on {good} of {total}" line with 0 in it (the chord one has its own
-        line, needsQuietChordsNone: "sounded right on 0 of 8 beats" is no sentence);
+     G. a graded round with no right note never shows a "{good} of {total}" pitch line with 0 in it (the chord one has its own
+        line, needsQuietChordsNone: "sounded right on 0 of 8 beats" is no sentence; melody's needsMelodyNone: not "I only caught 0
+        of 8");
    and controls, so this cannot go blind: every all-right round opens the gate, with the Great headline on the beat and Good 600 ms off
    it (the timing criteria coach, they do not fail a take). Every total is pinned. */
 const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2, eCases: 6, rows: 38608, zeroRight: 1180, micScreens: 496, keptSame: 3428, bestKept: 8264 };
@@ -19364,7 +19365,7 @@ function checkCoachNotesDecide() {
         const GREY = [0, 1, 2, 3, 5, 6], MARK_LINE = t('coach.report.markAnyway');
         /* G: every "right on {good} of {total}" line, written out with 0 right */
         const RIGHT_KEYS = ['closeQuietChords', 'closeQuietMelody', 'needsQuietChords', 'needsQuietMelody', 'quietMostMany', 'greatQuietMelody',
-          'greatQuietMelodyOne', 'greatChords', 'close', 'correctPerfect', 'wrongNote'].map(k => 'coach.crit.pitch.' + k);
+          'greatQuietMelodyOne', 'greatChords', 'close', 'correctPerfect', 'wrongNote', 'needsMelody'].map(k => 'coach.crit.pitch.' + k);
         const zeroLines = total => RIGHT_KEYS.map(k => t(k, { good: 0, total, rest: total, ordinal: '1st', heard: 'B', expected: 'A' }));
         /* peek: the card sits in a locked set's read-only preview (its .week-panel has .set-peek), as the DOM would answer closest() */
         const round = (mode, states, dev, dimCls, skillIds, before, peek) => {

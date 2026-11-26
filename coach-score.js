@@ -332,9 +332,11 @@ function coachScorePitch(){
     } else if (quietOnly){
       sentence = t(coach.mode === 'chords' ? 'coach.crit.pitch.needsQuietChords' : 'coach.crit.pitch.needsQuietMelody', { good, total });
     } else {
+      /* Melody with no right note: there is always a wrong one here (not quietOnly), so "I only caught 0 of 8" is said
+         as what it is: none of the notes heard were the written ones. */
       sentence = coach.mode === 'chords'
         ? t('coach.crit.pitch.needsChords')
-        : t('coach.crit.pitch.needsMelody', { good, total });
+        : t(good === 0 ? 'coach.crit.pitch.needsMelodyNone' : 'coach.crit.pitch.needsMelody', { good, total });
     }
   }
   return { name, icon, level, sentence };
