@@ -186,3 +186,13 @@ projected stage (`?teacher=true` → **Live quiz**), its control strip and Previ
   can each answer (the last tap wins). After any change to `live-quiz.js` or `live-quiz-teacher.js`: `node tools/live-quiz-loop.mjs`
   (about 20-35 s, Node only; exit 0 required). It counts, and does not fail on, a Reveal that comes before a slow or
   late student's own time is up (accepted by Jonathan, 2026-11-12).
+
+## The tool to run after a change (moved from CLAUDE.md, 2026-11-26)
+
+- `live-quiz.js`, `live-quiz-teacher.js`, its `lq.*` strings or the answers rule: `node tools/live-quiz-loop.mjs` (exit
+  1 = a rule broke; replay with `--case=<name> --verbose`).
+- `live-changes.js` ("Hear the chord change"): `node tools/live-changes-sim.mjs` (about 1 s).
+- `live-hilo.js` ("Higher or lower?"), its `hilo` branches or its piano files: `node tools/live-hilo-sim.mjs` (about
+  1 s; the pair is never written to the doc).
+- `live-saw.js` (the "Saw chase") or its `lqSawBandHtml` / `lqSawSwitchHtml` calls in `live-quiz.js`: `node
+  tools/live-saw-sim.mjs` (about 1 s; nothing about the chase is ever written to the doc).

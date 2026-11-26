@@ -555,6 +555,48 @@ The full text: `docs/workflow-history-to-2026-11-18.md`, section 4.
   naturally — re-stitch it"), or the agents go timid.
 - **Live preview:** VS Code Live Server; the sign-in wall's dev bypass loads a mock user whose progress never saves.
 
+
+### Reasons and dates moved out of CLAUDE.md (2026-11-26 rewrite)
+
+CLAUDE.md was cut to what every session needs; area rules moved to `.claude/rules/*.md` (they load with the files they
+govern). The dated reasons it carried, one line each:
+- **Change smoke in English, `--only` by area** (Jonathan, 2026-11-09: "it's taking forever").
+- **End-of-day smoke on request, no nightly task** (Jonathan, 2026-11-09).
+- **At most two headless-browser runs at a time** (Jonathan, 2026-11-23: "make two the default").
+- **The Mac's load bands** (Jonathan, 2026-11-16): at load 10 a quick check took 7 minutes instead of 2 (measured
+  2026-11-16). Load only matters on the Mac (2026-11-18: "machine load only matters on the mac"). Shift work to
+  Windows (2026-11-19: "shift work to windows"); Windows commits no idle lines since 2026-11-19.
+- **Don't repeat verification that already passed** (Jonathan, 2026-11-12: "things that are overkill don't need to run
+  again if checks have already passed"; "apply this to the future too").
+- **Browser checks in Chrome for Testing by default** (Jonathan, 2026-11-12).
+- **The teacher console is not enlarged** (Jonathan, 2026-11-16); the big-screen fill shipped 2026-11-13.
+- **A Fast change never stops to split a part** (Jonathan, 2026-11-11: "I frequently need fast changes"). The parts
+  come from the 2026-11-11 cut of `app.js`, `coach.js` and `teacher.js`.
+- **Student data never goes to Claude** (Jonathan, 2026-11-13: "I am allowed to store data in google/firestore but not
+  in claude").
+- **Module progress never resets** (Jonathan, 2026-11-13: "modules do not reset for students unless i do it").
+- **Real student takes outrank the synthetic rooms** (Jonathan, 2026-11-12: "we'll have to rely on recorded student
+  takes").
+- **Short agent reports** (Jonathan, 2026-11-13: "accurate and efficient").
+- **Reviewers spawned without asking** (Jonathan, 2026-11-08); a fresh reviewer each round because on 2026-11-08 every
+  `coach.js` round found a real major bug in the previous round's fixes.
+- **Agents for ordinary work too** (Jonathan, 2026-11-11: "agents and subagents are fine for normal changes too to
+  speed things up").
+- **A product change he asks for ships Fast** (Jonathan, 2026-11-09, about the 2-click count-in and Today's
+  activities by date: "these should have been fast changes").
+- **An `sw.js` list-only change ships Fast** (Jonathan, 2026-11-18: "list-only ships Fast").
+- **Opusplan** (Jonathan, 2026-11-20: "use opusplan at medium to xhigh even if we are chatting using fable"; "if we are
+  planning and chatting in fable, opusplan agents and subagents should be used to execute the plans"). The reviewer
+  agent files pin Opus since 2026-11-20, replacing the 2026-11-09 Fable-at-medium choice. A Fable review only when he
+  names one ("i will specify fable review if i want it, and you can recommend it too").
+- **Sonnet for the simple parts** (Jonathan, 2026-11-17: "for opus agents to use sonnet when they can if appropriate";
+  "it can also define effort level"); `site-runner` rather than `general-purpose` (2026-11-18, after `/usage` showed
+  general-purpose agents at 25%).
+- **Give the blurb for another session the first time** (Jonathan, 2026-11-11: "just give me the blurb the first
+  time").
+- **Preserve the author's words in module text** (Jonathan, 2026-07-25); the per-set Songs tab was removed 2026-08-27;
+  the rail's slim default is Look 1, Part 5 (2026-11-17).
+
 ---
 
 ## Power Chord Switch: where we stopped

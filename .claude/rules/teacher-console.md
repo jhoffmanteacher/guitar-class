@@ -97,3 +97,51 @@ gets strict, not an unchecked write.
   until you bump `CONFIG_WRITERS` on purpose.
 - `firestore.rules` deliberately does NOT enforce the counter: it would lock the
   Firebase console out of the one doc you'd repair by hand.
+
+## Each console part: what binds it and the tool to run after a change
+
+Moved from CLAUDE.md "Where the code lives" (2026-11-26).
+
+- **Which activities a student sees or lands on** (`caIsVisible` / `caBlockers` / `caBoardOrder` / the first-card
+  pick, `showApp`'s landing, the console's or the Journey pages' copies, `classConfigSignature`): `node
+  tools/visible-loop.mjs` (about 16 s).
+- **`teacherWriteConfig()`, `loadTeacherClassConfig()` or any `config/class` writer** (danger zone): run `node
+  tools/two-consoles-loop.mjs` before and after and report both tables (today's code fails about 10 to 25 of 1,000
+  schedules on the listed faults).
+- **The console is not enlarged** on a big screen (factor 1 at every size); only Live In-Class Games fills
+  (`siteFillStage()`, called by `renderTeacherBody`).
+- `teacher-backup.js` ("Download a backup", read-only): `node tools/backup-proof.mjs`. Never open a downloaded backup
+  (CLAUDE.md "Student data").
+- `teacher-errors.js` (Tools → Error log, and "Send a test entry"): `node tools/site-errors-sim.mjs`. No name, uid or
+  email may ever be added to a `siteErrors` entry.
+- `teacher-livegames.js` (the Games list: order, rename, Remove / Restore, kept in `config/class.liveGames` through
+  `teacherWriteConfig()`; `live-quiz.js` reads it through `lqPickerIds()` / `lqCustomTitle()`, and Start copies a
+  custom name into `liveQuiz/current.title`): `node tools/live-quiz-loop.mjs`.
+- `teacher-accounts.js` (requests to join, `accessRequests`; the allow list `config/access`, teacher-only, every write
+  merges one key; the roster's outside accounts): `node tools/access-sim.mjs`. The rules are `firestore.rules`, with
+  the `isSchool()` gate pinned by 1dt.
+- `teacher-songfiles.js` (Song files: Upload, List, Verify, Delete): the console's only writer of the `songFiles`
+  store, and Jonathan's click only. Song files are left out of the backup on purpose. `node
+  tools/song-files-console-sim.mjs`.
+- `teacher-builtsongs.js` (Built songs: the list with today's verdict, and Import of a .json and its .mp3 prepared with
+  `tools/new-playalong.mjs`: the audio through the Song files writer, then `builtSongs/{id}`, then the list). Song
+  files names a built song's audio and refuses to delete it. `node tools/song-files-console-sim.mjs`.
+- `teacher-sb-*.js` (the Song builder: drafts in `songDrafts/{id}`, the levelled 192k copy (`vendor/lamejs`, console
+  only) stored through the Song files writer): after any change to any of them, `node tools/song-builder-sim.mjs` and
+  `node tools/sb-dsp-test.mjs` (1en pins both).
+  - `teacher-sb-chart.js`: every chart it accepts must make a song `builtSongCheck` passes.
+  - `teacher-sb-pdf.js`: a chords pdf's text goes into the chart box; a tab pdf or a scan is only shown beside the
+    chart; kept in the tab, never stored.
+  - `teacher-sb-publish.js`: Publish only on the Preview step, only when `builtSongCheck` passes on the exact doc and
+    within 10 cents (over 8 pins only warns); ONE transaction writes `builtSongs/{id}`, `builtSongsMeta/list` and the
+    draft `songDrafts/{id}`.
+  - `teacher-sb-sheet.js` (the Lyrics sheet row): a chords-over-lyrics pdf checked by `pcSheetAlign`
+    (`app/cards-sheet.js`) against the song's card, refused with a reason when it does not line up; Add stores the pdf
+    through the Song files writer and writes `song.sheet` in one transaction. Also `node
+    tools/song-files-console-sim.mjs`.
+- `teacher-remove.js` (a student's "⋯": "Start this student over…" and "Delete this student's data…"; one student,
+  typed-name confirmation, a download offered first): the console's only write to `progress/{uid}` is its delete,
+  `teacherRemoveDeleteProgress()`. A page the student already has open saves its old copy again (stated in the
+  dialogs, not engineered away). After a change: `node tools/remove-one-sim.mjs` and `node tools/save-loop.mjs`.
+- `teacherResume*` in `teacher-core.js`: also `node tools/update-reload-loop.mjs` (`sw-and-loading.md`).
+- The `teacherFetchStudents()` remap in `teacher-core.js` is one half of the Modules 4/5 swap (`modules.md`).
