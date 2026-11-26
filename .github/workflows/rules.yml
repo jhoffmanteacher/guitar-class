@@ -15,6 +15,17 @@
 #                              a school account gets one by id and reads the
 #                              list, only the teacher writes (with --breaks)
 #
+# Job "emu-loops" (2026-11-26): the site's own pages on the real Firebase JS
+# SDK against the Auth AND Firestore emulators (tools/emu-site.mjs):
+#   tools/signin-loop.mjs      who gets in and can they save: the page's school
+#                              test against isSchool(), ask / allow / lock out
+#                              through the console's own writers
+#   tools/progress-emu-loop.mjs  the progress save on the real SDK: save-loop's
+#                              fake rules checked against it; reload, second
+#                              device, sign-out, offline, the 4/5 move, Start over
+# Both with --plants (planted faults in in-memory copies; each must turn a case
+# red). They run from the checkout; only the npm packages live outside it.
+#
 # Nothing here touches the real Firebase project: the emulator runs on the
 # runner under a "demo-" project id, which needs no credentials and cannot
 # reach the network project. No deploy step: publishing rules is still the
@@ -147,4 +158,89 @@ jobs:
             fi
             done
           done <<< "$RULES_TOOLS"
+          exit $failed
+
+  emu-loops:
+    # The site's own pages (tools/emu-site.mjs) on the real Firebase JS SDK, against the Auth and Firestore
+    # emulators under the demo- project id; the tools refuse any other id and any address off this runner.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Keep in step with the rules job above. FIREBASE_JS_VERSION must be the version index.html loads from
+      # gstatic: both tools fail when it is not.
+      FIREBASE_TOOLS_VERSION: 15.36.0
+      FIREBASE_JS_VERSION: 10.12.2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.16.0
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          java-package: jre
+      - name: Cache the emulator jar and the npm download cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/firebase/emulators
+            ~/.npm
+          key: emu-loops-${{ runner.os }}-ft${{ env.FIREBASE_TOOLS_VERSION }}-fb${{ env.FIREBASE_JS_VERSION }}
+      - name: Install the emulators and the SDK (outside the checkout)
+        run: |
+          EMU="$RUNNER_TEMP/emu-loops"
+          mkdir -p "$EMU" && cd "$EMU"
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund --legacy-peer-deps --save-exact \
+            "firebase-tools@$FIREBASE_TOOLS_VERSION" \
+            "firebase@$FIREBASE_JS_VERSION"
+          echo '{ "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8089 }, "auth": { "port": 9099 }, "ui": { "enabled": false } } }' > firebase.json
+          cp "$GITHUB_WORKSPACE/firestore.rules" .
+          java -version
+          npx --no-install firebase --version
+      - name: Run the loops on the emulators
+        env:
+          # One line per tool: the file, then its own arguments (--deps and --site are added).
+          EMU_TOOLS: |
+            tools/signin-loop.mjs --plants
+            tools/progress-emu-loop.mjs --plants
+        run: |
+          # GitHub runs this with -e and pipefail; one tool failing must not stop the other.
+          set +e +o pipefail
+          EMU="$RUNNER_TEMP/emu-loops"
+          esc()  { printf '%s' "$1" | awk 'BEGIN { ORS = "" } { gsub(/%/, "%25"); gsub(/\r/, "%0D"); if (NR > 1) printf "%%0A"; print }'; }
+          escp() { esc "$1" | awk 'BEGIN { ORS = "" } { gsub(/:/, "%3A"); gsub(/,/, "%2C"); print }'; }
+          failed=0
+          while read -r tool args; do
+            [ -z "$tool" ] && continue
+            if [ ! -f "$tool" ]; then
+              echo "::error title=$(escp "$(basename "$tool")")::$(esc "$tool is listed in EMU_TOOLS in .github/workflows/rules.yml but is not in the repo.")"
+              failed=1; continue
+            fi
+            name="$(basename "$tool")"
+            log="$EMU/$name.log"
+            echo "::group::$tool $args"
+            # Each tool in its own emulators, so one cannot leave data or accounts behind for the other.
+            ( cd "$EMU" && npx --no-install firebase emulators:exec --only firestore,auth --project demo-gc \
+                "node $GITHUB_WORKSPACE/$tool --deps $EMU --site $GITHUB_WORKSPACE $args" ) < /dev/null > "$log" 2>&1
+            code=$?
+            cat "$log"
+            echo "::endgroup::"
+            summary="$(grep -E '^(✓|✗) .*(passed, [0-9]+ failed|breaks caught)$' "$log" | tr '\n' ' ' | sed 's/ *$//')"
+            took="$(grep -E '^time: ' "$log" | tail -n 1)"
+            cases="$(awk '/^      / { reason = $0; next } /^  ✗ / { line = $0; sub(/^  ✗ /, "", line); sub(/^ +/, "", reason); print "✗ " line (reason != "" ? "  [" reason "]" : "") } { reason = "" }' "$log")"
+            if [ "$code" -eq 0 ] && [ -n "$summary" ]; then
+              echo "::notice title=$(escp "$name")::$(esc "$summary ${took}")"
+            else
+              failed=1
+              if [ -z "$cases" ]; then
+                body="exit code $code and no failing case printed: the install, the emulators or the tool itself failed. Last lines of the log:"$'\n'"$(tail -n 15 "$log")"
+              else
+                n="$(printf '%s\n' "$cases" | grep -c '^✗')"
+                body="$n failing (first 30 shown), ${took}:"$'\n'"$(printf '%s\n' "$cases" | head -n 30)"
+              fi
+              echo "::error title=$(escp "$name: ${summary:-no summary line}")::$(esc "$body")"
+            fi
+          done <<< "$EMU_TOOLS"
           exit $failed
