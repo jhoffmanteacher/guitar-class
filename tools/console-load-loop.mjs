@@ -105,6 +105,11 @@
                settings read is on screen once the console is quiet (a view drawn from the empty copy it leaves).
      R4-archived  an archived student never comes back into the roster the views draw from after a failed settings read.
      R4-games  during a progress outage with the settings read good, Games still offers the class games On / Off switch.
+     R5-1      the screen against the fake's REAL data, not the console's flags (a collection read answered EMPTY from the
+               cache looks like a good read to the console, section 5): while the server holds students, no "No students
+               yet" / "No student data yet" / "0 roster accounts" / "of 0 students", no summary strip counting 0 students,
+               and no roster student listed under "Allowed, not in the roster"; and the "asking to join" badge, once
+               shown, stays while a request still waits.
      page-error   anything the console logs through console.error or throws.
    COVERAGE FLOORS (a full run, 64+ cases, no --family): every family ran; 40+ write clicks reached the server; 4+
    window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks;
@@ -578,11 +583,19 @@ function docDiff(a, b) {
    it), set with {merge:true} (nested maps merge, FieldValue.delete() removes),
    update, delete, the two live-game listeners (liveQuiz/current and its
    answers: one snapshot each), a seeded latency on every call. The planned
-   OUTAGE: a read of config/class (a doc get or a transaction's get) fails with
-   code 'unavailable' while the case's network says the settings are down; a
-   read of the progress collection fails while it says progress is down.
-   Every other read succeeds. NOT modelled: the SDK's cache and offline queue,
-   security rules, batched writes, server timestamps.
+   OUTAGE says which reads cannot reach the server: config/class while the
+   case's network says the settings are down, the progress collection while it
+   says progress is down, and every other doc and collection while both are
+   down (the network is gone). A read that cannot reach the server answers as
+   the real SDK does (firebase-firestore-compat 10.12.2, memory cache, nothing
+   listening on these docs, review R5-1): a COLLECTION read RESOLVES with an
+   EMPTY list from the tab's cache unless it asked {source:'server'}, which
+   rejects ('unavailable'); a DOC read rejects either way ("Failed to get
+   document because the client is offline": no copy of it in the cache); a
+   transaction's get and commit on config/class reject. NOT modelled: a doc
+   held in the cache by a listener or a pending write, the offline write queue
+   (a write resolves at once), security rules, batched writes, server
+   timestamps.
    ════════════════════════════════════════════════════════════════════════ */
 const DELETE = Object.freeze({ __fieldValue: 'delete' });
 const BACKOFF = [0, 1000, 1500, 2250, 3375];
@@ -599,17 +612,21 @@ class FakeServer {
   }
   latency() { if (this.fixedLat) return this.fixedLat; const r = this.rng(); return r < 0.85 ? 8 + Math.floor(this.rng() * 70) : 120 + Math.floor(this.rng() * 480); }
   log(text) { this.events.push({ t: this.clock.now, text }); }
-  down(kind) { const s = this.netAt(this.clock.now); return kind === 'cfg' ? !!s.cfg : kind === 'prog' ? !!s.prog : false; }
+  down(kind) { const s = this.netAt(this.clock.now); return kind === 'cfg' ? !!s.cfg : kind === 'prog' ? !!s.prog : !!(s.cfg && s.prog); }
   unavailable(what) { return Object.assign(new Error('fake server: ' + what + ' is unavailable (the planned outage)'), { code: 'unavailable' }); }
   snap(path) { const ex = this.docs.has(path); return { exists: ex, data: ex ? sortedClone(this.docs.get(path)) : undefined, ver: this.ver.get(path) || 0 }; }
   version(path) { return this.ver.get(path) || 0; }
-  async read(path, who) {
-    const rec = { i: this.reads.length, kind: path === 'config/class' ? 'cfg' : 'doc', path, t0: this.clock.now, t1: null, ok: null, load: who.load, done: false };
+  // The truth the R5-1 checks hold the screen to: who is in the progress collection, how many requests wait.
+  rosterUids() { return [...this.docs.keys()].filter(k => /^progress\/[^/]+$/.test(k)).map(k => k.slice('progress/'.length)); }
+  waitingRequests() { return [...this.docs.keys()].filter(k => /^accessRequests\/[^/]+$/.test(k) && (this.docs.get(k) || {}).status === 'asked').length; }
+  // A doc read: rejected when it cannot reach the server, whatever its options (the SDK has no copy to answer from).
+  async read(path, who, opts) {
+    const rec = { i: this.reads.length, kind: path === 'config/class' ? 'cfg' : 'doc', path, t0: this.clock.now, t1: null, ok: null, load: who.load, done: false, server: !!(opts && opts.source === 'server') };
     this.reads.push(rec); this.inflight++;
     if (rec.kind === 'cfg' && rec.load) { this.loadCfgInflight++; this.maxLoadCfgInflight = Math.max(this.maxLoadCfgInflight, this.loadCfgInflight); }
     try {
       await this.clock.sleep(this.latency(), { kind: 'server' });
-      const fail = rec.kind === 'cfg' && this.down('cfg');
+      const fail = this.down(rec.kind);
       const s = fail ? null : this.snap(path);
       await this.clock.sleep(this.latency(), { kind: 'server' });
       rec.ok = !fail; rec.t1 = this.clock.now; rec.done = true;
@@ -620,19 +637,21 @@ class FakeServer {
       return s;
     } finally { this.inflight--; if (rec.kind === 'cfg' && rec.load) this.loadCfgInflight--; }
   }
-  async query(prefix, who, filters) {
-    const rec = { i: this.reads.length, kind: prefix === 'progress' ? 'prog' : 'col', path: prefix, t0: this.clock.now, t1: null, ok: null, load: who.load, done: false };
+  // A collection read that cannot reach the server: EMPTY from the cache, or rejected when it asked {source:'server'}.
+  async query(prefix, who, filters, opts) {
+    const rec = { i: this.reads.length, kind: prefix === 'progress' ? 'prog' : 'col', path: prefix, t0: this.clock.now, t1: null, ok: null, load: who.load, done: false, server: !!(opts && opts.source === 'server') };
     this.reads.push(rec); this.inflight++;
     if (this.onIssue) this.onIssue(rec);
     if (rec.kind === 'prog') { this.progInflight++; this.maxProgInflight = Math.max(this.maxProgInflight, this.progInflight); }
     try {
       await this.clock.sleep(this.latency() + (rec.kind === 'prog' ? this.progExtra || 0 : 0), { kind: 'server' });
-      const fail = rec.kind === 'prog' && this.down('prog');
-      let out = fail ? null : [...this.docs.keys()].filter(k => k.startsWith(prefix + '/') && k.slice(prefix.length + 1).indexOf('/') < 0).sort().map(p => ({ path: p, ...this.snap(p) }));
+      const cut = this.down(rec.kind), fail = cut && rec.server;
+      rec.cache = cut && !rec.server;
+      let out = fail ? null : rec.cache ? [] : [...this.docs.keys()].filter(k => k.startsWith(prefix + '/') && k.slice(prefix.length + 1).indexOf('/') < 0).sort().map(p => ({ path: p, ...this.snap(p) }));
       if (out) (filters || []).forEach(([f, op, v]) => { if (op === '==') out = out.filter(d => getPath(d.data || {}, f) === v); });
       await this.clock.sleep(this.latency(), { kind: 'server' });
       rec.ok = !fail; rec.t1 = this.clock.now; rec.done = true;
-      this.log(`read ${prefix}/*${rec.load ? ' (first load / retry)' : ''}: ${fail ? 'FAILED (outage)' : out.length + ' docs'}`);
+      this.log(`read ${prefix}/*${rec.load ? ' (first load / retry)' : ''}: ${fail ? 'FAILED (outage)' : rec.cache ? 'EMPTY, answered from the cache (offline, no {source:\'server\'})' : out.length + ' docs'}`);
       if (this.onRead) this.onRead(rec);
       if (fail) throw this.unavailable(prefix);
       return out;
@@ -728,7 +747,7 @@ function makeDb(server, label) {
   const who = () => ({ label, load: /\bloadAllStudents\b/.test(new Error().stack), ctrl: ALS.getStore() || null });
   const docRef = path => ({
     path, id: path.split('/').pop(),
-    get: () => { const w = who(); return server.read(path, w).then(s => makeSnap(docRef(path), s)); },
+    get: o => { const w = who(); return server.read(path, w, o).then(s => makeSnap(docRef(path), s)); },
     set: (data, o) => { server.write(path, data, o && o.merge ? 'merge' : 'set', label); return Promise.resolve(); },
     update: data => { server.write(path, data, 'merge', label); return Promise.resolve(); },
     delete: () => { server.write(path, null, 'delete', label); return Promise.resolve(); },
@@ -743,7 +762,7 @@ function makeDb(server, label) {
     const q = {
       path, doc: id => docRef(path + '/' + id),
       where: (f, op, v) => colRef(path, (filters || []).concat([[String(f), op, v]])), orderBy: () => q, limit: () => q, startAfter: () => q, endBefore: () => q,
-      get: () => { const w = who(); return server.query(path, w, filters).then(list => qResult(server, list, docRef)); },
+      get: o => { const w = who(); return server.query(path, w, filters, o).then(list => qResult(server, list, docRef)); },
       add: data => { const id = 'auto-' + (server.events.length + 1); server.write(path + '/' + id, data, 'set', label); return Promise.resolve(docRef(path + '/' + id)); },
       onSnapshot: (cb) => {
         let live = true;
@@ -1113,6 +1132,8 @@ const ROSTER_FACTS = [
   [/who hasn.t (finished|turned it in)/, 'a "who hasn\'t finished" list'], [/Everyone has (finished|turned)/, '"Everyone has finished"'], [/Opened: \d+/, 'an Opened count'],
   [/Every student is archived/, '"Every student is archived"'], [/Students\s*\d+\s*\/\s*\d+/, 'a Students tab count'],
   [/\b\d+ (done|started|not started|not turned in)\b/, 'a done / started count'], [/\b\d+ paused · \d+ archived/, 'a paused / archived count']];
+// R5-1: what a view says when it takes the class for one with no students (a cache's empty answer read as the roster).
+const EMPTY_CLASS = [[/No students? yet/i, '"No students yet"'], [/No student data yet/i, '"No student data yet"'], [/of 0 students\b|(?<![0-9])0 roster accounts?\b/, '"0 students"']];
 const textOf = el => el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
 const clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
 const mmss = t => { const s = Math.round(t / 100) / 10; return Math.floor(s / 60) + ':' + String((s % 60).toFixed(1)).padStart(4, '0'); };
@@ -1243,6 +1264,21 @@ async function runCase(seed, k, o) {
       if (ctl.length) fail('R3-2', `${p.view}${p.screen ? '/' + p.screen : ''}: ${ctl.length} control(s) worked out from the roster while it has not loaded (${clip([...new Set(ctl.map(e => ctrlInfo(e).sel))].join(', '), 140)})`);
     }
     A.alerts.filter(a => !a.seen).forEach(a => { a.seen = true; if (/Everyone is already open/.test(a.msg) && !p.studentsAt) fail('R3-2', 'the "Everyone is already open" alert while the roster has not loaded'); });
+    /* R5-1: the screen against the fake's REAL data, not the console's flags (a read answered EMPTY from the cache looks
+       like a good read to the console): while the server holds students, no view says the class has none, the summary
+       strip never counts 0 students, and no roster student is offered as "Allowed, not in the roster"; and the
+       "asking to join" badge, once shown, does not go away while a request still waits. */
+    const real = W.server.rosterUids();
+    if (real.length) {
+      const sumEl = A.doc.getElementById('t-summary'), sumTxt = sumEl && !(sumEl._style && sumEl._style.display === 'none') ? textOf(sumEl) : '';
+      for (const [re, what] of EMPTY_CLASS) { const m = re.exec(text); if (m) fail('R5-1', `${p.view}${p.screen ? '/' + p.screen : ''}: ${what} on screen while the server holds ${real.length} students ("…${clip(text.slice(Math.max(0, m.index - 30), m.index + 50), 90)}…")`); }
+      if (/^Students ?0(?![0-9])/.test(sumTxt)) fail('R5-1', `${p.view}: the summary strip counts 0 students while the server holds ${real.length}`);
+      const strays = g ? g.querySelectorAll('[data-access-block] button[data-access-set][data-state="off"]').filter(b => textOf(b) === 'Remove' && real.includes(b.getAttribute('data-uid'))) : [];
+      if (strays.length) fail('R5-1', `${p.view}: ${strays.length} roster student(s) listed under "Allowed, not in the roster" (with Remove) while the server holds them in the roster`);
+    }
+    const badge = A.doc.querySelector('#t-side [data-view="manage"] .t-access-badge');
+    if (badge) W.badgeShown = true;
+    else if (W.badgeShown && W.server.waitingRequests()) fail('R5-1', `the "asking to join" badge went away while the server still holds ${W.server.waitingRequests()} waiting request(s)`);
     // R3-3 (a): once quiet after a first-load / retry settings read moved the copy, every write control was drawn from it (or newer).
     if (quiet && W.bgCopy && W.lastCopy === W.bgCopy.cfg && app()) {
       const stale = app().querySelectorAll(WRITE_SEL).filter(el => el.isConnected && staleVsBg(el));
