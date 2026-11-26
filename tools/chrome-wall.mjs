@@ -223,6 +223,12 @@ export async function wallWatch(cdpPort, tool) {
       const p = m.params;
       rec.request(p.requestId, p.request.url, p.documentURL || (s && s.url) || '?');
       const n = net.get(p.requestId) || { hops: 0, extra: 0, ended: false };
+      /* A redirect means the hop before it was answered: count it now when it was an outside host, since only the
+         last hop is judged at the end (review R3-3: local -> outside 302 -> local passed). */
+      if (p.redirectResponse) {
+        const prev = p.redirectResponse.url || n.url;
+        if (prev && outsideHost(prev)) rec.answered(p.requestId, prev);
+      }
       n.hops++; n.url = p.request.url; net.set(p.requestId, n); settle(p.requestId);
       return;
     }
@@ -371,9 +377,10 @@ export async function browserSlot(tool, opts = {}) {
      `bash -c 'sleep 5; node …'` keeps bash's pid and start time, 5 s before node's own (review R2-3). The uptime
      value only where there is no ps. */
   const start = opts.start === undefined ? (processStart(process.pid) ?? OWN_START) : opts.start;
-  /* It gives up after GC_BROWSER_SLOT_MAX_WAIT minutes (default 45: longer than any run's own timeout) with exit 3,
-     naming who holds the slots; while it waits it says so again every 60 s (review R2-2). */
-  const maxWait = opts.maxWaitMs || (Number(env.GC_BROWSER_SLOT_MAX_WAIT) > 0 ? Number(env.GC_BROWSER_SLOT_MAX_WAIT) * 60000 : 45 * 60000);
+  /* It gives up after GC_BROWSER_SLOT_MAX_WAIT minutes with exit 3, naming who holds the slots; while it waits it
+     says so again every 60 s (review R2-2). The default, 160, is longer than the longest run's own timeout (golden's
+     --timeout, 150 minutes), so a queued run outlasts a holder that runs to its full timeout (review R3-1). */
+  const maxWait = opts.maxWaitMs || (Number(env.GC_BROWSER_SLOT_MAX_WAIT) > 0 ? Number(env.GC_BROWSER_SLOT_MAX_WAIT) * 60000 : 160 * 60000);
   const sayEvery = opts.sayEveryMs || 60000;
   mkdirSync(dir, { recursive: true });
   let said = false, saidAt = 0;
@@ -402,7 +409,7 @@ export async function browserSlot(tool, opts = {}) {
     }
     const waited = Date.now() - t0, who = got.live.map(h => h.what).join(', ');
     if (waited >= maxWait) {
-      console.error(`${tool}: ✗ gave up waiting for a browser slot after ${Math.round(waited / 60000)} min (GC_BROWSER_SLOT_MAX_WAIT); held by: ${who}`);
+      console.error(`${tool}: ✗ gave up waiting for a browser slot after ${maxWait < 60000 ? `${Math.round(waited / 1000)} s` : `${Math.round(waited / 60000)} min`} (GC_BROWSER_SLOT_MAX_WAIT); held by: ${who}`);
       process.exit(3);
     }
     if (!said || Date.now() - saidAt >= sayEvery) {
@@ -510,6 +517,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (!existsSync(chrome)) { console.log('chrome-wall: no Chrome (set CHROME); the wall part is not tested'); process.exit(bad ? 1 : 0); }
   const page = createServer((q, s) => {
     if (q.url.startsWith('/redir.js')) { s.writeHead(302, { location: 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js' }); return s.end(); }
+    /* /chain-answered: local -> quiet.test 302 -> local (review R3-3): the outside hop answered, the last hop local. */
+    if (q.url.startsWith('/c1.js')) { s.writeHead(302, { location: `http://quiet.test:${page.address().port}/c2.js` }); return s.end(); }
+    if (q.url.startsWith('/c2.js')) { s.writeHead(302, { location: `http://127.0.0.1:${page.address().port}/q.js` }); return s.end(); }
     if (q.url.startsWith('/q.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end('window.q = 1;'); }
     if (q.url.startsWith('/sw-out.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end(`self.addEventListener('install', e => e.waitUntil(fetch('https://firestore.googleapis.com/v1/sw').catch(() => {})))`); }
     if (q.url.startsWith('/sw-in.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end(`self.addEventListener('install', e => e.waitUntil(caches.open('t').then(c => c.add('/quiet')))); self.addEventListener('activate', e => e.waitUntil(clients.claim()))`); }
@@ -517,17 +527,18 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     q.url.startsWith('/sw-page') ? `<script>navigator.serviceWorker.register(${JSON.stringify(q.url.includes('out') ? '/sw-out.js' : '/sw-in.js')}).then(r => navigator.serviceWorker.ready).then(() => { document.title = 'sw ready'; })</script>`
     : q.url.startsWith('/leak') ? `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script>fetch('https://firestore.googleapis.com/v1/x').catch(()=>{})</script>`
     : q.url.startsWith('/redir-page') ? `<script src="/redir.js"></script><p>a local 302 to gstatic.com</p>`
+    : q.url.startsWith('/chain-answered') ? `<script src="/c1.js"></script><p>open</p>`
     : q.url.startsWith('/quiet-answered') ? `<script src="http://quiet.test:${page.address().port}/q.js"></script><p>open</p>`
     : q.url.startsWith('/init') ? `<script>window.firebase={apps:[],initializeApp(c){this.apps.push({options:c})}};firebase.initializeApp({projectId:${JSON.stringify(CLASS_PROJECT)}})</script>`
     : `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><p>quiet</p>`); });
   await new Promise(r => page.listen(0, '127.0.0.1', r));
   const free = () => new Promise(r => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => r(p)); }); });
-  for (const [path, want] of [['/quiet', 0], ['/leak', 1], ['/init', 1], ['/sw-page-in', 0], ['/sw-page-out', 1], ['/quiet-answered', 1], ['/redir-page', 0]]) {
+  for (const [path, want] of [['/quiet', 0], ['/leak', 1], ['/init', 1], ['/sw-page-in', 0], ['/sw-page-out', 1], ['/quiet-answered', 1], ['/chain-answered', 1], ['/redir-page', 0]]) {
     const cdp = await free(), prof = mkdtempSync(join(tmpdir(), 'gc-wall-test-'));
     /* /quiet-answered: a Chrome WITHOUT the flags whose resolver lets a quiet-listed host through to this server
        (review R1-3): the quiet file gets an answer, and that must fail the run. */
-    const open = path === '/quiet-answered';
-    if (open) QUIET.push(`http://quiet.test:${page.address().port}/`);
+    const open = path === '/quiet-answered' || path === '/chain-answered';
+    if (open && !QUIET.includes(`http://quiet.test:${page.address().port}/`)) QUIET.push(`http://quiet.test:${page.address().port}/`);
     const flags = open ? ['--no-proxy-server', '--host-resolver-rules=MAP quiet.test 127.0.0.1'] : WALL_FLAGS;
     const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', ...flags, 'about:blank'], { stdio: 'ignore' });
     const wall = await wallWatch(cdp, 'self-test');
