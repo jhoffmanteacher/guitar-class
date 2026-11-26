@@ -97,8 +97,13 @@ function makeRecord(tool, opts) {
   const quiet = new Map();      // host -> n
   const apps = new Map();       // projectId -> Set(page)
   const seen = new Set();       // requestId|url, so a request two sessions both report counts once
-  let total = 0, answeredQuiet = 0;
-  return {
+  let total = 0, answeredQuiet = 0, done = false, watchedNow = () => 0;
+  /* A tool that crashes, hangs into its watchdog or exits by a path that skips finish() still prints the verdict and
+     cannot exit 0 past it: the record is read once more as the process exits (no last look at the pages then). */
+  const onExit = (code) => { if (done) return; const c = rec.finish(code, watchedNow()); if (c !== code) process.exitCode = c; };
+  process.on('exit', onExit);
+  const rec = {
+    set watchedCount(fn) { watchedNow = fn; },
     request(id, url, page) {
       const host = outsideHost(url);
       if (!host) { total++; return; }
@@ -121,6 +126,7 @@ function makeRecord(tool, opts) {
     },
     /* Prints the verdict and returns the tool's exit code: unchanged when the wall held, at least 1 when it did not. */
     finish(code, watched) {
+      done = true; process.removeListener('exit', onExit);
       const bad = [];
       for (const [host, h] of hosts) bad.push(`${tool}: ✗ wall: ${[...h.pages].join(', ')} tried to reach ${host} (${h.n} request${h.n === 1 ? '' : 's'}, ${h.answered} answered). Tests may not reach outside hosts (tools/chrome-wall.mjs).`);
       for (const [id, pages] of apps) bad.push(`${tool}: ✗ wall: ${[...pages].join(', ')} initialised Firebase for ${id}${id === CLASS_PROJECT ? ' (the CLASS project)' : ''}. Tests may not start a Firebase app (tools/chrome-wall.mjs).`);
@@ -133,6 +139,7 @@ function makeRecord(tool, opts) {
     get quiet() { return [...quiet].map(([host, n]) => ({ host, n })); },
     get total() { return total; },
   };
+  return rec;
 }
 
 /* The CDP watch. Connects to Chrome's browser endpoint (a second client beside the tool's own) and attaches to every
@@ -157,6 +164,7 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
   });
   const timed = (p, ms) => Promise.race([p, sleep(ms).then(() => { throw new Error('timeout'); })]);
   let watched = 0;
+  rec.watchedCount = () => watched;
   const probe = async (sid) => {
     const s = sessions.get(sid);
     if (!s || (s.type !== 'page' && s.type !== 'iframe')) return;
@@ -230,6 +238,7 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
 export async function wallPlaywright(context, tool, opts = {}) {
   const rec = makeRecord(tool, opts);
   let n = 0, watched = 0;
+  rec.watchedCount = () => watched;
   await context.route('**/*', (route) => {
     const req = route.request(), url = req.url();
     let page = '?';
@@ -351,6 +360,24 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const code = await wall.finish(0);
     ok(code === want, `${path}: exit ${code}, expected ${want}`);
     proc.kill(); await sleep(500); rmSync(prof, { recursive: true, force: true });
+  }
+  /* A tool that leaves by process.exit(0) without finish(): the exit hook still prints the verdict and exits 1. */
+  {
+    const dir2 = mkdtempSync(join(tmpdir(), 'gc-wall-exit-')), script = join(dir2, 'child.mjs'), port = await free();
+    writeFileSync(script, `import { spawn } from 'node:child_process';
+      import { WALL_FLAGS, wallWatch } from ${JSON.stringify(fileURLToPath(import.meta.url))};
+      const proc = spawn(${JSON.stringify(chrome)}, ['--headless=new', '--remote-debugging-port=${port}', '--user-data-dir=${join(dir2, 'prof')}', '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
+      const wall = await wallWatch(${port}, 'exit-test');
+      const t = await (await fetch('http://127.0.0.1:${port}/json/new?about:blank', { method: 'PUT' })).json();
+      await wall.page(t.id);
+      const ws = new WebSocket(t.webSocketDebuggerUrl); await new Promise(r => { ws.onopen = r; });
+      ws.send(JSON.stringify({ id: 1, method: 'Page.navigate', params: { url: 'http://127.0.0.1:${page.address().port}/leak' } }));
+      await new Promise(r => setTimeout(r, 3000));
+      proc.kill();
+      process.exit(0);`);
+    const r = await new Promise(res => { const c = spawn(process.execPath, [script], { stdio: ['ignore', 'pipe', 'pipe'] }); let err = ''; c.stderr.on('data', d => { err += d; }); c.on('exit', code => res({ code, err })); });
+    ok(r.code === 1 && /exit-test: ✗ wall: \/leak tried to reach firestore\.googleapis\.com/.test(r.err), `process.exit(0) without finish(): exit ${r.code}, the wall line ${/✗ wall/.test(r.err) ? 'printed' : 'MISSING'}`);
+    await sleep(500); rmSync(dir2, { recursive: true, force: true });
   }
   page.close();
   console.log(bad ? `chrome-wall: ✗ ${bad} self-test case(s) failed` : 'chrome-wall: ✓ self-test passed');
