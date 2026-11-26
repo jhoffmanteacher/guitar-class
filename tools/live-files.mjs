@@ -21,10 +21,10 @@
    EXCEPT what Jekyll leaves out: a path with a part that starts with "." "_" "#"
    or "~" or ends with "~", and the `exclude:` list of the commit's _config.yml
    (matched as Jekyll 3 does: a glob in which * also matches "/", or a plain
-   prefix), unless its `include:` list names it. A file that starts with "---"
-   and a line break (front matter) is rendered by Jekyll, not copied: such a
-   file is only checked for answering 200 (none today; the self-test proves the
-   rule). The files the site cannot run without
+   prefix), unless its `include:` list names it. A public file that starts with
+   "---" and a line break (front matter) is rendered by Jekyll, not copied, so
+   it could not be compared: it fails the run before anything is fetched (none
+   today). The files the site cannot run without
    (index.html, sw.js and every file its lists name, every app / coach / teacher
    part, module-N.js, i18n.js, class-activities.js, tabs/*.html, the CSS,
    privacy.html, firebase-config.js, manifest.json) must be in the commit AND
@@ -40,11 +40,17 @@
        same size at its address (18 of 61 are 36,720 bytes), differs in the
        middle. Its hash in the commit's sw.js AUDIO_HASHES must also be the
        commit's bytes (sw.js itself is compared byte for byte). A server that
-       ignores Range sends the whole file, which is then hashed whole.
+       ignores Range sends the whole file, which is then hashed whole. When the
+       deploy's start is known (the Deployments API), each track's answer must
+       also carry a Last-Modified no older than that start: Pages stamps every
+       file of a build with the build's time (2026-11-26: four files at
+       17:26:59 for a deploy created 17:26:42), so an old copy of a track is
+       flagged even where its samples happen to match.
        --audio-bytes downloads and hashes every track whole.
      - The kill switch (BREAK-GLASS.md (b): tools/kill-switch/kill-sw.js copied
-       over sw.js) has no AUDIO_HASHES: the map check is skipped and said so;
-       every file, the tracks included, is still compared.
+       over sw.js), told by its version alone ('guitar-class-kill-switch'), has
+       no AUDIO_HASHES: the map check is skipped and said so; every file, the
+       tracks included, is still compared.
    A file that differs or is missing is tried again, all of them together in up
    to three more passes (--retries 3) after waits of 10 s, 30 s and 60 s
    (--retry-delay 10 is the first wait, then x3 and x6). GitHub's CDN (Fastly)
@@ -53,15 +59,17 @@
    ?lf=… query and `cache-control: no-cache` on each request only get past
    caches in between (a proxy). So when files still differ after those passes
    and the deploy finished less than 620 s ago (--cdn-max-age 600, plus 20 s),
-   the run waits until then and makes one last pass; after it a difference is a
-   failure.
+   the run first asks again whether a later deploy superseded the commit (then
+   it passes at once), else waits until then and makes one last pass; after it
+   a difference is a failure.
 
    Waiting for the deploy (skipped with --no-wait or a --base that is not the
    live site): GitHub's Deployments API (environment github-pages) is read with
    $GITHUB_TOKEN / $GH_TOKEN, else through `gh api`, else unauthenticated. The
    run waits (--wait 15 minutes) until the commit's deployment says "success".
    Once the API has answered, a later failed call is only "ask again" (the next
-   poll), never a switch to the weaker route below.
+   poll), never a switch to the weaker route below; on GitHub ($GITHUB_ACTIONS)
+   so is a failed first call (the job always has a token).
      - A deployment of a LATER commit (GitHub's compare API: "ahead") means a
        newer push superseded this one: the run says so and passes, because that
        push's own run checks the site. It is looked at before anything is
@@ -85,12 +93,15 @@
    must have compared more than 150 files); four planted faults (an app part
    with a changed byte, a module file missing, a backing track one byte longer,
    a backing track swapped for another of the same size: must fail on exactly
-   those four); a file stale on the first request only (passes on the second);
-   a file stale for 1.5 s with no retry left (fails without the last pass,
-   passes with it); a front-matter file served different (passes only as
-   rendered). Without a server: a _config.yml excluding app/ fails on the
-   required parts; the kill switch's sw.js plans with no problem; a fake GitHub
-   API that fails twice after answering once still ends "ready" by the API.
+   those four); a track with an old Last-Modified (red only when the deploy's
+   start is given); a file stale on the first request only (passes on the
+   second); a file stale for 1 s with no retry left (fails without the last
+   pass, passes with it); a later deploy found before the last pass (ends at
+   once, superseded). Without a server: front matter is a plan problem; a
+   _config.yml excluding app/ fails on the required parts; the kill switch's
+   sw.js plans with no problem and a note, the real sw.js with no note; a fake
+   GitHub API that fails twice after answering once, or (on GitHub) fails
+   first, still ends "ready" by the API.
    No network; seconds. */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -207,6 +218,10 @@ const REQUIRED_RE = [
 /* Front matter: Jekyll renders such a file instead of copying it. */
 export const isRendered = (buf) => /^---\r?\n/.test(buf.subarray(0, 8).toString('latin1'));
 
+/* A public file Jekyll would render (front matter) cannot be compared. */
+export const renderedProblems = (files) => files.filter(f => f.rendered)
+  .map(f => ({ path: f.path, why: 'starts with front matter ("---"): Jekyll renders it instead of copying it, so it cannot be compared' }));
+
 /* The two pieces of a track that are compared (the middle and the end), each
    with the sha256 of the commit's bytes there. */
 function samplesOf(bytes) {
@@ -242,7 +257,7 @@ export function plan(sha, { configText, swText } = {}) {
   const { listed, audio } = swLists(sw);
   /* BREAK-GLASS.md (b): the kill switch has no AUDIO_HASHES, and the site runs
      without it; the tracks are still compared below. */
-  const killSwitch = !/const AUDIO_HASHES = \{/.test(sw) || (sw.match(VER_RE) || [])[1] === KILL_SWITCH_VERSION;
+  const killSwitch = (sw.match(VER_RE) || [])[1] === KILL_SWITCH_VERSION;
   if (killSwitch) notes.push('sw.js is the kill switch (no AUDIO_HASHES): the map check is skipped; every file is still compared');
   const required = new Set(listed);
   for (const p of tree.keys()) if (REQUIRED_RE.some(re => re.test(p))) required.add(p);
@@ -258,6 +273,7 @@ export function plan(sha, { configText, swText } = {}) {
     }
     for (const p of Object.keys(audio)) if (!tree.has(p)) problems.push({ path: p, why: 'sw.js AUDIO_HASHES names it, but the commit has no such file' });
   }
+  problems.push(...renderedProblems(files));
   /* The site root is served as index.html. */
   if (published.has('index.html')) files.push({ ...files.find(f => f.path === 'index.html'), path: '', audio: false });
   files.sort((a, b) => a.path.localeCompare(b.path));
@@ -283,9 +299,14 @@ const fetchLive = (base, f, extra = {}) => fetch(urlFor(base, f.path), {
 const drop = async (res) => { try { await res.body?.cancel(); } catch { /* nothing to cancel */ } };
 
 /* A track: each sample as a Range request; a 200 answer is the whole file. */
-async function liveAudio(base, f) {
+async function liveAudio(base, f, notBefore) {
   for (const smp of f.samples) {
     const res = await fetchLive(base, f, { range: `bytes=${smp.start}-${smp.end - 1}` });
+    if (notBefore && (res.status === 200 || res.status === 206)) {
+      /* HTTP dates have whole seconds, like the deploy's created_at. */
+      const lm = Date.parse(res.headers.get('last-modified') || '');
+      if (!(lm >= notBefore)) { await drop(res); return { live: `Last-Modified ${res.headers.get('last-modified') || 'none'}, older than this deploy (${new Date(notBefore).toISOString()})` }; }
+    }
     if (res.status === 200) {
       const have = sha256(Buffer.from(await res.arrayBuffer()));
       return have === f.sha ? { ok: true } : { live: short(have) };
@@ -299,14 +320,12 @@ async function liveAudio(base, f) {
   return { ok: true };
 }
 
-async function liveOnce(base, f, audioBytes) {
+async function liveOnce(base, f, audioBytes, notBefore) {
   try {
-    if (f.audio && !audioBytes) return await liveAudio(base, f);
+    if (f.audio && !audioBytes) return await liveAudio(base, f, notBefore);
     const res = await fetchLive(base, f);
     if (res.status !== 200) { await drop(res); return { live: String(res.status) }; }
     const got = Buffer.from(await res.arrayBuffer());
-    /* Jekyll renders a front-matter file: only that it is served is checked. */
-    if (f.rendered) return { ok: true };
     const want = f.audio ? f.sha : sha256(blob(f.oid));
     const have = sha256(got);
     return have === want ? { ok: true } : { live: short(have) };
@@ -320,7 +339,7 @@ async function liveOnce(base, f, audioBytes) {
    whole CDN is behind waits about 100 s, not 100 s a file. If files still
    differ and settleAt (the deploy's end + the CDN's max-age + 20 s) is still
    ahead, one last pass at settleAt. */
-export async function compare(base, files, { retries = 3, retryDelay = 10, audioBytes = false, concurrency = 8, settleAt = 0, log = () => {} } = {}) {
+export async function compare(base, files, { retries = 3, retryDelay = 10, audioBytes = false, concurrency = 8, settleAt = 0, notBefore = 0, laterDeploy = null, log = () => {} } = {}) {
   const waits = [1, 3, 6].map(x => x * retryDelay * 1000);
   const result = new Map();
   let todo = files;
@@ -329,7 +348,7 @@ export async function compare(base, files, { retries = 3, retryDelay = 10, audio
     async function worker() {
       while (next < pass.length) {
         const f = pass[next++];
-        result.set(f, { ...(await liveOnce(base, f, audioBytes)), tries: n });
+        result.set(f, { ...(await liveOnce(base, f, audioBytes, notBefore)), tries: n });
       }
     }
     await Promise.all(Array.from({ length: Math.max(1, concurrency) }, worker));
@@ -339,6 +358,10 @@ export async function compare(base, files, { retries = 3, retryDelay = 10, audio
   for (; round <= retries && todo.length; round++) {
     if (round) { log(`  ${todo.length} file${todo.length === 1 ? '' : 's'} did not match: trying again in ${waits[Math.min(round - 1, waits.length - 1)] / 1000} s`); await sleep(waits[Math.min(round - 1, waits.length - 1)]); }
     todo = await runPass(todo, round + 1);
+  }
+  if (todo.length && settleAt > Date.now() && laterDeploy) {
+    const later = await laterDeploy();
+    if (later) { const out = []; out.superseded = later; return out; }
   }
   if (todo.length && settleAt > Date.now()) {
     log(`  ${todo.length} file${todo.length === 1 ? '' : 's'} did not match: the CDN may keep a copy up to its max-age; one last pass in ${Math.ceil((settleAt - Date.now()) / 1000)} s`);
@@ -357,6 +380,7 @@ let API_BASE = 'https://api.github.com';
 let API_ROUTES = null;
 let apiRoute = null;
 let apiAnswered = false;
+let IN_CI = !!process.env.GITHUB_ACTIONS;
 async function api(path) {
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   const viaFetch = async (auth) => {
@@ -395,7 +419,7 @@ async function isAhead(older, newer) {
 /* ready | waiting | failed | superseded | replaced | noapi */
 async function deployState(sha) {
   const deps = await api(`/repos/${REPO}/deployments?environment=github-pages&per_page=20`);
-  if (!Array.isArray(deps)) return apiAnswered ? { state: 'waiting', why: 'the GitHub API did not answer; asking again' } : { state: 'noapi' };
+  if (!Array.isArray(deps)) return apiAnswered || IN_CI ? { state: 'waiting', why: 'the GitHub API did not answer; asking again' } : { state: 'noapi' };
   const mine = deps.filter(d => d.sha === sha);
   const after = mine.length ? Date.parse(mine[0].created_at) : -Infinity;
   const newer = deps.filter(d => d.sha !== sha && Date.parse(d.created_at) > after).slice(0, 5);
@@ -405,7 +429,7 @@ async function deployState(sha) {
   if (!mine.length) return { state: 'waiting', why: 'no deployment of this commit yet' };
   const st = await api(`/repos/${REPO}/deployments/${mine[0].id}/statuses?per_page=1`);
   const s = Array.isArray(st) && st[0] ? st[0].state : 'pending';
-  if (s === 'success') return { state: 'ready', at: Date.parse(st[0].created_at) || Date.now() };
+  if (s === 'success') return { state: 'ready', at: Date.parse(st[0].created_at) || Date.now(), start: Date.parse(mine[0].created_at) || 0 };
   if (s === 'failure' || s === 'error') return { state: 'failed', log: st[0].log_url || '' };
   if (s === 'inactive') return newer.length ? { state: 'replaced', by: newer[0].sha } : { state: 'waiting', why: 'inactive' };
   return { state: 'waiting', why: s };
@@ -439,7 +463,7 @@ export async function waitForDeploy(sha, base, { waitMs, pollMs = 15000, log = (
   for (;;) {
     const d = await deployState(sha);
     if (d.state === 'noapi') break;
-    if (d.state === 'ready') { log(`  the Pages deploy of ${s8} has finished (GitHub's Deployments API)`); return { outcome: 'ready', mode: 'api', doneAt: d.at }; }
+    if (d.state === 'ready') { log(`  the Pages deploy of ${s8} has finished (GitHub's Deployments API)`); return { outcome: 'ready', mode: 'api', doneAt: d.at, start: d.start }; }
     if (d.state === 'superseded') return { outcome: 'superseded', mode: 'api', text: `a later commit, ${d.by.slice(0, 8)}, is deployed` };
     if (d.state === 'replaced') return { outcome: 'replaced', mode: 'api', text: `the live site was redeployed from ${d.by.slice(0, 8)}, which is not a later commit than ${s8}`, summary: 'the live site is not this commit' };
     if (d.state === 'failed') return { outcome: 'failed', mode: 'api', text: `the Pages deploy of ${s8} failed: ${d.log}`, summary: 'the deploy failed' };
@@ -451,7 +475,7 @@ export async function waitForDeploy(sha, base, { waitMs, pollMs = 15000, log = (
   log(`  no GitHub API here: waiting until the live sw.js says ${want}`);
   for (;;) {
     const live = await liveVersion(base);
-    if (live === want) return { outcome: 'ready', mode: 'version', doneAt: Date.now() };
+    if (live === want) return { outcome: 'ready', mode: 'version', doneAt: Date.now(), start: 0 };
     if (live && laterVersions(sha).has(live)) return { outcome: 'superseded', mode: 'version', text: `the live sw.js (${live}) is a later commit's` };
     if (Date.now() > deadline) {
       if (live == null) return { outcome: 'unreadable', mode: 'version' };
@@ -496,6 +520,7 @@ async function main() {
   const waiting = !has('--no-wait') && base === LIVE_BASE;
   let mode = 'none';
   let settleAt = 0;
+  let notBefore = 0;
   if (waiting) {
     const w = await waitForDeploy(sha, base, { waitMs: waitMin * 60000, log: (x) => console.log(x) });
     mode = w.mode;
@@ -503,9 +528,14 @@ async function main() {
     if (w.outcome === 'unreadable') { console.log(`live-files: could not run: the live sw.js could not be read at ${base}`); process.exit(2); }
     if (w.outcome !== 'ready') { console.log(`  ✗ ${w.text}`); console.log(`live-files: ✗ ${w.summary} (${label})`); process.exit(1); }
     settleAt = w.doneAt + (cdnMaxAge + 20) * 1000;
+    notBefore = w.start;
   }
+  const laterDeploy = !waiting ? null : mode === 'api'
+    ? async () => { const d = await deployState(sha); return d.state === 'superseded' ? `a later commit, ${d.by.slice(0, 8)}, was deployed` : null; }
+    : async () => { const live = await liveVersion(base); return live && laterVersions(sha).has(live) ? `the live sw.js (${live}) is a later commit's` : null; };
 
-  const bad = await compare(base, files, { retries, retryDelay, audioBytes, concurrency, settleAt, log: (s) => console.log(s) });
+  const bad = await compare(base, files, { retries, retryDelay, audioBytes, concurrency, settleAt, notBefore, laterDeploy, log: (s) => console.log(s) });
+  if (bad.superseded) { console.log(`live-files: ✓ superseded during the run: ${bad.superseded}; its own run checks the site`); process.exit(0); }
   if (bad.length === files.length && bad.every(b => /^error/.test(b.live))) {
     console.log(`live-files: could not run: no file could be fetched from ${base} (${bad[0].live})`); process.exit(2);
   }
@@ -533,6 +563,8 @@ async function selfTest() {
   check(!published.has('CLAUDE.md') && !published.has('tools/checks.mjs') && !published.has('_config.yml') && !published.has('.github/workflows/checks.yml'), 'CLAUDE.md, tools/, _config.yml and .github/ are not public');
   check(isRendered(Buffer.from('---\ntitle: x\n---\n')) && isRendered(Buffer.from('---\r\n')) && !isRendered(Buffer.from('--- not front matter')) && files.filter(f => f.rendered).length === 0,
     `front matter is told apart; ${files.filter(f => f.rendered).length} public files have it today`);
+  const fmp = renderedProblems([{ path: 'x.html', rendered: true }, { path: 'y.js', rendered: false }]);
+  check(fmp.length === 1 && fmp[0].path === 'x.html', `a public file with front matter is a plan problem (${fmp.length} of 2)`);
 
   /* A server of the commit's public files, under /guitar-class/ as on Pages,
      with single Range requests (206), as Pages answers them. */
@@ -551,14 +583,15 @@ async function selfTest() {
     if (p === 'changed' || (p === 'stale-once' && hits.get(rel) === 1) || (p && p.staleUntil && Date.now() < p.staleUntil)) body = Buffer.concat([body, Buffer.from('\n')]);
     if (p === 'longer') body = Buffer.concat([body, Buffer.from([0])]);
     if (p && p.swapWith) body = bytesOf(byPath.get(p.swapWith));
+    const lastMod = p === 'old' ? 'Mon, 02 Nov 2026 10:00:00 GMT' : 'Thu, 26 Nov 2026 17:26:59 GMT';
     const range = (req.headers.range || '').match(/^bytes=(\d+)-(\d+)$/);
     if (range) {
       const start = Number(range[1]), end = Math.min(Number(range[2]), body.length - 1);
-      res.writeHead(206, { 'content-range': `bytes ${start}-${end}/${body.length}`, 'content-length': end - start + 1 });
+      res.writeHead(206, { 'content-range': `bytes ${start}-${end}/${body.length}`, 'content-length': end - start + 1, 'last-modified': lastMod });
       res.end(body.subarray(start, end + 1));
       return;
     }
-    res.writeHead(200, { 'content-length': body.length });
+    res.writeHead(200, { 'content-length': body.length, 'last-modified': lastMod });
     res.end(body);
   });
   await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -585,6 +618,12 @@ async function selfTest() {
     const want = Object.keys(planted).sort().join(', ');
     check(got === want, `${Object.keys(planted).length} planted faults: red on exactly ${want} (got: ${got || 'nothing'})`);
     for (const b of bad) console.log(`      ${b.path}  expected ${b.expected}  live ${b.live}`);
+    const deployStart = Date.parse('2026-11-26T17:26:42Z');
+    const oldOne = byPath.get([...someAudio][0]);
+    planted = { [oldOne.path]: 'old' };
+    const lmNo = await compare(base, [oldOne], quick);
+    const lmYes = await compare(base, tested.filter(f => f.audio), { ...quick, notBefore: deployStart });
+    check(lmNo.length === 0 && lmYes.length === 1 && lmYes[0].path === oldOne.path, `a track with an old Last-Modified: green with no deploy start (${lmNo.length}), red on exactly it with one (${lmYes.map(b => `${b.path}: ${b.live}`).join('; ') || 'nothing'})`);
     planted = { 'i18n.js': 'stale-once' };
     hits.clear();
     bad = await compare(base, i18n, quick);
@@ -595,11 +634,10 @@ async function selfTest() {
     planted = { 'i18n.js': { staleUntil: Date.now() + 1000 } };
     bad = await compare(base, i18n, { ...quick, retries: 0, settleAt: Date.now() + 1500 });
     check(bad.length === 0, `the same with the CDN's last pass 1.5 s later: green (${bad.length} differ)`);
-    const fm = { ...byPath.get('privacy.html') };
-    planted = { 'privacy.html': 'changed' };
-    const asCopied = await compare(base, [fm], quick);
-    const asRendered = await compare(base, [{ ...fm, rendered: true }], quick);
-    check(asCopied.length === 1 && asRendered.length === 0, `a file served with other bytes: red as a copied file (${asCopied.length}), green as a rendered one (${asRendered.length})`);
+    planted = { 'i18n.js': 'changed' };
+    const t0 = Date.now();
+    bad = await compare(base, i18n, { ...quick, retries: 0, settleAt: Date.now() + 20000, laterDeploy: async () => 'a later commit, 0123abcd, was deployed' });
+    check(bad.superseded && Date.now() - t0 < 5000, `a later deploy found before the last pass: ends at once as superseded (${bad.superseded || 'not superseded'}, ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
   } finally { server.close(); }
 
   const cfg = blob(treeOf(sha).get('_config.yml').oid).toString('utf8') + '  - "app/"\n';
@@ -609,14 +647,17 @@ async function selfTest() {
   const p3 = plan(sha, { swText: kill });
   check(p3.problems.length === 0 && p3.notes.length === 1 && p3.files.filter(f => f.audio).length === files.filter(f => f.audio).length,
     `the kill switch's sw.js: ${p3.problems.length} problems, the tracks still compared (${p3.files.filter(f => f.audio).length}), note: ${p3.notes[0] || 'none'}`);
+  const p0 = plan(sha);
+  check(p0.notes.length === 0, `the real sw.js: no kill-switch note (${p0.notes.length})`);
 
-  /* A fake GitHub API: one answer (in progress), then two failures, then success. */
-  let depCalls = 0, stCalls = 0;
+  /* A fake GitHub API: one answer (in progress), then two failures, then success;
+     then, as on GitHub, two failures first. */
+  let depCalls = 0, stCalls = 0, failFirst = false;
   const fakeApi = createServer((req, res) => {
     const send = (code, obj) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(obj)); };
     if (/\/deployments\?/.test(req.url)) {
       depCalls++;
-      if (depCalls === 2 || depCalls === 3) return send(502, { message: 'bad gateway' });
+      if (failFirst ? depCalls <= 2 : (depCalls === 2 || depCalls === 3)) return send(502, { message: 'bad gateway' });
       return send(200, [{ id: 7, sha, created_at: new Date(Date.now() - 60000).toISOString() }]);
     }
     if (/\/deployments\/7\/statuses/.test(req.url)) { stCalls++; return send(200, [{ state: stCalls === 1 ? 'in_progress' : 'success', created_at: new Date().toISOString() }]); }
@@ -628,6 +669,9 @@ async function selfTest() {
   try {
     const w = await waitForDeploy(sha, 'http://127.0.0.1:9/', { waitMs: 5000, pollMs: 10 });
     check(w.outcome === 'ready' && w.mode === 'api' && depCalls === 4, `the API answers, fails twice, answers: "${w.outcome}" by the ${w.mode} route after ${depCalls} calls`);
+    depCalls = 0; stCalls = 0; failFirst = true; apiAnswered = false; apiRoute = null; IN_CI = true;
+    const w2 = await waitForDeploy(sha, 'http://127.0.0.1:9/', { waitMs: 5000, pollMs: 10 });
+    check(w2.outcome === 'ready' && w2.mode === 'api' && depCalls === 4, `on GitHub, the API fails twice first, then answers: "${w2.outcome}" by the ${w2.mode} route after ${depCalls} calls`);
   } finally { fakeApi.close(); }
 
   console.log(fails ? `live-files self-test: ✗ ${fails} check(s) failed` : 'live-files self-test: ✓ every check passed');
