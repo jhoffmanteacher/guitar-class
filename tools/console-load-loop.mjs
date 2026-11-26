@@ -7,7 +7,7 @@
    and the student-progress read (the progress collection) fail and come back on a schedule, while a teacher clicks
    views, hides the tab, types, drags, and a second console writes config/class.
 
-     node tools/console-load-loop.mjs                       152 cases, seed 1 (about 15-30 s)
+     node tools/console-load-loop.mjs                       160 cases, seed 1 (about 15-30 s)
      node tools/console-load-loop.mjs --seed S --cases N     another seed / count
      node tools/console-load-loop.mjs --case K --verbose     replay ONE case: every event, read, write and check
      --family F     only that family (names below)            --root DIR    another site folder (a break-it copy)
@@ -31,7 +31,7 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Nineteen families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Twenty families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
    booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
@@ -42,7 +42,7 @@
    Games mid-game after an update reload, during an outage), detail (a card's page from the update reload's note,
    progress down; a Hidden click lands on top of the other console's change and its follow-up settings read fails, so
    the page is drawn from the failed copy; a tab return then starts the retry, with a click right after its read).
-   Review R4 added ten: early (slow reads, 250-700 ms; a view clicked 0.2-1.2 s in, while the first load is out,
+   Review R4 added eleven: early (slow reads, 250-700 ms; a view clicked 0.2-1.2 s in, while the first load is out,
    sometimes while the module files load too; both reads down for 1.5-3.5 s, then progress), early2 (the same with
    only progress down), midload (module files 300 ms; a view clicked while they load), summary (Skills Overview and
    a class-period change, progress down), livelist (booted on Live In-Class Games with the settings read down, then a
@@ -56,7 +56,8 @@
    list row or a filter, and a write click; it lands, or every third case fails) and cfgfirst (the settings read
    fails first, for 10-25 s, and the progress read is slow: booted on a roster or settings view with no click until
    the minute timer's retry, or booted on Live In-Class Games, Mic recordings' own read bringing the settings back,
-   then a roster view opened).
+   then a roster view opened) and landwrite (a card's page or the list with progress down for 10-25 s, every latency
+   60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
    board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
    a card dragged for 10-90 s, the second console's writes (dates, Hidden, Optional, Play Along, Keep in Today, pins,
@@ -913,7 +914,7 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst', 'landwrite'];
 const MIN = 60000, SEC = 1000;
 const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true } };
 const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
@@ -956,9 +957,12 @@ function genCase(seed, k, famOverride) {
   // comes back and its progress read is slow (no click: the minute timer); (B) booted on Live In-Class Games, the
   // settings read back through Mic recordings' own read, then a roster view opened (no progress read has failed).
   else if (fam === 'cfgfirst') { heal = 3 * MIN; c.progExtra = r.int(1500, 3000); slot(0, r.int(10, 25) * SEC, ST.cfg); c.variant = nth % 2 ? 'B' : 'A'; boot = c.variant === 'A' ? ['skills', 'activities', 'students', 'games', 'trouble', 'manage', 'responses', 'songs'][Math.floor(nth / 2) % 8] : 'livequiz'; }
+  // A write still open when the retry's roster lands (review R4-1 (d), the reviewer's chaos case 30): every latency
+  // 60 ms and a click 60 ms before the slow progress read lands, so the view's own read waits for the write.
+  else if (fam === 'landwrite') { heal = 3 * MIN; boot = 'activities'; c.lat = 60; c.progExtra = r.int(1500, 3000); slot(0, r.int(10, 25) * SEC, ST.prog); c.writeAtProgLand = true; }
   else if (fam === 'chaos') { heal = 6 * MIN; for (let t = 0; t < heal; t += r.int(2, 20) * SEC) { const x = r(); slot(t, t + 20 * SEC, x < 0.3 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
   c.boot = boot;
-  c.bootSub = fam === 'detail' ? 'detail' : fam === 'failedread' ? (nth % 2 ? 'split' : 'detail') : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
+  c.bootSub = fam === 'detail' ? 'detail' : fam === 'landwrite' ? (nth % 2 ? 'split' : 'detail') : fam === 'failedread' ? (nth % 2 ? 'split' : 'detail') : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
   c.heal = heal;
   // Before the heal: a teacher at work.
   const pre = Math.max(heal, 3 * MIN);
@@ -1147,6 +1151,10 @@ async function runCase(seed, k, o) {
     }
   };
   W.server.onIssue = rec => {
+    if (c.writeAtProgLand && !W.wroteAtLand && rec.kind === 'prog' && rec.load && clock.now > 30 * SEC && clock.now < c.healAt - 10 * SEC) {
+      W.wroteAtLand = true;
+      queue.push({ t: clock.now + c.progExtra + 60, kind: 'write', injected: true }); queue.sort((a, b) => a.t - b.t);
+    }
     if (c.typeOnRetry && !W.typedOnRetry && rec.kind === 'prog' && rec.load && clock.now >= c.healAt) {
       W.typedOnRetry = true;
       queue.push({ t: clock.now + 1 + r.int(0, 39), kind: 'type', dur: 15 * SEC, guard: true, injected: true }); queue.sort((a, b) => a.t - b.t);
@@ -1398,7 +1406,7 @@ async function runCase(seed, k, o) {
    ════════════════════════════════════════════════════════════════════════ */
 async function main() {
   const seed = Number(opt('--seed', 1));
-  const n = Number(opt('--cases', 152));
+  const n = Number(opt('--cases', 160));
   const only = opt('--case', null);
   const family = opt('--family', null);
   if (family && !FAMILIES.includes(family)) { console.error(`console-load-loop: unknown family "${family}" (${FAMILIES.join(', ')})`); process.exit(2); }
