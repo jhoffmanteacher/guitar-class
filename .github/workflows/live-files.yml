@@ -3,10 +3,12 @@
 # After each push to main, tools/live-files.mjs waits for GitHub Pages to finish
 # deploying that commit (GitHub's Deployments API), then fetches every public
 # file from https://jhoffmanteacher.github.io/guitar-class/ and compares its
-# bytes with the same path at the commit (the backing tracks by size and by
-# sw.js's AUDIO_HASHES map, not downloaded). It fails with the list of files
+# bytes with the same path at the commit (the backing tracks by size and two
+# 8 KB samples each, not downloaded whole). It fails with the list of files
 # that differ or are missing, or when the deploy failed or was not done in 20
-# minutes. The tool's header says which files are public and how it retries a
+# minutes. A file still different after the retries gets one last pass 620 s
+# after the deploy finished (the CDN may keep a copy for max-age=600), so a
+# run can last about 31 minutes: the job allows 40. The tool's header says which files are public and how it retries a
 # CDN copy that is still catching up.
 #
 # Once a day it does the same for main's tip, which catches a site that went
@@ -16,8 +18,8 @@
 # A later push that is deployed first makes the run pass with "superseded": that
 # push's own run checks the site. So no run is cancelled by a newer one.
 #
-# First, --self-test proves the comparison turns red (a local server with three
-# planted faults; no network, seconds). Nothing here blocks a push or the Pages
+# First, --self-test proves the comparison turns red (a local server with four
+# planted faults, the kill switch, a fake GitHub API; no network, about 15 s). Nothing here blocks a push or the Pages
 # deploy (GitHub's separate "pages build and deployment" run); a red run means
 # "look at the last push". `node tools/checks.mjs --live` stays the quick check
 # by hand (one line, the live sw.js version).
@@ -39,7 +41,7 @@ permissions:
 jobs:
   live-files:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     concurrency:
       group: live-files-${{ github.sha }}
       cancel-in-progress: false
@@ -56,4 +58,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "live site files" --log "$RUNNER_TEMP/ci-out/live-files.log" --summary '^live-files: (✓|✗)' --deadline 27 -- node tools/live-files.mjs --sha "$GITHUB_SHA" --wait 20
+          node tools/ci/run-and-annotate.mjs --title "live site files" --log "$RUNNER_TEMP/ci-out/live-files.log" --summary '^live-files: (✓|✗)' --deadline 37 -- node tools/live-files.mjs --sha "$GITHUB_SHA" --wait 20

@@ -33,7 +33,7 @@ Before any of them: `git switch main && git pull --ff-only`, then `git status` m
    the push until you tell Jonathan to paste the old rules back and add the line it prints to `RULES-PASTE.md`.
 5. Confirm, one or two minutes later: `node tools/checks.mjs --live` must print
    "live site is serving this exact version". If it says "does not match", wait a minute and run it again.
-   Then `node tools/live-files.mjs` checks every file, byte for byte.
+   Then `node tools/live-files.mjs` checks every file (the backing tracks by size and samples).
 6. Open tabs reload themselves once (after a drill, recording, exit check or playing card ends; at
    most 5 minutes). Anyone still seeing the problem reloads the page.
 
