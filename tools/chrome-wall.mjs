@@ -179,7 +179,10 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
       watched++;
       const on = Promise.all([
         send('Network.enable', {}, sid),
-        send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }, sid),
+        /* A page's frames and dedicated workers are attached here; its service worker is not: the browser-level
+           attach below already watches it, and a second paused attach left the site's worker never installing
+           (update-reload-loop hung at "waiting for the worker to control the page", 2026-11-26). */
+        send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true, filter: [{ type: 'service_worker', exclude: true }, {}] }, sid),
         ti.type === 'page' || ti.type === 'iframe' ? send('Page.enable', {}, sid) : null,
       ]).catch(() => {}).finally(() => send('Runtime.runIfWaitingForDebugger', {}, sid).catch(() => {}));
       ready.set(ti.targetId, on);
@@ -319,13 +322,17 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   /* The wall: a page that fetches an outside host, and one that starts a Firebase app. */
   const chrome = process.env.CHROME || '/usr/bin/google-chrome';
   if (!existsSync(chrome)) { console.log('chrome-wall: no Chrome (set CHROME); the wall part is not tested'); process.exit(bad ? 1 : 0); }
-  const page = createServer((q, s) => { s.writeHead(200, { 'content-type': 'text/html' }); s.end(
-    q.url.startsWith('/leak') ? `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script>fetch('https://firestore.googleapis.com/v1/x').catch(()=>{})</script>`
+  const page = createServer((q, s) => {
+    if (q.url.startsWith('/sw-out.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end(`self.addEventListener('install', e => e.waitUntil(fetch('https://firestore.googleapis.com/v1/sw').catch(() => {})))`); }
+    if (q.url.startsWith('/sw-in.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end(`self.addEventListener('install', e => e.waitUntil(caches.open('t').then(c => c.add('/quiet')))); self.addEventListener('activate', e => e.waitUntil(clients.claim()))`); }
+    s.writeHead(200, { 'content-type': 'text/html' }); s.end(
+    q.url.startsWith('/sw-page') ? `<script>navigator.serviceWorker.register(${JSON.stringify(q.url.includes('out') ? '/sw-out.js' : '/sw-in.js')}).then(r => navigator.serviceWorker.ready).then(() => { document.title = 'sw ready'; })</script>`
+    : q.url.startsWith('/leak') ? `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script>fetch('https://firestore.googleapis.com/v1/x').catch(()=>{})</script>`
     : q.url.startsWith('/init') ? `<script>window.firebase={apps:[],initializeApp(c){this.apps.push({options:c})}};firebase.initializeApp({projectId:${JSON.stringify(CLASS_PROJECT)}})</script>`
     : `<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><p>quiet</p>`); });
   await new Promise(r => page.listen(0, '127.0.0.1', r));
   const free = () => new Promise(r => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => r(p)); }); });
-  for (const [path, want] of [['/quiet', 0], ['/leak', 1], ['/init', 1]]) {
+  for (const [path, want] of [['/quiet', 0], ['/leak', 1], ['/init', 1], ['/sw-page-in', 0], ['/sw-page-out', 1]]) {
     const cdp = await free(), prof = mkdtempSync(join(tmpdir(), 'gc-wall-test-'));
     const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
     const wall = await wallWatch(cdp, 'self-test');
@@ -334,6 +341,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const ws = new WebSocket(t.webSocketDebuggerUrl); await new Promise(r => { ws.onopen = r; });
     ws.send(JSON.stringify({ id: 1, method: 'Page.navigate', params: { url: `http://127.0.0.1:${page.address().port}${path}` } }));
     await sleep(3000);
+    if (path.startsWith('/sw-page')) {
+      const title = (await (await fetch(`http://127.0.0.1:${cdp}/json/list`)).json()).find(x => x.id === t.id).title;
+      ok(title === 'sw ready', `${path}: the service worker installed and activated under the watch (page title "${title}")`);
+    }
     const code = await wall.finish(0);
     ok(code === want, `${path}: exit ${code}, expected ${want}`);
     proc.kill(); await sleep(500); rmSync(prof, { recursive: true, force: true });
