@@ -1,6 +1,6 @@
 ---
 name: in-class-activities
-description: How the guitar site's In-Class Activities page, activity gate, exit checks and practice cards work: caBlockers/caIsVisible, Today's activity, Open-through, optional/CAS, clears, archive/delete, Journey gating, four-step/two-line rules, view:'card' practice cards and whole-song cards, Play Along now, Songs Core rows, render-time hiding (visibleSteps/visibleSections, section kinds), the two step renderers (caStepHtml / renderTeacherActivityDetail), the activity board and numbering (activityBoard, caBoardOrder, teacherMoveActivity, series numbers in titles), and the play-along-first song links (openSongLink, songsPlayAlongCard, TAKE_TO_SONG_ENABLED). Read BEFORE editing class-activities.js, the ca*/ec*/pc* code in the app/*.js parts (app/activities.js, app/cards.js, app/activities-2.js), the teacher-*.js activity/console code, or tabs/journey.js gating.
+description: How the guitar site's In-Class Activities page, activity gate, exit checks and practice cards work: caBlockers/caIsVisible, Today's activity, Open-through, optional/CAS, clears, archive/delete, Journey gating, four-step/two-line rules, view:'card' practice cards and whole-song cards, Play Along now, Songs Core rows, render-time hiding (visibleSteps/visibleSections, section kinds), the two step renderers (caStepHtml / renderTeacherActivityDetail), the activity board and numbering (activityBoard, caBoardOrder, teacherMoveActivity, series numbers in titles), and the play-along-first song links (openSongLink, songsPlayAlongCard, TAKE_TO_SONG_ENABLED). Read BEFORE editing class-activities.js, the ca*/ec*/pc* code in the app/*.js parts (app/activities.js, app/cards.js, app/activities-2.js, app/activities-list.js), the teacher-*.js activity/console code, or tabs/journey.js gating.
 ---
 
 ## Exit checks — the end-of-period product
@@ -48,7 +48,7 @@ Easy to break without noticing:
 **In-Class Activities** (the name since Jonathan, 2026-09-17; key
 `nav.classActivities`, hash `#class-activities`) is the site's home page:
 `showApp()` opens it whenever the URL carries no explore hash.
-`renderClassActivities()` (`app/activities-2.js`) builds three groups (named by Jonathan
+`renderClassActivities()` (`app/activities-list.js`) builds three groups (named by Jonathan
 2026-09-23):
 - **Today's activity** (`ca.startHere`) — every card dated today or yesterday
   (below), collapsed like every other card, not forced open (Jonathan,
@@ -280,7 +280,7 @@ should fill the page").
 **⚠️ The LOCK is switched off (Jonathan, 2026-10-07: "stop locking the
 other parts of site if class activities aren't cleared… CA should still pop
 up as normal on login").** `const CA_GATE_LOCKS = false;` beside
-`applyActivityGate()` in `app/activities-2.js` and `var JOURNEY_GATE_LOCKS = false;` in
+`applyActivityGate()` in `app/activities-list.js` and `var JOURNEY_GATE_LOCKS = false;` in
 `tabs/journey.js` are the whole switch; `true` restores the lock below exactly.
 - Still live: `caBlockers()` computes, and `showApp()` lands a student with
   any blocker on In-Class Activities at sign-in **whatever the hash** — except
@@ -350,7 +350,7 @@ card (`teacherSetActivityOptional`) writes `config/class.optionalActivities`
 - An optional card is still VISIBLE — `caIsVisible()` does not read the map —
   but never a blocker. It renders an "Optional" tag (`caOptionalTagHtml()`, in
   both meta-line builders: hero, plain card and check).
-- The rule lives in three places that must agree: `caBlockers()` (`app/activities-2.js`, via
+- The rule lives in three places that must agree: `caBlockers()` (`app/activities-list.js`, via
   `caIsOptional()`), `teacherBlockersFor()` (`teacher-config.js`), `journeyBlockers()`
   (tabs/journey.js).
 - The Today hero: required and unfinished first (2026-11-12), as stated under

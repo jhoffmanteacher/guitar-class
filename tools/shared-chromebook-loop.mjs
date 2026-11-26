@@ -11,7 +11,7 @@
    flushBeforeLeaving / showUnsavedNotice / devBypass / _uidKey), to the save path (app/save.js flushSave,
    queueSave, loadProgress, restoreClassConfigFromCache, the local mirrors), to anything that keeps a student's
    data in localStorage or sessionStorage (a new per-student key, a new cache), or to the unload/hide flushes
-   (shell.js pagehide/online, activities-2.js flushOnHide), or to the background retry of a failed sign-in read
+   (shell.js pagehide/online, activities-list.js flushOnHide), or to the background retry of a failed sign-in read
    (app/save.js progressLoadRetry*). About 75 s for the default 120 cases (2026-11-13). Node only.
 
    NODE, NOT A BROWSER, and why. The leak channels on a shared Chromebook are: (1) localStorage, shared by every

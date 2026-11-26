@@ -20,10 +20,10 @@
    no browser, no network, no Firebase.
 
    When to run it: after a change to any of the visibility / blocker / optional rules (caIsVisible, caIsOptional,
-   caBlockers, caReduceForMe, caBoardOrder in app/activities-2.js; teacherActivityVisible, teacherBlockersFor,
+   caReduceForMe, caBoardOrder in app/activities-2.js, caBlockers in app/activities-list.js; teacherActivityVisible, teacherBlockersFor,
    teacherActivityOptional, teacherBoardView in teacher-config.js / teacher-activities.js; journeyIsVisible,
    journeyOptional, journeyBlockers in tabs/journey.js), to loadClassConfig / restoreClassConfigFromCache /
-   classConfigSignature (app/save.js, app/activities-2.js), or to a console writer of config/class. It is not part
+   classConfigSignature (app/save.js, app/activities-list.js), or to a console writer of config/class. It is not part
    of tools/checks.mjs (check 1ah compares the three copies by source text only; this runs them).
 
    ── What is REAL (loaded whole and unmodified into Node vm contexts) ──
@@ -178,7 +178,7 @@
        exactly the student's current blockers ("Recomputed at click time").
    R12 WHEN a change reaches a student (truth table, printed at the end): loadClassConfig "reruns on every
        tab-visibility return" (save.js:228-231); "A teacher's console clear (or a new activity going live) has to
-       reach a student tab that's just sitting open" (activities-2.js:1208-1212); games on tab return
+       reach a student tab that's just sitting open" (activities-list.js:96-97); games on tab return
        (save.js:367-370). So: an open page does not change before its tab comes back; after a successful
        tab-return read it shows the answer for the doc as it is then, however many changes landed meanwhile (and
        its classConfigSignature moves whenever that answer moved, or the open screen is not repainted); after a

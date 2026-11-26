@@ -1307,11 +1307,11 @@ const SURVIVORS = [
   { start: /^tuner@fab$/, leave: NAV_LEAVES, kind: /.*/,
     reason: 'tuner.js: "No Start/Stop button — opening the tuner popup starts listening, closing it stops (wired in fab-tools.js togglePopup/closePopup)." The popup floats over every page, so a way out that leaves it open leaves it listening; a hidden tab stops it (its own visibilitychange handler).' },
   { start: /^power-name@card$/, leave: /^hide$/, kind: /.*/,
-    reason: 'app/activities-2.js visibilitychange: "Name the power chord is not stopped here (Jonathan, 2026-11-09): it has no clock, no sound and no mic, so a student who looks something up in another tab comes back to the same card and score."' },
+    reason: 'app/activities-list.js visibilitychange: "Name the power chord is not stopped here (Jonathan, 2026-11-09): it has no clock, no sound and no mic, so a student who looks something up in another tab comes back to the same card and score."' },
   { start: /^deck@/, leave: /^hide$/, kind: /^(left-running|retry-busy|update-waits)$/,
-    reason: 'app/activities-2.js visibilitychange, same comment: "A Card Deck round is the same kind (no clock, sound or mic) and is left as is." The round waits, dealt, for the student to come back (2026-11-25: kept as written; the lead may ask Jonathan).' },
+    reason: 'app/activities-list.js visibilitychange, same comment: "A Card Deck round is the same kind (no clock, sound or mic) and is left as is." The round waits, dealt, for the student to come back (2026-11-25: kept as written; the lead may ask Jonathan).' },
   { start: /^ear@/, leave: /^hide$/, kind: /^(left-running|retry-busy|update-waits)$/,
-    reason: 'app/activities-2.js visibilitychange, same comment: "An Ear Spark round\'s queued notes stop (they would play to a hidden tab); the round stays dealt, and its Play again button plays them from the start." Only the round\'s state survives: its notes, queued or ringing, must still stop (erStop).' },
+    reason: 'app/activities-list.js visibilitychange, same comment: "An Ear Spark round\'s queued notes stop (they would play to a hidden tab); the round stays dealt, and its Play again button plays them from the start." Only the round\'s state survives: its notes, queued or ringing, must still stop (erStop).' },
 ];
 /* KNOWN: open findings of the 2026-11-25 sweep this tool reaches. A failing schedule that matches one is counted under its
    id and still FAILS the run (exit 1): the loop is red on main until the fix lands, then the entry goes. `product` marks a

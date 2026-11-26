@@ -7210,7 +7210,7 @@ function checkGamesGroups() {
    new one, a changed level or a swap between kinds all fail). The module folds are EXECUTED: caModFoldHtml
    turns a module's heading <div> into its fold's <summary>, which must lose the role, for both callers (the
    Completed fold, on the real caModuleHeadHtml, keeps the module name as one level-3 heading INSIDE the
-   summary; the Unfinished fold's tag from activities-2.js, which has no such span, keeps none: a wrapper there
+   summary; the Unfinished fold's tag from activities-list.js, which has no such span, keeps none: a wrapper there
    would change what .ca-mod-head>span:first-child styles). The same run pins which fold starts OPEN
    (2026-11-16): only the newest module, unless the student opened or closed it, or it holds the open card
    or a Level up swap (FOLD_DEFAULT_CASES cases rendered through both real callers, the student's choice made
@@ -7322,7 +7322,7 @@ function checkTitleHeadings() {
         tf: (o, f) => o[f], caIsVisible: () => true, classActivities: { a: true } };
       const sec = 'var sec = { mod: { num: 4, name: "Open Chords" }, ids: ["a", "b"] };';
       const runs = [['the Completed fold (caModuleHeadHtml)', `${fold[0]}; ${doneHead[0]}; ${sec} caModFoldHtml('done', sec, caModuleHeadHtml(sec, { a: {}, b: {} }), '<CARDS/>', [], 4, null)`, 1],
-        ['the Unfinished fold (headHtml in activities-2.js)', `${fold[0]}; ${sec} caModFoldHtml('todo', sec, ${JSON.stringify(todoTag + 'Module 4 — Open Chords</div>')}, '<CARDS/>', [], 4, null)`, 0]];
+        ['the Unfinished fold (headHtml in activities-list.js)', `${fold[0]}; ${sec} caModFoldHtml('todo', sec, ${JSON.stringify(todoTag + 'Module 4 — Open Chords</div>')}, '<CARDS/>', [], 4, null)`, 0]];
       for (const [what, code, inside] of runs) {
         const out = String(vm.runInNewContext(code, sb));
         foldsRun++;
@@ -12869,7 +12869,7 @@ function checkKeepToday(ctx) {
 }
 
 /* 1ds. "SINCE YOUR LAST VISIT" (Jonathan, 2026-11-13; the end of
-   app/activities-2.js). A student back after TWO or more class days with no
+   app/activities-list.js). A student back after TWO or more class days with no
    saved work (class day = a release date of a card they can see; saved work =
    a practice-minutes day record; the last visit = the newest one before
    today) gets a group under Today's activity: the required, not-done cards
@@ -22507,9 +22507,9 @@ function checkSongRequests() {
        statement, so every stop path (stopCardAudio, stopAllDemoAudio,
        playSequence, a card leaving the screen) also cancels a song still
        loading, whatever early return is added later (review B minor 1);
-     - app/activities-2.js cancels a song still loading in a closing fold,
-       step or card beside each of its stop lines (songFileCancelWaitIn,
-       SONG_FILES_CLOSE_PIN of them; review B1);
+     - app/activities-2.js and app/activities-list.js cancel a song still
+       loading in a closing fold, step or card beside each of their stop
+       lines (songFileCancelWaitIn, SONG_FILES_CLOSE_PIN of them; review B1);
      - index.html loads app/songfiles.js before app/snippets.js;
      - nothing under tabs/ names a 'private:' file (review round 2): the Song
        Journey player cannot play a private song yet; it is its own piece of
@@ -22575,9 +22575,9 @@ function checkSongFilesLoader() {
     const first = (b.slice(b.indexOf('{') + 1).trim().match(/^[^;]*;/) || [''])[0];
     if (first !== 'songFileCancelWait();') fail(`${file}: ${name}()'s first statement must be songFileCancelWait(); (found ${JSON.stringify(first.slice(0, 60))}), so every stop also cancels a song still loading`);
   }
-  const ac = stripJsComments(read('app/activities-2.js'));
+  const ac = stripJsComments(read('app/activities-2.js')) + stripJsComments(read('app/activities-list.js'));
   const nClose = (ac.match(/songFileCancelWaitIn\(/g) || []).length;
-  if (nClose !== SONG_FILES_CLOSE_PIN) fail(`app/activities-2.js calls songFileCancelWaitIn() ${nClose} times; pinned at ${SONG_FILES_CLOSE_PIN} (one beside each fold / step / card close that stops a song). A new close path needs one too: then re-pin`);
+  if (nClose !== SONG_FILES_CLOSE_PIN) fail(`app/activities-2.js and app/activities-list.js call songFileCancelWaitIn() ${nClose} times; pinned at ${SONG_FILES_CLOSE_PIN} (one beside each fold / step / card close that stops a song). A new close path needs one too: then re-pin`);
   /* No private song on the Song Journey pages yet (review round 2, 2026-11-14): their player cannot play one; it
      is its own piece of Step 2. Every file under tabs/ (a page, journey.js, the stylesheets) is read. */
   const tabsPrivate = [];

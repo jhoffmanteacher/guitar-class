@@ -7,7 +7,7 @@
    student last did?
 
    WHEN TO RUN IT. After any change to app/save.js (queueSave, flushSave, the delete queues, loadProgress, the
-   Module 4/5 move, the late load after a failed sign-in read), to the 'online' re-save (app/shell.js), to logPracticeRep (app/drills.js), ecSubmit or flushOnHide (app/activities-2.js), or to
+   Module 4/5 move, the late load after a failed sign-in read), to the 'online' re-save (app/shell.js), to logPracticeRep (app/drills.js), ecSubmit (app/activities-2.js) or flushOnHide (app/activities-list.js), or to
    anything else that writes progress/{uid}. About 8-11 s for the default 200 cases (30-40 s on a busy machine). Node only: no browser, no network.
 
    FLAGS
@@ -174,7 +174,7 @@
         drillSkill / dk; lastModule 4<->5; lastSet; songReady layers 4<->5; nothing else. The stored doc must end
         marked, holding the moved data plus the session's work, and no key in the old numbering (save.js:11-58).
      R10 When a save is OWED. The site sends pending work after a 800 ms pause, on the next action, or when the tab is
-         hidden (save.js queueSave, activities-2.js flushOnHide: "sends now what the debounce would have sent"). So an
+         hidden (save.js queueSave, activities-list.js flushOnHide: "sends now what the debounce would have sent"). So an
          action is owed when, at or after it, its tab reaches a CLEAN POINT: an action or a hide with the network up
          from 2 s before to 6 s after it and the tab open all that time and the CDN not blocked; or a close with the
          network up from 2 s before to 1.5 s after, the SDK loaded, and a doc that was already marked (R9) when the tab
@@ -2233,7 +2233,7 @@ async function loadRetryChecks(out, fail){
      (renderProgressStrip, through redrawAllViews: rmp-lbl "done/total", done > 0 from the doc's m6w1-s1 'gotit'), the
      module picker set to the module on screen (module-select, which only onModuleChange sets), and the period question
      asked at the late load when the doc holds no period (L16a), never when it holds one (L16b).
-     Not testable here: applyActivityGate. The lock is off (CA_GATE_LOCKS = false, app/activities-2.js), so it always
+     Not testable here: applyActivityGate. The lock is off (CA_GATE_LOCKS = false, app/activities-list.js), so it always
      sets body.ca-gated to false and has nothing to redraw; dropping it changes nothing a student sees today. */
   for (const [tag, doc, asks] of [['L16a', (() => { const d = clone(START); delete d.period; return d; })(), true], ['L16b', START, false]]){
     let pre = null, mid = null;
