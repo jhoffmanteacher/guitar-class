@@ -6832,6 +6832,45 @@ function checkLiveSaw() {
   if (Number(m[1]) < 8 || Number(m[3]) < 90) { err(`1fd: the sim walked ${m[1]} games and ${m[3]} cases (pinned: at least 8 games, 90 cases): if the proof changed on purpose, re-pin here`); problems++; return; }
   ok(last.replace(/^live-saw-sim: /, ''));
 }
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   1fh. EVERY CHROME TOOL GOES THROUGH THE WALL (2026-11-26, tools/chrome-wall.mjs). A test page on 127.0.0.1 gets the
+   CLASS Firebase project's settings; before the wall, ten tools' pages loaded the real SDK and four sent answered
+   requests to firestore.googleapis.com. Every .mjs under tools/ whose code launches a browser (spawns chrome / CHROME,
+   names google-chrome, chromium.launch, puppeteer or playwright, or passes --headless) must import chrome-wall.mjs:
+   its flags, its watch (a request off 127.0.0.1 or a Firebase app fails the run) and its two-run lock. Comments are
+   left out before matching (block comments and whole-line // comments), so a tool that only mentions Chrome is not
+   held to it. Fails with the tool's path. Pinned: at least 15 tools found, so a matcher that stops finding them shows.
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|google-chrome|chromium\.launch\(|puppeteer|['"]playwright['"]|--headless/;
+const WALL_IMPORT_RE = /\bfrom\s+['"](?:\.{1,2}\/)+(?:tools\/)?chrome-wall\.mjs['"]/;
+function wallToolFiles(dir, rel = 'tools') {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
+    const p = join(dir, e.name), r = rel + '/' + e.name;
+    if (e.isDirectory()) out.push(...wallToolFiles(p, r));
+    else if (e.name.endsWith('.mjs')) out.push({ p, r });
+  }
+  return out;
+}
+function wallUnwalled(root) {
+  const launchers = [], missing = [];
+  for (const { p, r } of wallToolFiles(join(root, 'tools'))) {
+    if (r === 'tools/chrome-wall.mjs' || r === 'tools/checks.mjs') continue;
+    const code = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    if (!WALL_LAUNCH_RE.test(code)) continue;
+    launchers.push(r);
+    if (!WALL_IMPORT_RE.test(code)) missing.push(r);
+  }
+  return { launchers, missing };
+}
+function checkChromeWall() {
+  head('1fh. Every tool that launches Chrome goes through tools/chrome-wall.mjs (the wall and the two-run lock)');
+  const { launchers, missing } = wallUnwalled(ROOT);
+  for (const r of missing) { err(`1fh: ${r} launches a browser but does not import tools/chrome-wall.mjs: use WALL_FLAGS, wallWatch (or wallPlaywright) and browserSlot, as tools/smoke.mjs does`); problems++; }
+  if (launchers.length < 15) { err(`1fh: found ${launchers.length} tools that launch a browser (pinned: at least 15): the matcher may have stopped finding them`); problems++; }
+  if (!missing.length && launchers.length >= 15) ok(`${launchers.length} of ${launchers.length} tools that launch a browser import tools/chrome-wall.mjs`);
+}
 function checkToneTest() {
   head('1cx. The pitch detectors read made-up tones as they did (tools/tone-test.mjs)');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'tone-test.mjs')], { encoding: 'utf8', timeout: 120000 });
@@ -24439,6 +24478,7 @@ function checkNeverRules(sets) {
   checkLiveChanges();
   checkLiveHilo();
   checkLiveSaw();
+  checkChromeWall();
   checkCoachVerdicts();
   checkCoachNotesDecide();   // 1fg, in 1ca's sandbox
   checkToneTest();
