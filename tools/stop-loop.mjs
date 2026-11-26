@@ -96,8 +96,8 @@
    Every resource is tagged with the stack that made it ("erPlay app/drills.js:1163 < erStart …"); what the
    practice-minutes engine makes while it counts (its own clock) is not the started thing's and is left out.
    SURVIVORS (const SURVIVORS): what the code itself says is meant to outlive a way out, each with its quoted comment
-   (the progress save's timers; the Metronome, Timer and Tuner on navigation; Name the power chord on a hidden tab;
-   the download of a private song). KNOWN (const KNOWN): open findings of the 2026-11-25 sweep, counted by id and
+   (the progress save's timers; the Metronome, Timer and Tuner on navigation; Name the power chord, and a Card Deck or
+   Ear Spark round left dealt, on a hidden tab; the download of a private song). KNOWN (const KNOWN): open findings of the 2026-11-25 sweep, counted by id and
    still failing; "product call" marks one waiting on Jonathan.
 
    THE INSTRUMENTS are self-tested first: a page that starts eight things and stops three must show exactly the five
@@ -1184,6 +1184,11 @@ const PLACE = {
 };
 /* A tab line's Play button that plays more than a few notes (so it is still playing at the way out). */
 const longTabLine = scope => page => { const root = scope(page); if (!root) return null; const bs = root.querySelectorAll('[onclick^="playSequenceFromGroup"]'); let best = null, n = 0; for (const b of bs) { let m = []; try { m = JSON.parse(b.dataset.midis || '[]'); } catch {} if (m.length > n) { n = m.length; best = b; } } return best; };
+/* A student presses a line in the step that is open: a collapsed step's body is not on screen (styles.css
+   .step.collapsed .step-detail{display:none}). Open the button's step first (its own head, toggleStepOpen), so the
+   'step-close' way out closes the step the line plays in rather than opening it (2026-11-25: the press used to land in
+   a collapsed step, and 'step-close' then OPENED it). */
+const openStep = pick => page => { const b = pick(page); const li = b && b.closest ? b.closest('li.step') : null; if (li && li.classList.contains('collapsed')) { const h = li.querySelector('[onclick^="toggleStepOpen"]'); if (h) h.click(); } return b; };
 const SONG_LOADED = id => page => page.call(`(() => { const card = document.querySelector('details.ca-card[data-id="${id}"] .snip'); if (!card) return; const spec = JSON.parse(card.dataset.snip), tr = SNIPPET_TRACKS[spec.track];
   for (const s of [false, true]) for (const g of [false, true]) { const id = songFileId(snippetSrc(tr, s, g)); if (id) sfUrls.set(id, 'blob:stop-loop/' + id); } })()`);
 /* The Coach button on the longest line in the open set (m6w1 has a 32-note line: at 30 BPM it listens 64 s, past the 30 s cap). */
@@ -1198,7 +1203,7 @@ async function COACH_GO(page, log) {
   }
 }
 const STARTS = [
-  { id: 'tab-line@set', place: PLACE.set('m2w1'), press: longTabLine(page => activePanel(page)), running: any('!!playSeqState'), window: [300, 2500] },
+  { id: 'tab-line@set', place: PLACE.set('m2w1'), press: openStep(longTabLine(page => activePanel(page))), running: any('!!playSeqState'), window: [300, 2500] },
   { id: 'tab-line@card', place: PLACE.card('ca-1'), press: longTabLine(page => openCard(page, 'ca-1')), running: any('!!playSeqState'), window: [300, 2500] },
   { id: 'shuffle@set', place: PLACE.set('m2w1'), press: inSet('[onclick^="sdStart"]'), running: any("Object.values(shuffleDrills).some(s => s && s.phase === 'play')"), window: [200, 3000] },
   { id: 'shuffle@card', place: PLACE.card('ca-11'), press: inCard('ca-11', '[onclick^="sdStart"]'), running: any("Object.values(shuffleDrills).some(s => s && s.phase === 'play')"), window: [200, 3000] },
@@ -1255,7 +1260,20 @@ const LEAVE = {
   'hide': page => page.hide(true),
   'language': page => page.call('toggleTranslate()'),
   'sign-out': page => page.call('signOut()'),
-  'step-close': page => { const b = page.started && page.started.closest ? page.started.closest('.step') : null; const t = b ? b.querySelector('[onclick^="toggleStepOpen"]') : null; if (t) t.click(); else page.leaveNote = 'no step header to close'; },
+  /* In list view the step's own head closes it (toggleStepOpen). In focus view (the default) the head is the step's
+     heading and closes nothing (toggleStepOpen returns): the way off the step there is Next, or Back on the last step
+     (stationStepNav). */
+  'step-close': page => {
+    const b = page.started && page.started.closest ? page.started.closest('.step') : null;
+    const dp = b ? b.closest('.dp') : null;
+    if (dp && dp.classList.contains('focus')) {
+      const nav = [...dp.querySelectorAll('[onclick^="stationStepNav"]')];
+      const t = nav.find(x => x.classList.contains('fm-next') && !x.hasAttribute('hidden')) || nav.find(x => x.classList.contains('fm-back') && !x.hasAttribute('hidden'));
+      if (t) t.click(); else page.leaveNote = 'no Next or Back to move off the step';
+      return;
+    }
+    const t = b ? b.querySelector('[onclick^="toggleStepOpen"]') : null; if (t) t.click(); else page.leaveNote = 'no step header to close';
+  },
   'the-cap': page => {},
   'close-card': page => { const c = page.doc.querySelector('details.ca-card[open]'); if (c) c.open = false; },
   'all-activities': page => page.call('caCloseOpen()'),
@@ -1263,7 +1281,10 @@ const LEAVE = {
   'modules': page => page.call('exitExploreHash()'),
   'real-game-live': page => page.fsWrite('liveQuiz/current', { sessionId: 'lq-other', quizId: page.run('LQ_DEFAULT_QUIZ'), state: 'lobby', qIndex: -1, scores: {} }, false),
   'other-console-ends': page => page.fsWrite('liveQuiz/current', { state: 'off', endedAt: 1 }, true),
-  'console-view': page => page.call("teacherView = 'manage'; if (typeof renderTeacherBody === 'function') renderTeacherBody();"),
+  /* The console's own view switch (the sidebar's data-view buttons, teacher-core.js): every way to another view from
+     Live In-Class Games goes through setTeacherView, which stops the games' sounds (2026-11-25: this used to set
+     teacherView and redraw, a path no button takes). */
+  'console-view': page => page.call("setTeacherView('manage')"),
   'exit-preview': page => page.call('lqTeacherExitPreview()'),
 };
 
@@ -1287,25 +1308,15 @@ const SURVIVORS = [
     reason: 'tuner.js: "No Start/Stop button — opening the tuner popup starts listening, closing it stops (wired in fab-tools.js togglePopup/closePopup)." The popup floats over every page, so a way out that leaves it open leaves it listening; a hidden tab stops it (its own visibilitychange handler).' },
   { start: /^power-name@card$/, leave: /^hide$/, kind: /.*/,
     reason: 'app/activities-2.js visibilitychange: "Name the power chord is not stopped here (Jonathan, 2026-11-09): it has no clock, no sound and no mic, so a student who looks something up in another tab comes back to the same card and score."' },
+  { start: /^deck@/, leave: /^hide$/, kind: /^(left-running|retry-busy|update-waits)$/,
+    reason: 'app/activities-2.js visibilitychange, same comment: "A Card Deck round is the same kind (no clock, sound or mic) and is left as is." The round waits, dealt, for the student to come back (2026-11-25: kept as written; the lead may ask Jonathan).' },
+  { start: /^ear@/, leave: /^hide$/, kind: /^(left-running|retry-busy|update-waits)$/,
+    reason: 'app/activities-2.js visibilitychange, same comment: "An Ear Spark round\'s queued notes stop (they would play to a hidden tab); the round stays dealt, and its Play again button plays them from the start." Only the round\'s state survives: its notes, queued or ringing, must still stop (erStop).' },
 ];
 /* KNOWN: open findings of the 2026-11-25 sweep this tool reaches. A failing schedule that matches one is counted under its
    id and still FAILS the run (exit 1): the loop is red on main until the fix lands, then the entry goes. `product` marks a
-   finding that waits on Jonathan's call. */
+   finding that waits on Jonathan's call. Empty since fix/stop-bugs-2026-11-25: an entry is { id, note, match(s, f) }. */
 const KNOWN = [
-  { id: 'APP-DRILLS-1', note: 'Deck/Ear round left in \'run\' (and Ear notes playing) after a way out',
-    match: (s, f) => /^(deck|ear)@/.test(s.start) && s.leave !== 'language' && (/^(Deck|Ear) /.test(f.what) || f.kind === 'retry-busy' || f.kind === 'update-waits' || /erPlay|playNote/.test(f.where || '')) },
-  { id: 'APP-LESSON-1', note: 'a tab\'s Play line plays on over a set switch or a tab switch',
-    match: (s, f) => /^tab-line@set$/.test(s.start) && /^(other-set|checklist-tab|module-review)$/.test(s.leave) },
-  { id: 'APP-LESSON-1 (step move, product call)', product: true, note: 'the line plays on in a step closed in the ladder',
-    match: (s, f) => /^tab-line@set$/.test(s.start) && s.leave === 'step-close' },
-  { id: 'APP-DRILLS-3 (product call)', product: true, note: 'the Module Review recorder keeps recording after Songs / In class / My progress / a hidden tab',
-    match: (s, f) => /^recorder@/.test(s.start) && /^(in-class|songs|my-progress|games|hide)$/.test(s.leave) },
-  { id: 'APP-DRILLS-5', note: 'Find-the-Note\'s end-of-round timeout ends the NEXT round',
-    match: (s, f) => /^find-note-end@/.test(s.start) && f.kind === 'stale-timer' },
-  { id: 'LIVE-RULES-3', note: 'a chord-change round\'s song plays on when the session moves under it',
-    match: (s, f) => /^live-(preview|round)-startup@console$/.test(s.start) && /^(real-game-live|other-console-ends)$/.test(s.leave) && (f.kind === 'sounding' || f.kind === 'media') },
-  { id: 'COACH-A-2', note: 'the recording label outlives the capture',
-    match: (s, f) => f.kind === 'label-outlives' },
 ];
 
 /* ════════════════════════════════════════════════════════════════════════
