@@ -29,6 +29,9 @@
                                       matches local — catches a failed or
                                       still-running GitHub Pages deploy.
                                       Runs alone (no other checks).
+                                      Every public file, byte for byte:
+                                      node tools/live-files.mjs (GitHub runs
+                                      it after each deploy and daily).
 
    Exit code is non-zero if anything fails, so a push can be aborted.
    ════════════════════════════════════════════════════════════════════ */
@@ -24057,6 +24060,7 @@ function checkNeverRules(sets) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
     const status = await liveCheck();
     console.log('');
+    console.log(`${C.dim}      This compares one line. Every public file, byte for byte: node tools/live-files.mjs\n      (GitHub runs it after each deploy and once a day: .github/workflows/live-files.yml).${C.reset}`);
     if (status === 'ok') { ok('deploy confirmed.'); return; }
     err(status === 'unreachable'
       ? 'could NOT confirm the deploy (live site unreachable) — retry when online.'
