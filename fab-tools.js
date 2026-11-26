@@ -302,6 +302,17 @@ function stopMetro(){
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start');
 }
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
+/* A hidden tab stops the click (2026-11-25): nobody is there to hear it or to
+   press its Stop. stopMetro also drops the queued clicks and the dot's flash
+   timers. It does not start again by itself: the popup shows Start. Not in the
+   console: its Metronome is the room's, and Jonathan may switch the
+   projector's tab to his slides (code-hygiene rule 4). This file also loads on
+   the Journey pages, which have no IS_TEACHER_MODE. */
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden || !metroRunning) return;
+  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
+  stopMetro();
+});
 
 /* ── Timer ── */
 // timerEndAt: wall-clock deadline while running. The countdown is recomputed
