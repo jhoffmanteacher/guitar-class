@@ -264,7 +264,9 @@ async function main(){
 
     console.log("the student's view");
     await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html` });
-    await waitFor(`typeof devBypass === 'function' && typeof showProgressResetNotice === 'function'`, 15000);
+    /* Every part has run once the document is complete (they are defer scripts); devBypass() before that called a later
+       part's function that was not there yet, 1 run in 3 behind the wall (2026-11-26). */
+    await waitFor(`document.readyState === 'complete' && typeof devBypass === 'function' && typeof showProgressResetNotice === 'function'`, 15000);
     await js(`try{ localStorage.setItem('gc-lang','en'); }catch(e){} devBypass(); progressResetNotice = 'over'; showProgressResetNotice(); true`);
     await sleep(600);
     const en = await js(`(document.getElementById('reset-notice') || {}).textContent || ''`);
