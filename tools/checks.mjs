@@ -6835,76 +6835,123 @@ function checkLiveSaw() {
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
    1fh. EVERY CHROME TOOL GOES THROUGH THE WALL (2026-11-26, tools/chrome-wall.mjs). A test page on 127.0.0.1 gets the
    CLASS Firebase project's settings; before the wall, ten tools' pages loaded the real SDK and four sent answered
-   requests to firestore.googleapis.com. Every .mjs under tools/ that launches a browser must USE the wall, not only
-   import it: WALL_FLAGS, wallWatch( or wallPlaywright(, and browserSlot( in its code.
-   "Launches a browser" is read from the RAW text, comments included, so nothing can hide it (review R1-2: a block-
-   comment stripper hid the code after 'tabs/*.html'): spawn of chrome / CHROME, process.env.CHROME,
-   --remote-debugging-port, google-chrome, chromium.launch…(, puppeteer, playwright / playwright-core, --headless.
-   A tool that only mentions one of them in a comment is held to the wall too: the safe side.
-   "Uses" is read from the code alone: wallCode() blanks comments and the inside of strings with a small tokenizer
-   that knows strings, template literals and regular expressions, and drops import statements, so a name in a
-   comment, a string or the import line counts for nothing.
-   A tool may not import or reach the wall's QUIET list (a tool that adds to it quiets a host it should fail on).
+   requests to firestore.googleapis.com.
+   WHO LAUNCHES A BROWSER, read from the RAW text so nothing can hide it (comments included: the safe side): spawn of
+   chrome / CHROME, process.env.CHROME, --remote-debugging-port, google-chrome, chromium.launch…(, puppeteer,
+   playwright / playwright-core / @playwright/…, npx playwright, --headless; and any .mjs that names a .sh or .py
+   under tools/ that starts Chrome. Such a .sh / .py is itself red: Chrome starts from a .mjs, through the wall.
+   WHAT IT MUST DO, read from the code alone (wallCode() blanks comments, strings, template literals and regular
+   expressions in place, so positions match the raw text, and import lines are dropped):
+   - call browserSlot( and wallWatch( or wallPlaywright(;
+   - pass WALL_FLAGS INTO each launch call (best effort, review R2-5): every spawn / execFile / exec call whose text
+     names Chrome (chrome / CHROME as the program, --headless, --remote-debugging-port, --user-data-dir, playwright)
+     and every .launch…( call must hold WALL_FLAGS, or a name assigned from an expression that holds it;
+   - not import or reach the wall's QUIET list, statically or by a dynamic import(): a tool that adds to it quiets a
+     host it should fail on.
+   A HELPER: a tool with no launch call of its own that calls a name imported from another tools/ .mjs which itself
+   launches Chrome and passes all of this is through the wall too (so a shared launcher is not a false red).
    Fails with the tool's path and what is missing. Pinned: at least 15 tools found.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
-const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|process\.env\.CHROME\b|--remote-debugging-port|google-chrome|chromium\.launch\w*\(|puppeteer|['"]playwright[-\w/]*['"]|--headless/;
+const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|process\.env\.CHROME\b|--remote-debugging-port|google-chrome|chromium\.launch\w*\(|puppeteer|['"](?:@playwright\/[-\w/]*|playwright[-\w/]*)['"]|npx\s+playwright|--headless/;
+const WALL_SCRIPT_RE = /google-chrome|chromium|--headless|--remote-debugging-port|playwright|puppeteer|\bCHROME\b/;
+/* Comments, strings, template literals and regular expressions replaced by spaces (newlines kept), quotes kept. */
 function wallCode(src) {
-  let out = '', i = 0, prev = '';
+  const out = src.split('');
+  const blank = (i, j) => { for (let k = i; k < j; k++) if (out[k] !== '\n') out[k] = ' '; };
+  let i = 0, last = '';
   const n = src.length;
-  const sig = () => { for (let k = out.length - 1; k >= 0; k--) if (!/\s/.test(out[k])) return out[k]; return ''; };
   while (i < n) {
     const c = src[i], d = src[i + 1];
-    if (c === '/' && d === '/') { while (i < n && src[i] !== '\n') i++; continue; }
-    if (c === '/' && d === '*') { const e = src.indexOf('*/', i + 2); i = e < 0 ? n : e + 2; out += ' '; continue; }
+    if (c === '/' && d === '/') { const e = src.indexOf('\n', i); const j = e < 0 ? n : e; blank(i, j); i = j; continue; }
+    if (c === '/' && d === '*') { const e = src.indexOf('*/', i + 2); const j = e < 0 ? n : e + 2; blank(i, j); i = j; continue; }
     if (c === '"' || c === "'" || c === '`') {
-      i++;
-      while (i < n && src[i] !== c) { if (src[i] === '\\') i++; else if (c !== '`' && src[i] === '\n') break; i++; }
-      i++; out += c + c; continue;
+      let j = i + 1;
+      while (j < n && src[j] !== c) { if (src[j] === '\\') j++; else if (c !== '`' && src[j] === '\n') break; j++; }
+      blank(i + 1, j); i = j + 1; last = c; continue;
     }
-    if (c === '/') {
-      prev = sig();
-      if (!prev || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /\b(return|typeof|case|in|of)$/.test(out)) {
-        i++; let cls = false;
-        while (i < n && src[i] !== '\n') { const x = src[i]; if (x === '\\') { i += 2; continue; } if (x === '[') cls = true; else if (x === ']') cls = false; else if (x === '/' && !cls) break; i++; }
-        i++; while (i < n && /[a-z]/i.test(src[i])) i++;
-        out += '/r/'; continue;
-      }
+    if (c === '/' && (!last || /[(,=:[!&|?{};+\-*%<>~^]/.test(last) || /\b(return|typeof|case|in|of)\s*$/.test(src.slice(Math.max(0, i - 8), i)))) {
+      let j = i + 1, cls = false;
+      while (j < n && src[j] !== '\n') { const x = src[j]; if (x === '\\') { j += 2; continue; } if (x === '[') cls = true; else if (x === ']') cls = false; else if (x === '/' && !cls) break; j++; }
+      blank(i + 1, j); j++; while (j < n && /[a-z]/i.test(src[j])) j++; i = j; last = '/'; continue;
     }
-    out += c; i++;
+    if (!/\s/.test(c)) last = c;
+    i++;
   }
-  return out.replace(/^\s*import\b[^;]*;/gm, '');
+  return out.join('').replace(/^\s*import\s*\{[^}]*\}\s*from\s*['"]\s*['"]\s*;?/gm, m => m.replace(/[^\n]/g, ' ')).replace(/^\s*import\s+[^;\n]*;?/gm, m => m.replace(/[^\n]/g, ' '));
 }
+/* The (start, end) of the balanced (...) after position i in code. */
+const wallParens = (code, i) => { let d = 0; for (let k = i; k < code.length; k++) { if (code[k] === '(') d++; else if (code[k] === ')' && --d === 0) return k + 1; } return code.length; };
 function wallToolFiles(dir, rel = 'tools') {
   const out = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
     const p = join(dir, e.name), r = rel + '/' + e.name;
     if (e.isDirectory()) out.push(...wallToolFiles(p, r));
-    else if (e.name.endsWith('.mjs')) out.push({ p, r });
+    else if (/\.(mjs|sh|py)$/.test(e.name)) out.push({ p, r });
   }
   return out;
 }
 function wallUnwalled(root) {
-  const launchers = [], missing = [];
-  for (const { p, r } of wallToolFiles(join(root, 'tools'))) {
-    if (r === 'tools/chrome-wall.mjs' || r === 'tools/checks.mjs') continue;
-    const raw = readFileSync(p, 'utf8');
-    if (!WALL_LAUNCH_RE.test(raw)) continue;
-    launchers.push(r);
-    const code = wallCode(raw), lacks = [];
-    if (!/\bWALL_FLAGS\b/.test(code)) lacks.push('WALL_FLAGS');
-    if (!/\b(?:wallWatch|wallPlaywright)\s*\(/.test(code)) lacks.push('wallWatch( or wallPlaywright(');
+  const files = wallToolFiles(join(root, 'tools'));
+  const scripts = files.filter(f => /\.(sh|py)$/.test(f.r) && WALL_SCRIPT_RE.test(readFileSync(f.p, 'utf8')));
+  const scriptNames = scripts.map(f => f.r.split('/').pop());
+  const byRel = new Map(files.map(f => [f.r, f]));
+  const memo = new Map();
+  /* { launcher, lacks[], launches (own launch calls), exports (names it exports) } for one .mjs. */
+  const judge = (r) => {
+    if (memo.has(r)) return memo.get(r);
+    const f = byRel.get(r), raw = readFileSync(f.p, 'utf8'), code = wallCode(raw), lacks = [];
+    const res = { launcher: false, lacks, launches: 0, walled: false };
+    memo.set(r, res);
+    const runsScript = scriptNames.filter(nm => raw.includes(nm));
+    res.launcher = WALL_LAUNCH_RE.test(raw) || runsScript.length > 0;
+    if (!res.launcher) return res;
+    for (const nm of runsScript) lacks.push(`it runs ${nm}, which starts Chrome outside the wall`);
+    const flagNames = new Set(['WALL_FLAGS']);
+    for (const m of code.matchAll(/\b(?:const|let|var)?\s*([A-Za-z_$][\w$]*)\s*=(?!=)([^;]*)/g)) if (/\bWALL_FLAGS\b/.test(m[2])) flagNames.add(m[1]);
+    const holdsFlags = (span) => [...flagNames].some(nm => new RegExp('\\b' + nm.replace(/\$/g, '\\$') + '\\b').test(span));
+    for (const m of code.matchAll(/\b(spawn|spawnSync|execFile|execFileSync|exec|execSync)\s*\(|\.(launch\w*)\s*\(/g)) {
+      const open = m.index + m[0].length - 1, end = wallParens(code, open), rawSpan = raw.slice(m.index, end), span = code.slice(m.index, end);
+      const chromeCall = m[2] ? true : /^\w+\s*\(\s*(?:chrome|CHROME|process\.env\.CHROME)\b/.test(span) || /--headless|--remote-debugging-port|--user-data-dir|playwright/.test(rawSpan);
+      if (!chromeCall) continue;
+      res.launches++;
+      if (!holdsFlags(span)) lacks.push(`WALL_FLAGS in its launch call at line ${raw.slice(0, m.index).split('\n').length}`);
+    }
+    const quiets = /\bimport\s*\{[^}]*\bQUIET\b[^}]*\}\s*from\s*['"][^'"]*chrome-wall\.mjs['"]|\.QUIET\b/.test(raw)
+      || (/\bimport\s*\(\s*['"`][^'"`]*chrome-wall\.mjs/.test(raw) && /\bQUIET\b/.test(code));
+    if (quiets) lacks.push("to leave the wall's QUIET list alone (only tools/chrome-wall.mjs may touch it)");
+    const ownUse = /\bbrowserSlot\s*\(/.test(code) && /\b(?:wallWatch|wallPlaywright)\s*\(/.test(code);
+    if (res.launches === 0 && !ownUse && !runsScript.length && !quiets) {
+      /* A helper route: names imported from another tools/ .mjs that launches Chrome and is walled, and called here. */
+      for (const im of raw.matchAll(/\bimport\s*\{([^}]*)\}\s*from\s*['"](\.{1,2}\/[^'"]+\.mjs)['"]/g)) {
+        const target = join(dirname(r), im[2]).replace(/\\/g, '/');
+        if (target === 'tools/chrome-wall.mjs' || !byRel.has(target)) continue;
+        const h = judge(target);
+        const names = im[1].split(',').map(x => x.trim().split(/\s+as\s+/).pop()).filter(Boolean);
+        if (h.walled && h.launches > 0 && names.some(nm => new RegExp('\\b' + nm + '\\s*\\(').test(code))) { res.walled = true; return res; }
+      }
+    }
     if (!/\bbrowserSlot\s*\(/.test(code)) lacks.push('browserSlot(');
-    /* Only the wall's own self-test may add to its QUIET list: a tool that does quiets a host it should fail on. */
-    const quiets = /\bimport\s*\{[^}]*\bQUIET\b[^}]*\}\s*from\s*['"][^'"]*chrome-wall\.mjs['"]|\.QUIET\b/.test(raw);
-    if (lacks.length || quiets) missing.push(`${r} (${[lacks.length ? 'no ' + lacks.join(', no ') : '', quiets ? 'it uses the wall\'s QUIET list, which only tools/chrome-wall.mjs may' : ''].filter(Boolean).join('; ')})`);
+    if (!/\b(?:wallWatch|wallPlaywright)\s*\(/.test(code)) lacks.push('wallWatch( or wallPlaywright(');
+    if (!holdsFlags(code)) lacks.push('WALL_FLAGS');
+    res.walled = !lacks.length;
+    return res;
+  };
+  const launchers = [], missing = [];
+  for (const f of scripts) { launchers.push(f.r); missing.push(`${f.r} (it starts Chrome from a ${f.r.split('.').pop()} script: start it from a .mjs that uses the wall)`); }
+  for (const f of files) {
+    if (!f.r.endsWith('.mjs') || f.r === 'tools/chrome-wall.mjs' || f.r === 'tools/checks.mjs') continue;
+    const j = judge(f.r);
+    if (!j.launcher) continue;
+    launchers.push(f.r);
+    if (!j.walled) missing.push(`${f.r} (needs: ${j.lacks.join('; ')})`);
   }
   return { launchers, missing };
 }
 function checkChromeWall() {
   head('1fh. Every tool that launches Chrome goes through tools/chrome-wall.mjs (the wall and the two-run lock)');
   const { launchers, missing } = wallUnwalled(ROOT);
-  for (const r of missing) { err(`1fh: ${r} launches a browser but does not use tools/chrome-wall.mjs: pass WALL_FLAGS, call wallWatch (or wallPlaywright) and browserSlot, as tools/smoke.mjs does`); problems++; }
+  for (const r of missing) { err(`1fh: ${r} launches a browser but does not go through tools/chrome-wall.mjs as tools/smoke.mjs does`); problems++; }
   if (launchers.length < 15) { err(`1fh: found ${launchers.length} tools that launch a browser (pinned: at least 15): the matcher may have stopped finding them`); problems++; }
   if (!missing.length && launchers.length >= 15) ok(`${launchers.length} of ${launchers.length} tools that launch a browser use tools/chrome-wall.mjs (WALL_FLAGS, the watch, browserSlot)`);
 }
