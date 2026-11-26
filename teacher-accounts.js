@@ -108,10 +108,13 @@ function teacherAccessLoad(){
   teacherAccessLoading = (async () => {
     await ensureDb();
     const gen = teacherAccessWriteGen;
+    /* All three asked of the server, never the tab's cache (review R5-1): with no network a plain get() of a list
+       RESOLVES with an empty one ("Nobody is waiting", and the badge taken down), and the allow list can answer from
+       the copy a merge still waiting to be sent leaves (only that merge's keys). A failed read says so below. */
     const [a, r, w] = await Promise.allSettled([
-      db.collection('config').doc('access').get(),
-      db.collection('accessRequests').orderBy('at', 'desc').limit(TEACHER_ACCESS_REQ_MAX).get(),
-      db.collection('accessRequests').where('status', '==', 'asked').limit(TEACHER_ACCESS_REQ_MAX).get(),
+      db.collection('config').doc('access').get({ source: 'server' }),
+      db.collection('accessRequests').orderBy('at', 'desc').limit(TEACHER_ACCESS_REQ_MAX).get({ source: 'server' }),
+      db.collection('accessRequests').where('status', '==', 'asked').limit(TEACHER_ACCESS_REQ_MAX).get({ source: 'server' }),
     ]);
     /* A write started while this read was out: what it left is newer than
        anything here. Keep it, and read again when the writes settle. */
@@ -385,7 +388,8 @@ async function teacherRefreshAccessBadge(){
   let n;
   try{
     await ensureDb();
-    const snap = await db.collection('accessRequests').where('status', '==', 'asked').limit(TEACHER_ACCESS_BADGE_MAX).get();
+    // The server's answer only: offline a plain get() answers an empty list, which took the badge down (review R5-1).
+    const snap = await db.collection('accessRequests').where('status', '==', 'asked').limit(TEACHER_ACCESS_BADGE_MAX).get({ source: 'server' });
     n = snap.size;
   }catch(e){ return; }
   if(req !== teacherAccessBadgeReq) return;
