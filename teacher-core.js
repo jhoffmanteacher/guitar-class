@@ -714,7 +714,7 @@ async function loadAllStudents(opts){
       /* A failed read is {} (no archived list): filtering by it would bring archived students back into every view.
          Refuse to draw, as Games and the board do; teacherStudentsAt stays 0, so Refresh runs this whole load again. */
       if(!teacherClassConfigReadOk){
-        teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
+        teacherRefreshing=false; teacherRefreshFailed=true; teacherRosterDenied=false; teacherPaintRefreshBar();
         teacherPaintRosterMissing();
         return;
       }
@@ -735,11 +735,11 @@ async function loadAllStudents(opts){
     allStudentsRaw=fresh;
     teacherApplyRosterFilter();
   } catch(e){
-    teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
+    teacherRefreshing=false; teacherRefreshFailed=true; teacherRosterDenied=!!(e && e.code==='permission-denied'); teacherPaintRefreshBar();
     teacherPaintRosterMissing();
     return;
   }
-  teacherRefreshing=false; teacherRefreshFailed=false;
+  teacherRefreshing=false; teacherRefreshFailed=false; teacherRosterDenied=false;
   teacherStudentsAt=Date.now();
   // Rendering is deliberately OUTSIDE the fetch try/catch above — a bug in
   // renderTeacherBody/renderTeacherSummary shouldn't be reported to the
@@ -773,11 +773,16 @@ async function loadAllStudents(opts){
    to replace #lq-stage), drawn when the box still holds index.html's "Loading student data…" (the console booted on
    one, e.g. the update reload's resume). After a failure the minute timer (teacherSyncAutoRefresh) reads again while
    a roster view is open and the tab is visible, as does a tab return, at most once every 15 s (TEACHER_RETRY_GAP_MS,
-   review R3 minor 3); renderTeacherBody reads again when a blocked view is opened. A read that lands draws the view. */
+   review R3 minor 3); renderTeacherBody reads again when a blocked view is opened. None of these after a read the
+   rules refused (teacherRosterDenied, review M4): only Refresh. A read that lands draws the view. */
 let teacherBodyDrawn=false;       // renderTeacherBody has run: the box no longer holds index.html's loading line
 let teacherBodyDrawnDown=false;   // ...and the view on screen was drawn while the roster was already down (not loading)
 let teacherRosterBoxFailed=false; // the box holds a line painted by teacherPaintRosterMissing, not a view
 let teacherRosterTriedAt=0;       // when the last first load (or retry of it) started
+/* The last first load's progress read was REFUSED (permission-denied): the security rules, not the network, so reading
+   again changes nothing. No automatic retry (timer, tab return, a blocked view opened) until the Refresh button runs the
+   load again; the lines say to check the rules and press Refresh (review M4). */
+let teacherRosterDenied=false;
 const TEACHER_RETRY_GAP_MS=15000;
 const TEACHER_SETTINGS_VIEWS=['activities','games','manage','songs'];
 function teacherViewUsesRoster(v){ return !TEACHER_NO_REFRESH_BAR_VIEWS.includes(v) || v==='minutes'; }
@@ -786,8 +791,9 @@ function teacherRosterDown(){ return !teacherStudentsAt && teacherRefreshFailed;
 /* What a roster spot shows while the roster is missing (review R3-2, R4-1): an empty roster read as "No students yet",
    "0 of 0 done" and lists with buttons computed from nobody. */
 const TEACHER_ROSTER_DOWN_LINE='Student progress did not load, so no students are shown here. It is read again every minute.';
+const TEACHER_ROSTER_DENIED_LINE='Student progress was refused by the database, so no students are shown here. Check your Firebase security rules, then press Refresh.';
 const TEACHER_ROSTER_LOADING_LINE='Loading student progress…';
-function teacherRosterMissingLine(){ return teacherRosterDown() ? TEACHER_ROSTER_DOWN_LINE : TEACHER_ROSTER_LOADING_LINE; }
+function teacherRosterMissingLine(){ return teacherRosterDown() ? (teacherRosterDenied ? TEACHER_ROSTER_DENIED_LINE : TEACHER_ROSTER_DOWN_LINE) : TEACHER_ROSTER_LOADING_LINE; }
 // The Who picker's student list (the board's picker and its open toggle above): nobody to tick while the roster is missing.
 function teacherWhoListHtml(a, cfg){
   return teacherRosterMissing() ? `<div class="t-who-note">${teacherRosterMissingLine()}</div>` : teacherWhoBoxesHtml(a, cfg);
@@ -813,7 +819,7 @@ function teacherPaintRosterMissing(){
     box.innerHTML = !teacherClassConfigReadOk && teacherClassConfigLoaded
       ? '<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing would be accurate, so nothing is shown.</div>'
       : teacherRosterDown() && teacherClassConfigReadOk && !teacherRefreshing
-        ? '<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>'
+        ? `<div class="t-loading">Could not load student data${teacherRosterDenied ? ': the database refused it. Check your Firebase security rules, then press Refresh.' : '. Check your Firebase security rules.'}</div>`
         : '<div class="t-loading">Loading student data…</div>';
     teacherRosterBoxFailed=true;
   }
@@ -825,8 +831,13 @@ function teacherPaintRosterNote(){
   const show=teacherRosterDown() && !teacherRosterBlocks(teacherView) && TEACHER_SETTINGS_VIEWS.includes(teacherView);
   const old=document.getElementById('t-roster-note');
   if(!show){ if(old) old.remove(); return; }
+  // Refused by the rules (review M4): nothing reads it again by itself, so the note does not say it does.
+  const say=teacherRosterDenied
+    ? 'Student progress was refused by the database, so this page shows no students and no counts. Check your Firebase security rules, then press Refresh.'
+    : 'Student progress did not load, so this page shows no students and no counts. It is read again every minute; Refresh tries now.';
+  if(old){ if(old.textContent!==say) old.textContent=say; return; }
   const box=document.getElementById('t-grid-container');
-  if(!old && box) box.insertAdjacentHTML('beforebegin', '<div id="t-roster-note" class="t-loading" role="status" style="padding:var(--sp-10) var(--sp-20)">Student progress did not load, so this page shows no students and no counts. It is read again every minute; Refresh tries now.</div>');
+  if(box) box.insertAdjacentHTML('beforebegin', `<div id="t-roster-note" class="t-loading" role="status" style="padding:var(--sp-10) var(--sp-20)">${say}</div>`);
 }
 
 /* ── Keeping student progress current (2026-10-12) ──────────────────────
@@ -843,7 +854,8 @@ function teacherPaintRosterNote(){
        up during class. The timer stops on every other view and while the
        tab is hidden;
      - and, while the FIRST load has failed, about once a minute on any view
-       drawn from the roster (review R2-1): each tick runs that load again.
+       drawn from the roster (review R2-1): each tick runs that load again;
+       not when the rules refused the read (teacherRosterDenied, review M4).
        It reads config/class only while the newest read of it failed, and
        the progress docs only once that one is good, so a failure that lasts
        costs one read a tick, and tab returns add at most one every 15 s.
@@ -906,7 +918,7 @@ async function teacherRefreshStudents(opts){
      minor 3: 24 reads a minute). */
   if(!teacherStudentsAt){
     if(manual) loadAllStudents();
-    else if(teacherRefreshFailed && !teacherRefreshBlocker() && Date.now()-teacherRosterTriedAt>=TEACHER_RETRY_GAP_MS) loadAllStudents({auto:true});
+    else if(teacherRefreshFailed && !teacherRosterDenied && !teacherRefreshBlocker() && Date.now()-teacherRosterTriedAt>=TEACHER_RETRY_GAP_MS) loadAllStudents({auto:true});
     return;
   }
   const why=teacherRefreshBlocker();
@@ -981,7 +993,7 @@ function teacherRepaintActivityStudents(id){
    failed first load (teacherPaintRosterMissing). */
 function teacherSyncAutoRefresh(){
   // Also any roster view while the first load has failed (review R2-1): its tick runs that load again.
-  const want = (teacherView==='activities' || (teacherRosterDown() && teacherViewUsesRoster(teacherView))) && !document.hidden;
+  const want = (teacherView==='activities' || (teacherRosterDown() && !teacherRosterDenied && teacherViewUsesRoster(teacherView))) && !document.hidden;
   if(want && !teacherAutoRefreshTimer){
     teacherAutoRefreshTimer=setInterval(()=>{
       // A Refresh click or a tab return a moment ago already did this tick's work.
@@ -1006,7 +1018,7 @@ function teacherPaintRefreshBar(){
   if(!when) return;
   const at=teacherStudentsAt ? new Date(teacherStudentsAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'}) : '';
   when.textContent = !teacherStudentsAt
-    ? (teacherRefreshing ? 'Loading student progress…' : teacherRefreshFailed ? 'Could not load student progress.' : '')
+    ? (teacherRefreshing ? 'Loading student progress…' : teacherRefreshFailed ? (teacherRosterDenied ? 'Student progress was refused: check the security rules, then press Refresh.' : 'Could not load student progress.') : '')
     : teacherRefreshing ? `Student progress as of ${at} · refreshing…`
     : teacherRefreshHeld ? `Not refreshed: ${teacherRefreshHeld} · showing progress as of ${at}`
     : teacherRefreshFailed ? `Could not refresh — showing progress as of ${at}`
@@ -1529,7 +1541,7 @@ function renderTeacherBody(){
      class settings are drawn while those are good, with the line above them once the roster failed (review R2-4). */
   if(teacherRosterBlocks(teacherView)){
     // The read first, so the line says a read is out ("Loading student data…"): the failure before it may have been the settings'.
-    if(teacherRosterDown() && !teacherRefreshing) loadAllStudents();
+    if(teacherRosterDown() && !teacherRefreshing && !teacherRosterDenied) loadAllStudents();
     teacherPaintRosterMissing();
     return;
   }

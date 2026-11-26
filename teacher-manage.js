@@ -57,9 +57,10 @@ function renderTeacherManage(){
     const pausedCount=allStudentsRaw.filter(s=>paused[s.uid]).length;
     // One section at a time: these three, and `head` + the roster as Students (teacher-manage-layout.js).
     const panes={backup:teacherBackupPanelHtml(), songs:'<div id="t-songfiles-block"></div><div id="t-builtsongs-block"></div>', accounts:'<div id="t-access-block"></div>'};
-    /* No roster yet (still loading, or the first load failed; then it is read again every minute): the student list
-       and Open everyone through are worked out from it, so neither is drawn, and the list's place says why. An empty
-       roster read as "No students yet", and Open for all as "Everyone is already open" (review R3-2, R4-1). */
+    /* No roster yet (still loading, or the first load failed; then it is read again every minute, unless the rules
+       refused it): the student list and Open everyone through are worked out from it, so neither is drawn, and the
+       list's place says why. An empty roster read as "No students yet", and Open for all as "Everyone is already
+       open" (review R3-2, R4-1). */
     const rosterMissing=teacherRosterMissing();
     const openAll=rosterMissing ? '' : `
       <div class="tg-class">
