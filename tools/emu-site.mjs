@@ -118,7 +118,13 @@ export function emulator(a){
       const r = await req('PUT', `${fsBase}/emulator/v1/projects/${a.project}:securityRules`, { rules: { files: [{ name: 'firestore.rules', content: text }] } });
       if (r.status !== 200) throw new Error(`the emulator refused the rules (HTTP ${r.status}): ${r.text.slice(0, 300)}`);
     },
-    async clearFirestore(){ const r = await req('DELETE', `${fsBase}/emulator/v1/projects/${a.project}/databases/(default)/documents`); if (r.status !== 200) throw new Error('clear Firestore: HTTP ' + r.status); },
+    /* Asked once more, half a second later, after an HTTP 500: one 500 from the emulator should not stop a run. */
+    async clearFirestore(){
+      const url = `${fsBase}/emulator/v1/projects/${a.project}/databases/(default)/documents`;
+      let r = await req('DELETE', url);
+      if (r.status === 500){ await new Promise(res => setTimeout(res, 500)); r = await req('DELETE', url); }
+      if (r.status !== 200) throw new Error('clear Firestore: HTTP ' + r.status);
+    },
     async clearAuth(){ const r = await req('DELETE', `${authBase}/emulator/v1/projects/${a.project}/accounts`); if (r.status !== 200) throw new Error('clear Auth: HTTP ' + r.status); },
     /* The SEPARATE READER: the emulator's REST door with the owner key (rules bypassed), never the client SDK and
        never the site's code. null = no such document. */
@@ -596,6 +602,7 @@ export function makeRunner(opts = {}){
     if (RUN.beat) RUN.beat();
     console.log(`  ▶ ${el()}  ${R.prefix}${name}`);
     const t = Date.now();
+    const seen = faultMark();
     let res;
     try { res = await bounded(Promise.resolve().then(fn), ms, name); }
     catch (e){
@@ -603,10 +610,24 @@ export function makeRunner(opts = {}){
       else if (e && e.skipped) R.check(`${name}: not run`, false, e.message);
       else R.check(`${name}: the tool threw`, false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
     }
+    /* A site error during the case (an exception in a site callback, a rejection nobody handled, a script that did
+       not load) turns it red: a clean run has none (review R1-2, 2026-11-26). */
+    const fresh = faultsSince(seen);
+    if (fresh.length) R.check(`${name}: no page fault or unhandled rejection`, false, `${fresh.length}: ${fresh.slice(0, 2).join(' / ')}`);
     console.log(`  ■ ${el()}  ${R.prefix}${name} (${((Date.now() - t) / 1000).toFixed(1)} s)`);
     return res;
   };
   return R;
+}
+/* The faults the world now running has collected (its own: unhandled rejections and exceptions out of site callbacks;
+   each page's: a timer, a listener or a script that threw), marked so a case can take only those that came during it. */
+function faultMark(){
+  const w = CURRENT;
+  return { w, n: w ? w.faults.length : 0, pages: new Map(w ? w.pages.map(p => [p, p.faults.length]) : []) };
+}
+function faultsSince(m){
+  if (!m.w) return [];
+  return [...m.w.faults.slice(m.n), ...m.w.pages.flatMap(p => p.faults.slice(m.pages.get(p) || 0).map(f => p.id + ': ' + f))];
 }
 /* One await on the SDK or an emulator inside a case, with its own limit and name. */
 export const step = (p, what, ms = 15000) => bounded(p, ms, what);

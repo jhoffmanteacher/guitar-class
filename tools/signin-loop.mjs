@@ -137,6 +137,15 @@ async function suite(groups, plant, quiet, prefix){
     return `page said [${keys.join(' > ') || 'nothing'}]${settled ? '' : ' (still waiting after 12 s)'}, reader ${stored ? 'finds' : 'does not find'} the tick`;
   };
   const shut = async (...ps) => { for (const p of ps) if (p) await p.close('silent'); };
+  /* A click on one of the access screen's buttons, only if the screen DREW that button, enabled (review R1-1,
+     2026-11-26: the screen's listener answers a click on any data-access, so a button the screen forgot would
+     still have been "pressed"). Otherwise the case fails, naming the state. */
+  const press = (p, act) => {
+    const scr = p.els['access-screen'];
+    const b = scr && scr.querySelector(`[data-access="${act}"]`);
+    if (!b || 'disabled' in b.attrs) throw new Error(`the access screen has no ${b ? 'enabled ' : ''}"${act}" button (state ${p.run('accessState')})`);
+    return p.click('access-screen', { access: act });
+  };
 
   /* ── named accounts ── */
   if (groups.includes('named')){
@@ -201,7 +210,7 @@ async function suite(groups, plant, quiet, prefix){
     });
     await R.case('ask: Ask', async () => {
       need(S.p);
-      const clicked = S.p.click('access-screen', { access: 'ask' });
+      const clicked = press(S.p, 'ask');
       const asked = await until(() => S.p.run('accessState') === 'asked', 12000);
       const req = await E.ownerGet('accessRequests/' + S.uid);
       const at = req && req.at && req.at.__ts;
@@ -210,7 +219,7 @@ async function suite(groups, plant, quiet, prefix){
     });
     await R.case('ask: Check again while locked out', async () => {
       need(S.p);
-      S.p.click('access-screen', { access: 'check' });
+      press(S.p, 'check');
       const still = await until(() => S.p.run('!accessBusy && accessNote === "access.stillWaiting" && accessState === "asked"'), 10000);
       check('Check again while still locked out: stays, says "not yet", no reload', still && !S.p.reloadAsked, `note ${S.p.run('accessNote')}, state ${S.p.run('accessState')}, reload ${S.p.reloadAsked}`);
     });
@@ -232,7 +241,7 @@ async function suite(groups, plant, quiet, prefix){
     });
     await R.case('ask: Check again once allowed', async () => {
       need(S.p);
-      S.p.click('access-screen', { access: 'check' });
+      press(S.p, 'check');
       check('Check again once allowed: the page reloads into the site', await until(() => S.p.reloadAsked, 10000), `state ${S.p.run('accessState')}, note ${S.p.run('accessNote')}`);
       await shut(S.p); S.p = null;
       const { p, s } = await boot(S.dev, S.who);
@@ -275,7 +284,7 @@ async function suite(groups, plant, quiet, prefix){
       const { p, s } = await boot(S.dev, S.who);
       S.p = p; S.uid = uidOf(p);
       await until(() => p.run('accessState') === 'none', 8000);
-      p.click('access-screen', { access: 'ask' });
+      press(p, 'ask');
       check('the access screen; Ask lands', s === 'access' && await until(() => p.run('accessState') === 'asked', 12000) && (await E.ownerGet('accessRequests/' + S.uid) || {}).status === 'asked', `screen ${s}, state ${p.run('accessState')}`);
     });
     await R.case('decline: the console declines', async () => {
@@ -291,7 +300,7 @@ async function suite(groups, plant, quiet, prefix){
     });
     await R.case('decline: Check again', async () => {
       need(S.p);
-      S.p.click('access-screen', { access: 'check' });
+      press(S.p, 'check');
       check('…Check again: the screen says "declined", no reload', await until(() => S.p.run('!accessBusy && accessState === "declined"'), 10000) && !S.p.reloadAsked, `state ${S.p.run('accessState')}`);
     });
     await shut(S.p, S.tp);
@@ -306,7 +315,7 @@ async function suite(groups, plant, quiet, prefix){
       const { p, s } = await boot(S.dev, S.who);
       S.p = p; S.uid = uidOf(p);
       await until(() => p.run('accessState') === 'none', 8000);
-      p.click('access-screen', { access: 'ask' });
+      press(p, 'ask');
       S.asked = s === 'access' && await until(() => p.run('accessState') === 'asked', 12000);
     });
     await R.case('delete: the console deletes', async () => {
@@ -325,7 +334,7 @@ async function suite(groups, plant, quiet, prefix){
       const { p, s } = await boot(S.dev, S.who);
       S.p = p;
       check('…a new page load offers Ask again', s === 'access' && await until(() => p.run('accessState') === 'none', 8000), `screen ${s}, state ${p.run('accessState')}`);
-      p.click('access-screen', { access: 'ask' });
+      press(p, 'ask');
       check('…and the second Ask lands', await until(() => p.run('accessState') === 'asked', 12000) && (await E.ownerGet('accessRequests/' + S.uid) || {}).status === 'asked', `state ${p.run('accessState')}`);
     });
     await shut(S.p, S.tp);
@@ -396,6 +405,11 @@ function bulkList(){
   for (const l of locals) for (const d of domains) out.push([l + '@' + d, true]);
   for (const e of ['test0@seq.org', 'TEST1@SEQ.ORG', 'a@mail.seq.org', 'test2@gmail.example'])
     for (const w of [x => ' ' + x, x => x + ' ', x => x + '\n', x => '\t' + x]) out.push([w(e), true]);
+  /* Unicode spaces (no-break, the byte-order mark, ideographic, line separator) in front and after, and local parts
+     that are only space (review R1-4, 2026-11-26). */
+  for (const e of ['test0@seq.org', 'TEST1@SEQ.ORG'])
+    for (const u of ['\u00a0', '\ufeff', '\u3000', '\u2028']) out.push([u + e, true], [e + u, true]);
+  for (const l of [' ', '\t', '\n', '\u00a0', '\ufeff', '\u3000', '\u2028', '  ']) out.push([l + '@seq.org', true]);
   for (const e of ['@seq.org', 'a@@seq.org', 'a@b@seq.org', 'seq.org', '', 'a@seq.org\u0000', 'a@seq.org/x', '@', 'a@SEQ.org.', 'a@seq.org@seq.org']) out.push([e, true]);
   for (const l of locals.slice(0, 6)) for (const d of domains.slice(0, 5)) out.push([l + '@' + d, false]);
   return out;
@@ -411,6 +425,8 @@ const PLANTS = [
   { name: 'the rules\' allow list is looked up by email, not uid', groups: ['ask'], rules: [{ from: ".get(request.auth.uid, false) == true));", to: ".get(request.auth.token.get('email', ''), false) == true));" }] },
   { name: 'the console writes the allow entry with a dotted key (set() keeps the dot: a field named "allow.<uid>")', groups: ['ask'], site: [{ file: 'teacher-accounts.js', from: "await db.collection('config').doc('access').set({ allow }, { merge: true });", to: "const dotted = {}; Object.keys(allow).forEach(u => { dotted['allow.' + u] = allow[u]; }); await db.collection('config').doc('access').set(dotted, { merge: true });" }] },
   { name: 'Ask sends the device\'s clock as its time', groups: ['ask', 'delete'], site: [{ file: 'app/boot.js', from: 'at: firebase.firestore.FieldValue.serverTimestamp(),', to: 'at: new Date(),' }] },
+  { name: 'the access screen draws no Ask button before anything is asked (review plant P-E)', groups: ['ask'], site: [{ file: 'app/boot.js', from: "if(s === 'none' || s === 'failed') buttons = btn('access.ask', 'ask', true);", to: "if(s === 'failed') buttons = btn('access.ask', 'ask', true);" }] },
+  { name: 'showApp throws once the app is on screen (review plant P-F)', groups: ['named'], site: [{ file: 'app/boot.js', from: "  document.getElementById('app').style.display='block';\n  document.getElementById('fab-group')", to: "  document.getElementById('app').style.display='block';\n  throw new Error('planted: showApp');\n  document.getElementById('fab-group')" }] },
 ];
 function plantRules(list){
   let t = RULES;

@@ -231,7 +231,11 @@ jobs:
                 "node $GITHUB_WORKSPACE/$tool --deps $EMU --site $GITHUB_WORKSPACE $args" ) < /dev/null 2>&1 | tee "$log"
             code=${PIPESTATUS[0]}
             if [ "$code" -eq 124 ] || [ "$code" -eq 137 ]; then
-              echo "✗ $name: killed after 600 s by the step's timeout (its own deadline did not end it): 0 passed, 1 failed" | tee -a "$log"
+              # A tool whose own watchdog fired has said where it hung (": HUNG at \"") and may have ended with a
+              # SIGKILL (137): no second line saying its deadline did not work.
+              if ! grep -q ': HUNG at "' "$log"; then
+                echo "✗ $name: killed after 600 s by the step's timeout (its own deadline did not end it): 0 passed, 1 failed" | tee -a "$log"
+              fi
               # What timeout's signal did not reach (the emulators under npx) would hold the ports for the next tool.
               pkill -f cloud-firestore-emulator; pkill -f 'firebase emulators:exec'; sleep 2
             fi

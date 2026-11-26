@@ -515,6 +515,7 @@ const PLANTS = [
   { name: 'the Module 4/5 move merges instead of replacing (old keys come back)', groups: ['swap45'], site: [{ file: 'app/save.js', from: "tx.update(ref, Object.assign(swap45Patch(d) || {}, { 'migrations.swap45': true }));", to: 'tx.set(ref, Object.assign(swap45Remap(d), { migrations: { swap45: true } }), { merge: true });' }] },
   { name: 'the student\'s page reads the Start over marker under the wrong name', groups: ['startover'], site: [{ file: 'app/save.js', from: 'over: num(((d && d.progressStartOver) || {})[uid])', to: 'over: num(((d && d.progressStartover) || {})[uid])' }] },
   { name: 'Sign out does not wait for the last save', groups: ['signout'], site: [{ file: 'app/boot.js', from: 'await withTimeout((async()=>{ if(_flushP) await _flushP; await flushSave(); })(), ms);', to: 'await withTimeout(Promise.resolve(), ms);' }] },
+  { name: 'showApp throws once the app is on screen (review plant P-F)', groups: ['new'], site: [{ file: 'app/boot.js', from: "  document.getElementById('app').style.display='block';\n  document.getElementById('fab-group')", to: "  document.getElementById('app').style.display='block';\n  throw new Error('planted: showApp');\n  document.getElementById('fab-group')" }] },
 ];
 
 const ALL = ['sdk', 'new', 'reload', 'device2', 'untick', 'check', 'swap45', 'race45', 'startover', 'signout', 'offline', 'offline-signout', 'offline-close', 'toolarge'];
