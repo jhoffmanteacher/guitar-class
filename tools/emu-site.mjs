@@ -103,8 +103,10 @@ if (process.env.https_proxy || process.env.HTTPS_PROXY || process.env.grpc_proxy
 export function emulator(a){
   const fsBase = `http://${a.fsHost}`, authBase = `http://${a.authHost}`;
   const docs = `${fsBase}/v1/projects/${a.project}/databases/(default)/documents`;
+  /* Every call to an emulator's REST door gives up after 15 s (AbortSignal): a stalled emulator fails a step, it
+     never holds the run. */
   const req = async (method, url, body, token) => {
-    const r = await fetch(url, { method, headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}), body: body === undefined ? undefined : JSON.stringify(body) });
+    const r = await fetch(url, { method, signal: AbortSignal.timeout(15000), headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}), body: body === undefined ? undefined : JSON.stringify(body) });
     const text = await r.text();
     let json = null; try { json = text ? JSON.parse(text) : null; } catch { json = null; }
     return { status: r.status, json, text };
@@ -522,10 +524,73 @@ export async function rawClient(world, device, acct){
   const db = app.firestore();
   db.useEmulator('127.0.0.1', device.gate.port);
   const cred = fb.auth.GoogleAuthProvider.credential(JSON.stringify({ sub: acct.sub, email: acct.email, email_verified: acct.verified !== false, name: acct.name || '' }));
-  const u = (await auth.signInWithCredential(cred)).user;
+  const u = (await bounded(auth.signInWithCredential(cred), 15000, 'an SDK sign-in at the Auth emulator')).user;
   const c = { app, auth, db, uid: u.uid, FV: fb.firestore.FieldValue, alive: true, close: async () => { if (!c.alive) return; c.alive = false; await endApp(app); } };
   world.raws.push(c); device.raws.push(c);
   return c;
+}
+/* ─────────────────────────── the case runner ───────────────────────────
+   GitHub run 45870814442 (2026-11-26) printed nothing for 24 minutes and was cancelled: the step kept each tool's
+   output in a file, and nothing bounded a slow or stuck step. Now: one line as each case starts (▶) and ends (■),
+   printed even in the quiet planted-fault runs; every await on the SDK inside a case is a step() with its own limit;
+   a case past its limit fails with its name ("HUNG at <step>") and the run goes on; the whole run has a deadline
+   (watchdog) after which it prints "HUNG at <case>" and exits 3. */
+export const RUN = { current: '(starting)', t0: Date.now() };
+export function bounded(p, ms, what){
+  let timer;
+  const gate = new Promise((_, rej) => { timer = setTimeout(() => rej(Object.assign(new Error(`${what} did not finish in ${ms / 1000} s`), { hung: true, step: what, limit: ms / 1000 })), ms); });
+  return Promise.race([Promise.resolve(p), gate]).finally(() => clearTimeout(timer));
+}
+export function makeRunner(opts = {}){
+  const R = { pass: 0, fail: 0, red: [], quiet: !!opts.quiet, prefix: opts.prefix || '', caseMs: opts.caseMs || 40000 };
+  const el = () => ((Date.now() - RUN.t0) / 1000).toFixed(1).padStart(6) + ' s';
+  R.out = s => { if (!R.quiet) console.log(s); };
+  R.note = s => R.out('  ~ ' + s);
+  R.check = (name, ok, why) => {
+    if (ok) R.pass++; else { R.fail++; R.red.push(name); }
+    if (!R.quiet){ if (!ok && why) console.log('      ' + String(why).slice(0, 320)); console.log((ok ? '  ✓ ' : '  ✗ ') + name); }
+    return ok;
+  };
+  R.case = async (name, fn, ms = R.caseMs) => {
+    RUN.current = R.prefix + name;
+    console.log(`  ▶ ${el()}  ${R.prefix}${name}`);
+    const t = Date.now();
+    let res;
+    try { res = await bounded(Promise.resolve().then(fn), ms, name); }
+    catch (e){
+      if (e && e.hung) R.check(`${name}: HUNG at ${e.step === name ? 'the case itself' : e.step} (limit ${e.limit} s)`, false, 'a step never settled; the case was abandoned and the run went on');
+      else if (e && e.skipped) R.check(`${name}: not run`, false, e.message);
+      else R.check(`${name}: the tool threw`, false, e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+    }
+    console.log(`  ■ ${el()}  ${R.prefix}${name} (${((Date.now() - t) / 1000).toFixed(1)} s)`);
+    return res;
+  };
+  return R;
+}
+/* One await on the SDK or an emulator inside a case, with its own limit and name. */
+export const step = (p, what, ms = 15000) => bounded(p, ms, what);
+export function watchdog(tool, seconds, tally){
+  const h = setTimeout(() => {
+    const t = tally();
+    console.log(`\n✗ ${tool}: HUNG at "${RUN.current}" (the run passed its ${seconds} s deadline): ${t.pass} passed, ${t.fail + 1} failed`);
+    process.exit(3);
+  }, seconds * 1000);
+  h.unref();
+}
+/* Before any case: the SDK must reach BOTH emulators (a sign-in, then a server read through a device relay), each
+   within 15 s. '' = fine; otherwise what failed, and the tool stops (exit 2) instead of running every case into
+   its limit. */
+export async function preflight(world){
+  const dev = await makeDevice(world, 'PREFLIGHT');
+  const t = Date.now();
+  let c;
+  try { c = await bounded(rawClient(world, dev, { sub: 'preflight', email: 'test-preflight@seq.org', verified: true, name: 'Test P' }), 15000, 'a sign-in at the Auth emulator'); }
+  catch (e){ return `the SDK could not sign in at the Auth emulator ${world.a.authHost}: ${e.code || e.message}`; }
+  try { await bounded(c.db.doc('config/class').get({ source: 'server' }), 15000, 'a server read'); }
+  catch (e){ return `the SDK could not read from the Firestore emulator at ${world.a.fsHost} through this tool's relay (127.0.0.1:${dev.gate.port}): ${e.code || e.message}`; }
+  finally { if (c) await c.close(); }
+  console.log(`   preflight: the SDK signed in at ${world.a.authHost} and read from ${world.a.fsHost} in ${Date.now() - t} ms`);
+  return '';
 }
 /* An app's end (a closed tab): its unsent writes go with it. Never waited on for more than 5 s. */
 async function endApp(app){ try { await Promise.race([app.delete(), sleep(5000)]); } catch { /* already gone */ } }
@@ -533,7 +598,7 @@ async function endApp(app){ try { await Promise.race([app.delete(), sleep(5000)]
 export async function signInPage(world, page, acct){
   const { fb } = world.sdk;
   const cred = fb.auth.GoogleAuthProvider.credential(JSON.stringify({ sub: acct.sub, email: acct.email, email_verified: acct.verified !== false, name: acct.name || '' }));
-  const r = await page.auth().signInWithCredential(cred);
+  const r = await bounded(page.auth().signInWithCredential(cred), 15000, 'the page signing in at the Auth emulator');
   return r.user;
 }
 /* Wait until the site's sign-in callback has decided a screen. */

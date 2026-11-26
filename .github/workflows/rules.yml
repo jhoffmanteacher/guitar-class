@@ -164,6 +164,8 @@ jobs:
     # The site's own pages (tools/emu-site.mjs) on the real Firebase JS SDK, against the Auth and Firestore
     # emulators under the demo- project id; the tools refuse any other id and any address off this runner.
     runs-on: ubuntu-latest
+    # Each tool stops itself at its --deadline (540 s) and is killed at 600 s; two tools and the install fit well
+    # inside this.
     timeout-minutes: 25
     env:
       # Keep in step with the rules job above. FIREBASE_JS_VERSION must be the version index.html loads from
@@ -195,7 +197,8 @@ jobs:
           npm install --no-audit --no-fund --legacy-peer-deps --save-exact \
             "firebase-tools@$FIREBASE_TOOLS_VERSION" \
             "firebase@$FIREBASE_JS_VERSION"
-          echo '{ "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8089 }, "auth": { "port": 9099 }, "ui": { "enabled": false } } }' > firebase.json
+          # Both emulators on 127.0.0.1 by name: left out, firebase-tools listens on "localhost", which can be ::1 too.
+          echo '{ "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "host": "127.0.0.1", "port": 8089 }, "auth": { "host": "127.0.0.1", "port": 9099 }, "ui": { "enabled": false } } }' > firebase.json
           cp "$GITHUB_WORKSPACE/firestore.rules" .
           java -version
           npx --no-install firebase --version
@@ -221,11 +224,17 @@ jobs:
             name="$(basename "$tool")"
             log="$EMU/$name.log"
             echo "::group::$tool $args"
-            # Each tool in its own emulators, so one cannot leave data or accounts behind for the other.
-            ( cd "$EMU" && npx --no-install firebase emulators:exec --only firestore,auth --project demo-gc \
-                "node $GITHUB_WORKSPACE/$tool --deps $EMU --site $GITHUB_WORKSPACE $args" ) < /dev/null > "$log" 2>&1
-            code=$?
-            cat "$log"
+            # Each tool in its own emulators, so one cannot leave data or accounts behind for the other. The output
+            # streams into the job log as it comes (tee): run 45870814442 kept it in a file and showed nothing for
+            # 24 minutes. `timeout` ends the emulators and the tool together if the tool's own deadline ever fails.
+            ( cd "$EMU" && timeout --kill-after=20 600 npx --no-install firebase emulators:exec --only firestore,auth --project demo-gc \
+                "node $GITHUB_WORKSPACE/$tool --deps $EMU --site $GITHUB_WORKSPACE $args" ) < /dev/null 2>&1 | tee "$log"
+            code=${PIPESTATUS[0]}
+            if [ "$code" -eq 124 ] || [ "$code" -eq 137 ]; then
+              echo "✗ $name: killed after 600 s by the step's timeout (its own deadline did not end it): 0 passed, 1 failed" | tee -a "$log"
+              # What timeout's signal did not reach (the emulators under npx) would hold the ports for the next tool.
+              pkill -f cloud-firestore-emulator; pkill -f 'firebase emulators:exec'; sleep 2
+            fi
             echo "::endgroup::"
             summary="$(grep -E '^(✓|✗) .*(passed, [0-9]+ failed|breaks caught)$' "$log" | tr '\n' ' ' | sed 's/ *$//')"
             took="$(grep -E '^time: ' "$log" | tail -n 1)"

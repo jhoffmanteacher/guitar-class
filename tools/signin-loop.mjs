@@ -60,9 +60,15 @@
    Exit 0 = every case passed (and, with --plants, every plant was caught); 1 = a case failed or a plant was not
    caught; 2 = it could not run (no emulator, a project id that is not demo-, the SDK missing). The summary lines:
    "✓ firestore.rules: N passed, 0 failed" and "✓ K of K breaks caught".
+   WHAT IT PRINTS AS IT GOES (2026-11-26, after GitHub run 45870814442 printed nothing for 24 minutes): one line as
+   each case starts (▶) and ends (■), also in the quiet planted-fault runs; a case that does not finish within
+   --case-ms (default 50 s) fails as "HUNG at <step>" and the run goes on; past --deadline (default 540 s) the run
+   prints "HUNG at <case>" and exits 3. Before the first case a preflight checks that the SDK reaches both emulators
+   (a sign-in, then a server read through a device relay, 15 s each) and stops with exit 2 if not (--no-preflight
+   skips it: to watch every case run into its limits, as when diagnosing the tool itself).
    Last run: not yet (built 2026-11-26 in a cloud session whose network could not fetch the Firestore emulator). */
 import { readFileSync } from 'node:fs';
-import { emuArgs, loadSdk, emulator, makeWorld, makeDevice, makePage, signInPage, waitScreen, until, sleep, waitSaved, closeAll, wall } from './emu-site.mjs';
+import { emuArgs, loadSdk, emulator, makeWorld, makeDevice, makePage, signInPage, waitScreen, until, sleep, closeAll, wall, makeRunner, step, watchdog, preflight } from './emu-site.mjs';
 
 const ARGV = process.argv.slice(2);
 const A = emuArgs(ARGV, 'signin-loop');
@@ -74,34 +80,40 @@ const RULES = readFileSync(A.rules, 'utf8');
 if (!/function isSchool\(\)/.test(RULES)){ console.log(`\n✗ ${A.rules} has no isSchool() (the school-accounts gate): 0 passed, 1 failed`); process.exit(1); }
 const VERBOSE = A.has('verbose');
 const ONLY = (A.val('only') || '').split(',').filter(Boolean);
+const CASE_MS = (Number(A.val('case-ms')) || 50) * 1000;
+const DEADLINE = Number(A.val('deadline')) || 540;
 const TEACHER = (/const TEACHER_EMAIL\s*=\s*'([^']+)'/.exec(readFileSync(`${A.site}/firebase-config.js`, 'utf8')) || [])[1] || 'jhoffman@seq.org';
 const KEY1 = 'm1w1-b-sec0-0', KEY2 = 'm1w1-b-sec0-1';
+let CUR = null;
+watchdog('signin-loop', DEADLINE, () => (CUR ? { pass: CUR.pass, fail: CUR.fail } : { pass: 0, fail: 0 }));
 
 /* ── one run of the cases ── */
-async function suite(groups, plant, quiet){
-  let pass = 0, fail = 0; const red = [];
-  const say = s => { if (!quiet) console.log(s); };
-  const check = (name, ok, why) => {
-    if (ok) pass++; else { fail++; red.push(name); }
-    if (!quiet){ if (!ok && why) console.log('      ' + String(why).slice(0, 300)); console.log((ok ? '  ✓ ' : '  ✗ ') + name); }
-    return ok;
-  };
-  await E.loadRules(plant && plant.rules ? plantRules(plant.rules) : RULES);
-  await E.clearFirestore(); await E.clearAuth();
+async function suite(groups, plant, quiet, prefix){
+  const R = makeRunner({ quiet, prefix, caseMs: CASE_MS });
+  CUR = R;
+  const check = R.check, say = R.out;
+  await step(E.loadRules(plant && plant.rules ? plantRules(plant.rules) : RULES), 'loading the rules into the emulator');
+  await step(E.clearFirestore(), 'clearing Firestore'); await step(E.clearAuth(), 'clearing Auth');
   const world = await makeWorld(A, sdk, { verbose: VERBOSE && !quiet, plants: plant ? plant.site || [] : [] });
-  await E.ownerSet('config/class', { gamesEnabled: true });
+  await step(E.ownerSet('config/class', { gamesEnabled: true }), 'seeding config/class');
+  if (!quiet && !A.has('no-preflight')){
+    const pf = await preflight(world);
+    if (pf){ console.log(`\n✗ signin-loop: ${pf}: 0 passed, 1 failed`); await closeAll(world); process.exit(2); }
+  }
   let n = 0;
   /* The Auth emulator keeps ONE account per address (a second Google account with the same address, in any case,
      is linked to the first: same uid), so every made-up account here has its own address; the teacher is one. */
   const acct = (email, verified, name) => email === TEACHER ? { sub: 'sl-teacher', email, verified: true, name: 'Teacher' } : ({ sub: `sl-${++n}-${Date.now().toString(36)}`, email, verified, name: name || `Test ${n}` });
   const pageNote = p => p ? ` [page faults: ${p.faults.slice(0, 2).join(' / ') || 'none'}; warns: ${p.warns.slice(-2).join(' / ') || 'none'}]` : '';
-  const tokenOf = async p => { try { return await p.auth().currentUser.getIdToken(); } catch { return null; } };
+  const tokenOf = async p => { try { return await step(p.auth().currentUser.getIdToken(), 'reading the page\'s ID token', 10000); } catch { return null; } };
   const uidOf = p => { try { return p.auth().currentUser.uid; } catch { return null; } };
+  /* A case that needs what an earlier case made, when that case did not finish. */
+  const need = (...xs) => { if (xs.some(x => !x)) throw Object.assign(new Error('an earlier case did not finish'), { skipped: true }); };
   /* A page on a device, signed in, its screen decided. */
   const boot = async (dev, who, opts) => {
     const p = makePage(world, dev, opts || {});
     await signInPage(world, p, who);
-    const s = opts && opts.teacher ? await until(() => p.run('typeof teacherAccessDecide === "function" && !window.__authBootPending'), 30000) && 'console' : await waitScreen(p, 20000);
+    const s = opts && opts.teacher ? (await until(() => p.run('typeof teacherAccessDecide === "function" && !window.__authBootPending'), 20000) && 'console') : await waitScreen(p, 12000);
     return { p, s };
   };
   /* The page's save of one tick: 'landed' (the reader finds it and the page said Saved) | 'refused' (the page said the
@@ -109,14 +121,15 @@ async function suite(groups, plant, quiet){
   const tick = async (p, key) => {
     const uid = uidOf(p), before = p.saveMsgs.length;
     p.run(`onCompleteChange(${JSON.stringify(key)}, true)`);
-    const settled = await until(() => p.saveMsgs.slice(before).some(m => m.key === 'save.failed' || m.key === 'save.notSaving') || (p.run('_dirtyKeys.size === 0 && !_flushP') && p.saveMsgs.slice(before).some(m => m.key === 'save.saved')), 20000);
+    const settled = await until(() => p.saveMsgs.slice(before).some(m => m.key === 'save.failed' || m.key === 'save.notSaving') || (p.run('_dirtyKeys.size === 0 && !_flushP') && p.saveMsgs.slice(before).some(m => m.key === 'save.saved')), 12000);
     const keys = p.saveMsgs.slice(before).map(m => m.key).filter(Boolean);
     const doc = uid ? await E.ownerGet('progress/' + uid) : null;
     const stored = !!(doc && doc.completed && doc.completed[key] === true);
     if (keys.includes('save.saved') && !keys.includes('save.failed') && stored) return 'landed';
     if (keys.some(k => k === 'save.failed' || k === 'save.notSaving') && !stored) return 'refused';
-    return `page said [${keys.join(' > ') || 'nothing'}]${settled ? '' : ' (still waiting after 20 s)'}, reader ${stored ? 'finds' : 'does not find'} the tick`;
+    return `page said [${keys.join(' > ') || 'nothing'}]${settled ? '' : ' (still waiting after 12 s)'}, reader ${stored ? 'finds' : 'does not find'} the tick`;
   };
+  const shut = async (...ps) => { for (const p of ps) if (p) await p.close('silent'); };
 
   /* ── named accounts ── */
   if (groups.includes('named')){
@@ -134,129 +147,184 @@ async function suite(groups, plant, quiet){
       ['a school address with a space in front (" test8@seq.org": the page trims, the rules do not)', ' test8@seq.org', true, 'out'],
     ];
     for (const [label, email, verified, want] of NAMED){
-      const dev = await makeDevice(world, 'N' + n);
-      const { p, s } = await boot(dev, acct(email, verified));
-      const tok = await tokenOf(p);
-      const verdict = tok ? await E.readAs('config/class', tok) : 'no token';
       /* Every case name carries the account's address: the plant scorer tells cases apart by name. */
       const tag = JSON.stringify(email);
-      check(`${label}: the rules ${want === 'in' ? 'let it in' : 'refuse it'}`, verdict === (want === 'in' ? 'ok' : 'denied'), `rules: ${verdict}`);
-      const screen = want === 'in' ? 'app' : 'access';
-      check(`…${tag}: the page shows ${screen === 'app' ? 'the app' : 'the access screen'}`, s === screen, `the page shows ${s || 'nothing after 20 s'}${pageNote(p)}`);
-      if (s === 'app' || s === 'access'){
-        const r = await tick(p, KEY1);
-        if (s === 'app') check(`…${tag}: a tick in the app saves (the reader finds it; the page says "Saved")`, r === 'landed', `${r}${r === 'refused' ? ': the app is on screen and the rules refuse every save' : ''}${pageNote(p)}`);
-        else check(`…${tag}: a save from the access screen's page is refused (the page says so) and nothing is stored`, r === 'refused', r);
-      }
-      await p.close('silent');
+      let page = null;
+      await R.case(`named ${tag}`, async () => {
+        const dev = await makeDevice(world, 'N' + n);
+        const { p, s } = await boot(dev, acct(email, verified));
+        page = p;
+        const tok = await tokenOf(p);
+        const verdict = tok ? await E.readAs('config/class', tok) : 'no token';
+        check(`${label}: the rules ${want === 'in' ? 'let it in' : 'refuse it'}`, verdict === (want === 'in' ? 'ok' : 'denied'), `rules: ${verdict}`);
+        const screen = want === 'in' ? 'app' : 'access';
+        check(`…${tag}: the page shows ${screen === 'app' ? 'the app' : 'the access screen'}`, s === screen, `the page shows ${s || 'nothing after 12 s'}${pageNote(p)}`);
+        if (s === 'app' || s === 'access'){
+          const r = await tick(p, KEY1);
+          if (s === 'app') check(`…${tag}: a tick in the app saves (the reader finds it; the page says "Saved")`, r === 'landed', `${r}${r === 'refused' ? ': the app is on screen and the rules refuse every save' : ''}${pageNote(p)}`);
+          else check(`…${tag}: a save from the access screen's page is refused (the page says so) and nothing is stored`, r === 'refused', r);
+        }
+      });
+      await shut(page);
     }
   }
 
   /* ── an outside account: ask, allowed, in, saves, shut out ── */
   if (groups.includes('ask')){
     say('== an outside account: ask, the console allows, it gets in and saves, the console locks it out');
-    const who = acct('test9@gmail.example', true, 'Test 9');
-    const dev = await makeDevice(world, 'ASK');
-    const tdev = await makeDevice(world, 'TEACHER');
-    let { p: p1, s } = await boot(dev, who);
-    const uid = uidOf(p1);
-    check('before asking: the access screen', s === 'access', `the page shows ${s}${pageNote(p1)}`);
-    check('…it offers "Ask your teacher" (nothing asked yet)', await until(() => p1.run('accessState') === 'none', 8000), `state ${p1.run('accessState')}`);
-    check('…a save from that page is refused and nothing is stored', (await tick(p1, KEY1)) === 'refused');
-    await p1.close('silent');
-    ({ p: p1, s } = await boot(dev, who));
-    check('a new page load: the access screen again, and this device remembers the refusal', s === 'access' && dev.store['gcAccessRefused:' + uid] === '1', `screen ${s}, remembered ${dev.store['gcAccessRefused:' + uid]}`);
-    await until(() => p1.run('accessState') === 'none', 8000);
-    const clicked = p1.click('access-screen', { access: 'ask' });
-    const asked = await until(() => p1.run('accessState') === 'asked', 12000);
-    const req = await E.ownerGet('accessRequests/' + uid);
-    const at = req && req.at && req.at.__ts;
-    check('Ask (the screen\'s own button): the screen says "asked"', clicked && asked, `clicked ${clicked}, state ${p1.run('accessState')}${pageNote(p1)}`);
-    check('…the reader finds accessRequests/{uid}: the token\'s name and email, status asked, the server\'s time', !!req && req.name === 'Test 9' && req.email === who.email && req.status === 'asked' && typeof at === 'number' && Math.abs(at - Date.now()) < 120000 && Object.keys(req).sort().join() === 'at,email,name,status', JSON.stringify(req));
-    const beforeNote = p1.saveMsgs.length; void beforeNote;
-    p1.click('access-screen', { access: 'check' });
-    const still = await until(() => p1.run('!accessBusy && accessNote === "access.stillWaiting" && accessState === "asked"'), 10000);
-    check('Check again while still locked out: stays, says "not yet", no reload', still && !p1.reloadAsked, `note ${p1.run('accessNote')}, state ${p1.run('accessState')}, reload ${p1.reloadAsked}`);
-    const { p: tp, s: ts } = await boot(tdev, acct(TEACHER, true, 'Teacher'), { teacher: true });
-    check('the console (?teacher=true, the teacher\'s address) has its accounts code loaded', ts === 'console', `${ts}${pageNote(tp)}`);
-    if (ts === 'console'){
-      await tp.run('teacherAccessLoad()');
-      const listed = tp.run(`(teacherAccessReqs || []).some(r => r.uid === ${JSON.stringify(uid)} && r.status === 'asked')`);
-      check('…the console lists the request as waiting', listed, `requests ${tp.run('JSON.stringify((teacherAccessReqs||[]).map(r => r.status))')}, error ${tp.run('teacherAccessReqErr')}`);
-      await tp.run(`teacherAccessDecide(${JSON.stringify(uid)}, 'allowed')`);
-      const acc = await E.ownerGet('config/access'), req2 = await E.ownerGet('accessRequests/' + uid);
-      check('Allow (the console\'s own writer): the reader finds config/access.allow[uid] = true and the request marked allowed', !!acc && acc.allow && acc.allow[uid] === true && req2 && req2.status === 'allowed', `note "${tp.run('teacherAccessNote')}"; config/access ${JSON.stringify(acc)}; request ${req2 && req2.status}`);
-    }
-    p1.click('access-screen', { access: 'check' });
-    check('Check again once allowed: the page reloads into the site', await until(() => p1.reloadAsked, 10000), `state ${p1.run('accessState')}, note ${p1.run('accessNote')}`);
-    await p1.close('silent');
-    const { p: p3, s: s3 } = await boot(dev, who);
-    check('…the new page load shows the app, and the device forgets the refusal', s3 === 'app' && !dev.store['gcAccessRefused:' + uid], `screen ${s3}, remembered ${dev.store['gcAccessRefused:' + uid]}${pageNote(p3)}`);
-    if (s3 === 'app') check('…a tick saves (the reader finds it; the page says "Saved")', (await tick(p3, KEY1)) === 'landed');
-    if (ts === 'console'){
-      await tp.run('teacherAccessLoad()');
-      await tp.run(`teacherAccessSet([${JSON.stringify(uid)}], false)`);
-      const acc = await E.ownerGet('config/access'), req3 = await E.ownerGet('accessRequests/' + uid);
-      check('"Locked out" (the console\'s own writer): the entry is gone and the request marked declined', !!acc && !(acc.allow && uid in acc.allow) && req3 && req3.status === 'declined', `config/access ${JSON.stringify(acc)}; request ${req3 && req3.status}`);
-    }
-    if (s3 === 'app'){
-      const r = await tick(p3, KEY2);
+    const S = { who: acct('test9@gmail.example', true, 'Test 9') };
+    await R.case('ask: before asking', async () => {
+      S.dev = await makeDevice(world, 'ASK'); S.tdev = await makeDevice(world, 'TEACHER');
+      const { p, s } = await boot(S.dev, S.who);
+      S.p = p; S.uid = uidOf(p);
+      check('before asking: the access screen', s === 'access', `the page shows ${s}${pageNote(p)}`);
+      check('…it offers "Ask your teacher" (nothing asked yet)', await until(() => p.run('accessState') === 'none', 8000), `state ${p.run('accessState')}`);
+      check('…a save from that page is refused and nothing is stored', (await tick(p, KEY1)) === 'refused');
+      await shut(p); S.p = null;
+    });
+    await R.case('ask: a new page load', async () => {
+      need(S.dev);
+      const { p, s } = await boot(S.dev, S.who);
+      S.p = p;
+      check('a new page load: the access screen again, and this device remembers the refusal', s === 'access' && S.dev.store['gcAccessRefused:' + S.uid] === '1', `screen ${s}, remembered ${S.dev.store['gcAccessRefused:' + S.uid]}`);
+      await until(() => p.run('accessState') === 'none', 8000);
+    });
+    await R.case('ask: Ask', async () => {
+      need(S.p);
+      const clicked = S.p.click('access-screen', { access: 'ask' });
+      const asked = await until(() => S.p.run('accessState') === 'asked', 12000);
+      const req = await E.ownerGet('accessRequests/' + S.uid);
+      const at = req && req.at && req.at.__ts;
+      check('Ask (the screen\'s own button): the screen says "asked"', clicked && asked, `clicked ${clicked}, state ${S.p.run('accessState')}${pageNote(S.p)}`);
+      check('…the reader finds accessRequests/{uid}: the token\'s name and email, status asked, the server\'s time', !!req && req.name === 'Test 9' && req.email === S.who.email && req.status === 'asked' && typeof at === 'number' && Math.abs(at - Date.now()) < 120000 && Object.keys(req).sort().join() === 'at,email,name,status', JSON.stringify(req));
+    });
+    await R.case('ask: Check again while locked out', async () => {
+      need(S.p);
+      S.p.click('access-screen', { access: 'check' });
+      const still = await until(() => S.p.run('!accessBusy && accessNote === "access.stillWaiting" && accessState === "asked"'), 10000);
+      check('Check again while still locked out: stays, says "not yet", no reload', still && !S.p.reloadAsked, `note ${S.p.run('accessNote')}, state ${S.p.run('accessState')}, reload ${S.p.reloadAsked}`);
+    });
+    await R.case('ask: the console opens', async () => {
+      need(S.tdev);
+      const { p, s } = await boot(S.tdev, acct(TEACHER, true, 'Teacher'), { teacher: true });
+      S.tp = s === 'console' ? p : null;
+      check('the console (?teacher=true, the teacher\'s address) has its accounts code loaded', s === 'console', `${s}${pageNote(p)}`);
+      if (!S.tp) await shut(p);
+    });
+    await R.case('ask: the console allows', async () => {
+      need(S.tp, S.uid);
+      await step(S.tp.run('teacherAccessLoad()'), 'the console reading the allow list and the requests');
+      const listed = S.tp.run(`(teacherAccessReqs || []).some(r => r.uid === ${JSON.stringify(S.uid)} && r.status === 'asked')`);
+      check('…the console lists the request as waiting', listed, `requests ${S.tp.run('JSON.stringify((teacherAccessReqs||[]).map(r => r.status))')}, error ${S.tp.run('teacherAccessReqErr')}`);
+      await step(S.tp.run(`teacherAccessDecide(${JSON.stringify(S.uid)}, 'allowed')`), 'the console\'s Allow');
+      const acc = await E.ownerGet('config/access'), req2 = await E.ownerGet('accessRequests/' + S.uid);
+      check('Allow (the console\'s own writer): the reader finds config/access.allow[uid] = true and the request marked allowed', !!acc && acc.allow && acc.allow[S.uid] === true && req2 && req2.status === 'allowed', `note "${S.tp.run('teacherAccessNote')}"; config/access ${JSON.stringify(acc)}; request ${req2 && req2.status}`);
+    });
+    await R.case('ask: Check again once allowed', async () => {
+      need(S.p);
+      S.p.click('access-screen', { access: 'check' });
+      check('Check again once allowed: the page reloads into the site', await until(() => S.p.reloadAsked, 10000), `state ${S.p.run('accessState')}, note ${S.p.run('accessNote')}`);
+      await shut(S.p); S.p = null;
+      const { p, s } = await boot(S.dev, S.who);
+      S.p3 = p;
+      check('…the new page load shows the app, and the device forgets the refusal', s === 'app' && !S.dev.store['gcAccessRefused:' + S.uid], `screen ${s}, remembered ${S.dev.store['gcAccessRefused:' + S.uid]}${pageNote(p)}`);
+      if (s === 'app') check('…a tick saves (the reader finds it; the page says "Saved")', (await tick(p, KEY1)) === 'landed');
+    });
+    await R.case('ask: the console locks it out', async () => {
+      need(S.tp, S.uid);
+      await step(S.tp.run('teacherAccessLoad()'), 'the console reading the allow list again');
+      await step(S.tp.run(`teacherAccessSet([${JSON.stringify(S.uid)}], false)`), 'the console\'s Locked out');
+      const acc = await E.ownerGet('config/access'), req3 = await E.ownerGet('accessRequests/' + S.uid);
+      check('"Locked out" (the console\'s own writer): the entry is gone and the request marked declined', !!acc && !(acc.allow && S.uid in acc.allow) && req3 && req3.status === 'declined', `config/access ${JSON.stringify(acc)}; request ${req3 && req3.status}`);
+    });
+    await R.case('ask: the open page\'s next save', async () => {
+      need(S.p3);
+      const r = await tick(S.p3, KEY2);
       check('…the page still open: its next save is refused, the page says so (never "Saved"), the tick is not stored', r === 'refused', r);
-    }
-    await p3.close('silent');
-    const { p: p4, s: s4 } = await boot(dev, who);
-    check('…a new page load: the access screen, saying "declined"', s4 === 'access' && await until(() => p4.run('accessState') === 'declined', 8000), `screen ${s4}, state ${p4.run('accessState')}`);
-    const reqBefore = JSON.stringify(await E.ownerGet('accessRequests/' + uid));
-    await p4.run('accessAsk()');
-    await sleep(300);
-    check('…asking again is refused by the rules and changes nothing', JSON.stringify(await E.ownerGet('accessRequests/' + uid)) === reqBefore && p4.run('accessState') === 'declined', `state ${p4.run('accessState')}`);
-    await p4.close('silent'); await tp.close('silent');
+      await shut(S.p3); S.p3 = null;
+    });
+    await R.case('ask: a new page load after the lock-out', async () => {
+      need(S.dev);
+      const { p, s } = await boot(S.dev, S.who);
+      S.p4 = p;
+      check('…a new page load: the access screen, saying "declined"', s === 'access' && await until(() => p.run('accessState') === 'declined', 8000), `screen ${s}, state ${p.run('accessState')}`);
+      const reqBefore = JSON.stringify(await E.ownerGet('accessRequests/' + S.uid));
+      await step(p.run('accessAsk()'), 'a second Ask', 15000);
+      await sleep(300);
+      check('…asking again is refused by the rules and changes nothing', JSON.stringify(await E.ownerGet('accessRequests/' + S.uid)) === reqBefore && p.run('accessState') === 'declined', `state ${p.run('accessState')}`);
+    });
+    await shut(S.p, S.p3, S.p4, S.tp);
   }
 
   /* ── Decline ── */
   if (groups.includes('decline')){
     say('== an outside account asks; the console declines');
-    const who = acct('test10@outside.example', true, 'Test 10');
-    const dev = await makeDevice(world, 'DEC'), tdev = await makeDevice(world, 'TEACHER2');
-    const { p, s } = await boot(dev, who);
-    const uid = uidOf(p);
-    await until(() => p.run('accessState') === 'none', 8000);
-    p.click('access-screen', { access: 'ask' });
-    check('the access screen; Ask lands', s === 'access' && await until(() => p.run('accessState') === 'asked', 12000) && (await E.ownerGet('accessRequests/' + uid) || {}).status === 'asked', `screen ${s}, state ${p.run('accessState')}`);
-    const { p: tp, s: ts } = await boot(tdev, acct(TEACHER, true, 'Teacher'), { teacher: true });
-    if (ts === 'console'){ await tp.run('teacherAccessLoad()'); await tp.run(`teacherAccessDecide(${JSON.stringify(uid)}, 'declined')`); }
-    const req = await E.ownerGet('accessRequests/' + uid), acc = await E.ownerGet('config/access');
-    check('Decline (the console\'s own writer): the request is declined, no allow entry', ts === 'console' && req && req.status === 'declined' && !(acc && acc.allow && uid in acc.allow), `console ${ts}; request ${req && req.status}; config/access ${JSON.stringify(acc)}`);
-    p.click('access-screen', { access: 'check' });
-    check('…Check again: the screen says "declined", no reload', await until(() => p.run('!accessBusy && accessState === "declined"'), 10000) && !p.reloadAsked, `state ${p.run('accessState')}`);
-    await p.close('silent'); await tp.close('silent');
+    const S = { who: acct('test10@outside.example', true, 'Test 10') };
+    await R.case('decline: Ask', async () => {
+      S.dev = await makeDevice(world, 'DEC'); S.tdev = await makeDevice(world, 'TEACHER2');
+      const { p, s } = await boot(S.dev, S.who);
+      S.p = p; S.uid = uidOf(p);
+      await until(() => p.run('accessState') === 'none', 8000);
+      p.click('access-screen', { access: 'ask' });
+      check('the access screen; Ask lands', s === 'access' && await until(() => p.run('accessState') === 'asked', 12000) && (await E.ownerGet('accessRequests/' + S.uid) || {}).status === 'asked', `screen ${s}, state ${p.run('accessState')}`);
+    });
+    await R.case('decline: the console declines', async () => {
+      need(S.tdev, S.uid);
+      const { p, s } = await boot(S.tdev, acct(TEACHER, true, 'Teacher'), { teacher: true });
+      S.tp = p;
+      if (s === 'console'){
+        await step(p.run('teacherAccessLoad()'), 'the console reading the requests');
+        await step(p.run(`teacherAccessDecide(${JSON.stringify(S.uid)}, 'declined')`), 'the console\'s Decline');
+      }
+      const req = await E.ownerGet('accessRequests/' + S.uid), acc = await E.ownerGet('config/access');
+      check('Decline (the console\'s own writer): the request is declined, no allow entry', s === 'console' && req && req.status === 'declined' && !(acc && acc.allow && S.uid in acc.allow), `console ${s}; request ${req && req.status}; config/access ${JSON.stringify(acc)}`);
+    });
+    await R.case('decline: Check again', async () => {
+      need(S.p);
+      S.p.click('access-screen', { access: 'check' });
+      check('…Check again: the screen says "declined", no reload', await until(() => S.p.run('!accessBusy && accessState === "declined"'), 10000) && !S.p.reloadAsked, `state ${S.p.run('accessState')}`);
+    });
+    await shut(S.p, S.tp);
   }
 
   /* ── Delete ── */
   if (groups.includes('delete')){
     say('== an outside account asks; the console deletes the request; it may ask again');
-    const who = acct('test11@outside.example', true, 'Test 11');
-    const dev = await makeDevice(world, 'DEL'), tdev = await makeDevice(world, 'TEACHER3');
-    let { p, s } = await boot(dev, who);
-    const uid = uidOf(p);
-    await until(() => p.run('accessState') === 'none', 8000);
-    p.click('access-screen', { access: 'ask' });
-    const ok1 = s === 'access' && await until(() => p.run('accessState') === 'asked', 12000);
-    const { p: tp, s: ts } = await boot(tdev, acct(TEACHER, true, 'Teacher'), { teacher: true });
-    if (ts === 'console'){ await tp.run('teacherAccessLoad()'); await tp.run(`teacherAccessDeleteRequest(${JSON.stringify(uid)})`); }
-    check('Delete (the console\'s own writer, after its confirm): the reader finds no request', ok1 && ts === 'console' && (await E.ownerGet('accessRequests/' + uid)) === null, `asked ${ok1}, console ${ts}, note "${ts === 'console' ? tp.run('teacherAccessNote') : ''}"`);
-    await p.close('silent');
-    ({ p, s } = await boot(dev, who));
-    check('…a new page load offers Ask again', s === 'access' && await until(() => p.run('accessState') === 'none', 8000), `screen ${s}, state ${p.run('accessState')}`);
-    p.click('access-screen', { access: 'ask' });
-    check('…and the second Ask lands', await until(() => p.run('accessState') === 'asked', 12000) && (await E.ownerGet('accessRequests/' + uid) || {}).status === 'asked', `state ${p.run('accessState')}`);
-    await p.close('silent'); await tp.close('silent');
+    const S = { who: acct('test11@outside.example', true, 'Test 11') };
+    await R.case('delete: Ask', async () => {
+      S.dev = await makeDevice(world, 'DEL'); S.tdev = await makeDevice(world, 'TEACHER3');
+      const { p, s } = await boot(S.dev, S.who);
+      S.p = p; S.uid = uidOf(p);
+      await until(() => p.run('accessState') === 'none', 8000);
+      p.click('access-screen', { access: 'ask' });
+      S.asked = s === 'access' && await until(() => p.run('accessState') === 'asked', 12000);
+    });
+    await R.case('delete: the console deletes', async () => {
+      need(S.tdev, S.uid);
+      const { p, s } = await boot(S.tdev, acct(TEACHER, true, 'Teacher'), { teacher: true });
+      S.tp = p;
+      if (s === 'console'){
+        await step(p.run('teacherAccessLoad()'), 'the console reading the requests');
+        await step(p.run(`teacherAccessDeleteRequest(${JSON.stringify(S.uid)})`), 'the console\'s Delete');
+      }
+      check('Delete (the console\'s own writer, after its confirm): the reader finds no request', S.asked && s === 'console' && (await E.ownerGet('accessRequests/' + S.uid)) === null, `asked ${S.asked}, console ${s}, note "${s === 'console' ? p.run('teacherAccessNote') : ''}"`);
+    });
+    await R.case('delete: ask again', async () => {
+      need(S.dev, S.uid);
+      await shut(S.p); S.p = null;
+      const { p, s } = await boot(S.dev, S.who);
+      S.p = p;
+      check('…a new page load offers Ask again', s === 'access' && await until(() => p.run('accessState') === 'none', 8000), `screen ${s}, state ${p.run('accessState')}`);
+      p.click('access-screen', { access: 'ask' });
+      check('…and the second Ask lands', await until(() => p.run('accessState') === 'asked', 12000) && (await E.ownerGet('accessRequests/' + S.uid) || {}).status === 'asked', `state ${p.run('accessState')}`);
+    });
+    await shut(S.p, S.tp);
   }
 
   /* ── the client's school test against isSchool(), address by address ── */
   if (groups.includes('bulk')){
     say('== the client\'s school test (accessIsSchoolUser) against the rules\' isSchool(), with no allow list');
-    await E.ownerDelete('config/access');
+    await step(E.ownerDelete('config/access'), 'removing the allow list');
     const dev = await makeDevice(world, 'BULK');
     const probe = makePage(world, dev);
     const client = (email, verified) => probe.run(`accessIsSchoolUser(${JSON.stringify({ email, emailVerified: verified })})`) === true;
@@ -266,28 +334,32 @@ async function suite(groups, plant, quiet){
     /* Through the Auth emulator: one pass per verified flag (Auth cleared before each: the emulator keeps an
        account's first flag), each address once per pass (it links a second account with the same address). */
     for (const ver of [true, false]){
-      await E.clearAuth();
-      const seen = new Set();
-      const todo = list.filter(([email, v]) => v === ver && !seen.has(email.toLowerCase()) && seen.add(email.toLowerCase()));
-      out.auth.same += list.filter(([, v]) => v === ver).length - todo.length;
-      const one = async ([email, verified]) => {
-        const k = ++i;
-        const g = await E.googleSignIn({ sub: `bulk-${k}`, email, email_verified: verified, name: `Test ${k}` });
-        if (g.error || !g.idToken){ out.auth.refusedByEmu++; return; }
-        out.auth.n++;
-        const c = client(g.email === undefined ? '' : g.email, g.emailVerified), r = await E.readAs('config/class', g.idToken);
-        if (c !== (r === 'ok')) out.auth.dis.push({ email, kept: g.email, verified: g.emailVerified, client: c, rules: r });
-      };
-      for (let j = 0; j < todo.length; j += 16) await Promise.all(todo.slice(j, j + 16).map(one));
+      await R.case(`bulk: through the Auth emulator's sign-in, ${ver ? 'verified' : 'unverified'}`, async () => {
+        await step(E.clearAuth(), 'clearing Auth');
+        const seen = new Set();
+        const todo = list.filter(([email, v]) => v === ver && !seen.has(email.toLowerCase()) && seen.add(email.toLowerCase()));
+        out.auth.same += list.filter(([, v]) => v === ver).length - todo.length;
+        const one = async ([email, verified]) => {
+          const k = ++i;
+          const g = await E.googleSignIn({ sub: `bulk-${k}`, email, email_verified: verified, name: `Test ${k}` });
+          if (g.error || !g.idToken){ out.auth.refusedByEmu++; return; }
+          out.auth.n++;
+          const c = client(g.email === undefined ? '' : g.email, g.emailVerified), r = await E.readAs('config/class', g.idToken);
+          if (c !== (r === 'ok')) out.auth.dis.push({ email, kept: g.email, verified: g.emailVerified, client: c, rules: r });
+        };
+        for (let j = 0; j < todo.length; j += 16) await Promise.all(todo.slice(j, j + 16).map(one));
+      }, 180000);
     }
     /* As exact tokens: every address, as given. */
-    const forged = async ([email, verified]) => {
-      const k = ++i;
-      out.forged.n++;
-      const c2 = client(email, verified), r2 = await E.readAs('config/class', E.forgeToken({ sub: `bulkf-${k}`, email, email_verified: verified, name: `Test ${k}` }));
-      if (c2 !== (r2 === 'ok')) out.forged.dis.push({ email, verified, client: c2, rules: r2 });
-    };
-    for (let j = 0; j < list.length; j += 16) await Promise.all(list.slice(j, j + 16).map(forged));
+    await R.case('bulk: as exact tokens', async () => {
+      const forged = async ([email, verified]) => {
+        const k = ++i;
+        out.forged.n++;
+        const c2 = client(email, verified), r2 = await E.readAs('config/class', E.forgeToken({ sub: `bulkf-${k}`, email, email_verified: verified, name: `Test ${k}` }));
+        if (c2 !== (r2 === 'ok')) out.forged.dis.push({ email, verified, client: c2, rules: r2 });
+      };
+      for (let j = 0; j < list.length; j += 16) await Promise.all(list.slice(j, j + 16).map(forged));
+    }, 180000);
     const show = d => `${JSON.stringify(d.email)}${d.kept !== undefined && d.kept !== d.email ? ` (kept as ${JSON.stringify(d.kept)})` : ''} verified ${d.verified}: the page says ${d.client ? 'school' : 'not school'}, the rules ${d.rules === 'ok' ? 'let it in' : d.rules === 'denied' ? 'refuse it' : d.rules}`;
     say(`   ${list.length} addresses; the Auth emulator signed in ${out.auth.n} (${out.auth.same} were the same address in another case, refused ${out.auth.refusedByEmu}); ${out.forged.n} as exact tokens`);
     if (out.auth.dis.length) for (const d of out.auth.dis) check(`through sign-in: ${show(d)}`, false, 'the page and the rules disagree');
@@ -296,12 +368,13 @@ async function suite(groups, plant, quiet){
     else check(`as exact tokens: the page and the rules agree on all ${out.forged.n} addresses`, out.forged.n > 0);
     const school = list.filter(([e, v]) => v && client(e, v)).length;
     check(`the list holds both answers (${school} school, ${list.length - school} not)`, school >= 10 && list.length - school >= 10);
+    await probe.close('silent');
   }
 
   for (const p of world.pages) for (const f of p.faults) if (!quiet && VERBOSE) console.log('      (page fault) ' + p.id + ': ' + f);
   if (!quiet && world.faults.length) console.log(`   note: ${world.faults.length} unhandled rejection(s) from site code, first: ${world.faults[0]}`);
   await closeAll(world);
-  return { pass, fail, red, world };
+  return { pass: R.pass, fail: R.fail, red: R.red, world };
 }
 
 /* The generated addresses: [email, email_verified]. */
@@ -342,32 +415,33 @@ function plantRules(list){
 /* ── main ── */
 const ALL = ['named', 'ask', 'decline', 'delete', 'bulk'];
 const groups = ONLY.length ? ALL.filter(g => ONLY.includes(g)) : ALL;
-console.log(`== signin-loop: ${A.rules.split('/').pop()} on the emulators (Firestore ${A.fsHost}, Auth ${A.authHost}), project ${A.project}; Firebase JS SDK ${sdk.version} (index.html loads ${sdk.siteVersion}); site ${A.site}`);
+console.log(`== signin-loop: ${A.rules.split('/').pop()} on the emulators (Firestore ${A.fsHost}, Auth ${A.authHost}), project ${A.project}; Firebase JS SDK ${sdk.version} (index.html loads ${sdk.siteVersion}); site ${A.site}; a case may take ${CASE_MS / 1000} s, the run ${DEADLINE} s`);
 if (sdk.version !== sdk.siteVersion) console.log(`   ✗ the SDK here (${sdk.version}) is not the version the site loads (${sdk.siteVersion}): install firebase@${sdk.siteVersion} in --deps`);
 let real;
-try { real = await suite(groups, null, false); }
+try { real = await suite(groups, null, false, ''); }
 catch (e){ console.log(`\n✗ signin-loop could not run: ${e.message}${/fetch failed|ECONNREFUSED/.test(String(e.message) + (e.cause || '')) ? ` (no emulator at ${A.fsHost} / ${A.authHost}? run it inside firebase emulators:exec --only firestore,auth)` : ''}: 0 passed, 1 failed`); process.exit(2); }
 const wallBad = wall.refused.length;
 if (wallBad) console.log(`      the tool's fetch was asked for ${wallBad} address(es) off this machine, first ${wall.refused[0]}\n  ✗ the wall: nothing may leave 127.0.0.1`);
 console.log(`   (every page asked for project ${[...new Set(real.world.siteConfigs)].join(', ') || 'none'}; each was given ${A.project})`);
 const versionBad = sdk.version !== sdk.siteVersion ? 1 : 0;
 console.log(`\n${real.fail || wallBad || versionBad ? '✗' : '✓'} ${A.rules.split('/').pop()}: ${real.pass} passed, ${real.fail + (wallBad ? 1 : 0) + versionBad} failed`);
+console.log(`time: ${Math.round((Date.now() - T0) / 1000)} s (the cases)`);
 let missed = 0;
 if (A.has('plants') || A.val('plant')){
   const pick = A.val('plant') ? [PLANTS[Number(A.val('plant')) - 1]].filter(Boolean) : PLANTS;
   console.log('\n== planted faults (an in-memory copy of one site file or of the rules; each must turn a case red that is green on the real code)');
   let skipped = 0;
-  for (const pl of pick){
+  for (const [k, pl] of pick.entries()){
     const gs = pl.groups.filter(g => groups.includes(g));
     if (!gs.length){ console.log(`  - skipped: ${pl.name} (its groups, ${pl.groups.join(', ')}, are not in --only)`); skipped++; continue; }
     let r;
-    try { r = await suite(gs, pl, true); }
+    try { r = await suite(gs, pl, true, `plant ${k + 1}: `); }
     catch (e){ console.log(`  ✗ ${pl.name}: ${e.plantMiss ? e.message : 'the run failed: ' + e.message}`); missed++; continue; }
     const fresh = r.red.filter(x => !real.red.includes(x));
     if (fresh.length) console.log(`  ✓ caught: ${pl.name} — ${fresh.length} red: ${fresh.slice(0, 2).join(' | ').slice(0, 260)}${fresh.length > 2 ? ' | …' : ''}`);
     else { console.log(`  ✗ NOT caught: ${pl.name}`); missed++; }
   }
-  await E.loadRules(RULES);
+  await step(E.loadRules(RULES), 'putting the real rules back');
   console.log(`\n${missed ? '✗' : '✓'} ${pick.length - skipped - missed} of ${pick.length - skipped} breaks caught`);
 }
 console.log(`time: ${Math.round((Date.now() - T0) / 1000)} s`);
