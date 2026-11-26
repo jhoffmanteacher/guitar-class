@@ -57,7 +57,9 @@
    fails first, for 10-25 s, and the progress read is slow: booted on a roster or settings view with no click until
    the minute timer's retry, or booted on Live In-Class Games, Mic recordings' own read bringing the settings back,
    then a roster view opened) and landwrite (a card's page or the list with progress down for 10-25 s, every latency
-   60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it).
+   60 ms; a write click 60 ms before the retry's slow progress read lands, so the view's own read waits for it; since
+   review M3 nothing else happens before that retry, and the write is Hidden or a release date, so every list case
+   plays it: a default run is red without the landing's redraw, teacher-core.js loadAllStudents).
    Review R5 added archkept (a 5 s first progress read; Games, Songs or Manage opened while the settings are down for
    1.6 s, so that view's own settings read fails before the roster lands; then a roster view).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
@@ -1021,6 +1023,11 @@ function genCase(seed, k, famOverride) {
     add(c.earlyAt, 'view', { v: c.earlyView, early: true });
     add(r.int(20, 40) * SEC, 'write', {});
     if (r.chance(0.5)) add(r.int(5, 15) * SEC, 'B', { cells: 'mix' });
+  } else if (fam === 'landwrite') {
+    /* A fixed schedule (review M3): nothing before the minute timer's retry, so every case plays the landing with the
+       view still up and visible (a random view, hide or box typed in left 27 of 32 cases without it), and the write
+       60 ms before the roster lands is one whose own read waits: Hidden or a release date, in turn. */
+    c.landPrefer = nth % 2 ? 'date' : 'hidden';
   } else if (fam === 'archkept') {
     add(c.earlyAt, 'view', { v: c.earlyView, early: true });
     add(r.int(20, 40) * SEC, 'view', { v: r.pick(['students', 'skills', 'trouble']) });
@@ -1140,8 +1147,10 @@ const ROSTER_FACTS = [
   [/who hasn.t (finished|turned it in)/, 'a "who hasn\'t finished" list'], [/Everyone has (finished|turned)/, '"Everyone has finished"'], [/Opened: \d+/, 'an Opened count'],
   [/Every student is archived/, '"Every student is archived"'], [/Students\s*\d+\s*\/\s*\d+/, 'a Students tab count'],
   [/\b\d+ (done|started|not started|not turned in)\b/, 'a done / started count'], [/\b\d+ paused · \d+ archived/, 'a paused / archived count']];
-// R5-1: what a view says when it takes the class for one with no students (a cache's empty answer read as the roster).
-const EMPTY_CLASS = [[/No students? yet/i, '"No students yet"'], [/No student data yet/i, '"No student data yet"'], [/of 0 students\b|(?<![0-9])0 roster accounts?\b/, '"0 students"']];
+/* R5-1: what a view says when it takes the class for one with no students (a cache's empty answer read as the roster).
+   Class activities' "No student data yet" (a card's done list and Students tab) is about ONE card's students, its Who
+   list: a card given only to a student since archived says it in a full class (seed 3 case 110), so not there. */
+const EMPTY_CLASS = [[/No students? yet/i, '"No students yet"'], [/No student data yet/i, '"No student data yet"', 'activities'], [/of 0 students\b|(?<![0-9])0 roster accounts?\b/, '"0 students"']];
 const textOf = el => el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
 const clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
 const mmss = t => { const s = Math.round(t / 100) / 10; return Math.floor(s / 60) + ':' + String((s % 60).toFixed(1)).padStart(4, '0'); };
@@ -1183,7 +1192,7 @@ async function runCase(seed, k, o) {
   W.server.onIssue = rec => {
     if (c.writeAtProgLand && !W.wroteAtLand && rec.kind === 'prog' && rec.load && clock.now > 30 * SEC && clock.now < c.healAt - 10 * SEC) {
       W.wroteAtLand = true;
-      queue.push({ t: clock.now + c.progExtra + 60, kind: 'write', injected: true }); queue.sort((a, b) => a.t - b.t);
+      queue.push({ t: clock.now + c.progExtra + 60, kind: 'write', injected: true, prefer: c.landPrefer }); queue.sort((a, b) => a.t - b.t);
     }
     if (c.typeOnRetry && !W.typedOnRetry && rec.kind === 'prog' && rec.load && clock.now >= c.healAt) {
       W.typedOnRetry = true;
@@ -1279,7 +1288,7 @@ async function runCase(seed, k, o) {
     const real = W.server.rosterUids();
     if (real.length) {
       const sumEl = A.doc.getElementById('t-summary'), sumTxt = sumEl && !(sumEl._style && sumEl._style.display === 'none') ? textOf(sumEl) : '';
-      for (const [re, what] of EMPTY_CLASS) { const m = re.exec(text); if (m) fail('R5-1', `${p.view}${p.screen ? '/' + p.screen : ''}: ${what} on screen while the server holds ${real.length} students ("…${clip(text.slice(Math.max(0, m.index - 30), m.index + 50), 90)}…")`); }
+      for (const [re, what, notOn] of EMPTY_CLASS) { const m = notOn !== p.view && re.exec(text); if (m) fail('R5-1', `${p.view}${p.screen ? '/' + p.screen : ''}: ${what} on screen while the server holds ${real.length} students ("…${clip(text.slice(Math.max(0, m.index - 30), m.index + 50), 90)}…")`); }
       if (/^Students ?0(?![0-9])/.test(sumTxt)) fail('R5-1', `${p.view}: the summary strip counts 0 students while the server holds ${real.length}`);
       const strays = g ? g.querySelectorAll('[data-access-block] button[data-access-set][data-state="off"]').filter(b => textOf(b) === 'Remove' && real.includes(b.getAttribute('data-uid'))) : [];
       if (strays.length) fail('R5-1', `${p.view}: ${strays.length} roster student(s) listed under "Allowed, not in the roster" (with Remove) while the server holds them in the roster`);
