@@ -743,6 +743,10 @@ async function loadAllStudents(opts){
   // the wrong direction entirely.
   try{
     renderTeacherBody(); renderTeacherSummary();
+    /* Class activities draws after its own settings read, which waits for any of this tab's writes still open: what the
+       roster fills (the Students tab, an open Who picker) is painted now from the copy in hand, so no "did not load"
+       line outlives the roster that just landed (review R4-1 (d)); the read then paints the rest as usual. */
+    if(teacherView==='activities' && teacherClassConfigReadOk) renderTeacherActivities({cached:true});
   } catch(e){
     console.error('Teacher dashboard render failed:', e);
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Something went wrong displaying this data. Check the browser console for details.</div>';
