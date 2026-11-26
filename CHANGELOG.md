@@ -6,12 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
-## 2026-11-25 — The Listening Coach says so when it could not hear you
+## 2026-11-25 — The Listening Coach says so when it is not sure what it heard
 
-- **The Listening Coach gives a grade only when it could hear your notes.** Playing on the beat all the way through is not
-  enough by itself. It has to hear the right notes.
-- **When it could not hear enough of your notes clearly, it says so.** That round gets no grade, and nothing is saved to
-  your progress. Move the guitar closer to the mic and try again.
+- **On a melody drill, the Listening Coach has to hear the right notes.** Playing on the beat all the way through is not
+  enough by itself.
+- **A chord drill still mostly scores your timing** when it hears your strums but not the notes.
+- **When it is not sure of most of the notes, it says so and that round is not saved to your progress.** Move the guitar
+  closer to the mic and try again.
 - **"Mark it anyway" still works.** If the room is too loud for the mic, go to My skills checklist, press "I've got it!",
   then "Mark it anyway".
 - **The report shows what to work on first.** The row to fix is at the top. Rows that said nothing about your round are gone.
