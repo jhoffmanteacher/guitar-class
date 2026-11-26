@@ -166,6 +166,7 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
   const sessions = new Map();   // sessionId -> { type, url, ready:Promise, targetId }
   const ready = new Map();      // targetId -> Promise (Network on)
   const urls = new Map();       // requestId -> URL, outside requests only (to name an ExtraInfo reply)
+  const early = new Set();      // requestIds whose ExtraInfo reply came before the request itself
   const send = (method, params = {}, sessionId) => new Promise((res, rej) => {
     if (closed) return rej(new Error('closed'));
     const i = ++id; pending.set(i, { res, rej });
@@ -213,13 +214,18 @@ export async function wallWatch(cdpPort, tool, opts = {}) {
     if (m.method === 'Network.requestWillBeSent') {
       const p = m.params;
       rec.request(p.requestId, p.request.url, p.documentURL || (s && s.url) || '?');
-      if (outsideHost(p.request.url)) urls.set(p.requestId, p.request.url);
+      if (outsideHost(p.request.url)) { urls.set(p.requestId, p.request.url); if (early.delete(p.requestId)) rec.answered(p.requestId, p.request.url); }
       return;
     }
     /* A reply counts once per request, whichever event reports it: responseReceived can be missing when Chrome
        blocks the body (a script served as text/html), responseReceivedExtraInfo is sent for any reply off the wire. */
     if (m.method === 'Network.responseReceived') { rec.answered(m.params.requestId, m.params.response.url); return; }
-    if (m.method === 'Network.responseReceivedExtraInfo') { rec.answered(m.params.requestId, urls.get(m.params.requestId)); return; }
+    if (m.method === 'Network.responseReceivedExtraInfo') {
+      /* It can come before the request's requestWillBeSent: then it is counted when that arrives. */
+      const id = m.params.requestId;
+      if (urls.has(id)) rec.answered(id, urls.get(id)); else early.add(id);
+      return;
+    }
     if (m.method === 'Network.webSocketCreated') { rec.request('ws:' + m.params.requestId, m.params.url, (s && s.url) || '?'); return; }
     if (m.method === 'Page.loadEventFired' && m.sessionId) { const sid = m.sessionId; setTimeout(() => probe(sid), 1500); }
   };
@@ -438,6 +444,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const chrome = process.env.CHROME || '/usr/bin/google-chrome';
   if (!existsSync(chrome)) { console.log('chrome-wall: no Chrome (set CHROME); the wall part is not tested'); process.exit(bad ? 1 : 0); }
   const page = createServer((q, s) => {
+    if (q.url.startsWith('/q.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end('window.q = 1;'); }
     if (q.url.startsWith('/sw-out.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end(`self.addEventListener('install', e => e.waitUntil(fetch('https://firestore.googleapis.com/v1/sw').catch(() => {})))`); }
     if (q.url.startsWith('/sw-in.js')) { s.writeHead(200, { 'content-type': 'text/javascript' }); return s.end(`self.addEventListener('install', e => e.waitUntil(caches.open('t').then(c => c.add('/quiet')))); self.addEventListener('activate', e => e.waitUntil(clients.claim()))`); }
     s.writeHead(200, { 'content-type': 'text/html' }); s.end(
