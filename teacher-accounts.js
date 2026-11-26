@@ -74,7 +74,8 @@ let teacherAccessBadgeReq = 0;
 let teacherAccessWriteGen = 0;          // bumped as each write starts: a read that began before it is stale
 let teacherAccessReadOwed = false;      // a read was dropped as stale: read again once the writes settle
 
-function teacherAccessIsSchool(email){ return TEACHER_ACCESS_SCHOOL_RE.test(String(email || '').trim()); }
+/* No trim, as in accessIsSchoolUser (app/boot.js) and the rules' isSchool(). */
+function teacherAccessIsSchool(email){ return TEACHER_ACCESS_SCHOOL_RE.test(String(email || '')); }
 /* A stranger's text, made safe to SHOW (escaping still happens at the
    interpolation point): control characters, the direction overrides and
    isolates (U+202A-202E, U+2066-2069, U+200E/F) become nothing, so a name

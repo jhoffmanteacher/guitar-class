@@ -1536,8 +1536,9 @@ let accessState = '';                          // '' (reading) | 'none' | 'asked
 let accessNote = '';                           // i18n key of a one-line note under the buttons
 let accessCheckedAt = 0;
 let accessBusy = false;
+/* No trim, as the rules' isSchool() has none (signin-loop, 2026-11-26): "x@seq.org " is an outside account to both. */
 function accessIsSchoolUser(user){
-  return !!user && user.emailVerified === true && ACCESS_SCHOOL_RE.test(String(user.email || '').trim());
+  return !!user && user.emailVerified === true && ACCESS_SCHOOL_RE.test(String(user.email || ''));
 }
 /* This device remembers, per account, that the rules refused it
    (localStorage gcAccessRefused:<uid>, review R1-1): set when the access

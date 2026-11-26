@@ -23,8 +23,8 @@
 
    GROUPS
      named   named made-up accounts through whole pages: a school address in two spellings, the teacher's own
-             address, a subdomain, four look-alikes, an unverified school address, a school address with a space in
-             front. For each: the rules' verdict (REST, its own token) is the one expected; the page shows the app
+             address, a subdomain, four look-alikes, an unverified school address, a school address with a space after
+             it. For each: the rules' verdict (REST, its own token) is the one expected; the page shows the app
              exactly when the rules let the account in; in the app, a tick lands (the reader finds it, the page says
              "Saved"); on the access screen, a save from that page is refused (the page says the save failed) and
              nothing is stored.
@@ -151,7 +151,10 @@ async function suite(groups, plant, quiet, prefix){
       ['a look-alike (test5+seq.org@gmail.example)', 'test5+seq.org@gmail.example', true, 'out'],
       ['a look-alike (test6@seq-org.example)', 'test6@seq-org.example', true, 'out'],
       ['an UNVERIFIED school address', 'test7@seq.org', false, 'out'],
-      ['a school address with a space in front (" test8@seq.org": the page trims, the rules do not)', ' test8@seq.org', true, 'out'],
+      /* A space AFTER the address: the rules' pattern must end at "org", so it is an outside account; the page
+         trimmed it until 2026-11-26 and showed the app with every save refused. (A space in front is "school" to
+         both: [^@]+ takes it.) */
+      ['a school address with a space after it ("test8@seq.org ": the rules refuse it, so the page must too)', 'test8@seq.org ', true, 'out'],
     ];
     for (const [label, email, verified, want] of NAMED){
       /* Every case name carries the account's address: the plant scorer tells cases apart by name. */
