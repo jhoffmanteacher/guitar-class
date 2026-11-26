@@ -25,7 +25,7 @@
    Full and Power chords, a section with lyric lines, the speed slider on its opening stop, in English and Spanish.
      node tools/song-files-e2e.mjs [--shots <dir>] [--chrome <path>]   (or CHROME=…; Chrome for Testing only)
    Exit 0: every step passed. 1: a step failed (each is printed). 2: could not run. Needs ffmpeg and Node 22+.
-   One headless-Chrome run at a time on the Mac (CLAUDE.md). */
+   At most two headless-Chrome runs at a time on the machine; tools/chrome-wall.mjs's lock makes a third wait. */
 import { createServer } from 'node:http';
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, rmSync } from 'node:fs';

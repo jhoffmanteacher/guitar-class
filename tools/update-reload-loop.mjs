@@ -153,7 +153,7 @@
    Exit 0 = every case passed, 1 = a case failed, 2 = could not run, 3 = the
    watchdog. Run it after any change to sw.js, the service-worker block in
    app/start.js, swResume* in app/boot.js or teacherResume* in teacher-core.js.
-   Only one headless-Chrome run at a time on the machine (CLAUDE.md). The
+   At most two headless-Chrome runs at a time (CLAUDE.md; tools/chrome-wall.mjs's lock). The
    network is blocked (tools/chrome-wall.mjs: --host-resolver-rules, with --no-proxy-server: behind a
    proxy, as in a cloud session with HTTPS_PROXY set, Chrome sent every request
    to the proxy and the rules blocked nothing; the Firebase SDK then loaded,

@@ -7,7 +7,7 @@
      node tools/mic-old-takes-proof.mjs                 run every case, print counts
      node tools/mic-old-takes-proof.mjs --shots <dir>   also save 1366×657 screenshots
      node tools/mic-old-takes-proof.mjs --root <dir>    serve another checkout
-     (Chrome: CHROME=… or --chrome <path>; one headless-browser run at a time.)
+     (Chrome: CHROME=… or --chrome <path>; at most two headless-browser runs at a time.)
 
    Cases (each on a fresh console and a fresh stub):
      main      takes saved 45, 31, 30, 29 and 1 days ago and one with no date:

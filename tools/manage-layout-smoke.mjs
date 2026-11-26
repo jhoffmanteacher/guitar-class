@@ -22,7 +22,7 @@
      - the section opened last survives a reload; the dashboard's "Open Manage" lands on Accounts; the sidebar's
        Manage lands on the remembered section;
      - no sideways scroll at 1366×657, 1440×900 and 1920×1080; no page error.
-   Only one headless-Chrome run at a time on this Mac. */
+   At most two headless-Chrome runs at a time on the machine; tools/chrome-wall.mjs's lock makes a third wait. */
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';

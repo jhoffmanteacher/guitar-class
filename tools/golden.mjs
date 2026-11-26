@@ -225,8 +225,8 @@
    No network: Chrome is started so that only 127.0.0.1 resolves. What the
    site draws must not depend on whether Google's servers answered.
 
-   Like smoke.mjs: Node 22+, Chrome or Chromium, no other dependency; one headless-Chrome
-   run at a time (never beside smoke.mjs, pm-e2e.mjs, slow-load.mjs or another golden run). */
+   Like smoke.mjs: Node 22+, Chrome or Chromium, no other dependency; at most two headless-Chrome
+   runs at a time, this one included (tools/chrome-wall.mjs's lock makes a third wait). */
 import { createServer } from 'node:http';
 import { spawn, execFileSync } from 'node:child_process';
 import { inflateSync } from 'node:zlib';

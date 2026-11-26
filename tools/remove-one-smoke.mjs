@@ -21,7 +21,7 @@
        "Started over <date> · not applied yet …"; the dialogs' warning above the typed name
      - the student's view of the one-line notice after a start over, English and Spanish (the app shown through the
        local dev bypass; the apply itself is proven by tools/save-loop.mjs --reset)
-   Only one headless-Chrome run at a time on this Mac. */
+   At most two headless-Chrome runs at a time on the machine; tools/chrome-wall.mjs's lock makes a third wait. */
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';

@@ -25,7 +25,7 @@
 
    WHEN TO RUN IT: after any change to a practice card's chart (`card.sections` in class-activities.js), to
    SNIPPET_TRACKS, or to the player in app/cards.js / app/cards-sheet.js / app/snippets.js. It is not part of checks.mjs.
-   One headless-browser run at a time on a machine (not beside smoke.mjs, golden.mjs, pm-e2e.mjs, slow-load.mjs).
+   At most two headless-browser runs at a time on a machine, this one included (tools/chrome-wall.mjs's lock).
 
    WHAT IS REAL. The site's own page in headless Chrome, signed in through the dev bypass, with the card open on
    the In class page. Every setting is changed by a real click on the card's own control, so pcToggle,
