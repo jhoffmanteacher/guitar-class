@@ -13,7 +13,7 @@ see `WORKFLOW.md` and the git commit log.
 - **Module 9, Set 1 shows the six re-tests once**, not twice.
 - **Module 8, "Count the 6-note cycle" has a new video** that teaches the p-i-m-a-m-i pattern.
 - **Module 2: the hand-position sketch no longer says the thumb sits behind the index finger.** The step's words are
-  right: keep it behind the neck, about behind the middle finger.
+  right: keep it behind the neck.
 
 
 ## 2026-11-25 — The Listening Coach says so when it is not sure what it heard
