@@ -368,7 +368,7 @@ script.
   `coachRenderReport`, one line of `coachScorePitch`): (1) "Right notes" at Not yet is never Good on two other Greats;
   (2) when that Not yet rests on sounds the Coach could not read (wrong notes on under three quarters of the beats, and
   more unclear beats than silent ones), the round gets a "couldn't hear" screen (`coach.report.unreadMelody` /
-  `unreadChords`: "I heard sounds, but I could not tell which notes you played..."): no level, nothing saved for the
+  `unreadChords`: "I could not hear enough of your notes clearly to score this round..."): no level, nothing saved for the
   skill, the gate as it was; while the skill still waits on the Coach it names the gate's "Mark it anyway"; (3) melody's
   quietMost branch needs two right notes for level 2. No slot verdict, detector, onset or matcher moved, and only the
   Coach calls these functions. `listen-site.mjs` reads the new screen as `couldntHear`. checks.mjs 1fg runs the rules on

@@ -1922,18 +1922,19 @@
       es: 'No pude escucharlo con claridad — inténtalo de nuevo en un lugar más silencioso, con la guitarra más cerca del micrófono, y rasguea cada acorde con firmeza.' },
     'coach.report.couldntHearMelody': { en: 'I couldn’t hear that clearly — try again somewhere quieter, with the guitar closer to the mic, and pick each note firmly.',
       es: 'No pude escucharlo con claridad — inténtalo de nuevo en un lugar más silencioso, con la guitarra más cerca del micrófono, y toca cada nota con firmeza.' },
-    // coach-score.js coachRenderReport, the "could not read" screen (2026-11-25), only while the skill still waits on the Coach: the check-off gate's own button names (gate.markAnyway, skill.gotIt)
-    'coach.report.markAnyway': { en: 'If the room is too loud for the mic, mark the skill yourself: press “I’ve got it!”, then “Mark it anyway”.',
-      es: 'Si hay demasiado ruido para el micrófono, marca la destreza tú: presiona “¡Ya lo tengo!” y luego “Marcarlo de todos modos”.' },
+    // coach-score.js coachRenderReport, the "could not read" screen (2026-11-25), only while the skill still waits on the Coach: the check-off gate's own button names (gate.markAnyway, skill.gotIt) and where "I've got it!" is (nav.checklistTitle), since the Coach also opens from a lesson step
+    'coach.report.markAnyway': { en: 'If the room is too loud for the mic, mark the skill yourself. In My skills checklist, press “I’ve got it!”, then “Mark it anyway”.',
+      es: 'Si hay demasiado ruido para el micrófono, marca tú la destreza. En Mi lista de destrezas, presiona “¡Ya lo tengo!” y luego “Marcarlo de todos modos”.' },
     'coach.report.micHint': { en: 'Playing but not being heard? Check that the right microphone is selected.',
       es: '¿Estás tocando pero no se te escucha? Revisa que esté seleccionado el micrófono correcto.' },
-    'coach.report.micHintMac': { en: 'On a Mac, also check that Mic Mode in Control Center is set to Standard — Voice Isolation filters out guitars.',
-      es: 'En una Mac, revisa también que el Modo de micrófono en el Centro de Control esté en Estándar — el modo Aislamiento de voz filtra el sonido de la guitarra.' },
-    // coach-score.js coachRenderReport (2026-11-25, "the notes decide"): sounds were heard, but the Coach could not read them as notes; no level is given
-    'coach.report.unreadChords': { en: 'I heard sounds, but no clear chord notes. Move the guitar closer to the mic and try again.',
-      es: 'Escuché sonidos, pero no notas claras del acorde. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
-    'coach.report.unreadMelody': { en: 'I heard sounds, but I could not tell which notes you played. Move the guitar closer to the mic and try again.',
-      es: 'Escuché sonidos, pero no pude saber qué notas tocaste. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
+    // On a Mac, after micHint on one screen and alone (or after markAnyway) on the "could not read" one: so no "also", it reads whole either way
+    'coach.report.micHintMac': { en: 'On a Mac, check that Mic Mode in Control Center is set to Standard. Voice Isolation filters out guitars.',
+      es: 'En una Mac, revisa que el Modo de micrófono en el Centro de Control esté en Estándar. El modo Aislamiento de voz filtra el sonido de la guitarra.' },
+    // coach-score.js coachRenderReport (2026-11-25, "the notes decide"): too few beats read as notes to score; no level is given. The chips under it can still show right and wrong notes, so it never says none were read
+    'coach.report.unreadChords': { en: 'I could not hear enough clear chord notes to score this round. Move the guitar closer to the mic and try again.',
+      es: 'No pude escuchar suficientes notas claras del acorde para calificar este intento. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
+    'coach.report.unreadMelody': { en: 'I could not hear enough of your notes clearly to score this round. Move the guitar closer to the mic and try again.',
+      es: 'No pude escuchar con claridad suficientes notas para calificar este intento. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
     'coach.reportDone': { en: 'Done',
       es: 'Listo' },
     'coach.start': { en: 'Start the check',
