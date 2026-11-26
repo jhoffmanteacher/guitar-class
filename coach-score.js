@@ -69,14 +69,19 @@ function coachMinHeard(slotCount){
   return Math.max(Math.min(3, Math.ceil(slotCount / 2)), Math.ceil(slotCount * 0.3));
 }
 
-/* The skill this round is for still waits on the Coach: toggleSkill (app/audio-ui.js) would show the check-off gate, whose
-   "Mark it anyway" the "could not read" screen names. Not in a locked set's read-only preview: toggleSkill refuses
-   "I've got it!" there (isSetPeeking), so no gate opens. The card sits inside the set's panel (coachOpen puts it next to its
+/* This Coach card is in a locked set's read-only preview. The card sits inside the set's panel (coachOpen puts it next to its
    button, in a lesson step or the checklist's practice panel, both of the skill's own set), so the panel's .set-peek is read
-   from the card, as app/lesson.js does from a button. typeof: the gate lives in app/audio-ui.js, not in the coach parts. */
+   from the card, as app/lesson.js does from a button. */
+function coachInPreview(){
+  return !!(coach && coach.card && typeof coach.card.closest === 'function' && coach.card.closest('.week-panel.set-peek'));
+}
+
+/* The skill this round is for still waits on the Coach: toggleSkill (app/audio-ui.js) would show the check-off gate, whose
+   "Mark it anyway" the "could not read" screen names. Not in a preview: toggleSkill refuses "I've got it!" there
+   (isSetPeeking), so no gate opens. typeof: the gate lives in app/audio-ui.js, not in the coach parts. */
 function coachGateWaiting(){
   if (typeof skillIsCoachGated !== 'function' || typeof coachSkillBest !== 'function') return false;
-  if (coach.card && typeof coach.card.closest === 'function' && coach.card.closest('.week-panel.set-peek')) return false;
+  if (coachInPreview()) return false;
   return (coach.skillIds || []).some(sid => skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL
     && !(typeof progress !== 'undefined' && progress && progress[sid] === 'gotit'));
 }
@@ -203,8 +208,12 @@ function coachRenderReport(){
     ? `<div class="coach-tip">&#x1F44D; ${t('coach.tip.countedLoose', { n: looseCount })}</div>` : '';
 
   /* Compact per-drill result → the student's progress doc, so the next visit
-     can show the line above. Skipped in dev bypass (Firestore rejects that uid). */
-  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser() && coach.drillId){
+     can show the line above. Skipped in dev bypass (Firestore rejects that uid),
+     and in a locked set's read-only preview (2026-11-25): a preview writes
+     nothing, and a saved skill level there would open the check-off gate
+     before the set unlocks. The report still shows; a consented recording is
+     coachFinish's, unchanged. */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser() && coach.drillId && !coachInPreview()){
     if (!games.coach) games.coach = {};
     const prevAttempts = (games.coach[coach.drillId] && games.coach[coach.drillId].attempts) || 0;
     games.coach[coach.drillId] = { level: overallLevel, attempts: prevAttempts + 1, at: new Date().toISOString().slice(0, 10) };

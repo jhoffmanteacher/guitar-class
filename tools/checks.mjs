@@ -19332,12 +19332,15 @@ function checkCoachVerdicts() {
         sounds at all: the mic hint), in any round;
      F. a graded report draws one row per criterion that has a level (none for a level-0 criterion such as "no chord changes in this
         drill"), lowest level first, "Right notes" first on a tie, each with its own level (read from the HTML);
+     H. a graded round in a locked set's read-only preview (Good and Great, with no history and with a saved best) still shows its
+        report but saves nothing: saveGames is not called and the whole games object is unchanged (a saved level there opened the
+        gate before the set unlocked);
      G. a graded round with no right note never shows a "{good} of {total}" pitch line with 0 in it (the chord one has its own
         line, needsQuietChordsNone: "sounded right on 0 of 8 beats" is no sentence; melody's needsMelodyNone: not "I only caught 0
         of 8");
    and controls, so this cannot go blind: every all-right round opens the gate, with the Great headline on the beat and Good 600 ms off
    it (the timing criteria coach, they do not fail a take). Every total is pinned. */
-const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2, eCases: 6, rows: 38608, zeroRight: 1180, micScreens: 496, keptSame: 3428, bestKept: 8264 };
+const NOTES_DECIDE_PIN = { rounds: 11692, pitchOne: 8408, nothingRead: 212, unread: 2932, oneRight: 1100, opened: 2990, allRight: 28, tips: 2, eCases: 6, rows: 38608, zeroRight: 1180, micScreens: 496, keptSame: 3428, bestKept: 8264, previewGraded: 4 };
 function checkCoachNotesDecide() {
   head('1fg. Listening Coach: the notes decide; "Right notes" at Not yet never opens the check-off gate, nothing read gets no level (run)');
   let bad = 0;
@@ -19348,7 +19351,7 @@ function checkCoachNotesDecide() {
   try {
     res = JSON.parse(run(`(function(){
       const keep = { coach, currentUser, games, saveGames, progress, lang: getLang() };
-      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0, eCases: 0, rows: 0, zeroRight: 0, micScreens: 0, keptSame: 0, bestKept: 0 }, bad = [];
+      const n = { rounds: 0, pitchOne: 0, nothingRead: 0, unread: 0, oneRight: 0, opened: 0, allRight: 0, tips: 0, eCases: 0, rows: 0, zeroRight: 0, micScreens: 0, keptSame: 0, bestKept: 0, previewGraded: 0 }, bad = [];
       try {
         setLang('en');
         const sid = SETS.flatMap(w => w.skills || []).map(s => s.id).find(id => skillIsCoachGated(id));
@@ -19479,6 +19482,14 @@ function checkCoachNotesDecide() {
           else if (want) n.tips++;
           progress = {};
         }
+        /* H: a graded round in a preview: the report shows, nothing is saved */
+        for (const [dev, wantShown] of [[600, 2], [0, 3]]) for (const before of [0, 2]) {
+          const r = round('melody', Array(8).fill('ok'), dev, [], [sid], before, true);
+          n.previewGraded++;
+          const what = 'H: an all-right round ' + dev + ' ms off in a locked set\\'s preview' + (before ? ', saved best Good' : '');
+          if (r.shown !== wantShown) bad.push(what + ': the report says ' + r.shown + ', want ' + wantShown);
+          if (r.saves || !r.same) bad.push(what + ': it saved (saveGames ' + r.saves + ' time(s); games now ' + r.after + ')');
+        }
       } finally {
         coach = keep.coach; currentUser = keep.currentUser; games = keep.games; saveGames = keep.saveGames; progress = keep.progress; setLang(keep.lang);
         try { sessionStorage.removeItem('k1fg'); } catch(e){}
@@ -19490,7 +19501,7 @@ function checkCoachNotesDecide() {
   for (const b of res.bad) fail(b);
   if (res.badCount > res.bad.length) fail(`… and ${res.badCount - res.bad.length} more`);
   for (const [k, v] of Object.entries(NOTES_DECIDE_PIN)) if (res.n[k] !== v) fail(`${res.n[k]} ${k}, pinned ${v}: the check went partly blind (or the rounds changed: re-pin NOTES_DECIDE_PIN on purpose)`);
-  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" leave the saved games exactly as they were, every graded round saves once (and ${res.n.keptSame} couldn't-hear and ${res.n.bestKept} graded rounds again for a student whose best is already Good: nothing moved, the best never lowered); ${res.n.rows} report rows drawn lowest first, none without a level; ${res.n.zeroRight} graded rounds with no right note never say "right on 0 of"; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of ${res.n.eCases} cases, as wanted in all ${res.n.eCases}), never on the ${res.n.micScreens} mic screens; controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
+  if (!bad) ok(`${res.n.rounds} Coach rounds through the real report and gate: ${res.n.pitchOne} with "Right notes" at Not yet never open the gate; ${res.n.nothingRead} with no beat read as a note never get Good (sounds on most beats: "couldn't hear"); ${res.n.oneRight} melody rounds with at most one right note never open it; ${res.n.unread} "could not read" screens and every "couldn't hear" leave the saved games exactly as they were, every graded round saves once (and ${res.n.keptSame} couldn't-hear and ${res.n.bestKept} graded rounds again for a student whose best is already Good: nothing moved, the best never lowered); ${res.n.rows} report rows drawn lowest first, none without a level; ${res.n.zeroRight} graded rounds with no right note never say "right on 0 of"; "Mark it anyway" named only while the skill waits (in ${res.n.tips} of ${res.n.eCases} cases, as wanted in all ${res.n.eCases}), never on the ${res.n.micScreens} mic screens; ${res.n.previewGraded} graded rounds in a read-only preview show their report and save nothing; controls: ${res.n.allRight} all-right rounds open it, Great on the beat and Good off it (${res.n.opened} rounds open it in all)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
