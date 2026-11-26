@@ -189,7 +189,9 @@ swap, keyed MCs: `.claude/rules/modules.md`.
   anything a student's work or screen depends on. Push rules still apply.
 - **Browser checks run in Chrome for Testing**, headless via `CHROME` and a small script (like
   `tools/console-layout-smoke.mjs`, whose stub Firestore reaches the console); the Chrome extension only for a
-  person-style click-through.
+  person-style click-through. Every Chrome tool goes through `tools/chrome-wall.mjs`: the wall (no request may leave
+  127.0.0.1 and no Firebase app may start, or the run fails) and the two-run lock (`GC_BROWSER_SLOTS`, skipped on
+  GitHub; checks.mjs 1fh). Never weaken a loop or the wall to make a run pass.
 
 ## Keep the Mac's load "just right"
 
