@@ -420,6 +420,9 @@ function rebuildModuleContentPanels(){
      module panels to rebuild, and a Teacher view song playing for the room
      must keep playing through a language switch (teacher.js). */
   if(!IS_TEACHER_MODE) stopCardAudio();
+  /* A Module Review take in progress: its recorder is in a panel about to be rebuilt, so it stops, the mic is
+     released and the take is thrown away, as on every way out of the review (stopAnyRec, app/review.js). */
+  if(!IS_TEACHER_MODE && typeof stopAnyRec === 'function') stopAnyRec({ discard: true });
   const anchor = lessonScrollAnchor();
   document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
     const wid = panel.dataset.id;

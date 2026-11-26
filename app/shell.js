@@ -823,7 +823,10 @@ function activateSet(id, opts){
     return;
   }
   if(!peek) lastSetId = id;
-  if (typeof stopAnyRec === 'function') stopAnyRec({keepFab:true});
+  /* A Module Review take in progress: going to another set or review throws it away (discard, stopAnyRec in
+     app/review.js); the row of the review already open keeps it, stopped, to listen back to, as before. */
+  const stayingOnSet = !!activeWeekPanel() && activeWeekPanel().dataset.id === id;
+  if (typeof stopAnyRec === 'function') stopAnyRec(stayingOnSet ? {keepFab:true} : {discard:true});
   // A Listening Coach check left running inline in the set/tab we're leaving
   // just goes invisible otherwise (its DOM node stays put, only hidden by
   // CSS) — the mic and its rAF loop would keep running unseen, permanently
@@ -841,7 +844,7 @@ function activateSet(id, opts){
   // is still using the round or the tab line (review R1-6). The Card Deck and
   // Ear Spark rounds: the set panels only, so showApp's boot-time call never
   // resets a round already started on In-Class Activities.
-  const stayingHere = !!activeWeekPanel() && activeWeekPanel().dataset.id === id;
+  const stayingHere = stayingOnSet;
   if(!stayingHere){
     if(typeof sdAbortAll === 'function') sdAbortAll();
     if(typeof dkErAbortAll === 'function') dkErAbortAll('.week-panel');
@@ -1269,6 +1272,10 @@ function routeExploreHash(){
      (openGamesScreen). */
   const inColumn = x => EXPLORE_PAGES.some(p => p.hash === x && !p.overlay);
   if(h !== leftPage && (inColumn(h) || inColumn(leftPage)) && typeof coachClose === 'function') coachClose();
+  /* A page over the practice view (In class, Songs, My progress, Games, Live quiz) is a way out of Module Review: a
+     take in progress is stopped, its mic released and the take thrown away (stopAnyRec, app/review.js). Search is a
+     panel over the page, not a way out. */
+  if(h && h !== '#search' && h !== leftPage && typeof stopAnyRec === 'function') stopAnyRec({ discard: true });
   /* Remember the student's place in the set BEFORE anything is shown or
      hidden — once a screen is in the flow, .main's scrollTop has already
      been shifted by scroll anchoring and no longer means what it says.

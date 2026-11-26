@@ -1372,11 +1372,13 @@ document.addEventListener('visibilitychange', () => {
        round stays dealt, and its Play again button plays them from the start. */
     if(typeof erStopAll === 'function') erStopAll();
     /* A student's tab also stops what plays or counts with nobody there (2026-11-25): a Play tab line (a hidden tab
-       lags its timeouts, and its Stop button is out of reach) and a Shuffle round's countdown (back to Start, as on
-       every other way out). The console keeps them: the room may still be listening (code-hygiene rule 4). */
+       lags its timeouts, and its Stop button is out of reach), a Shuffle round's countdown (back to Start, as on every
+       other way out), and a Module Review take in progress (stopped, the mic released, the take thrown away, as when
+       the student leaves the review). The console keeps them: the room may still be listening (code-hygiene rule 4). */
     if(!IS_TEACHER_MODE){
       if(typeof stopPlaySeq === 'function') stopPlaySeq();
       if(typeof sdAbortAll === 'function') sdAbortAll();
+      if(typeof stopAnyRec === 'function') stopAnyRec({ discard: true });
     }
     flushOnHide();
     return;

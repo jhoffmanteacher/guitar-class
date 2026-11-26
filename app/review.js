@@ -398,6 +398,15 @@ async function startRec(slot){
     recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
     recorder.onstop = () => {
       stream.getTracks().forEach(t => t.stop());
+      /* Stopped by a way out (stopAnyRec with discard): the take is thrown away, nothing kept to listen back to. */
+      if (recState[slot] && recState[slot].discard){
+        const d = recState[slot];
+        if (d.timerInterval) clearInterval(d.timerInterval);
+        if (d.autoStopTimeout) clearTimeout(d.autoStopTimeout);
+        delete recState[slot];
+        refreshRecUI(slot);
+        return;
+      }
       const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
       const s = recState[slot] || {};
       s.recording = false;
@@ -452,18 +461,24 @@ function stopRec(slot){
 
 /* Navigating away mid-recording would otherwise leave the mic live for up
    to REC_MAX_SECS — every other mic feature on the site stops on navigation,
-   so the recorder does too. Called from activateSet (which passes keepFab:
-   the rail recorder is a persistent site-wide tool with a pulsing tile —
-   switching sets to read a chord chart mid-take shouldn't truncate it) and,
-   without options, from startTuner/coachOpen (those need the mic itself, so
-   every slot stops, fab included). Since 2026-11-14 there is no 'fab' slot
-   (the dock's Record tool was removed), so keepFab changes nothing; kept. */
+   so the recorder does too. Every way out of Module Review passes discard
+   (2026-11-25): another set or Module Review row (activateSet), a page over
+   it (routeExploreHash: In class, Songs, My progress, Games, Live quiz), the
+   language (rebuildModuleContentPanels) and a hidden tab (app/activities-2.js).
+   The take in progress is stopped, the mic released and the take thrown away:
+   nothing half-made is left to listen back to. Without options, from
+   startTuner/coachOpen (those need the mic itself): the take stops and is
+   kept to listen back to, as before. keepFab: since 2026-11-14 there is no
+   'fab' slot (the dock's Record tool was removed), so it changes nothing; kept. */
 function stopAnyRec(opts){
   Object.keys(recState).forEach(m => {
     if (opts && opts.keepFab && m === 'fab') return;
     const s = recState[m];
     if (!s) return;
-    if (s.recording) stopRec(m);
+    if (s.recording){
+      if (opts && opts.discard) s.discard = true;
+      stopRec(m);
+    }
     // A slot still waiting on getUserMedia has no recorder to stop — drop
     // the entry so the slot isn't stuck in `starting` forever; startRec sees
     // the swap and releases the stream if permission is granted later.
