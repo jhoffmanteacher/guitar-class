@@ -6,6 +6,17 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-25 — The Listening Coach says so when it could not hear you
+
+- **The Listening Coach gives a grade only when it could hear your notes.** Playing on the beat all the way through is not
+  enough by itself. It has to hear the right notes.
+- **When it could not hear enough of your notes clearly, it says so.** That round gets no grade, and nothing is saved to
+  your progress. Move the guitar closer to the mic and try again.
+- **"Mark it anyway" still works.** If the room is too loud for the mic, go to My skills checklist, press "I've got it!",
+  then "Mark it anyway".
+- **The report shows what to work on first.** The row to fix is at the top. Rows that said nothing about your round are gone.
+
+
 ## 2026-11-25 — Every click sounds the same, and no more typed answers in the modules
 
 - **Every click on the site now sounds the same on every beat**: play-along cards, Song Journey pages, Strum Hero,
