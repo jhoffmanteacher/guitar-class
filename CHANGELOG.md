@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-26 — A new kind of activity: Echo
+
+- **New activity: Echo.** The site plays a short power-chord strum, you play it back in the gap, then the next one. It
+  ends with two parts of a song you know. (It shows up once your teacher posts it.)
+
+
 ## 2026-11-26 — Your other Chromebooks
 
 - **After your teacher starts you over or deletes your work, your other Chromebooks no longer bring old work back.**
