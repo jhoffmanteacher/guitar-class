@@ -1933,11 +1933,11 @@
     // On a Mac, after micHint on one screen and alone (or after markAnyway) on the "could not read" one: so no "also", it reads whole either way
     'coach.report.micHintMac': { en: 'On a Mac, check that Mic Mode in Control Center is set to Standard. Voice Isolation filters out guitars.',
       es: 'En una Mac, revisa que el Modo de micrófono en el Centro de Control esté en Estándar. El modo Aislamiento de voz filtra el sonido de la guitarra.' },
-    // coach-score.js coachRenderReport (2026-11-25, "the notes decide"): too few beats read as notes to score; no level is given. The chips under it can still show right and wrong notes, so it never says none were read
-    'coach.report.unreadChords': { en: 'I could not hear enough clear chord notes to score this round. Move the guitar closer to the mic and try again.',
-      es: 'No pude escuchar suficientes notas claras del acorde para calificar este intento. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
-    'coach.report.unreadMelody': { en: 'I could not hear enough of your notes clearly to score this round. Move the guitar closer to the mic and try again.',
-      es: 'No pude escuchar con claridad suficientes notas para calificar este intento. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
+    // coach-score.js coachRenderReport (2026-11-25, "the notes decide"): too few beats read as notes to score; no level is given. The chips under it can still show right and wrong notes, and most beats can be clearly WRONG notes, and the screen has no volume reading: so it says it is not sure, never that it could not hear or that none were read
+    'coach.report.unreadChords': { en: 'I am not sure enough of the chord notes to score this round. Move the guitar closer to the mic and try again.',
+      es: 'No estoy seguro de suficientes notas del acorde para calificar este intento. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
+    'coach.report.unreadMelody': { en: 'I am not sure enough of your notes to score this round. Move the guitar closer to the mic and try again.',
+      es: 'No estoy seguro de suficientes notas para calificar este intento. Acerca la guitarra al micrófono e inténtalo de nuevo.' },
     'coach.reportDone': { en: 'Done',
       es: 'Listo' },
     'coach.start': { en: 'Start the check',
