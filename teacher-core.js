@@ -632,7 +632,12 @@ function showTeacherLoadWarning(moduleNums){
    a failed read — the callers decide what that means for the screen. */
 async function teacherFetchStudents(){
   await ensureDb();
-  const snap=await db.collection('progress').get();
+  /* Asked of the server, never the tab's cache: with no network a plain get()
+     RESOLVES with an empty list (measured, practice-minutes.js), which the
+     console took for a class of no students and showed real students as
+     "not in the roster" (review R5-1, 2026-11-25). A failed read throws,
+     and both callers already handle that. */
+  const snap=await db.collection('progress').get({source:'server'});
   const out=[];
   /* Hear It First saves the signed-in account's trainer profile into
      progress/{uid} with mergeFields, which creates the document when it is
