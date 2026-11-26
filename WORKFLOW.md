@@ -133,21 +133,48 @@ CHANGELOG 2026-11-25; the code side:
   class project; it was refused (no data, nothing written).** update-reload-loop now stops if the SDK loaded.
 - **GitHub** (`checks.yml`) also runs kill-switch proof, tuning-sim-proof, access-sim, backup-proof, stay-proof and
   mic-sim/micrec-clock after every push.
-- **Taken out after review round 3, not shipped:** "the console recovers by itself after a failed load" (three rounds
-  each found a new MAJOR: a stuck failure line, Remove buttons computed from an empty roster, the two-console guard
-  off during an outage). The console's failed-read behaviour is main's. Being rebuilt test-first
-  (`tools/console-load-loop.mjs`).
-- **Open from the sweep (push 2 and later; details in the session's reports):** every click the same sound (built);
-  typed answers off in all modules (built: `TYPED_RESPONSES_ENABLED`); a Focus step tap redraws only the open card
-  (built: 588 ms -> 132 ms at 4x CPU; needs a golden compare and a review); the new loops `stop-loop`,
-  `built-song-loop`, `sb-draft-loop` (built) and a console failed-read loop; the Listening Coach "the notes decide"
-  (being built; Always Reviewed, its own push); the per-Chromebook reset marker (a stopped consent "yes", unsent
-  practice seconds and old ticks still come back from a second Chromebook after a Delete); a doc re-created after a
-  Delete without `migrations.swap45`; things left running that `stop-loop` lists (a Shuffle round and Note Call /
-  Call the chord after a card closes by its title, a tab line when In class opens, the Module Review recorder on a
-  language switch); `playalong-loop` walks the ca-54 ladder as an ordinary card (42 ✗ lines, same on d8ca4e2); a class
-  settings change redraws under an open card; Unpublish from an old copy; eight Chrome tools with no network block
-  (the smoke among them); split `live-quiz.js` (over 2,000 lines) and `app/activities-2.js` (1,990s).
+- **Pushes 2 to 4, same day** (CHANGELOG, the top 2026-11-25 entry): every click the same sound; typed answers off
+  in all modules (`TYPED_RESPONSES_ENABLED`, `checks.mjs` 1ff; two Module 9 steps wait for Jonathan's wording, 1ff
+  prints them); a Focus step tap redraws only the open card (`caRedrawOpenCard`, `tools/focus-tap-diff.mjs`: 2,112 of
+  2,112 taps byte-identical to a full render); "stop everything you leave" (drill rounds on a card close, a tab line
+  on a step move, the Module Review recorder on every way out, the Metronome on a hidden tab); the new loops
+  `tools/stop-loop.mjs` (221 start x way-out pairs, 0 known), `tools/built-song-loop.mjs`, `tools/sb-draft-loop.mjs`;
+  `playalong-loop` leaves a speed-ladder card (ca-54) to `speed-ladder-loop`; the console's roster read asks the
+  server (`get({source:'server'})`: with no network a plain get resolved EMPTY and real students showed as "not in
+  the roster"); the two splits: `app/activities-list.js` (the gate, the list, its folds, `flushOnHide`) out of
+  `app/activities-2.js`, and `live-quiz-teacher.js` (the stage, the control strip, Preview) out of `live-quiz.js`.
+- **The Listening Coach, "the notes decide" (Reviewed, `site-reviewer-deep`, 3 rounds; its own push so it can be
+  rolled back alone: revert the commits from "Listening Coach: the notes decide" through the 1fg ones).** Report card
+  only (`coach-score.js`): no detector, onset, matcher or slot verdict moved (0 of 17,280 synthetic and 0 of 562
+  real-take verdicts differ; the other games 0). A melody round opens the check-off gate only when the Coach read
+  the notes as right; a round it is not sure of gets the "not sure" screen, no level and no save; a round in a locked
+  set's preview saves nothing; the report shows the lowest row first. Real takes: takes holding 0 of the 8 written
+  notes graded Good 22 -> 0; right-playing takes with the gate open 29 -> 26 of 33 (told Not yet 4 -> 0, told "not
+  sure" 0 -> 7). Nothing played: gate open 211 -> 4 of 552 (melody), 27 -> 6 of 72 (chords). Accepted cost: in the
+  two harsh synthetic rooms far fewer right players get a grade (room7 76 -> 22, room4 70 -> 1 of 80): they see "not
+  sure" and use "Mark it anyway". Guard: `checks.mjs` 1fg (A to H). Open: 1fg does not yet count `saveProgress` /
+  streak saves on a not-sure round, check each unread line against the round's mode, or pin `needsMelodyNone` to
+  rounds with no right note (review R3-2); 4 of 552 nothing-played melody rounds still reach Good (two noise readings
+  counted as right on 3- and 4-beat drills; a rule change, needs takes). More takes wanted: 20+ melody takes from a
+  loud period, 10+ chord takes, one slow-tempo take (`node tools/mic-sim/takes-in.mjs`).
+- **Not shipped: "the console recovers by itself after a failed load."** Five review rounds each found something;
+  round 5 found the empty-roster fault above (already on main, fixed alone) and one regression (R5-2:
+  `teacherArchivedKept` is null until a roster filter runs on a good read, so an archived student can show for
+  minutes). The work is kept on the remote branch `wip/console-recover-2026-11-25` with its loop
+  (`tools/console-load-loop.mjs`, 160 cases). To finish: apply R5-2 (set it right after the good read in
+  `loadAllStudents`), make the loop's fake server answer EMPTY when offline, give its `landwrite` family more cases,
+  then one review. Until then a failed console read needs a reload, as before.
+- **Still open from the sweep** (none is live-breaking):
+  the per-Chromebook reset marker (a stopped consent "yes", unsent practice seconds and old ticks can come back from
+  a second Chromebook after a Delete; save path, Always Reviewed); a doc re-created after a Delete without
+  `migrations.swap45` (app and `tabs/journey.js`); a class settings change redraws under an open card; "Next: Set N"
+  on a locked set; Unpublish from an old copy and the Import notice (Song builder); the lyric sheet's `server` line;
+  6/8 on the student Metronome for 6/8 cards; the Journey pages' "didn't load" handling; eight Chrome tools with no
+  network block (the smoke among them); `tools/speed-ladder-loop.mjs` is not run on GitHub; the two permanent
+  detectors (unused top-level names; quoted-`escAttr` handler arguments); Card Deck and Ear Spark rounds are left as
+  they are on a hidden tab (the 2026-11-09 choice; stop-loop lists them as documented survivors); stale comments
+  that still name `activities-2.js` (teacher-students.js:441, tabs/journey.js, app/songfiles.js:498,
+  app/review.js:467, teacher-livemusic.js:21).
 - **Jonathan's calls still open:** the Module 8 fingerpicking video (K2Z3RZc5t-A is titled "Travis Finger Picking";
   the step's hint and quiz are about p-i-m-a-m-i), ca-34's intro open G vs ca-35's solo D-string fret 4 ("Vuelve a la
   Vida"), Module 9 Set 1's re-tests shown twice, a privacy-page sentence for "request to join", the Module 2 thumb
