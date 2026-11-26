@@ -3,8 +3,10 @@
    Why: a test page served on 127.0.0.1 gets the CLASS Firebase project's settings (firebase-config.js picks the
    practice project only on the practice host names). Before this file, ten of the fifteen headless-Chrome tools did
    not block the network, so their pages loaded the real Firebase SDK from gstatic.com and could talk to the real
-   class project (closed-loop report 2026-11-26, "Fix first"). Measured on origin/main ecee6ac with this file in a
-   report-only scratch copy: see /home/claude/sweep/reports/FIX-wall.md.
+   class project (closed-loop report 2026-11-26, "Fix first"). Measured on origin/main ecee6ac with this watch in
+   report-only mode (no flags, nothing failed): every one of those pages loaded the SDK from www.gstatic.com and
+   started the CLASS project's app, and smoke (activities, games), trainer-e2e and song-files-e2e also sent
+   requests to firestore.googleapis.com that were answered. GitHub's smoke runs did the same on every push.
 
    THE WALL, in three parts:
    1. WALL_FLAGS go on every Chrome command line: every host name resolves to "not found" except 127.0.0.1 and
@@ -55,9 +57,10 @@ export const CLASS_PROJECT = (() => {
   return 'guitar-class-2fd21';
 })();
 
-/* Outside files the site's HTML asks for on every load (index.html's <script defer src> tags for the Firebase SDK,
-   the same tags in the Journey and Tuning Simulator pages). Prefixes, matched against the whole URL. Measured
-   2026-11-26 (FIX-wall.md): what each tool asked for before the wall. Keep this list short and static-file only. */
+/* Outside files the site asks for on every load: the Firebase SDK's <script defer src> tags in index.html and the
+   Song Journey pages (tabs/*.html), and the Firestore SDK file app/boot.js adds from the same folder. Prefixes,
+   matched against the whole URL. Measured 2026-11-26: the only outside file the fifteen tools' pages asked for
+   behind the wall. Keep this list short and static-file only. */
 export const QUIET = [
   'https://www.gstatic.com/firebasejs/',
 ];
