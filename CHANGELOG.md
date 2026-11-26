@@ -13,6 +13,9 @@ see `WORKFLOW.md` and the git commit log.
   unchanged.
 - **The modules no longer ask you to type an answer.** Where a step used to have a typing box, it now asks you to
   say the answer out loud or play it. Answers you typed before are still saved.
+- **Leaving Module Review while you record stops the recording and throws that take away**: going to another set,
+  In class, Songs, My progress or Games, switching the language, or switching to another tab. The microphone turns
+  off. Press Record again when you come back.
 
 
 ## 2026-11-25 — A check of the whole site: fixes, a song help pop-up, a simpler Metronome
