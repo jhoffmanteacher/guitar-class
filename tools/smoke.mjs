@@ -43,6 +43,9 @@
    every commit. Needs Node 22+ (global WebSocket) and Chrome or Chromium; it
    serves the repo itself, so Python and a separate server are not needed.
    Network noise (Firebase, Google, YouTube) is ignored — it is offline-safe.
+   Behind the wall (tools/chrome-wall.mjs, 2026-11-26): no request leaves 127.0.0.1 and no Firebase app starts,
+   or the walk fails with a "smoke: ✗ wall:" line naming the host and the page. Before the wall, this walk loaded
+   the real Firebase SDK and started the CLASS project's app on every page (GitHub runs included).
 
    It prints one line as each walk starts and nothing else until the end, so do
    not pipe it through `tail`; redirect to a file (`> file 2>&1`) and read that.
@@ -90,6 +93,7 @@ import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 import { writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { WALL_FLAGS, wallWatch, browserSlot, SITE_BOOTED } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /* Is today in a practice-minutes skipWeeks week (practice-minutes-config.js, Mondays)? Then the strip has no goal and
@@ -187,8 +191,11 @@ function extractRef(ref) {
   return dir;
 }
 
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port) {
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -3095,7 +3102,7 @@ async function walk(base, chromePort, label) {
   await page.send('Page.navigate', { url: `${base}/index.html` });
   await Promise.race([loaded, sleep(15000)]);
   await sleep(3000);
-  if (!(await run('dev-bypass-present', `!!document.getElementById('dev-bypass-btn')`))) events.push({ step: 'boot', kind: 'step-failed', text: 'no dev bypass button — the page did not boot' });
+  if (!(await run('dev-bypass-present', SITE_BOOTED))) events.push({ step: 'boot', kind: 'step-failed', text: 'no dev bypass button — the page did not boot' });
   await run('devBypass', `devBypass()`, 3500);
   if (!(await run('app-visible', `getComputedStyle(document.getElementById('app')).display !== 'none'`))) events.push({ step: 'boot', kind: 'step-failed', text: 'the app did not open after the dev bypass' });
 
@@ -3521,14 +3528,17 @@ const watchdog = setInterval(() => {
 }, 1000);
 watchdog.unref();
 try {
+  mark('setup: waiting for a browser slot');
+  await browserSlot('smoke');
   mark('setup: starting Chrome');
   const prof = mkdtempSync(join(tmpdir(), 'gc-smoke-chrome-'));
   const cdp = await freePort();
   const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
-    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
   chromeProc = proc;   // stopped and waited for by runCleanup() before the profile below is deleted
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+  wall = await wallWatch(cdp, 'smoke');
 
   const here = await serve(ROOT); cleanup.push(() => here.srv.close());
   say(`smoke: walking this checkout on http://127.0.0.1:${here.port} …`);
@@ -3558,5 +3568,5 @@ try {
     if (report.length > 40) console.error(`  … and ${report.length - 40} more`);
   } else console.log(`smoke: ✓ no JavaScript errors${base ? ' beyond the baseline' : ''}`);
 } catch (e) { console.error('smoke: could not run —', e && e.message); exitCode = 2; }
-finally { clearInterval(watchdog); await runCleanup(); }
+finally { clearInterval(watchdog); if (wall) exitCode = await wall.finish(exitCode); await runCleanup(); }
 process.exit(exitCode);

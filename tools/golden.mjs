@@ -236,6 +236,7 @@ import { tmpdir, platform, homedir } from 'node:os';
 import { join, extname, normalize, resolve, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ALL_PARTS = ['data', 'sets', 'keys', 'gates', 'save', 'screens', 'games', 'play', 'activities', 'pages', 'console', 'tools', 'livequiz'];
@@ -454,8 +455,11 @@ setInterval(() => {
 }, 2000).unref();
 const stepStart = name => { stepName = name; stepAt = Date.now(); };
 
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port) {
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -860,12 +864,14 @@ function pagePlayer() {
 const chrome = findChrome();
 if (!chrome || !existsSync(chrome)) { console.error(`golden: no Chrome or Chromium at ${chrome || '(none found)'} (use --chrome <path> or CHROME=…)`); process.exit(2); }
 try {
+  await browserSlot('golden');
   const prof = mkdtempSync(join(tmpdir(), 'gc-golden-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
-    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars', '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore', env: { ...process.env, TZ: 'America/Los_Angeles' } });
+    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore', env: { ...process.env, TZ: 'America/Los_Angeles' } });
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+  wall = await wallWatch(cdp, 'golden');
   const site = await serve(ROOT); cleanup.push(() => site.srv.close());
   const base = `http://127.0.0.1:${site.port}`;
   console.log(`golden: snapshot of ${ROOT} (parts: ${PARTS.filter(p => ON[p]).join(', ')}) …`);
@@ -1745,6 +1751,7 @@ try {
     console.log(`golden: ✓ the snapshot passed its own checks; ${events.length} error event(s) recorded (${ex} exception(s)) in errors.json${events.length ? ': read them' : ''}`); }
 } catch (e) { console.error('golden: could not run —', e && e.message); exitCode = 2; }
 finally {
+  if (wall) exitCode = await wall.finish(exitCode);
   if (chromeProc) { await new Promise(res => { chromeProc.once('exit', res); chromeProc.kill(); setTimeout(() => { try { chromeProc.kill('SIGKILL'); } catch { /* gone */ } res(); }, 3000); }); }
   for (const f of cleanup.reverse()) { try { f(); } catch { /* best effort */ } }
 }

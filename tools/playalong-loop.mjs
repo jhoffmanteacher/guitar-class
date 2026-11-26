@@ -266,6 +266,7 @@ import { tmpdir } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -375,8 +376,11 @@ function serve(dir) {
   });
   return new Promise(r => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
 }
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port) {
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -2125,15 +2129,18 @@ async function main() {
   if (typeof WebSocket === 'undefined') { console.error('playalong-loop: needs Node 22+ (global WebSocket)'); return 2; }
   if (!existsSync(join(ROOT, 'index.html'))) { console.error(`playalong-loop: ${ROOT} is not a copy of the site (no index.html)`); return 2; }
   const t0 = Date.now();
+  mark('setup: waiting for a browser slot');
+  await browserSlot('playalong-loop');
   mark('setup: starting Chrome');
   const prof = mkdtempSync(join(tmpdir(), 'gc-playalong-chrome-'));
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   const cdp = await freePort();
-  chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1',
+  chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, ...WALL_FLAGS,
     '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--window-size=1366,657', 'about:blank'], { stdio: 'ignore' });
   let up = false;
   for (let i = 0; i < 80 && !up; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); up = true; } catch { await sleep(250); } }
   if (!up) { console.error('playalong-loop: Chrome did not start'); return 2; }
+  wall = await wallWatch(cdp, 'playalong-loop');
   const site = await serve(ROOT);
   cleanup.push(() => site.srv.close());
   mark('setup: opening the site');
@@ -2604,5 +2611,5 @@ function reportLeads(walks) {
 
 try { exitCode = await main(); }
 catch (e) { console.error('playalong-loop: could not run —', e && (e.stack || e.message)); exitCode = 2; }
-finally { clearInterval(watchdog); await runCleanup(); }
+finally { clearInterval(watchdog); if (wall) exitCode = await wall.finish(exitCode); await runCleanup(); }
 process.exit(exitCode);

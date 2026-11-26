@@ -30,6 +30,7 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot, SITE_BOOTED } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -62,14 +63,18 @@ const srv = createServer((req, res) => {
 });
 await new Promise((r) => srv.listen(0, '127.0.0.1', r));
 const port = srv.address().port;
+await browserSlot('pm-e2e');
 const prof = mkdtempSync(join(tmpdir(), 'pm-e2e-chrome-'));
 const cdp = await freePort();
 const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--autoplay-policy=no-user-gesture-required',
-  '--no-first-run', '--disable-gpu', '--hide-scrollbars', 'about:blank'], { stdio: 'ignore' });
-const done = (code) => { try { proc.kill(); srv.close(); rmSync(prof, { recursive: true, force: true }); } catch {} process.exit(code); };
+  '--no-first-run', '--disable-gpu', '--hide-scrollbars', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
+let wall = null;
+const done = async (code) => { if (wall) code = await wall.finish(code); try { proc.kill(); srv.close(); rmSync(prof, { recursive: true, force: true }); } catch {} process.exit(code); };
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
 
+wall = await wallWatch(cdp, 'pm-e2e');
 const t = await (await fetch(`http://127.0.0.1:${cdp}/json/new?about:blank`, { method: 'PUT' })).json();
+await wall.page(t.id);
 const ws = new WebSocket(t.webSocketDebuggerUrl);
 await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
 let id = 0; const pending = new Map(); const consoleErrors = [];
@@ -97,10 +102,10 @@ if (FAKE_DATE) await send('Page.addScriptToEvaluateOnNewDocument', { source: `((
   window.Date = FD; })()` });
 await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
 await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html` });
-for (let i = 0; i < 80; i++) { if (await ev(`typeof devBypass === 'function' && !!document.getElementById('dev-bypass-btn') && document.readyState === 'complete'`).catch(() => false)) break; await sleep(250); }
+for (let i = 0; i < 80; i++) { if (await ev(SITE_BOOTED).catch(() => false)) break; await sleep(250); }
 await sleep(3500);   // Firebase answers "signed out" a moment after load; the bypass must come after it (as in tools/smoke.mjs)
 await ev(`devBypass()`); await sleep(3500);
-if (!(await ev(`getComputedStyle(document.getElementById('app')).display !== 'none'`))) { console.log('the app did not open after the dev bypass'); done(2); }
+if (!(await ev(`getComputedStyle(document.getElementById('app')).display !== 'none'`))) { console.log('the app did not open after the dev bypass'); await done(2); }
 await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); for (const k of await caches.keys()) await caches.delete(k); })()`);
 
 /* An in-page student and Firestore. The engine's host is replaced; everything
@@ -673,7 +678,7 @@ check('a recap shown on an open card goes at sign-out', so.up && so.gone, so);
    the medal in the header strip and in the Games bar, the toast, the three tile states, and the one-row top bar with the medal. */
 console.log('top 5');
 await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html` });
-for (let i = 0; i < 80; i++) { if (await ev(`typeof devBypass === 'function' && !!document.getElementById('dev-bypass-btn') && document.readyState === 'complete'`).catch(() => false)) break; await sleep(250); }
+for (let i = 0; i < 80; i++) { if (await ev(SITE_BOOTED).catch(() => false)) break; await sleep(250); }
 await sleep(3500);
 await ev(`devBypass()`); await sleep(3500);
 await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); for (const k of await caches.keys()) await caches.delete(k); })()`);
@@ -853,7 +858,7 @@ check('the hand-in is kept on this device (localStorage pm:wg) and a bad entry i
 /* ── ?teacher: the console never shows the strip (PM_HOST.user() is null there). Real host, no fake. ── */
 console.log('?teacher');
 await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher` });
-for (let i = 0; i < 80; i++) { if (await ev(`typeof devBypass === 'function' && !!document.getElementById('dev-bypass-btn') && document.readyState === 'complete'`).catch(() => false)) break; await sleep(250); }
+for (let i = 0; i < 80; i++) { if (await ev(SITE_BOOTED).catch(() => false)) break; await sleep(250); }
 await sleep(3500);
 await ev(`devBypass()`); await sleep(2500);
 const tch = await ev(`(() => { const h = document.getElementById('pm-header'); PM.syncHeader(true); return { teacher: IS_TEACHER_MODE, hidden: h.hidden, empty: h.innerHTML === '', shown: !!h.getClientRects().length, strips: [...document.querySelectorAll('.pm-strip')].filter(e => e.getClientRects().length).length }; })()`);
@@ -864,4 +869,4 @@ await shot('10-teacher-no-strip');
 
 check('no uncaught exceptions on the page', consoleErrors.length === 0, consoleErrors.slice(0, 3));
 console.log(`\n${fail ? '✗' : '✓'} pm-e2e: ${pass} passed, ${fail} failed — screenshots in ${OUT}`);
-done(fail ? 1 : 0);
+await done(fail ? 1 : 0);

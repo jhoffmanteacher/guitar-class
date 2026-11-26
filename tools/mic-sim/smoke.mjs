@@ -11,11 +11,16 @@ import { createRequire } from 'module';
 // require() honours NODE_PATH, so a globally installed playwright works:
 //   NODE_PATH=$(npm root -g) node tools/mic-sim/smoke.mjs
 const { chromium } = createRequire(import.meta.url)('playwright');
+import { WALL_FLAGS, wallPlaywright, browserSlot } from '../chrome-wall.mjs';
 
 const base = process.argv[2] || 'http://localhost:8123/';
 const harness = fs.readFileSync(new URL('./page-harness.js', import.meta.url), 'utf8');
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(() => chromium.launch());
-const page = await browser.newPage({ viewport: { width: 1366, height: 657 } });
+/* The wall (tools/chrome-wall.mjs): the flags at launch, every request routed; the run fails if a page left localhost. */
+await browserSlot('mic-sim/smoke');
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: WALL_FLAGS }).catch(() => chromium.launch({ args: WALL_FLAGS }));
+const context = await browser.newContext({ viewport: { width: 1366, height: 657 } });
+const wall = await wallPlaywright(context, 'mic-sim/smoke');
+const page = await context.newPage();
 const pageErrs = [];
 page.on('pageerror', e => pageErrs.push(String(e.message)));
 await page.goto(base + 'index.html', { waitUntil: 'load' });
@@ -145,4 +150,5 @@ const es = await page.evaluate(() => { const r = {}; setLang('es'); ['micrec.ask
 out('i18n-es', es);
 await page.screenshot({ path: process.env.SHOT || '/tmp/micrec-smoke.png' });
 out('pageErrors', { errs: pageErrs });
+process.exitCode = await wall.finish(0);
 await browser.close();

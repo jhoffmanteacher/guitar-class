@@ -60,6 +60,7 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -169,14 +170,16 @@ watchdog.unref();
 
 const failures = [];
 try {
+  await browserSlot('slow-load');
   prof = mkdtempSync(join(tmpdir(), 'gc-slowload-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
     '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars',
-    '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore' });
+    ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
   let version = null;
   for (let i = 0; i < 60 && !version; i++) { try { version = await (await fetch(`http://127.0.0.1:${cdp}/json/version`)).json(); } catch { await sleep(250); } }
   if (!version) throw new Error('Chrome did not open its debugging port in 15 s');
+  wall = await wallWatch(cdp, 'slow-load');
   browser = await connect(version.webSocketDebuggerUrl);
   site = await serve(ROOT);
   const base = `http://127.0.0.1:${site.port}`;
@@ -194,6 +197,7 @@ try {
     const errors = []; const t0 = Date.now();
     const { browserContextId } = await browser.send('Target.createBrowserContext');
     const { targetId } = await browser.send('Target.createTarget', { url: 'about:blank', browserContextId });
+    await wall.page(targetId);
     const { sessionId } = await browser.send('Target.attachToTarget', { targetId, flatten: true });
     const send = (m, p) => browser.send(m, p, sessionId);
     onPage = { sessionId, fn: (method, p) => {
@@ -276,6 +280,7 @@ try {
   exitCode = 1;
 } finally {
   clearInterval(watchdog);
+  if (wall) exitCode = await wall.finish(exitCode);
   shutdown();
 }
 process.exit(exitCode);

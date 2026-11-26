@@ -41,6 +41,7 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -73,8 +74,11 @@ function serve(dir) {
   });
   return new Promise((r) => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
 }
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port) {
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -139,12 +143,14 @@ if (typeof WebSocket === 'undefined') { console.error('trainer-e2e: needs Node 2
 
 const cleanup = []; let exitCode = 0;
 try {
+  await browserSlot('trainer-e2e');
   const prof = mkdtempSync(join(tmpdir(), 'hif-chrome-'));
   const cdp = await freePort();
   const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream',
-    '--autoplay-policy=no-user-gesture-required', '--mute-audio', '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+    '--autoplay-policy=no-user-gesture-required', '--mute-audio', '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
   cleanup.push(() => proc.kill(), () => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+  wall = await wallWatch(cdp, 'trainer-e2e');
   const here = await serve(ROOT); cleanup.push(() => here.srv.close());
   const base = `http://127.0.0.1:${here.port}`;
   console.log(`trainer-e2e: serving ${base}, screenshots in ${SHOTS}`);
@@ -589,7 +595,7 @@ try {
   }
   }
 } catch (e) { console.error('trainer-e2e: could not finish —', e && e.stack || e); exitCode = 2; }
-finally { for (const f of cleanup.reverse()) { try { f(); } catch { /* best effort */ } } }
+finally { if (wall) exitCode = await wall.finish(exitCode); for (const f of cleanup.reverse()) { try { f(); } catch { /* best effort */ } } }
 
 const bad = results.filter((r) => !r.ok);
 console.log(`\ntrainer-e2e: ${results.length - bad.length}/${results.length} checks passed${bad.length ? ' — FAILED: ' + bad.map((b) => b.name).join('; ') : ''}`);

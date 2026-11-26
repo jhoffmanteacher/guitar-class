@@ -154,7 +154,7 @@
    watchdog. Run it after any change to sw.js, the service-worker block in
    app/start.js, swResume* in app/boot.js or teacherResume* in teacher-core.js.
    Only one headless-Chrome run at a time on the machine (CLAUDE.md). The
-   network is blocked (--host-resolver-rules, with --no-proxy-server: behind a
+   network is blocked (tools/chrome-wall.mjs: --host-resolver-rules, with --no-proxy-server: behind a
    proxy, as in a cloud session with HTTPS_PROXY set, Chrome sent every request
    to the proxy and the rules blocked nothing; the Firebase SDK then loaded,
    its "signed out" answer came after devBypass() and signed the dev user out
@@ -179,6 +179,7 @@ import { tmpdir } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -342,8 +343,11 @@ function serve() {
 const freePort = () => new Promise((res, rej) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); s.on('error', rej); });
 
 /* ── CDP ── */
+/* The wall (tools/chrome-wall.mjs): one per case's Chrome; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(cdpPort) {
   const t = await (await fetch(`http://127.0.0.1:${cdpPort}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -742,6 +746,8 @@ async function runCase(cs, env) {
   const res = { name: cs.name, checks: [], note: '', ms: 0, notes: [] };
   const check = (name, ok, shown) => res.checks.push([name, !!ok, shown]);
   site.dir = env.v1;
+  mark(`${cs.name}: waiting for a browser slot`);
+  await browserSlot('update-reload');
   mark(`${cs.name}: starting Chrome`);
   const prof = mkdtempSync(join(tmpdir(), 'gc-update-reload-chrome-'));
   env.profiles.push(prof);
@@ -750,10 +756,11 @@ async function runCase(cs, env) {
   cleanup.push(dropProfile);
   const cdp = await freePort();
   chromeProc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu',
-    '--autoplay-policy=no-user-gesture-required', '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore' });
+    '--autoplay-policy=no-user-gesture-required', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
   let page = null;
   try {
     for (let i = 0; i < 80; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+    wall = await wallWatch(cdp, `update-reload: ${cs.name}`);
     page = await openPage(cdp);
     const c = makeCtx(page, cs.name);
     /* Reloads, counted by the browser three ways: navigations committed (frameNavigated), navigations the page asked for
@@ -1067,6 +1074,7 @@ async function runCase(cs, env) {
   } catch (e) {
     check('ran', false, String(e && e.message || e).split('\n')[0]);
   } finally {
+    if (wall) { check('the wall held (no request left 127.0.0.1, no Firebase app)', !(await wall.finish(0)), 'the wall lines above'); wall = null; }
     if (page) page.close();
     mark(`${cs.name}: closing Chrome`);
     await stopChrome();

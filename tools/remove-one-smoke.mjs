@@ -29,6 +29,7 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -55,8 +56,11 @@ function serve(dir){
   });
   return new Promise(r => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
 }
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port){
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -125,14 +129,16 @@ async function main(){
   if (!chrome){ console.error('remove-one-smoke: no Chrome found (pass --chrome or set CHROME)'); process.exit(2); }
   if (SHOTS) mkdirSync(SHOTS, { recursive: true });
   const { srv, port } = await serve(ROOT);
+  await browserSlot('remove-one-smoke');
   const prof = mkdtempSync(join(tmpdir(), 'gc-remove-one-chrome-'));
   const cdp = await freePort();
-  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
   let pass = 0, fail = 0;
   const ok = (c, line) => { console.log((c ? '  ✓ ' : '  ✗ ') + line); c ? pass++ : fail++; return c; };
   let page;
   try {
     for (let i = 0; i < 80; i++){ try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+    wall = await wallWatch(cdp, 'remove-one-smoke');
     page = await openPage(cdp);
     const errs = [];
     page.on((m, p) => { if (m === 'Runtime.exceptionThrown'){ const d = p.exceptionDetails; errs.push((d.exception && d.exception.description) || d.text); } if (m === 'Runtime.consoleAPICalled' && p.type === 'error') errs.push(p.args.map(a => a.value || a.description || '').join(' ')); });
@@ -270,6 +276,7 @@ async function main(){
     await shot('12-student-started-over-es');
     await js(`setLang('en'); true`);
   } finally {
+    if (wall && await wall.finish(0)) fail++;
     if (page) await page.close();
     proc.kill('SIGTERM');
     srv.close();

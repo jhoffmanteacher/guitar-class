@@ -79,6 +79,7 @@ import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 import { FIXTURES, withAudio } from './built-songs-fixtures.mjs';
 import { madePdf } from './made-pdf.mjs';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -113,8 +114,11 @@ function serve(dir) {
   });
   return new Promise(r => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
 }
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port) {
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -223,16 +227,18 @@ async function main() {
   if (typeof WebSocket === 'undefined') { console.error('console-layout-smoke: needs Node 22+ (global WebSocket)'); process.exit(2); }
   if (SHOTS) mkdirSync(SHOTS, { recursive: true });
   const { srv, port } = await serve(ROOT);
+  await browserSlot('console-layout-smoke');
   const prof = mkdtempSync(join(tmpdir(), 'gc-console-chrome-'));
   const cdp = await freePort();
   const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu',
-    '--autoplay-policy=no-user-gesture-required', 'about:blank'], { stdio: 'ignore' });
+    '--autoplay-policy=no-user-gesture-required', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
   const fails = [];
   const stats = { views: 0, activities: 0, tabs: 0, filters: 0, folds: 0, searches: 0, board: 0, repaint: 0, writes: 0, backs: 0, shots: [] };
   const fail = (step, msg) => fails.push(step + ': ' + msg);
   let page;
   try {
     for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+    wall = await wallWatch(cdp, 'console-layout-smoke');
     page = await openPage(cdp);
     const pageErrors = [];
     page.on((method, params) => {
@@ -1258,6 +1264,7 @@ async function main() {
       }
     }
   } finally {
+    if (wall && await wall.finish(0)) fail('wall', 'a page tried to leave 127.0.0.1 or started Firebase (the lines above)');
     try { if (page) await page.close(); } catch { /* gone */ }
     proc.kill('SIGKILL'); srv.close();
     try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }

@@ -30,6 +30,7 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const args = process.argv.slice(2);
 const opt = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
@@ -114,13 +115,17 @@ async function main() {
   });
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
   const port = srv.address().port, cdp = await freePort();
+  await browserSlot('mic-old-takes-proof');
   const prof = mkdtempSync(join(tmpdir(), 'gc-micold-chrome-'));
-  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu', ...WALL_FLAGS, 'about:blank'], { stdio: 'ignore' });
+  let wall = null;
   let pass = 0, failed = 0; const fails = [];
   const check = (name, cond, detail) => { if (cond) pass++; else { failed++; fails.push(name + (detail ? ' — ' + detail : '')); } };
   try {
     for (let i = 0; i < 80; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+    wall = await wallWatch(cdp, 'mic-old-takes-proof');
     const t = await (await fetch(`http://127.0.0.1:${cdp}/json/new?about:blank`, { method: 'PUT' })).json();
+    await wall.page(t.id);
     const ws = new WebSocket(t.webSocketDebuggerUrl);
     await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
     let id = 0; const pending = new Map(); const pageErrors = [];
@@ -259,7 +264,7 @@ async function main() {
     check('no page errors', errs.length === 0, errs.slice(0, 3).join(' | '));
     ws.close();
   } catch (e) { failed++; fails.push('run: ' + (e && e.stack || e)); }
-  finally { try { proc.kill('SIGKILL'); } catch {} srv.close(); }
+  finally { if (wall && await wall.finish(0)) failed++; try { proc.kill('SIGKILL'); } catch {} srv.close(); }
   for (const f of fails) console.log('  ✗ ' + f);
   console.log(`mic-old-takes-proof: ${pass + failed} checks, ${failed} failed`);
   process.exit(failed ? 1 : 0);

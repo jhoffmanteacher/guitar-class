@@ -27,6 +27,7 @@ import { tmpdir } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { WALL_FLAGS, wallWatch, browserSlot } from './chrome-wall.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -54,8 +55,11 @@ function serve(dir) {
   });
   return new Promise(r => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
 }
+/* The wall (tools/chrome-wall.mjs): set once Chrome is up; every tab is watched before its first navigation. */
+let wall = null;
 async function openPage(port) {
   const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  if (wall) await wall.page(t.id);
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
   let id = 0; const pending = new Map(); const handlers = [];
@@ -84,14 +88,16 @@ async function main() {
   const chrome = opt('--chrome') || process.env.CHROME;
   if (!chrome || !existsSync(chrome)) { console.error('speed-ladder-loop: no Chrome for Testing: set CHROME or pass --chrome <path>'); return 2; }
   if (typeof WebSocket === 'undefined') { console.error('speed-ladder-loop: needs Node 22+ (global WebSocket)'); return 2; }
+  await browserSlot('speed-ladder-loop');
   const prof = mkdtempSync(join(tmpdir(), 'gc-ladder-chrome-'));
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   const cdp = await freePort();
-  chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1',
+  chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, ...WALL_FLAGS,
     '--autoplay-policy=no-user-gesture-required', '--mute-audio', '--no-first-run', '--disable-gpu', '--window-size=1366,657', 'about:blank'], { stdio: 'ignore' });
   let up = false;
   for (let i = 0; i < 80 && !up; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); up = true; } catch { await sleep(250); } }
   if (!up) { console.error('speed-ladder-loop: Chrome did not start'); return 2; }
+  wall = await wallWatch(cdp, 'speed-ladder-loop');
   const site = await serve(ROOT);
   cleanup.push(() => site.srv.close());
   const page = await openPage(cdp);
@@ -216,4 +222,5 @@ async function main() {
 }
 const watchdog = setTimeout(() => { console.error('speed-ladder-loop: ✗ HUNG (13 minutes)'); done(3); }, 13 * 60 * 1000);
 watchdog.unref();
-main().then(done, e => { console.error('speed-ladder-loop: ✗ ' + (e && e.stack || e)); done(2); });
+const finish = async code => done(wall ? await wall.finish(code) : code);
+main().then(finish, e => { console.error('speed-ladder-loop: ✗ ' + (e && e.stack || e)); return finish(2); });
