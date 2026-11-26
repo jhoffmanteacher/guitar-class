@@ -6844,6 +6844,7 @@ function checkLiveSaw() {
    "Uses" is read from the code alone: wallCode() blanks comments and the inside of strings with a small tokenizer
    that knows strings, template literals and regular expressions, and drops import statements, so a name in a
    comment, a string or the import line counts for nothing.
+   A tool may not import or reach the wall's QUIET list (a tool that adds to it quiets a host it should fail on).
    Fails with the tool's path and what is missing. Pinned: at least 15 tools found.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 const WALL_LAUNCH_RE = /\bspawn(?:Sync)?\(\s*(?:chrome|CHROME)\b|process\.env\.CHROME\b|--remote-debugging-port|google-chrome|chromium\.launch\w*\(|puppeteer|['"]playwright[-\w/]*['"]|--headless/;
@@ -6894,7 +6895,9 @@ function wallUnwalled(root) {
     if (!/\bWALL_FLAGS\b/.test(code)) lacks.push('WALL_FLAGS');
     if (!/\b(?:wallWatch|wallPlaywright)\s*\(/.test(code)) lacks.push('wallWatch( or wallPlaywright(');
     if (!/\bbrowserSlot\s*\(/.test(code)) lacks.push('browserSlot(');
-    if (lacks.length) missing.push(`${r} (no ${lacks.join(', no ')})`);
+    /* Only the wall's own self-test may add to its QUIET list: a tool that does quiets a host it should fail on. */
+    const quiets = /\bimport\s*\{[^}]*\bQUIET\b[^}]*\}\s*from\s*['"][^'"]*chrome-wall\.mjs['"]|\.QUIET\b/.test(raw);
+    if (lacks.length || quiets) missing.push(`${r} (${[lacks.length ? 'no ' + lacks.join(', no ') : '', quiets ? 'it uses the wall\'s QUIET list, which only tools/chrome-wall.mjs may' : ''].filter(Boolean).join('; ')})`);
   }
   return { launchers, missing };
 }
