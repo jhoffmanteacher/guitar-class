@@ -5,6 +5,8 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
 
 ## Start here — the short list (read this even if you read nothing else)
 
+Which loop after which change: `docs/which-loop.md`.
+
 **Before you say "done" on a code change:**
 1. While working: `node tools/checks.mjs --check --skip-links` (a Stop hook now
    runs it for you at the end of every turn that changed code; if it blocks
