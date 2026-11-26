@@ -7,7 +7,7 @@
    and the student-progress read (the progress collection) fail and come back on a schedule, while a teacher clicks
    views, hides the tab, types, drags, and a second console writes config/class.
 
-     node tools/console-load-loop.mjs                       136 cases, seed 1 (about 20-30 s)
+     node tools/console-load-loop.mjs                       152 cases, seed 1 (about 15-30 s)
      node tools/console-load-loop.mjs --seed S --cases N     another seed / count
      node tools/console-load-loop.mjs --case K --verbose     replay ONE case: every event, read, write and check
      --family F     only that family (names below)            --root DIR    another site folder (a break-it copy)
@@ -31,24 +31,32 @@
    network, no audio. The second console is the server writing config/class itself, with configVersion moved on by
    one, as a second console's teacherWriteConfig does (no second vm).
 
-   WHAT IS VARIED (section 7). Seventeen families of cases, in turn: persist (one outage kind — settings, progress or
+   WHAT IS VARIED (section 7). Nineteen families of cases, in turn: persist (one outage kind — settings, progress or
    both — from boot until a heal at 3-6 min), flip (the state drawn again every 30 s for 6 min), r31 (progress down for
    5 min and ONE settings failure in minute 1 or 2, booted on a settings view), r33 (progress down, settings good,
    booted on a settings view; the second console dates and hides every card at 15-25 s; a write click 62-75 s; a click
    1-120 ms after each background settings read lands; a box typed in while the first retry after the heal is out),
-   storm (an outage, the tab hidden every 5 s and shown 2.5 s later, for a minute), healthy (a good boot, outages from
+   storm (an outage, the tab hidden every 5 s and shown 2.5 s later, for a minute; every other storm hides it from
+   50 s to 170 s instead), healthy (a good boot, outages from
    90 s), empty (a GOOD class with no students and no settings doc, or an empty one), live (booted on Live In-Class
    Games mid-game after an update reload, during an outage), detail (a card's page from the update reload's note,
    progress down; a Hidden click lands on top of the other console's change and its follow-up settings read fails, so
    the page is drawn from the failed copy; a tab return then starts the retry, with a click right after its read).
-   Review R4 added eight: early (slow reads, 250-700 ms; a view clicked 0.2-1.2 s in, while the first load is out,
+   Review R4 added ten: early (slow reads, 250-700 ms; a view clicked 0.2-1.2 s in, while the first load is out,
    sometimes while the module files load too; both reads down for 1.5-3.5 s, then progress), early2 (the same with
    only progress down), midload (module files 300 ms; a view clicked while they load), summary (Skills Overview and
    a class-period change, progress down), livelist (booted on Live In-Class Games with the settings read down, then a
    Remove / Restore / move in its games list), games2 (Games with progress down: the class games switch must be
-   offered), failedread (a loaded console whose settings read fails for 25 s; Refresh on a card's page, then Songs,
-   Teacher view songs or Live In-Class Games, with write clicks) and chaos (both reads flipping every 2-20 s for
-   6 min under random views, writes, sub-screens, hides and Refresh).
+   offered), failedread (a loaded console whose settings read fails for 25 s; on a card's page: Refresh, a write, a
+   tab return 15 s later that repaints the Students pane from the copy in hand; on the list: a write whose follow-up
+   read fails, a list filter, a tab return; then Songs, Teacher view songs or Live In-Class Games, with write
+   clicks), chaos (both reads flipping every 2-20 s for 6 min under random views, writes, sub-screens, hides and
+   Refresh), slowprog (a progress read that takes 2-6 s, the settings fast; Manage, Games, Songs, Class activities,
+   Skills Overview, Students or Practice minutes opened while it is out, in turn, then a Who picker, Arrange board, a
+   list row or a filter, and a write click; it lands, or every third case fails) and cfgfirst (the settings read
+   fails first, for 10-25 s, and the progress read is slow: booted on a roster or settings view with no click until
+   the minute timer's retry, or booted on Live In-Class Games, Mic recordings' own read bringing the settings back,
+   then a roster view opened).
    Each case also draws the view it boots on (all 16, and the three Class activities screens), views clicked, Arrange
    board, Back to list, a list row, a Songs Preview, a Who picker opened, the tab hidden and shown, a box typed in or
    a card dragged for 10-90 s, the second console's writes (dates, Hidden, Optional, Play Along, Keep in Today, pins,
@@ -56,25 +64,31 @@
    The network always heals at the end, and the 130 s after the heal have no click, no hidden tab and no typing (the
    recovery check below). Events a read or a commit queues (the clicks right after a read) run at their time.
 
-   WHAT IS ASSERTED (each failure carries its finding id; the brief's invariants 1-5):
-     R3-1  the screen matches the reads (checked whenever no read is out): no "Could not read the class settings" line
-           while the console's newest settings read was good; "Could not load student data" only after a progress read
-           failed (not when the settings read failed first); no roster line ("Could not load student data" / "the
-           student list") and no "Student progress did not load" note while the roster is loaded; a note that says
-           the class settings loaded only while they did. And recovery: 125 s after the heal, with no click, a view
-           that reads the roster (or the class settings) shows the roster loaded, no failure line and no note; a tool
-           view is drawn (not index.html's "Loading student data…").
-     R3-2  while the roster has failed to load (no roster yet, a read failed): no roster fact in the view — no count
-           of students, accounts or done/turned-in, no "No students yet" / "No student data yet", no "not in the
-           roster", no "would be locked out", no "Every roster account is", no "who hasn't finished" — and no control
+   WHAT IS ASSERTED (each failure carries its finding id; the brief's invariants 1-5). The checks run after each event
+   once its reads land, and also every 50 ms while they are out, and every 50 ms of the boot while its reads are out
+   (the load window is on screen, and clickable, that long: review R4-1).
+     R3-1  the screen matches the reads: no "Could not read the class settings" line while no settings read is out and
+           the console's newest one was good; "Could not load student data" only after a progress read failed (not
+           when the settings read failed first), also while a read is out; and once no read is out, no roster line
+           ("Could not load student data" / "the student list") and no "Student progress did not load" note while
+           the roster is loaded, and a note that says the class settings loaded only while they did. And recovery:
+           125 s after the heal, with no click, a view that reads the roster (or the class settings) shows the roster
+           loaded, no failure line and no note; a tool view is drawn (not index.html's "Loading student data…").
+     R3-2  while the roster is missing (its first read still out, or it failed to load): no roster fact in the view —
+           no count of students, accounts or done/turned-in, no "No students yet" / "No student data yet", no "not in
+           the roster", no "would be locked out", no "Every roster account is", no "who hasn't finished" — and no control
            computed from the roster: a student's row buttons (games, period, pause, archive, Open through, Clear,
            Clear all, More…), a Who tick box, Open for all, Allow all in CAS, a roster account's Allowed / Locked out
-           or a stray's Remove; and no "Everyone is already open" alert.
+           or a stray's Remove; no number in the Skills Overview summary strip; and no "Everyone is already open"
+           alert.
      R3-3  a background read never moves the config copy without a redraw: (a) after a settings read made by the first
            load or its retry lands, by the time the console is quiet every write control on screen was drawn from
            that copy or one at least as new, and a click 1-120 ms after such a read is on such a control; (b) a write
            whose control was drawn before a second-console change it touches is refused ("Nothing was saved"), never
-           committed, in every state, as on a healthy console.
+           committed, when a first-load / retry read moved the copy past that change (or no read did). When a write's
+           own follow-up read or a view's read moved it, the write is counted ("stale-control writes outside this
+           tool") and not failed: a healthy console does the same today (main d8ca4e2, --no-outage, seed 1 case 122:
+           a card page's Hidden after a Clear).
      R2-reads  bounded reads (the brief's invariant 4): in any 60 s with the outage unchanged for the 60 s before and
            no click, the console makes at most 6 settings + progress reads while visible (4 retries, one every 15 s at
            most, one read each, plus one redraw read when the settings come back) and NONE while hidden; never two
@@ -84,22 +98,25 @@
      R1-dead   no view left on a "Loading…" line with nothing left to run.
      R1-empty  a GOOD but empty class never shows a failure line or the note.
      R1-live   on Live In-Class Games the stage (#lq-stage) is always there and is never replaced while the view stays.
-     R4-1      "Student progress did not load" / "Loading student progress" only while the roster is missing; R3-2 also
-               covers the load window (no roster yet, no read failed) and the Skills Overview summary strip.
-     R4-failedcopy  no write control (and no Live games list button) drawn from a FAILED settings read is on screen once
-               the console is quiet (a view drawn from the empty copy a failed read leaves).
+     R4-1      "Student progress did not load" / "Loading student progress" only while the roster is missing, and
+               "Loading student progress" not once a progress read failed (a view drawn while loading is drawn again).
+     R4-failedcopy  no write control, no Live games list button and no Class activities list row drawn from a FAILED
+               settings read is on screen once the console is quiet (a view drawn from the empty copy it leaves).
      R4-archived  an archived student never comes back into the roster the views draw from after a failed settings read.
      R4-games  during a progress outage with the settings read good, Games still offers the class games On / Off switch.
      page-error   anything the console logs through console.error or throws.
    COVERAGE FLOORS (a full run, 64+ cases, no --family): every family ran; 40+ write clicks reached the server; 4+
    window clicks fired; 200+ checks ran with the roster down on a view that draws without it; 30+ recovery checks;
-   5+ Who pickers opened; 3+ card pages kept over a failed read when a retry starts; 3+ boxes typed in during a retry.
+   5+ Who pickers opened; 3+ card pages kept over a failed read when a retry starts; 3+ boxes typed in during a retry;
+   100+ checks while the first progress read was out; 3+ minutes measured with the tab hidden throughout.
 
    NOT COVERED: anything a browser adds (layout, CSS: a pane hidden by CSS counts as on screen here; focus moves;
    real event order); the update reload itself (the resume note is set, the reload is not played); a settings read
    that fails AFTER the roster has loaded, on a view with no retry (Games, Manage, Songs, Mic, the board's cached
    repaint): that view waits for a click or Refresh, as before (asserted for the R3-1 line consistency and R4-failedcopy,
-   not for recovery); the sidebar's activity tree and the Live games picker drawn from a failed copy (no write control); more than one console in a vm (the second console is the server); students writing their own docs
+   not for recovery); the sidebar's activity tree and the Live games picker drawn from a failed copy (no write
+   control); a stale control written after a write's own follow-up read (R3-3 above); more than one console in a vm
+   (the second console is the server); students writing their own docs
    during a case; the Delete dialog (tools/remove-one-sim.mjs); the write race between two real consoles
    (tools/two-consoles-loop.mjs). The latencies (8-78 ms, 15% of calls 120-600 ms) are guesses. Made-up data only:
    12 students "Test Student 01" … at example.test, a made-up teacher address. */
@@ -896,7 +913,7 @@ const VIEWS = ['activities', 'students', 'skills', 'responses', 'trouble', 'game
 const TOOL_VIEWS = ['livequiz', 'mic', 'reports', 'tsongs', 'errors', 'songrequests', 'songbuilder'];
 const SETTINGS_VIEWS = ['activities', 'games', 'manage', 'songs'];
 const usesRoster = v => !TOOL_VIEWS.includes(v);
-const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog'];
+const FAMILIES = ['persist', 'flip', 'r31', 'r33', 'storm', 'healthy', 'empty', 'live', 'detail', 'early', 'early2', 'midload', 'summary', 'livelist', 'games2', 'failedread', 'chaos', 'slowprog', 'cfgfirst'];
 const MIN = 60000, SEC = 1000;
 const ST = { ok: { cfg: false, prog: false }, cfg: { cfg: true, prog: false }, prog: { cfg: false, prog: true }, both: { cfg: true, prog: true } };
 const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'progress' : 'ok';
@@ -904,6 +921,8 @@ const stName = s => s.cfg && s.prog ? 'both' : s.cfg ? 'settings' : s.prog ? 'pr
 function genCase(seed, k, famOverride) {
   const r = makeRng(seed, k, 7);
   const fam = famOverride || FAMILIES[k % FAMILIES.length];
+  // This case's turn within its family: the families below that must reach every view or variant take them in turn.
+  const nth = famOverride ? k : Math.floor(k / FAMILIES.length);
   const c = { k, fam, slots: [], events: [], empty: fam === 'empty', emptyKind: r.pick(['missing', 'blank']), windowClicks: 0 };
   const slot = (from, to, s) => c.slots.push({ from, to, ...s });
   const pickBoot = pool => r.pick(pool);
@@ -932,10 +951,14 @@ function genCase(seed, k, famOverride) {
   else if (fam === 'failedread') { heal = 2 * MIN; boot = 'activities'; const e = r.int(20, 30) * SEC; slot(e, e + 25 * SEC, ST.cfg); c.failAt = e; }
   // The load window held open (review R4-1): a progress read that takes 2-6 s, the settings fast; views drawn and
   // clicked while it is out, and it then lands or fails.
-  else if (fam === 'slowprog') { heal = 3 * MIN; c.noResume = true; boot = 'activities'; c.progExtra = r.int(2000, 6000); if (r.chance(0.5)) slot(0, heal, ST.prog); c.earlyView = r.pick(['manage', 'manage', 'games', 'songs', 'activities', 'skills', 'students', 'minutes']); c.earlyAt = r.int(100, 800); }
+  else if (fam === 'slowprog') { heal = 3 * MIN; c.noResume = true; boot = 'activities'; c.progExtra = r.int(2000, 6000); if (nth % 3 === 2) slot(0, heal, ST.prog); c.earlyView = ['manage', 'games', 'songs', 'activities', 'manage', 'skills', 'students', 'minutes'][nth % 8]; c.earlyAt = r.int(100, 800); }
+  // The settings read fails first (review R4-1): (A) booted on a view the box line replaces, the retry's settings read
+  // comes back and its progress read is slow (no click: the minute timer); (B) booted on Live In-Class Games, the
+  // settings read back through Mic recordings' own read, then a roster view opened (no progress read has failed).
+  else if (fam === 'cfgfirst') { heal = 3 * MIN; c.progExtra = r.int(1500, 3000); slot(0, r.int(10, 25) * SEC, ST.cfg); c.variant = nth % 2 ? 'B' : 'A'; boot = c.variant === 'A' ? ['skills', 'activities', 'students', 'games', 'trouble', 'manage', 'responses', 'songs'][Math.floor(nth / 2) % 8] : 'livequiz'; }
   else if (fam === 'chaos') { heal = 6 * MIN; for (let t = 0; t < heal; t += r.int(2, 20) * SEC) { const x = r(); slot(t, t + 20 * SEC, x < 0.3 ? ST.ok : x < 0.55 ? ST.cfg : x < 0.85 ? ST.prog : ST.both); } }
   c.boot = boot;
-  c.bootSub = fam === 'detail' ? 'detail' : fam === 'failedread' ? r.pick(['detail', 'split']) : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
+  c.bootSub = fam === 'detail' ? 'detail' : fam === 'failedread' ? (nth % 2 ? 'split' : 'detail') : c.noResume ? null : boot === 'activities' ? r.pick(['split', 'split', 'board', 'detail']) : null;
   c.heal = heal;
   // Before the heal: a teacher at work.
   const pre = Math.max(heal, 3 * MIN);
@@ -951,7 +974,9 @@ function genCase(seed, k, famOverride) {
     if (r.chance(0.5)) add(tIn(150 * SEC, 200 * SEC), 'view', { v: r.pick(VIEWS) });
     if (r.chance(0.5)) add(tIn(20 * SEC, 280 * SEC), 'B', { cells: r.pick(['dates', 'mix']) });
   } else if (fam === 'storm') {
-    for (let i = 0; i < 12; i++) { add(60 * SEC + i * 5 * SEC, 'hide'); add(62.5 * SEC + i * 5 * SEC, 'show'); }
+    // Every other storm hides the tab for two whole minutes instead: the reads it makes while hidden must be none.
+    if (nth % 2) { add(50 * SEC, 'hide'); add(170 * SEC, 'show'); }
+    else for (let i = 0; i < 12; i++) { add(60 * SEC + i * 5 * SEC, 'hide'); add(62.5 * SEC + i * 5 * SEC, 'show'); }
     if (r.chance(0.5)) add(tIn(10 * SEC, 50 * SEC), 'view', { v: r.pick(VIEWS.filter(usesRoster)) });
   } else if (fam === 'detail') {
     // A card's page (the update reload's note) while progress is down. The other console changes the dates; this one
@@ -974,18 +999,31 @@ function genCase(seed, k, famOverride) {
     add(r.int(45, 60) * SEC, 'write', { prefer: 'lqg' });
   } else if (fam === 'games2') {
     add(r.int(5, 10) * SEC, 'write', { prefer: 'classgames', must: true });
+  } else if (fam === 'failedread' && c.bootSub === 'split') {
+    // A write whose follow-up read fails leaves the failed copy under the list; a filter click and a tab return
+    // (the progress read only) then repaint the list's rows and the Students pane from it.
+    add(c.failAt + 2 * SEC, 'write', { prefer: 'date' });
+    add(c.failAt + 4 * SEC, 'sub', { what: 'filter' });
+    add(c.failAt + 6 * SEC, 'hide'); add(c.failAt + 7.5 * SEC, 'show');
+    add(c.failAt + 10 * SEC, 'view', { v: r.pick(['songs', 'tsongs', 'livequiz']) });
+    add(c.failAt + 14 * SEC, 'write', {});
   } else if (fam === 'failedread') {
+    // The card's page kept over the failed Refresh; a tab return 15 s after it (the roster read only) repaints the
+    // Students pane from the copy in hand, which is the failed read.
     add(c.failAt + 3 * SEC, 'refresh');
-    add(c.failAt + 4.5 * SEC, 'sub', { what: 'filter' });
     add(c.failAt + 6 * SEC, 'B', { cells: 'all' });
     add(c.failAt + 9 * SEC, 'write', {});
-    add(c.failAt + 12 * SEC, 'view', { v: r.pick(['songs', 'tsongs', 'livequiz']) });
-    add(c.failAt + 16 * SEC, 'write', {});
+    add(c.failAt + 19 * SEC, 'hide'); add(c.failAt + 20.5 * SEC, 'show');
+    add(c.failAt + 23 * SEC, 'view', { v: r.pick(['songs', 'tsongs', 'livequiz']) });
+    add(c.failAt + 27 * SEC, 'write', {});
   } else if (fam === 'slowprog') {
     add(c.earlyAt, 'view', { v: c.earlyView, early: true });
     add(c.earlyAt + r.int(300, 1200), 'sub', { what: r.pick(['who', 'board', 'pick', 'filter']) });
     add(c.earlyAt + r.int(1300, 1900), 'write', {});
     if (r.chance(0.5)) add(r.int(10, 20) * SEC, 'B', { cells: 'mix' });
+  } else if (fam === 'cfgfirst') {
+    if (c.variant === 'A') { for (let t = 50 * SEC; t < 80 * SEC; t += 500) add(t, 'check'); }
+    else { add(30 * SEC, 'view', { v: 'mic' }); add(34 * SEC, 'view', { v: r.pick(['skills', 'students', 'trouble', 'responses']) }); }
   } else if (fam === 'chaos') {
     for (let i = 0, n = r.int(4, 10); i < n; i++) add(tIn(3 * SEC, heal - 5 * SEC), 'view', { v: r.pick(VIEWS) });
     for (let i = 0, n = r.int(3, 8); i < n; i++) add(tIn(3 * SEC, heal - 5 * SEC), 'write', {});
@@ -1078,7 +1116,7 @@ async function runCase(seed, k, o) {
   const c = genCase(seed, k, o.family);
   const r = makeRng(seed, k, 11);
   const clock = new VClock();
-  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0 } };
+  const W = { seed, k, clock, baseTime: Date.UTC(2026, 10, 24, 18, 0, 0), fails: [], log: [], stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0 } };
   W.server = new FakeServer({ clock, rng: makeRng(seed, k, 2), docs: seedDocs(c.empty, c.emptyKind), netAt: c.netAt });
   W.server.fixedLat = c.lat || 0; W.server.progExtra = c.progExtra || 0; W.modMs = c.modMs || 0;
   if (c.boot === 'livequiz' || c.fam === 'live') W.server.docs.set('liveQuiz/current', { state: 'question', quizId: 'string-id', qIndex: 0, sessionId: 'sess-1', limitSec: 20, scores: {}, mode: 'class' });
@@ -1087,13 +1125,15 @@ async function runCase(seed, k, o) {
   const fail = (tag, msg) => { if (W.fails.some(f => f.tag === tag && f.msg === msg)) return; W.fails.push({ tag, msg, t: clock.now }); say(`✗ [${tag}] ${msg}`); };
   const A = makeConsole(W);
   // Which copy the console holds, and which read put it there (polled after every timer).
-  W.lastCopy = null; W.bgCopy = null; W.lastCfgRead = null; W.stageEl = null;
+  W.lastCopy = null; W.bgCopy = null; W.lastCfgRead = null; W.stageEl = null; W.copyMoves = [];
   const pollCopy = () => {
     let s; try { s = A.ctx.__stamp(); } catch { return; }
     if (s.cfg === W.lastCopy) return;
     W.lastCopy = s.cfg;
     if (s.ok) W.goodCopy = s.cfg;
     const rd = W.lastCfgRead; W.lastCfgRead = null;
+    // Which read moved the copy to which version: R3-3 (b) blames only a first-load / retry read.
+    if (s.ok) W.copyMoves.push({ v: Number(s.v) || 0, load: !!(rd && rd.load), t: clock.now });
     if (rd && rd.load && rd.ok && s.ok) { W.bgCopy = { cfg: s.cfg, v: Number(s.v) || 0, t: clock.now }; say(`the copy is now v${s.v}, from a first-load / retry read`); }
     else if (verbose) say(`the copy is now ${s.ok ? 'v' + s.v : 'the failed read ({})'}`);
   };
@@ -1120,7 +1160,15 @@ async function runCase(seed, k, o) {
     // R3-3 (b): this write's control was drawn from version bornV; a second-console change after that, to a cell it writes, must refuse it.
     const mine = new Set(); cm.patch.forEach(pt => leaves(pt).forEach((v, path) => mine.add(path)));
     const hit = W.server.history.filter(h => h.by === 'B' && h.v > cm.ctrl.bornV && h.v <= cm.readCV).flatMap(h => h.changed.filter(p => mine.has(p) || [...mine].some(m => p.startsWith(m + '.') || m.startsWith(p + '.'))));
-    if (hit.length) fail('R3-3', `a write from a control drawn at v${cm.ctrl.bornV} (${cm.ctrl.sel}) committed over the other console's later change to ${clip([...new Set(hit)].join(', '), 120)} — a healthy console refuses it ("Nothing was saved")`);
+    if (!hit.length) return;
+    /* The read that first brought the copy past the other console's change: a first-load / retry read is this tool's
+       business (it moved the copy without a redraw). A write's own follow-up read or a view's read does the same on a
+       healthy console today (seen on main d8ca4e2 with --no-outage, a card page's Hidden / Delete after a Clear): not
+       this tool's, counted and listed under "outside this tool" instead. No such read at all is a failure. */
+    const firstV = Math.min(...W.server.history.filter(h => h.by === 'B' && h.v > cm.ctrl.bornV && h.v <= cm.readCV).map(h => h.v));
+    const mover = W.copyMoves.find(m => m.v >= firstV);
+    if (mover && !mover.load) { W.stats.healthyStale++; say(`(outside this tool) a write from a control drawn at v${cm.ctrl.bornV} (${cm.ctrl.sel}) committed over the other console's later change; the copy moved past it through a write's or a view's own read at ${mmss(mover.t)}`); return; }
+    fail('R3-3', `a write from a control drawn at v${cm.ctrl.bornV} (${cm.ctrl.sel}) committed over the other console's later change to ${clip([...new Set(hit)].join(', '), 120)}${mover ? ` (a first-load / retry read moved the copy past it at ${mmss(mover.t)} without a redraw)` : ''} — a healthy console refuses it ("Nothing was saved")`);
   };
   // Up to T, or to an event a read or a commit has just queued (a click right after a read must happen then, not later).
   const advanceTo = async T => {
@@ -1337,6 +1385,7 @@ async function runCase(seed, k, o) {
     const allHidden = hiddenAt(t) && !hides.some(e => e.t >= t && e.t < t + MIN);
     const key = (allHidden ? 'hidden, ' : '') + stName(s0) + ' down';
     W.rate[key] = Math.max(W.rate[key] || 0, reads);
+    if (allHidden) W.stats.hiddenMinutes++;
     if (allHidden && reads) fail('R2-reads', `${reads} reads in the minute from ${mmss(t)} with the tab hidden (${stName(s0)} down): want 0`);
     if (!allHidden && reads > 6) fail('R2-reads', `${reads} reads in the minute from ${mmss(t)} (${stName(s0)} down, no click${hides.some(e => e.t >= t && e.t < t + MIN) ? ', the tab hidden and shown' : ''}): want at most 6`);
   }
@@ -1349,14 +1398,14 @@ async function runCase(seed, k, o) {
    ════════════════════════════════════════════════════════════════════════ */
 async function main() {
   const seed = Number(opt('--seed', 1));
-  const n = Number(opt('--cases', 144));
+  const n = Number(opt('--cases', 152));
   const only = opt('--case', null);
   const family = opt('--family', null);
   if (family && !FAMILIES.includes(family)) { console.error(`console-load-loop: unknown family "${family}" (${FAMILIES.join(', ')})`); process.exit(2); }
   const t0 = Date.now();
   SITE = compileSite(resolve(opt('--root', REPO)));
   const ks = only !== null ? [Number(only)] : Array.from({ length: n }, (_, i) => i);
-  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0 }, rate: {} };
+  const out = { failed: [], byTag: {}, fams: {}, stats: { writeClicks: 0, committed: 0, refused: 0, windowClicks: 0, downChecks: 0, recoverChecks: 0, noControl: 0, busyGuards: 0, whoOpened: 0, detailKept: 0, loadingChecks: 0, healthyStale: 0, hiddenMinutes: 0 }, rate: {} };
   for (const k of ks) {
     heartbeat(`case ${k}`, true);
     const { c, W } = await runCase(seed, k, { verbose: flag('--verbose'), family });
@@ -1383,11 +1432,12 @@ async function main() {
     if (st.busyGuards < 3) floors.push(`only ${st.busyGuards} boxes typed in while a retry was out (floor 3)`);
     if (st.whoOpened < 5) floors.push(`only ${st.whoOpened} Who pickers opened (floor 5)`);
     if (st.detailKept < 3) floors.push(`only ${st.detailKept} cards kept on screen over a failed settings read (floor 3)`);
+    if (st.hiddenMinutes < 3) floors.push(`only ${st.hiddenMinutes} minutes measured with the tab hidden throughout (floor 3)`);
     if (st.loadingChecks < 100) floors.push(`only ${st.loadingChecks} checks while the first progress read was out (floor 100)`);
   }
   floors.forEach(f => console.log(`  ✗ [coverage] ${f}`));
   const rate = Object.keys(out.rate).sort().map(x => `${x} ${out.rate[x]}`).join(', ');
-  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.loadingChecks} while it was loading; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry; most reads in a quiet minute: ${rate || '—'}`;
+  const detail = `seed ${seed}; ${Object.keys(out.fams).map(f => f + ' ' + out.fams[f]).join(', ')}; ${st.writeClicks} write clicks (${st.committed} saved, ${st.refused} "Nothing was saved", ${st.windowClicks} right after a background read); ${st.downChecks} checks with the roster down; ${st.loadingChecks} while it was loading; ${st.hiddenMinutes} minutes hidden throughout; ${st.recoverChecks} recovery checks; ${st.whoOpened} Who pickers opened; ${st.detailKept} cards kept over a failed read; ${st.busyGuards} boxes typed in during a retry; ${st.healthyStale} stale-control writes outside this tool (a write's or a view's own read); most reads in a quiet minute: ${rate || '—'}`;
   process.stderr.write(`console-load-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s\n`);
   if (out.failed.length || floors.length) {
     console.log(`console-load-loop: ✗ ${out.failed.length} of ${ks.length} cases failed (${Object.keys(out.byTag).sort().map(t => t + ' ' + out.byTag[t]).join(', ') || 'coverage'}) — ${detail}`);
