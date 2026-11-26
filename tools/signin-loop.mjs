@@ -63,10 +63,17 @@
    WHAT IT PRINTS AS IT GOES (2026-11-26, after GitHub run 45870814442 printed nothing for 24 minutes): one line as
    each case starts (▶) and ends (■), also in the quiet planted-fault runs; a case that does not finish within
    --case-ms (default 50 s) fails as "HUNG at <step>" and the run goes on; past --deadline (default 540 s) the run
-   prints "HUNG at <case>" and exits 3. Before the first case a preflight checks that the SDK reaches both emulators
-   (a sign-in, then a server read through a device relay, 15 s each) and stops with exit 2 if not (--no-preflight
-   skips it: to watch every case run into its limits, as when diagnosing the tool itself).
-   Last run: not yet (built 2026-11-26 in a cloud session whose network could not fetch the Firestore emulator). */
+   prints "HUNG at <case>" and exits 3. The deadline is kept by a worker thread (emu-site.mjs watchdog), so it fires
+   even when this thread's event loop is blocked, and so does --stall (default 30 s with no heartbeat): it prints three
+   samples of where the tool was stuck ("stuck in …", with the async callers) and exits 3. GitHub run 45885160639
+   went silent for 9.5 minutes that way: the stub DOM's querySelector always answered null, so the console's split
+   view drew [data-ta-detail], could not find it, and drew the split again in a promise round with no timer (fixed in
+   emu-site.mjs: an element now finds what was drawn into its innerHTML). Before the first case a preflight checks
+   that the SDK reaches both emulators (a sign-in, then a server read through a device relay, 15 s each) and stops
+   with exit 2 if not (--no-preflight skips it: to watch every case run into its limits, as when diagnosing the tool
+   itself).
+   Last run: 2026-11-26, a cloud session with the emulator jar fetched by hand (firebase-tools 15.36.0, Firestore
+   emulator 1.22.0): 56 passed, 0 failed, 8 of 8 breaks caught, 140 s (the bulk group 8 s). */
 import { readFileSync } from 'node:fs';
 import { emuArgs, loadSdk, emulator, makeWorld, makeDevice, makePage, signInPage, waitScreen, until, sleep, closeAll, wall, makeRunner, step, watchdog, preflight } from './emu-site.mjs';
 
@@ -85,7 +92,7 @@ const DEADLINE = Number(A.val('deadline')) || 540;
 const TEACHER = (/const TEACHER_EMAIL\s*=\s*'([^']+)'/.exec(readFileSync(`${A.site}/firebase-config.js`, 'utf8')) || [])[1] || 'jhoffman@seq.org';
 const KEY1 = 'm1w1-b-sec0-0', KEY2 = 'm1w1-b-sec0-1';
 let CUR = null;
-watchdog('signin-loop', DEADLINE, () => (CUR ? { pass: CUR.pass, fail: CUR.fail } : { pass: 0, fail: 0 }));
+await watchdog('signin-loop', DEADLINE, () => (CUR ? { pass: CUR.pass, fail: CUR.fail } : { pass: 0, fail: 0 }), Number(A.val('stall')) || 30);
 
 /* ── one run of the cases ── */
 async function suite(groups, plant, quiet, prefix){
