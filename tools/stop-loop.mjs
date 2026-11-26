@@ -12,7 +12,7 @@
    WHEN TO RUN IT. After adding or changing anything that starts sound, a timer, an rAF loop, a listener, the mic or a
    recorder (a drill, a card, a game, a floating tool, a live game), or a way out (activateSet, switchTabById, the hash
    router, caOnToggle / caCloseOpen, the visibilitychange handlers, toggleTranslate, signOut). Node only, no browser,
-   no network. The default 221 schedules (one per start × way-out pair) take about 50 s of CPU: 1 to 3 minutes on a
+   no network. The default 241 schedules (one per start × way-out pair) take about 50 s of CPU: 1 to 3 minutes on a
    shared machine (2026-11-25).
 
    FLAGS
@@ -65,7 +65,7 @@
 
    WHAT A START IS ("--list" prints them with their ways out): a tab's Play line on a set and on a card; Shuffle,
    Card Deck, Ear Spark, Find-the-Note (mid-round, and answered to the end then the language switch then Start again);
-   Note Call, Call the chord, Name the power chord; a practice card, a whole-song card, the ca-54 speed card; a
+   Note Call, Call the chord, Name the power chord, Echo (a made-up phrase and a record phrase); a practice card, a whole-song card, the ca-54 speed card; a
    backing-track snippet and a private song still loading; the Module Review recorder; the floating Metronome, Timer
    and Tuner; the Listening Coach (open, Start, count-in, listening, with consented recording), and the Coach past its
    30 s recording cap; on the console, "Hear the chord change" in Preview and in a real game, left during the song's
@@ -87,7 +87,7 @@
                           listener the start added and never removed counts)
      late-timer           a timeout the start set fires after the grace and changes the page or starts something
      left-running         a drill or player still in its running state (Shuffle 'play', Deck / Ear 'run', Name the power
-                          chord 'play', ncLive, chcLive, pcState, snipState, playSeqState, recState, ecRuns, sfWait,
+                          chord 'play', ncLive, chcLive, echoLive, pcState, snipState, playSeqState, recState, ecRuns, sfWait,
                           coachMicLive)
      retry-busy           progressLoadRetryBusy() is still true
      update-waits         a new service worker takes over and the page does not reload within 2.5 s (busyReason)
@@ -1216,6 +1216,10 @@ const STARTS = [
   { id: 'find-note-end@set', place: PLACE.set('m2w1'), press: inSet('[onclick^="fgStart"]'), finish: 'fg', only: /^stale-timer$/, running: any("Object.values(fretGames).some(s => s)"), window: [0, 300] },
   { id: 'note-call@card', place: PLACE.card('ca-23'), press: inCard('ca-23', '[onclick^="ncStart"]'), running: any('!!ncLive'), window: [500, 4000] },
   { id: 'call-chord@card', place: PLACE.card('ca-48'), press: inCard('ca-48', '[data-chc-start]'), running: any('!!chcLive'), window: [500, 4000] },
+  /* Echo (ca-55, app/echo.js): a made-up phrase (the site's strums and clicks on the AudioContext clock), and a record
+     phrase (two <audio> elements: the full mix, then the rhythm-down mix), reached by its phrase dot first. */
+  { id: 'echo@card', place: PLACE.card('ca-55'), press: inCard('ca-55', '[data-echo-start]'), running: any('!!echoLive'), window: [300, 4000] },
+  { id: 'echo-record@card', place: PLACE.card('ca-55'), press: page => { const c = openCard(page, 'ca-55'); const go = c && c.querySelector('[data-echo-go="11"]'); if (go) go.click(); return c ? c.querySelector('[data-echo-start]') : null; }, running: any('!!echoLive'), window: [300, 4000] },
   { id: 'power-name@card', place: PLACE.card('ca-49'), press: inCard('ca-49', '[data-pwn-start]'), running: any("Object.values(powerNames).some(s => s && s.phase === 'play')"), window: [200, 3000] },
   { id: 'practice-card@card', place: PLACE.card('ca-10'), press: inCard('ca-10', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'whole-song@card', place: PLACE.card('ca-24'), press: inCard('ca-24', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
@@ -1332,6 +1336,7 @@ const RUNNING_STATE = `(() => { const out = [], each = (o, f) => Object.keys(o |
   each(earDrills, s => s.phase === 'run').forEach(k => out.push('Ear ' + k + " in 'run'"));
   if (typeof powerNames !== 'undefined') each(powerNames, s => s.phase === 'play').forEach(k => out.push('Name the power chord ' + k + " in 'play'"));
   if (ncLive) out.push('Note Call (ncLive)'); if (chcLive) out.push('Call the chord (chcLive)');
+  if (typeof echoLive !== 'undefined' && echoLive) out.push('Echo (echoLive)');
   if (pcState) out.push('a practice card (pcState)'); if (snipState) out.push('a snippet (snipState)'); if (playSeqState) out.push('a tab line (playSeqState)');
   each(recState, s => s.starting || s.recording).forEach(k => out.push('the recorder ' + k + ' (recState)'));
   if (Object.keys(ecRuns).length) out.push('an exit check (ecRuns)');

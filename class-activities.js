@@ -388,7 +388,8 @@
    `ca-51` is the "Perdón Mamá" play-along card (2026-11-09);
    `ca-52` is "Strum Pattern check" (2026-11-14); `ca-53` is "Strum
    Pattern — The Chorus" (2026-11-16); `ca-54` is "Sweet Child O' Mine —
-   Speed Ladder" (2026-11-24); the next new activity is `ca-55`.
+   Speed Ladder" (2026-11-24); `ca-55` is "Echo — Power Chord
+   Strums" (2026-11-26); the next new activity is `ca-56`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7570,6 +7571,66 @@ window.CLASS_ACTIVITIES = [
           barsPerRow: 4,   // the chorus on one row, shown twice (Jonathan, 2026-11-17)
           bpm: 85,         // the slider's first tempo (Jonathan, 2026-11-17)
         },
+      },
+    ],
+  },
+  /* ca-55 — Echo — Power Chord Strums (Jonathan, 2026-11-26: "create an echo activity … for sweet child of mine",
+     then the same day: start on made-up D5 / C5 / G5 phrases, not the song, and work up step by step to its own strum
+     patterns — "it kind of tricks students into practicing the verse and chorus patterns"). A new format: the site
+     plays a short phrase (Listen), then leaves the same length for the student to play it back (Your turn), then
+     "Got it" / "Again" / "Next phrase". Nothing listens (the mic does not work in his room) and nothing is saved but
+     the step's own tick. Engine: renderEcho, app/echo.js; checks.mjs 1fi.
+     THE TITLE AND DIRECTIONS NEVER NAME THE SONG (his call): the reveal is the drill's last screen, which names the
+     sections the band phrases were (from ca-33) and the song.
+     THE LADDER, 13 phrases, each one step from the one before:
+       1-3   one chord each, D5, C5, G5, four downs a bar (D.D.D.D.), 80 BPM: the shapes and a steady hand;
+       4     the first change, D5 to C5, same downs, 85;
+       5-6   ups come in, C5 to G5 (D.DU D.DU), then G5 to D5 (D.DU.UD.: ca-46's chunks rung), 90;
+       7-9   the verse strum (D.DU.UDU, ca-46's pattern) on D5, then on D5 D5 C5 C5 and G5 G5 D5 D5 — the verse's
+             two halves, still the site's sound, 100;
+       10    toward the chorus strum, A5 to C5 (D.....DU), 100;
+       11    the chorus strum (D..U..DU, ca-53's pattern) on A5 C5 D5 D5 — the chorus chords, 110;
+       12-13 the real thing WITH THE RECORD: ca-33's Verse 1 (bars 25-32, its first lap) and Chorus 1 (bars 41-44),
+             read by reference (echoModel refuses chords that are not the card's), Listen on the full mix and Your
+             turn on the rhythm-down mix.
+     Made-up phrases play at 0.8 of their BPM on Slower (the default, as every drill here), so 64 up to 88; the record
+     phrases at Slower are the slow file, 100, and 125 at Normal. Chord shapes are ca-46's and ca-53's (A5 open, as
+     ca-33 and ca-53 play it next to C5). Like ca-48 (Call the Chord): Focus view, one step, label + drill and no text:
+     the widget carries its one direction line (echo.intro). No `journey`: it would name the song. Unplaced: BUILT
+     until Jonathan puts it on the console board. */
+  {
+    id:    'ca-55',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Echo — Power Chord Strums',
+    title_es: 'Eco — Rasgueos con acordes de potencia',
+    intro:    'Hear a short power-chord strum, then play it back in time.',
+    intro_es: 'Escucha un rasgueo corto con acordes de potencia y luego tócalo a tiempo.',
+    steps: [
+      {
+        label:    'Practice — Echo, phrase by phrase',
+        label_es: 'Practica — Eco, frase por frase',
+        drill: { type: 'echo', card: 'ca-33',
+          chords: {
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] },
+            C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
+            G5: { frets: [['E', 3], ['A', 5], ['D', 5]], midi: [43, 50, 55] },
+            A5: { frets: [['A', 0], ['D', 2], ['G', 2]], midi: [45, 52, 57] }
+          },
+          phrases: [
+            { pattern: 'D.D.D.D.', bars: ['D5', 'D5'], bpm: 80 },
+            { pattern: 'D.D.D.D.', bars: ['C5', 'C5'], bpm: 80 },
+            { pattern: 'D.D.D.D.', bars: ['G5', 'G5'], bpm: 80 },
+            { pattern: 'D.D.D.D.', bars: ['D5', 'C5'], bpm: 85 },
+            { pattern: 'D.DUD.DU', bars: ['C5', 'G5'], bpm: 90 },
+            { pattern: 'D.DU.UD.', bars: ['G5', 'D5'], bpm: 90 },
+            { pattern: 'D.DU.UDU', bars: ['D5', 'D5'], bpm: 100 },
+            { pattern: 'D.DU.UDU', bars: ['D5', 'D5', 'C5', 'C5'], bpm: 100 },
+            { pattern: 'D.DU.UDU', bars: ['G5', 'G5', 'D5', 'D5'], bpm: 100 },
+            { pattern: 'D.....DU', bars: ['A5', 'C5'], bpm: 100 },
+            { pattern: 'D..U..DU', bars: ['A5', 'C5', 'D5', 'D5'], bpm: 110 },
+            { pattern: 'D.DU.UDU', bars: ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'], record: { section: 'Verse 1', fromBar: 25 } },
+            { pattern: 'D..U..DU', bars: ['A5', 'C5', 'D5', 'D5'], record: { section: 'Chorus 1', fromBar: 41 } }
+          ] },
       },
     ],
   },

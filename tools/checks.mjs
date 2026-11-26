@@ -12361,10 +12361,10 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
-const ONE_LINE_2A = 424, ONE_LINE_2C = 38, DRILL_SCREENS = 138;   // 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
+const ONE_LINE_2A = 426, ONE_LINE_2C = 40, DRILL_SCREENS = 140;   // 2026-11-26: +2, +2, +2, ca-55 (Echo): its intro, the echo.intro line and its one drill screen (EN + ES). 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
-  'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth',
+  'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth', 'echo.intro',
   'ca.cardDirections', 'ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.sheetDirections'];
 const DRILL_DIRECTIONS_GONE = ['nc.descAnswer', 'nc.howCoachAnswer', 'nc.howCoach', 'nc.howTap', 'ncp.descAnswer', 'ncp.howCoachAnswer',
   'ncp.howCoach', 'ncp.howTap', 'pwn.howAnswer', 'pwn.howScored'];
@@ -14894,6 +14894,135 @@ function checkChordCall(ctx) {
     if (origAct === undefined) delete ctx.document.activeElement;
   }
   if (bad === 0) ok(stats.drills + ' drills; ' + stats.changes + ' of ' + stats.changes + ' changes walked at both speeds (' + (stats.windows - stats.cut) + ' windows of a full beat or more, ' + stats.cut + ' cut by a change closer than a beat); ' + stats.sheet + ' of ' + stats.drills + ' drills\' changes are the lyric sheet\'s own; ' + stats.taps + ' taps (early, in time, late, wrong, none; tapping every 250 ms passed ' + stats.mash.passed + ' of ' + stats.mash.rounds + ' Follow rounds with ' + stats.mash.earlies + ' early misses, a double-tapping player passed ' + stats.dbl.passed + ' of ' + stats.dbl.rounds + ') and ' + stats.samples + ' hidden-chord samples; ' + stats.keys + ' space-bar listeners added and all removed; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' chc.* strings');
+}
+
+/* 1fi. ECHO (step.drill 'echo', ca-55; Jonathan, 2026-11-26). The site plays a short phrase (Listen), then leaves
+   the same length for the student to play it back (Your turn); nothing listens or grades. A made-up ladder of
+   power-chord strums climbs to the song's own verse and chorus strums, and the last two phrases are the record
+   (ca-33's Verse 1 and Chorus 1). EXECUTES the real app/echo.js in the 0b context:
+   - the data: exactly one echo drill, ca-55's only step (Focus view, no step text), 13 phrases: 11 made-up, then
+     the two record phrases pinned below; the title and intro never name the song, EN or ES (his call: the reveal
+     is the last screen); every phrase passes echoModel (a record phrase's chords are the card's own bars);
+   - echoModel REFUSES (the guard runs, not just the data): a record phrase whose chords are not the card's, one
+     outside its section, a pattern that is not eight slots, a chord the drill has no notes for, a bpm of 0;
+   - the default speed is Slower (pinned), and the tempo shown: phrase 1 at 64 / 80 BPM, the record phrases at the
+     slow file's 100 and the record's 125;
+   - every screen (setup, playing, the prompt, the last screen) for the first phrase and each record phrase, EN + ES:
+     no raw echo.* key, the strum board drawn with one lit cell per strum; the cue shows Count in, Listen and Your
+     turn; the last screen names the record phrases' sections and the song;
+   - stopCardAudio() takes a playing phrase back to its setup screen and clears echoLive;
+   - every echo.* string a screen shows exists in English and Spanish and none defined is unused (pinned count). */
+function checkEcho(ctx) {
+  head('1fi. Echo (ca-55): the ladder, the record phrases, every screen, the stop');
+  let bad = 0;
+  const flag = m => { err('1fi: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const J = JSON.stringify;
+  const run = x => vm.runInContext(x, ctx);
+  const EXPECT = { keys: 24, phrases: 13, made: 11,
+    record: [{ section: 'Verse 1', fromBar: 25, bars: 8 }, { section: 'Chorus 1', fromBar: 41, bars: 4 }],
+    bpm: { first: [64, 80], record: [100, 125] } };
+  const stats = { screens: 0, refused: 0, phrases: 0 };
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const all = [];
+  for (const a of acts) (a.steps || []).forEach((st, i) => { if (st && st.drill && st.drill.type === 'echo') all.push({ id: a.id, i, d: st.drill }); });
+  if (all.length !== 1 || all[0].id !== 'ca-55' || all[0].i !== 0) { flag('echo drills: ' + J(all.map(x => x.id + ' step ' + (x.i + 1))) + ', pinned at one, ca-55 step 1 — give a new one its pin on purpose'); if (!all.length) return; }
+  const c55 = acts.find(a => a.id === 'ca-55');
+  if (!c55 || c55.view !== 'focus' || (c55.steps || []).length !== 1 || c55.steps[0].text) flag('ca-55 must be a Focus-view activity of one step with no step text (the widget carries its one direction line)');
+  for (const f of ['title', 'title_es', 'intro', 'intro_es']) if (c55 && /sweet child/i.test(c55[f] || '')) flag(`ca-55.${f} names the song ("${c55[f]}") — the song is named only on the drill's last screen (Jonathan, 2026-11-26)`);
+  const D = all[0].d;
+  const sum = JSON.parse(run(`(function(){ const M = echoModel(${J(D)}); if(!M) return 'null';
+    return JSON.stringify({ n: M.n, made: M.phrases.filter(P => !P.record).length,
+      record: M.phrases.filter(P => P.record).map(P => ({ section: P.S.s.label, fromBar: P.fromBar, bars: P.bars })) }); })()`) || 'null');
+  if (!sum) flag('echoModel returns null for ca-55 — a phrase, the card or the section is off');
+  else {
+    stats.phrases = sum.n;
+    if (sum.n !== EXPECT.phrases || sum.made !== EXPECT.made) flag(`ca-55 has ${sum.n} phrases (${sum.made} made-up), pinned ${EXPECT.phrases} (${EXPECT.made})`);
+    if (J(sum.record) !== J(EXPECT.record)) flag('ca-55 record phrases ' + J(sum.record) + ', pinned ' + J(EXPECT.record));
+  }
+  // The guard runs: each of these must be refused.
+  const recIdx = D.phrases.findIndex(p => p.record);
+  const bads = [
+    ['a record phrase with a chord the card does not play there', d => { const p = d.phrases[recIdx]; p.bars = p.bars.slice(); p.bars[0] = 'C5'; }],
+    ['a record phrase outside its section', d => { d.phrases[recIdx].record = Object.assign({}, d.phrases[recIdx].record, { fromBar: 24 }); }],
+    ['a pattern of seven slots', d => { d.phrases[0].pattern = 'D.D.D.D'; }],
+    ['a chord with no notes', d => { d.phrases[0].bars = ['E5', 'E5']; }],
+    ['a bpm of 0', d => { d.phrases[0].bpm = 0; }],
+  ];
+  for (const [what, mut] of bads) {
+    const d = JSON.parse(J(D));
+    mut(d);
+    if (run(`echoModel(${J(d)}) === null`)) stats.refused++; else flag('echoModel accepts ' + what);
+  }
+  const used = new Set();
+  const origT = ctx.t;
+  const origGet = ctx.document.getElementById;
+  const recs = {};
+  const mkEl = id => { const e = { id, textContent: '', innerHTML: '', className: '', children: [], isConnected: true, parentNode: null, querySelectorAll: () => [] };
+    e.classList = { toggle(){}, add(){}, remove(){}, contains(){ return false; } }; return e; };
+  try {
+    ctx.t = (k, p) => { used.add(k); return origT(k, p); };
+    ctx.document.getElementById = id => recs[id] || (recs[id] = mkEl(id));
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${J(lang)})`);
+      const r = JSON.parse(run(`(function(){
+        const R = { bad: [], screens: 0 };
+        const key = 'chk-echo';
+        if(!renderEcho(${J(D)}, key)){ R.bad.push('renderEcho drew nothing'); return JSON.stringify(R); }
+        const st = echoes[key];
+        R.slow = st.slow;
+        const meta = () => { const m = /<span class="sdr-meta">([^<]*)<\\/span>/.exec(echoScreenHtml(key)); return m ? m[1] : ''; };
+        const bpmAt = (i, slow) => { st.idx = i; st.phase = 'setup'; st.slow = slow; const m = /(\\d+) BPM/.exec(meta()); return m ? Number(m[1]) : null; };
+        const rec = st.M.phrases.findIndex(P => P.record);
+        R.bpm = { first: [bpmAt(0, true), bpmAt(0, false)], record: [bpmAt(rec, true), bpmAt(rec, false)] };
+        st.slow = true;
+        const idxs = [0].concat(st.M.phrases.map((P, i) => P.record ? i : -1).filter(i => i >= 0));
+        idxs.forEach(i => ['setup', 'play', 'ask'].forEach(ph => {
+          st.idx = i; st.phase = ph;
+          const h = echoScreenHtml(key);
+          R.screens++;
+          if(/>\\s*echo\\.[A-Za-z]+/.test(h)) R.bad.push('phrase ' + (i + 1) + ' ' + ph + ': a raw echo.* key on screen');
+          const want = strumSequence(st.M.phrases[i].strum).length, got = (h.match(/data-seq="/g) || []).length;
+          if(!/tab--strum/.test(h) || got !== want) R.bad.push('phrase ' + (i + 1) + ' ' + ph + ': the strum board shows ' + got + ' strums, the phrase has ' + want);
+        }));
+        st.idx = 0; st.phase = 'play'; st.P = st.M.phrases[0]; st.hits = strumSequence(st.P.strum); st.lit = -2;
+        ['count', 'listen', 'turn'].forEach(p => { st.part = p; st.shown = ''; echoPaint(st, -1); });
+        R.cues = ['count', 'listen', 'turn'].map(p => t(p === 'listen' ? 'echo.listen' : p === 'turn' ? 'echo.yourTurn' : 'echo.countIn'));
+        st.phase = 'done'; st.got = st.got.map((g, i) => i % 2 === 0);
+        R.done = echoScreenHtml(key); R.screens++;
+        st.got = st.got.map(() => true); R.doneAll = echoScreenHtml(key); R.screens++;
+        R.labels = st.M.phrases.filter(P => P.record).map(P => tf(P.S.s, 'label'));
+        R.song = st.M.song;
+        // The stop: a playing phrase, then stopCardAudio().
+        st.phase = 'play'; echoLive = key;
+        stopCardAudio();
+        R.stopped = st.phase === 'setup' && echoLive === null;
+        delete echoes[key];
+        return JSON.stringify(R);
+      })()`));
+      r.bad.forEach(m => flag(lang + ': ' + m));
+      stats.screens += r.screens;
+      if (r.slow !== true) flag(lang + ': the drill does not open on Slower (pinned default)');
+      if (J(r.bpm) !== J(EXPECT.bpm)) flag(lang + ': tempos shown ' + J(r.bpm) + ', expected ' + J(EXPECT.bpm));
+      if (new Set(r.cues).size !== 3) flag(lang + ': the cue does not change between Count in, Listen and Your turn');
+      const plain = String(r.done).replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+      if (!r.song || !plain.includes(r.song) || r.labels.some(l => !plain.includes(l))) flag(lang + ': the last screen does not name ' + J(r.labels) + ' of "' + r.song + '"');
+      if (!/sdr-verdict mid/.test(r.done) || !/sdr-verdict good/.test(r.doneAll)) flag(lang + ': the last screen does not tell some phrases from all of them');
+      if (!r.stopped) flag(lang + ': stopCardAudio() left the phrase playing (echoStopAll not reached)');
+    }
+  } catch (e) { flag('threw: ' + (e && e.message)); }
+  finally { ctx.t = origT; ctx.document.getElementById = origGet; try { run('setLang("en")'); } catch { /* best effort */ } }
+  const I18N = loadI18nTable();
+  const defined = Object.keys(I18N).filter(k => k.startsWith('echo.'));
+  const SAME_OK = new Set(['echo.bpm', 'echo.normal']);   // a number and a loanword: the same in both languages on purpose
+  for (const k of used) {
+    if (!k.startsWith('echo.')) continue;
+    if (!I18N[k] || !I18N[k].en || !I18N[k].es) flag('i18n ' + k + ' is missing its English or Spanish');
+    else if (I18N[k].es === I18N[k].en && !SAME_OK.has(k)) flag('i18n ' + k + ': the Spanish is just the English');
+  }
+  for (const k of defined) if (!used.has(k)) flag('i18n ' + k + ' is defined but no Echo screen shows it');
+  if (defined.length !== EXPECT.keys) flag(defined.length + ' echo.* keys, pinned at ' + EXPECT.keys);
+  if (bad === 0) ok(`1fi: ca-55's ${stats.phrases} phrases pass echoModel (${EXPECT.made} made-up, ${EXPECT.record.length} on the record, chords = the card's); ${stats.refused} of ${bads.length} bad phrases refused; ${stats.screens} screens rendered EN + ES with every strum on the board; the cue, the reveal and the stop hold; ${EXPECT.keys} echo.* strings`);
 }
 
 /* 1co. NAME THE POWER CHORD (step.drill 'pcname', ca-49, work order 2026-11-05).
@@ -24132,6 +24261,7 @@ function checkNeverRules(sets) {
   checkNoteCallPower(rcCtx);
   checkChordCall(rcCtx);
   checkPowerName(rcCtx);
+  checkEcho(rcCtx);
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
   checkSongTiles(rcCtx);

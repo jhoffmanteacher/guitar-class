@@ -930,6 +930,7 @@ function stopCardAudio(){
   snipStop();   // a looping backing-track snippet is site-generated sound as well
   pcStop();     // …and so is a practice card's song (view:'card')
   chcStopAll();  // …and a Call the chord round: its song, count-in and space-bar listener
+  if(typeof echoStopAll === 'function') echoStopAll();   // …and an Echo phrase (app/echo.js, a later part): its two files and count-in
   pwnStopAll();  // …and a Name the power chord round's pending advance (a focus-view Next re-renders the card under it)
   ncStopAll();  //…and a Note Call round's clicks (and its mic, if the Coach is on) —
                 // a focus-view Next re-renders the card, which would orphan its loop

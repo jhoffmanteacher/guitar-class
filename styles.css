@@ -5087,6 +5087,27 @@ body.games-open{overflow:hidden}
 .chcr .sdr-drill{margin-top:var(--sp-10)}
 .chcr .nc-dots{flex-wrap:wrap;max-width:420px}
 .chcr .fret-dot{flex:none}
+/* ── Echo (step.drill 'echo', app/echo.js; ca-55) — Listen, then Your turn. Same purple drill frame (.sdr); the
+   phrase is drawn on the strum board (buildStrum, .tab--strum) with its playing strum lit (.beat-now), blue on Listen
+   and green on Your turn. The cue over it says which half is playing. The prompt is the speed ladder's (.pc-ask).
+   Kept short so the head, an eight-bar board (two rows), the buttons and the dots fit 1366x657. ── */
+.echo-cue{font-size:var(--fs-22);font-weight:700;min-height:1.4em;margin-bottom:var(--sp-6);color:var(--text2)}
+.echo-cue.listen{color:var(--blue-text)}
+.echo-cue.turn{color:var(--green-text)}
+.echo-board{text-align:left;margin:0 auto var(--sp-8);max-width:820px}
+.echo-board .tab{margin:0}
+.echo-board .strum-cell.beat-now{background:var(--blue-bg);border-radius:4px}
+.echo-play.turn .echo-board .strum-cell.beat-now{background:var(--green-bg)}
+.echo-play.turn .echo-board .strum-cell.beat-now .strum-dir{color:var(--green-text)}
+.echo-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--sp-8) var(--sp-18)}
+.echo-row .echo-speed{margin-bottom:0}
+.echo-row .sdr-actions{margin-top:0}
+.echo-ask{justify-content:center;text-align:left;margin-top:0}
+.echo-reveal{font-size:var(--fs-16);font-weight:600;color:var(--purple-text);margin:var(--sp-6) 0}
+.echo-dots{margin-top:var(--sp-10);margin-bottom:0}
+.echo-dot{padding:0;cursor:pointer}
+.echo-dot:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.echor .nc-foot .echo-dots{margin-top:0}
 /* ── Name the power chord (step.drill 'pcname') — Note Call's board with chord
    names, tapped or picked. Same purple drill frame (.sdr); the 12 names sit in
    two rows of six so the card, board, names and feedback fit 1366x657.
