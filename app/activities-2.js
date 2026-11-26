@@ -374,7 +374,7 @@ function caOnToggle(details){
      player, which the snipStop/pcStop below can't see). */
   if(!details.open && wasOpenId === details.dataset.id){
     const closing = (window.CLASS_ACTIVITIES || []).find(x => x.id === details.dataset.id);
-    /* caSinceRepaint: something arrived while the card was open (a "Since your last visit" answer, a new day); the
+    /* caSinceRepaint: something arrived while the card was open (a "Since your last visit" answer, a new day, a class settings change); the
        list catches up now, as caCloseOpen does. */
     if(caSinceRepaint || (closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing)))){
       stopCardAudio();
@@ -710,7 +710,7 @@ function caCloseOpen(){
   const paOnly = !!(closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing)));
   caSwap = null;
   caOpenId = null;
-  // caSinceRepaint: something arrived while the card was open (a "Since your last visit" group, caSinceRepaintNow; a new day, the tab-return handler).
+  // caSinceRepaint: something arrived while the card was open (a "Since your last visit" group, caSinceRepaintNow; a new day or a class settings change, the tab-return handler).
   if(hadSwap || paOnly || caSinceRepaint) renderClassActivities(); else caSyncTopbar();
   scrollPaneTop(false);
 }

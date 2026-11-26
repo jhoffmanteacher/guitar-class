@@ -187,7 +187,11 @@
        A tab left open past midnight, config unchanged: at its tab return it shows what a fresh load shows that
        day (Today's activities, the first card, the search index; the directed midnight block, 2026-11-25). With a
        card open (and playing) at that tab return, nothing stops and the list is not redrawn under it; the page
-       catches up when the card closes, by "All activities" or by its title (reviews R1-7, R2-3).
+       catches up when the card closes, by "All activities" or by its title (reviews R1-7, R2-3). The same for a
+       class settings change with a card open (2026-11-26, the directed open-card block): the values move at the
+       read, the list waits for the close; unless the change took the open card itself off the page (Archive,
+       Delete, Hide, a later date, Who, off the board): then the list is redrawn at once without it, what the card
+       ran is stopped, and a half-taken check saves nothing.
    Not exercised (round-2 review R2-6): board ties on a seeded board (the writers always re-pack 1..N, so R8's
    "pos, then the legacy number, then the id" runs only on the unseeded board); a student un-marking a card.
    Still not stated, measured only: when an already-open Journey page picks up a change (journey.js has no
@@ -974,7 +978,7 @@ function genWorld(rng, today) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
-const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, midnightSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, todayChecks: 0, todayKept: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
+const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, midnightSteps: 0, openCardSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, todayChecks: 0, todayKept: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
   marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, namedRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
@@ -1608,6 +1612,129 @@ async function directedMidnight() {
   VNOW = DAYS[0][1];
 }
 
+/* R12 + an open card, directed (2026-11-26): the teacher changes config/class while a student has a card open (a song
+   playing, a round running, a Focus step, a half-taken exit check). At the tab return the list is not redrawn under
+   the open card and nothing is stopped; "◀ All activities" or the card's title then shows what a fresh load shows.
+   EXCEPT when the change takes the open card itself off the page (Archive, Delete, Hide, a later date, Who, off the
+   board): then the list is redrawn at once without it, as before (equal to a fresh load), the card's audio and rounds
+   are stopped (stopCardAudio, caStopRoundsIn on that card), and the half-taken check saves nothing (no exitChecks
+   entry, no completion, after the hide flush). The changes are written straight into the doc (what the console's
+   writers produce for these cells, R11 covers the writers themselves). The open card is a plain card, the check
+   mid-take, or a "Play Along now" card (on the page only because it is open). Fixed, not seeded. */
+async function directedOpenCard() {
+  const uid = 'stu-alpha';
+  CUR = { seed: SEED, idx: 'open-card', label: 'directed open-card block' };
+  step('directed open-card block');
+  VNOW = DAYS[0][1];
+  const today = modelToday(VNOW), later = modelAddDays(today, 3);
+  const plain = ACTS.filter(a => !mIsSongCard(a) && a.teacherOnly !== true && a.optional !== true && a.kind !== 'check' && a.view !== 'card');
+  const check = ACTS.find(a => a.kind === 'check' && a.optional !== true);
+  const pa = ACTS.find(a => !mIsSongCard(a) && a.teacherOnly !== true && a.view === 'card');
+  if (plain.length < 3 || !check || !pa) { fail('setup', `needs 3 plain cards, a check and a practice card, found ${plain.length}, ${check ? 1 : 0} and ${pa ? 1 : 0}`); return; }
+  const [a0, a1, a2] = plain.slice(0, 3).map(a => a.id), c0 = check.id, p0 = pa.id;
+  /* p0: on the board, undated, "Play Along now": on the page only while it is the open card (caIsPlayAlongOnly). */
+  const base = () => ({ activityBoardSeeded: true,
+    activityBoard: { [a0]: { module: 1, pos: 1 }, [a1]: { module: 1, pos: 2 }, [a2]: { module: 1, pos: 3 }, [c0]: { module: 1, pos: 4 }, [p0]: { module: 1, pos: 5 } },
+    activityDates: { [a0]: today, [a1]: today, [c0]: today }, playAlongActivities: { [p0]: true }, configVersion: 1 });
+  const prog = { name: NAMES[uid], email: 'stu1@example.test', period: '4', classActivities: {}, migrations: { swap45: true } };
+  const shown = page => JSON.parse(page.run(`JSON.stringify({ today: caTodayIds.slice().sort(), first: caStartHereId })`));
+  const SPY = `window.__oc = { renders: 0, stops: 0, audio: 0, rounds: [] };
+    (function(){ const r = renderClassActivities; renderClassActivities = function(){ __oc.renders++; return r.apply(this, arguments); };
+      for (const n of ['stopCardAudio', 'snipStop', 'pcStop', 'stopPlaySeq']) { const f = globalThis[n]; globalThis[n] = function(){ __oc.stops++; if (n === 'stopCardAudio') __oc.audio++; return f.apply(this, arguments); }; }
+      const sr = caStopRoundsIn; caStopRoundsIn = function(card){ __oc.rounds.push(card && card.dataset && card.dataset.id); return sr.apply(this, arguments); }; })();`;
+  /* The open card as the page finds it (the stub DOM has no cards): a <details> that is open, for caStopRoundsIn. */
+  const fakeCard = id => `window.__ocCard = { open: true, dataset: { id: ${JSON.stringify(id)} }, contains: () => false, querySelector: () => null, querySelectorAll: () => [], closest: () => null };
+    (function(){ const q = document.querySelector; document.querySelector = function(sel){ return String(sel).includes('[data-id="' + ${JSON.stringify(id)} + '"]') ? __ocCard : q.apply(this, arguments); }; })();`;
+  const openPage = async (store, id) => {
+    const pg = await bootStudent({ storage: makeStorage() }, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+    pg.els['class-activities-screen'].hidden = false;
+    pg.run('renderClassActivities()');
+    pg.run(fakeCard(id));
+    pg.run(`caOnToggle(__ocCard)`);
+    return pg;
+  };
+  const tabBack = async pg => {
+    pg.client.plan.config.push('ok');
+    pg.ctx.document.hidden = false;
+    (pg.docListeners.visibilitychange || []).forEach(fn => fn({}));
+    await flush();
+  };
+  const freshShows = async store => {
+    const f = await bootStudent({ storage: makeStorage() }, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+    f.run('renderClassActivities()');
+    return shown(f);
+  };
+  /* 1. A change elsewhere, a card open: three changes (Archive another card, release a new one today, rename the open
+     one), each closed by "◀ All activities" and by its title; the open card is a Focus card or the check mid-take. */
+  const elsewhere = [
+    ['Archive another card', d => { d.archivedActivities = { [a1]: true }; }],
+    ['a new card released today', d => { d.activityDates[a2] = today; }],
+    ['the open card renamed', d => { d.activityTitles = { [a0]: { en: 'Renamed', base: 'x' } }; }],
+  ];
+  for (const [label, edit] of elsewhere) {
+    for (const [openId, how] of [[a0, 'All activities'], [c0, 'its title'], [p0, 'All activities']]) {
+      const store = new Store();
+      store.put('config/class', base());
+      store.put('progress/' + uid, prog);
+      step(`open card: ${label}, ${openId === c0 ? 'the check mid-take' : openId === p0 ? 'a Play Along now card' : 'a card'} open, closed by ${how}`);
+      const pg = await openPage(store, openId);
+      if (openId === c0) pg.run(`ecViewOpts[${JSON.stringify(c0)}] = { keyPrefix: 'ca' }; ecRuns[${JSON.stringify(c0)}] = { i: 1, picks: ['x'] };`);
+      const before = shown(pg);
+      pg.run(SPY);
+      const d = base(); edit(d); store.put('config/class', d);
+      await tabBack(pg);
+      const during = JSON.parse(pg.run('JSON.stringify(__oc)'));
+      const held = shown(pg);
+      const picks = pg.run(`JSON.stringify(ecRuns[${JSON.stringify(c0)}] || null)`);
+      pg.run(how === 'All activities' ? 'caCloseOpen()' : '__ocCard.open = false; caOnToggle(__ocCard)');
+      const after = shown(pg);
+      const want = await freshShows(store);
+      C.openCardSteps++; C.comparisons += 4;
+      const where = `${label}, ${openId === c0 ? 'the check mid-take' : openId === p0 ? 'a Play Along now card' : 'a card'} open`;
+      if (label !== 'the open card renamed' && JSON.stringify(want) === JSON.stringify(before)) fail(where, `a fresh load shows the same list as before the change (${JSON.stringify(want)}): the block is mis-aimed`);
+      if (during.renders || during.stops) fail(where, `the tab return redrew the list ${during.renders} time(s) and called a stopper ${during.stops} time(s) under the open card: the student's song stops, the round resets, the Focus step or the check's answers are rebuilt`);
+      if (JSON.stringify(held) !== JSON.stringify(before)) fail(where, `the list under the open card changed at the tab return (${JSON.stringify(held)}, was ${JSON.stringify(before)})`);
+      if (openId === c0 && picks !== JSON.stringify({ i: 1, picks: ['x'] })) fail(where, `the check's answers so far were not kept through the tab return (${picks})`);
+      if (JSON.stringify(after) !== JSON.stringify(want)) fail(`${where}: closed by ${how}`, `the page shows ${JSON.stringify(after)} after the close, a fresh load shows ${JSON.stringify(want)}: it never catches up with the teacher's change`);
+    }
+  }
+  /* 2. The change takes the open card off the page: the half-taken check (or a plain card) is redrawn away at once. */
+  const gone = [
+    ['Archive', d => { d.archivedActivities = { [c0]: true }; }],
+    ['Delete', d => { d.deletedActivities = { [c0]: true }; delete d.activityBoard[c0]; delete d.activityDates[c0]; }],
+    ['Hide', d => { d.hiddenActivities = { [c0]: true }; }],
+    ['a later release date', d => { d.activityDates[c0] = later; }],
+    ['given to another student (Who)', d => { d.activityStudents = { [c0]: { 'stu-bravo': true } }; }],
+    ['taken off the board', d => { delete d.activityBoard[c0]; }],
+  ];
+  for (const [label, edit] of gone) {
+    const store = new Store();
+    store.put('config/class', base());
+    store.put('progress/' + uid, prog);
+    step(`open card removed: ${label}, the check mid-take`);
+    const pg = await openPage(store, c0);
+    pg.run(`ecViewOpts[${JSON.stringify(c0)}] = { keyPrefix: 'ca' }; ecRuns[${JSON.stringify(c0)}] = { i: 1, picks: ['x'] };`);
+    const before = shown(pg);
+    pg.run(SPY);
+    const d = base(); edit(d); store.put('config/class', d);
+    await tabBack(pg);
+    const during = JSON.parse(pg.run('JSON.stringify(__oc)'));
+    const now = shown(pg);
+    const want = await freshShows(store);
+    pg.ctx.document.hidden = true;
+    (pg.docListeners.visibilitychange || []).forEach(fn => fn({}));
+    await flush();
+    const saved = store.read('progress/' + uid) || {};
+    C.openCardSteps++; C.comparisons += 4;
+    const where = `${label} of the open check`;
+    if (JSON.stringify(want) === JSON.stringify(before)) fail(where, `a fresh load still shows the check (${JSON.stringify(want)}): the block is mis-aimed`);
+    if (!during.renders || JSON.stringify(now) !== JSON.stringify(want)) fail(where, `at the tab return the page shows ${JSON.stringify(now)} (${during.renders} render(s)), a fresh load shows ${JSON.stringify(want)}: a card the teacher took away stays on the page`);
+    if (!during.audio || !during.rounds.includes(c0)) fail(where, `the card went from the page with its audio ${during.audio ? 'stopped' : 'NOT stopped (stopCardAudio)'} and its rounds ${during.rounds.includes(c0) ? 'stopped' : 'NOT stopped (caStopRoundsIn)'}: what it was running plays on out of a card that is gone`);
+    if ((saved.exitChecks && saved.exitChecks[c0]) || (saved.classActivities && saved.classActivities[c0])) fail(where, `the half-taken check was saved (${JSON.stringify({ exitChecks: saved.exitChecks && saved.exitChecks[c0], done: saved.classActivities && saved.classActivities[c0] })})`);
+  }
+  VNOW = DAYS[0][1];
+}
+
 /* ── Directed: the console after a FAILED read of config/class (2026-11-14, plant-a-fault 635dbb41db) ──
    teacher-config.js renderTeacherGames: "A failed read leaves cfg = {} ... renders as all-defaults with nothing to
    say so ... do the same here rather than show a confident wrong answer" (and the comment above
@@ -1655,6 +1782,7 @@ for (const i of indices) {
 if (ONE_CASE === null) {
   try { await directedSignature(); } catch (e) { fail('harness (signature block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
   try { await directedMidnight(); } catch (e) { fail('harness (midnight block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
+  try { await directedOpenCard(); } catch (e) { fail('harness (open-card block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
   try { await directedConsoleRead(); } catch (e) { fail('harness (console read block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
 }
 clearInterval(watchdog);
@@ -1675,6 +1803,7 @@ out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoad
 out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
 out.push(`  the signature, directed: ${C.sigSteps} of 14 inputs changed alone, each followed by a tab return with a good read`);
 out.push(`  a tab left open past midnight, directed: ${C.midnightSteps} of 3 tab returns compared with a fresh load (Today, the first card, the search index; with a card open: nothing stops, caught up at the close by "All activities" and by its title)`);
+out.push(`  a class settings change with a card open, directed: ${C.openCardSteps} of 15 tab returns (9 changes elsewhere: nothing redrawn or stopped, caught up at the close; 6 that take the open check away: redrawn at once, its audio and rounds stopped, nothing saved)`);
 out.push(`  the console after a failed config read, directed: ${C.consoleReadPaints} of 3 Games views painted (failed read, good read, failed read)`);
 out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
 out.push(`  Today's activities (R16, caTodayIds after the same render): ${C.todayChecks} sign-ins checked, ${C.todayKept} of them with a kept card dated before yesterday in Today`);

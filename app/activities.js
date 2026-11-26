@@ -787,8 +787,9 @@ function caFocusNavHtml(a, si, isDone){
    its groups) notes them; caRedrawOpenCard refuses, and the caller does the
    full render, whenever the result could differ from one: no single note
    for the card, another card or a closed fold around it, a different card
-   object or done state, a pending "Since your last visit" repaint, or a new
-   student, day or language since that render. The page after a redraw is
+   object or done state, a pending repaint (caSinceRepaint: "Since your last
+   visit", a new day or a class settings change that came while the card was
+   open), or a new student, day or language since that render. The page after a redraw is
    byte for byte the page a full render would draw: tools/focus-tap-diff.mjs
    proves it over every Focus activity and step, in both languages. */
 let caOpenRec = null;          // set by renderClassActivities while it builds

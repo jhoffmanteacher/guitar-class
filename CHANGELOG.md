@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-26 — An open activity keeps going when the teacher changes the class settings
+
+- **In-Class Activities: a change your teacher makes no longer cuts off the card you have open.** Your
+  song keeps playing, and your step and your exit-check answers stay where they were. The list updates when you
+  close the card. If your teacher takes away the card you have open, it closes and nothing from it is saved half-way.
+
+
 ## 2026-11-26 — The privacy page
 
 - **The privacy page now says what "Ask your teacher to let me in" saves:** your name and email, so your teacher can
