@@ -835,10 +835,13 @@ function ncStop(key){
 }
 /* Stops any running round and puts its card back on the setup screen.
    Called by ncStart, and by coach.js's gamesStopMic() — the umbrella every
-   "someone else needs the mic / the tab went to the background" path runs. */
-function ncStopAll(){
+   "someone else needs the mic / the tab went to the background" path runs.
+   scope (optional): only the rounds whose box is inside it (a card closing by
+   its title; drillBoxInScope, app/drills.js). */
+function ncStopAll(scope){
   Object.keys(noteCalls).forEach(k => {
     const st = noteCalls[k];
+    if(scope && !drillBoxInScope(ncBox(k), scope)) return;
     if(st.starting){   // mid mic-start: ncStart bails when its await returns
       st.cancelled = true;
       if(typeof coachMicAskCancel === 'function') coachMicAskCancel();   // its "Turn on the microphone" panel, if one is waiting, ends that await now
@@ -1287,10 +1290,11 @@ function chcQuit(key){
   chcRepaint(key, chcSetupHtml(key));
 }
 /* Every running round, back to its setup screen. Called by stopCardAudio and
-   the hidden-tab path, like ncStopAll. */
-function chcStopAll(){
+   the hidden-tab path, like ncStopAll; scope as ncStopAll's. */
+function chcStopAll(scope){
   Object.keys(chordCalls).forEach(k => {
     if(chordCalls[k].phase !== 'play') return;
+    if(scope && !drillBoxInScope(chcBox(k), scope)) return;
     chcQuit(k);
   });
 }
@@ -1614,9 +1618,14 @@ function pwnQuit(key){
   pwnRepaint(key, pwnSetupHtml(key));
 }
 /* Every running round back to its setup screen: stopCardAudio and a focus-view step change call this, like ncStopAll.
-   A hidden tab does not (2026-11-09): the round waits for the student. */
-function pwnStopAll(){
-  Object.keys(powerNames).forEach(k => { if(powerNames[k].phase === 'play') pwnQuit(k); });
+   A hidden tab does not (2026-11-09): the round waits for the student. scope as ncStopAll's (a card closing by its
+   title ends its own round). */
+function pwnStopAll(scope){
+  Object.keys(powerNames).forEach(k => {
+    if(powerNames[k].phase !== 'play') return;
+    if(scope && !drillBoxInScope(pwnBox(k), scope)) return;
+    pwnQuit(k);
+  });
 }
 /* Full screen (the projector): a click on empty screen brings up the next card
    (Jonathan, 2026-11-19). An answered card moves on as Next does; an unanswered

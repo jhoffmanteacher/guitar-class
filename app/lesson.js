@@ -1084,10 +1084,13 @@ function nudgeStepIntoView(li, force){
 // Close every other step in the whole card, leaving `keep` untouched. Card-wide,
 // not per-section: two sections could each hold an open step otherwise, which is
 // exactly one step too many in either view.
+// A Play tab line in a step that closes stops with it (stopPlaySeqIn, app/shell.js):
+// its Stop button and cursor are out of sight. Same in toggleStepOpen and collapseAndAdvance.
 function closeOtherStepsInDp(root, keep){
   if(!root) return;
   root.querySelectorAll('li.step').forEach(other=>{
     if(other===keep) return;
+    if(!other.classList.contains('collapsed')) stopPlaySeqIn(other);
     other.classList.add('collapsed');
     const h = other.querySelector('.step-head');
     if(h) h.setAttribute('aria-expanded','false');
@@ -1104,6 +1107,7 @@ function toggleStepOpen(btn){
      control — closing it would leave the card blank, so taps no-op. */
   if(!willOpen && dp && dp.classList.contains('focus')) return;
   closeOtherStepsInDp(stepScope(li), li);
+  if(!willOpen) stopPlaySeqIn(li);
   li.classList.toggle('collapsed', !willOpen);
   btn.setAttribute('aria-expanded', String(willOpen));
   syncStationFocus(dp);
@@ -1141,6 +1145,7 @@ function collapseAndAdvance(li){
   // Nothing left to advance to: focus mode would go blank, so the finished
   // step stays open with its ✓. List mode collapses it as it always has.
   if(next || !focus){
+    stopPlaySeqIn(li);
     li.classList.add('collapsed');
     const head = li.querySelector('.step-head');
     if(head) head.setAttribute('aria-expanded','false');

@@ -793,9 +793,15 @@ window.addEventListener('online', function(){
    stops it, but only when its button sits in a set panel: not stopCardAudio(),
    which would also cut a song on In-Class Activities when showApp's boot-time
    catch-up calls activateSet(). */
-function stopSetPanelSeq(){
-  if(typeof playSeqState === 'undefined' || !playSeqState || !playSeqState.btn) return;
-  if(playSeqState.btn.closest && playSeqState.btn.closest('.week-panel') && typeof stopPlaySeq === 'function') stopPlaySeq();
+function stopSetPanelSeq(){ stopPlaySeqIn('.week-panel'); }
+/* The tab line stops only when its button sits inside `scope`: a selector (its
+   closest()), or an element (a step that closes in the ladder, a card closed by
+   its title, the In class list being redrawn). */
+function stopPlaySeqIn(scope){
+  if(typeof playSeqState === 'undefined' || !playSeqState || !playSeqState.btn || typeof stopPlaySeq !== 'function') return;
+  const b = playSeqState.btn;
+  const inside = typeof scope === 'string' ? !!(b.closest && b.closest(scope)) : !!(scope && scope.contains && scope.contains(b));
+  if(inside) stopPlaySeq();
 }
 function activateSet(id, opts){
   // opts.peek: open a locked set read-only instead of bouncing off the gate

@@ -335,11 +335,22 @@ function printActivity(ev, id){
 // The .dp card builder's ✓ glyph, borrowed as a plain inline SVG so this
 // renderer doesn't have to pull in station-card CSS classes for one icon.
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
+/* Everything a card runs on its own steps ends when that card closes (by its title, "All activities", another card):
+   a Shuffle, Card Deck or Ear Spark round goes back to its Start screen (app/drills.js), a Note Call, Call the chord or
+   Name the power chord round ends (app/drills-call.js), and a Play tab line stops (stopPlaySeqIn, app/shell.js). Out of
+   sight, a round left running holds the update reload and the sign-in read's retry, and a Note Call or Call the chord
+   round plays on. Only rounds inside `card`: another card's are not this close's to end. */
+function caStopRoundsIn(card){
+  if(typeof sdAbortAll === 'function') sdAbortAll(card);
+  if(typeof dkErAbortAll === 'function') dkErAbortAll(card);
+  if(typeof ncStopAll === 'function') ncStopAll(card);
+  if(typeof chcStopAll === 'function') chcStopAll(card);
+  if(typeof pwnStopAll === 'function') pwnStopAll(card);
+  stopPlaySeqIn(card);
+}
 function caOnToggle(details){
-  /* A Card Deck or Ear Spark round in a card that closes goes back to its Start screen (dkErAbortAll, app/drills.js),
-     before any branch below re-renders the list: out of sight, a round left in 'run' holds the update reload and the
-     sign-in read's retry. */
-  if(!details.open && typeof dkErAbortAll === 'function') dkErAbortAll(details);
+  /* Before any branch below re-renders the list (caStopRoundsIn). */
+  if(!details.open) caStopRoundsIn(details);
   /* Closing a Level up's target that sits in its card's slot puts that card
      back, open, where the student left it (caCardLinkHtml). */
   if(!details.open && caSwap && details.dataset.id === caSwap.to && caOpenId === caSwap.to){
@@ -679,9 +690,9 @@ function caCloseOpen(){
   // note above caFullscreenNow). fullscreenchange then redraws the bar.
   if(caFullscreenNow()){ try { document.exitFullscreen().catch(() => {}); } catch(e) { /* nothing to leave */ } }
   const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
-  /* Its Card Deck or Ear Spark round now, while the card is still on the page: caOnToggle's own call comes after the
-     re-render below has replaced it. */
-  if(card && typeof dkErAbortAll === 'function') dkErAbortAll(card);
+  /* Its drill rounds now, while the card is still on the page: caOnToggle's own call comes after the re-render below
+     has replaced it. */
+  if(card) caStopRoundsIn(card);
   if(card) card.open = false;
   /* A Level up's card swapped into another card's slot (caSwap) needs the
      list re-rendered to put the `from` card back. caOnToggle would do that,
@@ -1360,6 +1371,13 @@ document.addEventListener('visibilitychange', () => {
        An Ear Spark round's queued notes stop (they would play to a hidden tab); the
        round stays dealt, and its Play again button plays them from the start. */
     if(typeof erStopAll === 'function') erStopAll();
+    /* A student's tab also stops what plays or counts with nobody there (2026-11-25): a Play tab line (a hidden tab
+       lags its timeouts, and its Stop button is out of reach) and a Shuffle round's countdown (back to Start, as on
+       every other way out). The console keeps them: the room may still be listening (code-hygiene rule 4). */
+    if(!IS_TEACHER_MODE){
+      if(typeof stopPlaySeq === 'function') stopPlaySeq();
+      if(typeof sdAbortAll === 'function') sdAbortAll();
+    }
     flushOnHide();
     return;
   }
@@ -1449,6 +1467,9 @@ function renderClassActivities(){
   // a card pulled out some other way; this is the one path we know about.)
   snipStop();
   pcStop();   // a practice card's song, same reason (pcFrame has the same backstop)
+  /* …and a Play tab line in one of them: its Stop button and cursor would be on the old, detached card (another card
+     opened by a deep link redraws the list under it). */
+  stopPlaySeqIn(bodyEl);
   // Recomputed up front — the gate intro line and the resume card below both
   // read body.ca-gated, and a completion just made in THIS render pass
   // (caToggleComplete/ecSubmit, both call this) has to be reflected before

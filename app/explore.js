@@ -1336,9 +1336,12 @@ function openClassActivitiesScreen(focusId){
   if(!screen) return;
   if(screen.hasAttribute('hidden')){
     closeTopPanels('class-activities');
-    /* The set underneath goes out of sight: its Card Deck or Ear Spark round goes back to Start, as on a set switch
-       (the set panels only, dkErAbortAll in app/drills.js). */
+    /* The set underneath goes out of sight: its Shuffle, Card Deck or Ear Spark round goes back to Start and its Play
+       tab line stops, as on a set switch (the set panels only, app/drills.js and stopSetPanelSeq in app/shell.js).
+       closeTopPanels does nothing here when no page was open, and the router's caClosePanel is the other pages' path. */
+    if(typeof sdAbortAll === 'function') sdAbortAll('.week-panel');
     if(typeof dkErAbortAll === 'function') dkErAbortAll('.week-panel');
+    stopSetPanelSeq();
     screen.removeAttribute('hidden');
     syncExploreNav();
     const exit = screen.querySelector('.page-exit, .page-title');

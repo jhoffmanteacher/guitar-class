@@ -535,8 +535,23 @@ function sdStop(key){
    sdStop() alone cancelled the "next card" timeout of an answered card but
    left it locked in phase 'play' — and module panels are cached, so coming
    back found a frozen card with no Start button. Same shape as ncStopAll. */
-function sdAbortAll(){
+/* Is a drill round's box inside a way out's scope? No scope: every round. An
+   element (the card that is closing): a box inside it. A selector:
+   '.week-panel' keeps a set switch from resetting a round on In-Class
+   Activities (showApp's boot-time activateSet runs after the student may have
+   started one); under a selector, a round whose box is no longer on the page
+   counts as inside: nobody can see it. Shared by every drill's stop-all here
+   and in app/drills-call.js. */
+function drillBoxInScope(box, scope){
+  if(!scope) return true;
+  if(typeof scope === 'string') return !box || !!box.closest(scope);
+  return !!box && typeof scope.contains === 'function' && scope.contains(box);
+}
+/* scope (optional): which rounds, as drillBoxInScope reads it (a card closing
+   stops only its own round). */
+function sdAbortAll(scope){
   Object.keys(shuffleDrills).forEach(k => {
+    if(scope && !drillBoxInScope(sdBox(k), scope)) return;
     sdStop(k);
     const st = shuffleDrills[k];
     if(!st || st.phase !== 'play') return;
@@ -1118,9 +1133,16 @@ const EAR_POOLS = {
 function earLabel(pool, i){ return pool.labelKeys ? t(pool.labelKeys[i]) : pool.labels[i]; }
 const earDrills = {};
 function erBox(key){ return document.getElementById('err-' + key); }
+/* The queued notes, and the notes already sounding: a recorded note rings for
+   about 3 s, so a way out (another set, In class, a hidden tab, the language)
+   damps it as stopPlaySeq damps a tab line (playSeqDamp, app/audio-ui.js). */
 function erStop(key){
   const st = earDrills[key];
   if(st && st.timeouts) st.timeouts.forEach(clearTimeout);
+  if(st && st.voices){
+    if(typeof playSeqDamp === 'function') playSeqDamp(st.voices);
+    st.voices = [];
+  }
 }
 function erStopAll(){
   Object.keys(earDrills).forEach(erStop);
@@ -1133,15 +1155,11 @@ function erStopAll(){
    of sight reads as "busy" to progressLoadRetryBusy() (app/save.js) and to
    the update reload (app/start.js), so both waited on a round nobody could
    see; and an Ear round's queued notes played on over the next set. Stop the
-   notes and put a mid-round drill back on its setup screen. A note already
-   sounding rings out (playNote's own decay, up to about 3 s).
-   scope (optional): only the rounds whose box is inside it. An element (the
-   card that is closing), or a selector: '.week-panel' keeps a set switch from
-   resetting a round on In-Class Activities (showApp's boot-time activateSet
-   runs after the student may have started one). Under a selector, a round
-   whose box is no longer on the page counts as inside: nobody can see it. */
+   notes (erStop damps one already sounding too) and put a mid-round drill
+   back on its setup screen.
+   scope (optional): which rounds, as drillBoxInScope reads it. */
 function dkErAbortAll(scope){
-  const inScope = box => !scope || (typeof scope === 'string' ? !box || !!box.closest(scope) : !!box && typeof scope.contains === 'function' && scope.contains(box));
+  const inScope = box => drillBoxInScope(box, scope);
   Object.keys(deckDrills).forEach(k => {
     const st = deckDrills[k];
     if(!st || st.phase !== 'run') return;
@@ -1201,7 +1219,8 @@ function erPlay(key){
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   (st.timeouts || []).forEach(clearTimeout);
   st.timeouts = [];
-  st.seq.forEach((n, i) => st.timeouts.push(setTimeout(() => playNote(st.cfg.pool.midis[n]), i * 1100)));
+  st.voices = [];
+  st.seq.forEach((n, i) => st.timeouts.push(setTimeout(() => st.voices.push(playNote(st.cfg.pool.midis[n])), i * 1100)));
 }
 function erRunHtml(key){
   const st = earDrills[key], pool = st.cfg.pool;
