@@ -72,8 +72,10 @@
      - the Week-later checks view (2026-11-27, teacher-spotcheck.js) at 1366x657: the stub's made-up "last day a skill
        was marked" (SPOT_AGO: 2, 7, 6 or 20 days ago, none, CAS all yesterday) and made-up earlier results in this
        browser's store (SPOT_PRIOR), worked out here: under P7 five rows, every one a student whose day is 7 or more
-       days ago with a playable skill marked, no student twice, the one never checked first, each pair the least
-       checked of that student's, the skill's wording, its "You've got it when" line and "N days ago"; the same list
+       days ago with a playable skill marked, no student twice, the one never checked first, as many different
+       skills as the students' skills allow (a maximum matching worked out here) with no skill of a student's checked
+       fewer times left to no other row, the two-sentence explainer with the rest behind "How rows are picked" (closed,
+       opens, stays open over a mark), the skill's wording, its "You've got it when" line and "N days ago"; the same list
        in a second tab of the same browser (a reload); Held / Not yet / Skip marks and the summary's checks, held and
        skipped worked out here, Undo, sizes 3 and 8, Draw again (fewest checks first), P4's one row (the 7-day
        boundary), CAS's empty state, All's period picker; no sideways scroll (spotcheck-*.png with --shots);
@@ -480,7 +482,7 @@ async function main() {
       const prior = SPOT_PRIOR.map(([n, skill, result, ago], k) => ({ uid: 'stub-uid-' + n, skill, result, day: minus(ago), at: k + 1, period: '7', list: minus(ago) + '|7|0', ticked: minus(ago + 7), by: 'teacher' }));
       const seedState = { v: 1, results: prior, lists: {}, undo: [{ list: minus(21) + '|4|0', uid: 'stub-uid-03', skill: 'w2-s2', result: 'held', prev: null }] };
       await js(`(() => { localStorage.setItem(${JSON.stringify(SK)}, ${JSON.stringify(JSON.stringify(seedState))}); localStorage.removeItem(${JSON.stringify(SZ)}); return true; })()`);
-      const marks = new Map();
+      const marks = new Map(), spotDistinct = [];
       // The checks a list was drawn from: the earlier results plus the marks made before that draw (drawn = a copy of them).
       let drawn = new Map();
       const checksOf = (uid, mk = drawn) => prior.filter(r => r.uid === uid && r.result !== 'skip').length + [...mk.values()].filter(m => m.uid === uid && m.result !== 'skip').length;
@@ -494,10 +496,25 @@ async function main() {
         howto: !!document.querySelector('[data-spot-howto]'), empty: !!document.querySelector('[data-spot-empty]'), pick: [...document.querySelectorAll('[data-spot-period]')].map(b => b.dataset.spotPeriod),
         undo: (document.querySelector('[data-spot-undo]') || {}).textContent || '', undoOff: !!(document.querySelector('[data-spot-undo]') || {}).disabled,
         said: (document.querySelector('[data-spot-said]') || {}).textContent || '', text: document.getElementById('t-grid-container').innerText,
+        listRows: (() => { try { const L = JSON.parse(localStorage.getItem('gc-teacher-spotcheck-v1')).lists[teacherPeriodFilter]; return L ? L.rows : null; } catch (e) { return null; } })(),
+        explain: (document.querySelector('[data-spot-explain]') || {}).innerText || '',
+        more: (() => { const d = document.querySelector('details[data-spot-more]'), m = d && d.querySelector(':scope > summary'); return d ? { open: d.open, summary: m ? m.textContent.trim() : '', shown: d.innerText.trim() } : null; })(),
         sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         wraps: [...document.querySelectorAll('#t-grid-container .tg-grid-wrap')].map(w => w.scrollWidth - w.clientWidth) }))()`);
       const checkRows = (r, p, where, size) => {
-        const ok = pool(p), uids = r.rows.map(x => x.uid);
+        const ok = pool(p), uids = r.rows.map(x => x.uid), full = r.listRows || r.rows;
+        // As many different skills as the students' skills allow: a maximum matching of the whole stored list, worked out here.
+        const most = rows => {
+          const hold = new Map(), sets = rows.map(o => ticked(+o.uid.slice(-2)));
+          const aug = (k, seen) => { for (const id of sets[k]) { if (seen.has(id)) continue; seen.add(id); if (!hold.has(id) || aug(hold.get(id), seen)) { hold.set(id, k); return true; } } return false; };
+          return sets.filter((_, k) => aug(k, new Set())).length;
+        };
+        // The whole stored list, and the rows on screen (its first rows): each as many different skills as possible.
+        for (const [rows, what] of [[full, 'the ' + full.length + ' rows of the list'], [r.rows, 'the ' + r.rows.length + ' rows on screen']]) {
+          const diff = new Set(rows.map(o => o.skill)).size, can = most(rows);
+          if (diff !== can) fail('spotcheck', `${where}: ${diff} different skills on ${what}, worked out here ${can} possible`);
+        }
+        spotDistinct.push(`${where} ${new Set(full.map(o => o.skill)).size}/${full.length} (on screen ${new Set(r.rows.map(o => o.skill)).size}/${r.rows.length})`);
         if (r.rows.length !== Math.min(size, ok.length)) fail('spotcheck', `${where}: ${r.rows.length} rows, worked out here min(${size}, ${ok.length})`);
         if (r.pool !== ok.length) fail('spotcheck', `${where}: the view says ${r.pool} can be drawn, worked out here ${ok.length}`);
         if (new Set(uids).size !== uids.length) fail('spotcheck', `${where}: a student twice: ${uids.join(', ')}`);
@@ -505,8 +522,9 @@ async function main() {
           const i = +x.uid.slice(-2);
           if (!ok.includes(i)) fail('spotcheck', `${where}: ${x.uid} drawn (last marked ${SPOT_AGO(i)} days ago, ${ticked(i).length} playable skills marked)`);
           if (!ticked(i).includes(x.skill)) fail('spotcheck', `${where}: ${x.uid} drawn on ${x.skill}, not a playable skill they marked`);
-          const least = Math.min(...ticked(i).map(id => pairOf(x.uid, id)));
-          if (pairOf(x.uid, x.skill) !== least) fail('spotcheck', `${where}: ${x.uid} on ${x.skill} (${pairOf(x.uid, x.skill)} checks) when another of theirs has ${least}`);
+          // A skill of theirs checked fewer times may be passed over only when another row of the list holds it (one skill per row).
+          const free = ticked(i).filter(id => pairOf(x.uid, id) < pairOf(x.uid, x.skill) && !full.some(o => o.uid !== x.uid && o.skill === id));
+          if (free.length) fail('spotcheck', `${where}: ${x.uid} on ${x.skill} (${pairOf(x.uid, x.skill)} checks) when ${free[0]} of theirs has ${pairOf(x.uid, free[0])} and no other row holds it`);
           if (!x.text.includes(gotItWhen[x.skill]) || !/You’ve got it when/.test(x.text)) fail('spotcheck', `${where}: ${x.uid}'s row lacks its "You've got it when" line`);
           if (!x.text.includes(SPOT_AGO(i) + ' days ago') || !/on or before/.test(x.text)) fail('spotcheck', `${where}: ${x.uid}'s row does not say "on or before … ${SPOT_AGO(i)} days ago": ${x.text.slice(0, 160)}`);
         }
@@ -533,6 +551,14 @@ async function main() {
       let r = await readSpot();
       if (!r.howto || !/no backing track, no help/.test(r.text)) fail('spotcheck', 'the one-line instruction (once, no backing track, no help) is not at the top');
       if (!/A week is counted from the last day the student marked ANY skill/.test(r.text) || !/Not a grade/.test(r.text) || !/this browser on this computer only/.test(r.text)) fail('spotcheck', 'the view does not say what a week is measured from, where results are kept, or that it is not a grade');
+      /* The stub's skill sets are nested, so its lists can come out different by luck: one directed draw too. b (no checks)
+         comes first and has only s1; a would rather s1 (its s2 was checked once), so a different skill means a moves to s2. */
+      const dd = await js(`JSON.stringify(teacherSpotDraw([{ uid: 'a', skills: ['s1', 's2'], day: '2026-11-01' }, { uid: 'b', skills: ['s1'], day: '2026-11-01' }], [{ uid: 'a', skill: 's2', result: 'held' }], 'x', 8))`);
+      if (dd !== '[{"uid":"b","skill":"s1","day":"2026-11-01"},{"uid":"a","skill":"s2","day":"2026-11-01"}]') fail('spotcheck', 'a directed draw repeated a skill it could have avoided: ' + dd);
+      // The grey explainer: two sentences in view; the rest behind a native "How rows are picked" disclosure, closed.
+      const sentences = r.explain.split(/(?<=[.!?])\s+/).filter(Boolean).length;
+      if (sentences > 2 || !/^Each row is a skill/.test(r.explain) || !/last 7 days is not drawn yet/.test(r.explain)) fail('spotcheck', `the explainer under the instruction is ${sentences} sentences: ${r.explain.slice(0, 200)}`);
+      if (!r.more || r.more.open || r.more.summary !== 'How rows are picked' || r.more.shown !== 'How rows are picked' || /20 seconds/.test(r.text)) fail('spotcheck', 'no closed native "How rows are picked" disclosure holding the rest: ' + JSON.stringify(r.more));
       checkRows(r, '7', 'P7', 5);
       const firstList = JSON.stringify(r.rows.map(x => [x.uid, x.skill]));
       const never = pool('7').filter(i => !checksOf(uidOf(i))).map(uidOf);
@@ -571,8 +597,12 @@ async function main() {
         await js(`document.querySelectorAll('#t-grid-container [data-spot-row]')[${k}].querySelector('[data-spot-mark="${result}"]').click()`); await sleep(120);
         marks.set(row.uid + '|' + row.skill, { uid: row.uid, skill: row.skill, result });
       };
+      // Open "How rows are picked" first: the repaint each mark makes must keep it open.
+      await js(`document.querySelector('details[data-spot-more] > summary').click()`); await sleep(80);
       await markRow(0, 'held'); await markRow(1, 'notyet'); await markRow(2, 'skip');
       r = await readSpot();
+      if (!r.more || !r.more.open || !/20 seconds/.test(r.more.shown) || !/a different skill/.test(r.more.shown)) fail('spotcheck', 'opened, "How rows are picked" did not stay open over three marks or lacks the rest: ' + JSON.stringify(r.more).slice(0, 200));
+      await js(`document.querySelector('details[data-spot-more] > summary').click()`); await sleep(80);
       if (r.rows.slice(0, 3).map(x => x.state).join() !== 'held,notyet,skip' || r.rows.slice(3).some(x => x.state !== 'open')) fail('spotcheck', 'the marks on screen are ' + r.rows.map(x => x.state).join());
       if (JSON.stringify(r.rows.map(x => [x.uid, x.skill])) !== firstList) fail('spotcheck', 'marking changed the list');
       checkSum(r, 'after Held, Not yet, Skip');
@@ -625,7 +655,7 @@ async function main() {
       await js(`teacherSetPeriodFilter('all')`); await sleep(150);
       await js(`(() => { localStorage.removeItem(${JSON.stringify(SK)}); localStorage.removeItem(${JSON.stringify(SZ)}); return true; })()`);
       const e = errsSince(n0); if (e.length) fail('spotcheck', 'page error: ' + e[0]);
-      stats.spot = { rows: 5, pool: pool('7').length, marks: 4, checks: sum3 && sum3.checks, held: sum3 && sum3.held, skipped: sum3 && sum3.skipped, size8, p4 };
+      stats.spot = { rows: 5, pool: pool('7').length, marks: 4, checks: sum3 && sum3.checks, held: sum3 && sum3.held, skipped: sum3 && sum3.skipped, size8, p4, distinct: spotDistinct.join(', ') };
     }
 
     // ── Practice minutes: the "This week's goal (minutes)" box (2026-11-09) ──
@@ -1583,7 +1613,7 @@ async function main() {
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.big) console.log(`  2560x1300: ${stats.big} view switches, the console at factor 1 with no sideways scroll, Live In-Class Games filling (1.874) and the next view back at 1; Student view's student site ${stats.studentView ? 'fills (' + stats.studentView + ') and is 1 at 1366x657' : 'NOT checked'}`);
   if (stats.usage) console.log(`  Usage at 1366x657: ${stats.usage.tools} tool rows equal to the stub worked out here under All (${stats.usage.openedAll} opened, the rest "0 students" last) and P7 (${stats.usage.openedP7} opened); the minutes read from the view's button; ${stats.usage.minRows} minutes rows in ${stats.usage.groups} periods sorted by minutes, each with the stub's numbers; 9 rho lines equal to a second implementation`);
-  if (stats.spot) console.log(`  Week-later checks at 1366x657: P7 ${stats.spot.rows} rows of ${stats.spot.pool} who can be drawn (worked out here), the never-checked student first, the same list in a second tab; ${stats.spot.marks} marks and the summary (${stats.spot.checks} checks, ${stats.spot.held} held, ${stats.spot.skipped} skipped) worked out here, Undo, sizes 3 / 8 (${stats.spot.size8} rows), Draw again by fewest checks; P4 ${stats.spot.p4} row (the 7-day boundary); CAS empty; All asks for a period`);
+  if (stats.spot) console.log(`  Week-later checks at 1366x657: P7 ${stats.spot.rows} rows of ${stats.spot.pool} who can be drawn (worked out here), the never-checked student first, the same list in a second tab; ${stats.spot.marks} marks and the summary (${stats.spot.checks} checks, ${stats.spot.held} held, ${stats.spot.skipped} skipped) worked out here, Undo, sizes 3 / 8 (${stats.spot.size8} rows), Draw again by fewest checks; different skills (${stats.spot.distinct}, each = the most possible); the explainer two sentences, the rest behind "How rows are picked"; P4 ${stats.spot.p4} row (the 7-day boundary); CAS empty; All asks for a period`);
   if (stats.sheet) console.log(`  Song builder Lyrics sheet row at 1366x657: ${stats.sheet.length} states (${stats.sheet.join(', ')}), no sideways scroll, inside the detail column`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }

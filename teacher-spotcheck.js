@@ -30,8 +30,11 @@
    (one period: under All the view asks for one), the teacher's own account left out: every student who can be
    drawn, ordered by how many checks they have had (Held or Not yet; a Skip is not a check), fewest first, ties in a
    random order; the first TEACHER_SPOT_MAX (8) of them, one row each, so no student is in a list twice. For each, one
-   of their playable ticked skills: the pair checked least, then a skill not already in this list, then the skill
-   checked least across the class, then random. The seed is the day, the period and the draw number, and the list is
+   of their playable ticked skills, and a DIFFERENT skill on every row whenever their skills allow it (Jonathan's
+   lead, 2026-11-27): taken in list order, each student gets the first skill in their own order (the pair checked
+   least, then the skill checked least across the class, then random) that no row has yet, an earlier row moving to
+   another of its skills when that frees one, so the first 3 or 5 rows have as many different skills as they can.
+   Only a student left with nothing free repeats a skill (their pair checked least). The seed is the day, the period and the draw number, and the list is
    KEPT (STORAGE) the first time it is drawn that day, so a reload the same day shows the same list; "Draw again"
    draws the next number. The size control (3 / 5 / 8, default 5, remembered per browser) shows the first 3, 5 or 8
    rows of the one list (rows marked beyond them stay on screen). A row whose student is no longer listed (archived,
@@ -150,16 +153,26 @@ function teacherSpotDraw(pool, results, seed, max){
   const byId=(a, b)=>(a<b?-1:a>b?1:0);
   const studs=(pool||[]).slice().sort((a, b)=>byId(a.uid, b.uid)).map(p=>({p, k:rnd()}))
     .sort((a, b)=>((c.stu[a.p.uid]||0)-(c.stu[b.p.uid]||0)) || (a.k-b.k) || byId(a.p.uid, b.p.uid));
-  const used=new Set(), rows=[];
+  const chosen=[];
   for(const {p} of studs){
-    if(rows.length>=max) break;
-    if(!p.skills.length) continue;
-    const opts=p.skills.map(id=>({id, k:rnd()})).sort((a, b)=>((c.pair[p.uid+'|'+a.id]||0)-(c.pair[p.uid+'|'+b.id]||0))
-      || ((used.has(a.id)?1:0)-(used.has(b.id)?1:0)) || ((c.skill[a.id]||0)-(c.skill[b.id]||0)) || (a.k-b.k) || byId(a.id, b.id));
-    used.add(opts[0].id);
-    rows.push({uid:p.uid, skill:opts[0].id, day:p.day});
+    if(chosen.length>=max) break;
+    if(p.skills.length) chosen.push(p);
   }
-  return rows;
+  const prefs=chosen.map(p=>p.skills.map(id=>({id, k:rnd()})).sort((a, b)=>((c.pair[p.uid+'|'+a.id]||0)-(c.pair[p.uid+'|'+b.id]||0))
+    || ((c.skill[a.id]||0)-(c.skill[b.id]||0)) || (a.k-b.k) || byId(a.id, b.id)).map(o=>o.id));
+  /* Different skills (THE DRAW): row k takes its first skill no row holds, or one whose row can move to another free
+     skill (an augmenting path). A skill once held stays held, so each new row never costs an earlier one its own. */
+  const holder=new Map(), got=[];
+  const take=(k, seen)=>{
+    for(const id of prefs[k]){
+      if(seen.has(id)) continue;
+      seen.add(id);
+      if(!holder.has(id) || take(holder.get(id), seen)){ holder.set(id, k); got[k]=id; return true; }
+    }
+    return false;
+  };
+  chosen.forEach((p, k)=>{ if(!take(k, new Set())) got[k]=null; });
+  return chosen.map((p, k)=>({uid:p.uid, skill:got[k]===null ? prefs[k][0] : got[k], day:p.day}));
 }
 function teacherSpotListId(period, L){ return L.day+'|'+period+'|'+L.draw; }
 function teacherSpotEmpty(){ return {v:1, results:[], lists:{}, undo:[]}; }
@@ -289,7 +302,7 @@ function teacherSpotBackupSection(){
 }
 
 /* ── The view ── */
-let teacherSpotBound=false, teacherSpotSaid='';
+let teacherSpotBound=false, teacherSpotSaid='', teacherSpotMoreOpen=false;
 function teacherSpotSize(){
   let v=5;
   try{ v=Number(localStorage.getItem(TEACHER_SPOT_SIZE_KEY))||5; }catch(e){ v=5; }
@@ -321,7 +334,10 @@ function teacherSpotHeadHtml(info){
   const ids=Object.keys(info), play=ids.filter(id=>info[id].playable).length;
   return `<h3 class="us-t-head">Week-later checks</h3>`
     +`<div class="sc-t-howto" data-spot-howto>Ask each student to play the skill once: no backing track, no help, no second try. Then mark what you heard.</div>`
-    +`<div class="tr-meta">Each row is a skill the student marked “I’ve got it” at least a week ago. A week is counted from the last day the student marked ANY skill “I’ve got it”: the site saves that day, not one for each skill, so a student who marked anything in the last ${TEACHER_SPOT_MIN_DAYS} days is not drawn yet. Only skills you can hear in about 20 seconds are drawn (${play} of ${ids.length} skills: playing, fretting, strumming and the like); knowledge skills, whole songs and verses, backing tracks, tuning with a tuner and Module 13 are left out. The criterion under each skill is its own “You’ve got it when” line.</div>`;
+    +`<div class="tr-meta sc-t-explain" data-spot-explain>Each row is a skill the student marked “I’ve got it” at least a week ago. A week is counted from the last day the student marked ANY skill “I’ve got it”, so a student who marked anything in the last ${TEACHER_SPOT_MIN_DAYS} days is not drawn yet.</div>`
+    +`<details class="tg-help sc-t-more" data-spot-more${teacherSpotMoreOpen?' open':''}><summary>How rows are picked</summary><div class="tg-note">`
+    +`The site saves that one day for each student, not a day for each skill. Only skills you can hear in about 20 seconds are drawn (${play} of ${ids.length} skills: playing, fretting, strumming and the like); knowledge skills, whole songs and verses, backing tracks, tuning with a tuner and Module 13 are left out.<br><br>`
+    +`One row per student, the students with the fewest checks first (Held or Not yet; a Skip is not a check). Each gets the skill of theirs checked least, and every row a different skill while their skills allow it. The criterion under each skill is its own “You’ve got it when” line. The same list comes back all day; “Draw again” makes a new one.</div></details>`;
 }
 function teacherSpotListHtml(st, per, students, info, today){
   const {pool, recent, noDay, none}=teacherSpotPool(students, info, today);
@@ -407,7 +423,12 @@ function teacherSpotFootHtml(){
 function renderTeacherSpotcheck(){
   const box=document.getElementById('t-grid-container');
   if(!box) return;
-  if(!teacherSpotBound){ box.addEventListener('click', teacherSpotClick); teacherSpotBound=true; }
+  if(!teacherSpotBound){
+    box.addEventListener('click', teacherSpotClick);
+    // "How rows are picked" stays open across the repaint every mark makes; toggle does not bubble, hence the capture.
+    box.addEventListener('toggle', e=>{ if(e.target && e.target.matches && e.target.matches('[data-spot-more]')) teacherSpotMoreOpen=!!e.target.open; }, true);
+    teacherSpotBound=true;
+  }
   const info=teacherSpotSkillInfo(typeof SETS!=='undefined' ? SETS : []);
   const students=teacherSpotStudents();
   const per=teacherPeriodFilter, today=teacherSpotDayStr(new Date());
