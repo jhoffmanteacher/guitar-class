@@ -13,7 +13,7 @@
      node tools/console-layout-smoke.mjs --chrome <path> Chrome binary (or CHROME=…)
 
    What it does, and fails on:
-     - clicks every sidebar item (the 16 are pinned) and checks that view
+     - clicks every sidebar item (the 17 are pinned) and checks that view
        renders its own element with no page error, that exactly that item is
        marked current, and that no view scrolls the page sideways at 1366 px;
      - opens a practice card, a focus-view activity, a paths activity and an
@@ -63,6 +63,12 @@
        on <html>, innerWidth 2560) and no sideways scroll; Live In-Class Games fills like the student site (about
        1.874) and the next view puts it back to 1; last, the Student view address (no ?teacher) fills 2560x1300 and is
        1 at 1366x657;
+     - the Usage view (2026-11-27, teacher-usage.js) at 1366x657: the stub's made-up usage counts, module steps,
+       skills and practice minutes (USAGE_SEED below) worked out here, apart from the console, for All and for P7:
+       every tool row's students and opens, most first, the never-opened tools last as "0 students"; with no minutes
+       read yet the view offers the Practice minutes read, and its button fills the minutes table; per period the
+       table sorted by minutes with each student's numbers, and the Spearman lines equal to rho worked out here (a
+       second implementation); names drawn as text, no sideways scroll (usage-*.png with --shots);
      - measures sideways scroll at 390 px;
      - the Song builder's Lyrics sheet row (2026-11-18, teacher-sb-sheet.js) at 1366x657: two made-up built songs in
        the stub, made-up pdfs (tools/made-pdf.mjs) read by the real pdf.js; the row with no sheet, a sheet that follows
@@ -138,6 +144,22 @@ async function openPage(port) {
 // Network noise that says nothing about our code (the page tries Firebase and Google; nothing is signed in).
 const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|net::ERR|Failed to fetch|ERR_|auth\/|identitytoolkit|favicon|Content Security|websocket|WebChannel|offline|Could not reach|NotAllowedError|play\(\) request|AbortError|NotSupportedError|The play\(\)|sw\.js|ServiceWorker/i;
 
+/* The Usage view's made-up numbers for stub student i (1..30), used by the stub and, apart from the console, by the
+   checks below: usage counts per tool (some tools many students, one a single student, most none), module steps
+   done, skills marked "I've got it!" and practice minutes (0: no weeks doc). */
+const USAGE_SEED = (i) => {
+  const tools = {};
+  if (i % 2) tools.tuner = 1 + (i % 4);
+  if (i % 3 === 0) tools.metronome = 2;
+  if (i <= 12 && i % 2 === 0) tools['game-cc'] = i;
+  if (i % 5 === 0) tools['card-song'] = 3;
+  if (i % 4 === 1) tools['card-practice'] = 1 + (i % 3);
+  if (i % 7 === 0) tools['journey-the-cure'] = 1;
+  if (i === 30) tools['mr-record'] = 1;
+  const steps = (i * 7) % 23, got = (i * 5) % 11;
+  return { tools, steps, got, minutes: i % 6 === 0 ? 0 : 4 + steps * 2 + ((i * 3) % 7) * 4 };
+};
+const USAGE_SKILL_IDS = ['module-1.js', 'module-2.js'].flatMap(f => [...readFileSync(join(ROOT, f), 'utf8').matchAll(/\{ id: '((?:m2)?w\d+-s\d+)'/g)].map(m => m[1]));
 /* The stub: an in-memory Firestore with the calls the console makes (get on a
    doc or a collection, a transaction that merges a patch with FieldValue.delete
    sentinels), plus the seed. Runs in the page. Every name is fake. */
@@ -168,6 +190,9 @@ const STUB = String.raw`(() => {
   if (has('ca-48')) dates['ca-48'] = day(-1);
   if (has('ca-49')) dates['ca-49'] = day(5);
   const students = [];
+  const usageSeed = ${USAGE_SEED.toString()};
+  // The console fetches the module files on demand (SETS is empty here): Modules 1 and 2's skill ids, read from the files.
+  const skillIds = ${JSON.stringify(USAGE_SKILL_IDS)};
   for (let i = 1; i <= 30; i++) {
     const n = String(i).padStart(2, '0');
     const period = i <= 12 ? '4' : i <= 24 ? '7' : 'CAS';
@@ -185,8 +210,12 @@ const STUB = String.raw`(() => {
       exitChecks[cid] = { score, total: items.length, at: day(-3), picks };
       delete done[cid];
     });
+    const u = usageSeed(i), completed = {}, skills = {};
+    for (let k = 0; k < u.steps; k++) completed['m1w1-b-sec0-' + k] = true;
+    skillIds.slice(0, u.got).forEach(id => { skills[id] = 'gotit'; });
+    if (u.minutes) store.set('minutes/stub-uid-' + n + '/weeks/2026-W45', { seconds: u.minutes * 60 });
     students.push({ uid: 'stub-uid-' + n, name: HOSTILE[n] || 'Test Student ' + n, email: 'student' + n + '@example.test', period,
-      classActivities: done, caSteps: steps, exitChecks, skills: {}, responses: {}, migrations: { swap45: true } });
+      classActivities: done, caSteps: steps, exitChecks, skills, responses: {}, migrations: { swap45: true }, toolOpens: u.tools, completed });
   }
   students.forEach(s => store.set('progress/' + s.uid, s));
   const who = {};
@@ -281,7 +310,7 @@ async function main() {
       picked: activityDetailId, students: allStudentsRaw.length })`);
     if (boot.err) fail('boot', 'showTeacherApp threw ' + boot.err);
     if (boot.view !== 'activities' || !boot.list) fail('boot', 'the console did not open on the Class activities list (view ' + boot.view + ')');
-    if (boot.side !== 16) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 16');
+    if (boot.side !== 17) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 17');
     if (JSON.stringify(boot.current) !== '["activities"]') fail('boot', 'the current sidebar item is ' + JSON.stringify(boot.current));
     if (boot.students !== nStu) fail('boot', 'the console read ' + boot.students + ' students, the stub has ' + nStu);
     await sleep(300);
@@ -294,7 +323,8 @@ async function main() {
     const MARKERS = { activities: ['[data-ta-split]'], songs: ['.t-songs'], tsongs: ['[data-tvs]'], livequiz: ['.lq-shell'], students: ['.stu-chart'],
       skills: ['td.nc[data-open-student]'], trouble: ['.tr-meta', /least-mastered skills/], minutes: ['.pm-t-table'], responses: ['.t-loading', /written a response/],
       manage: ['[data-set-open-through]'], games: ['[data-set-games]'], mic: ['.tg-class', /Collect mic recordings/], reports: ['.t-loading', /issue reports/],
-      errors: ['.t-loading', /No errors logged/], songrequests: ['.t-loading', /No song requests/], songbuilder: ['[data-sb-root]'] };
+      errors: ['.t-loading', /No errors logged/], songrequests: ['.t-loading', /No song requests/], songbuilder: ['[data-sb-root]'],
+      usage: ['[data-tview="usage"]', /Which tools students open/] };
     const views = await js(`[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`);
     if (JSON.stringify(views.slice().sort()) !== JSON.stringify(Object.keys(MARKERS).sort())) fail('sidebar', 'the sidebar views are ' + JSON.stringify(views) + ', expected ' + JSON.stringify(Object.keys(MARKERS)));
     for (const v of views) {
@@ -321,6 +351,102 @@ async function main() {
       if (v === 'manage') await shot('06-manage-1366');
     }
     await xss('every sidebar view');
+
+    // ── Usage (teacher-usage.js, 2026-11-27): both tables against the stub's made-up roster, worked out here ──
+    {
+      const n0 = pageErrors.length;
+      const waitFor = async (expr, ms = 8000) => { for (let t = 0; t < ms; t += 100) { if (await js(expr).catch(() => false)) return true; await sleep(100); } return false; };
+      // The roster the view shows: the stub's students, the archived one (05) left out, under the period filter.
+      const roster = per => Array.from({ length: 30 }, (_, k) => k + 1).filter(i => i !== 5 && (!per || (i <= 12 ? '4' : i <= 24 ? '7' : 'CAS') === per));
+      const ids = await js(`JSON.stringify(teacherUsageTools().map(t => [t.label, t.id]))`).then(JSON.parse);
+      const idOf = Object.fromEntries(ids);
+      const want = per => { const r = roster(per), out = {};
+        for (const [, id] of ids) { let who = 0, opens = 0; r.forEach(i => { const v = USAGE_SEED(i).tools[id] || 0; if (v > 0) { who++; opens += v; } }); out[id] = { who, opens }; }
+        return { n: r.length, out }; };
+      const read = () => js(`(() => { const cells = tr => [...tr.children].map(td => td.textContent.trim());
+        return { rows: [...document.querySelectorAll('[data-usage-tools] tbody tr:not(.tg-group)')].map(cells),
+          rho: [...document.querySelectorAll('[data-usage-rho]')].map(li => [li.dataset.usageRho, li.textContent.replace(/\\s+/g, ' ')]),
+          mins: [...document.querySelectorAll('[data-usage-minutes] tbody tr')].map(tr => tr.classList.contains('tg-group') ? ['#', tr.textContent.trim()] : cells(tr)),
+          button: !!document.querySelector('[data-usage-pm-load]'), text: document.getElementById('t-grid-container').innerText,
+          sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          wraps: [...document.querySelectorAll('[data-usage-tools], [data-usage-minutes]')].map(w => w.scrollWidth - w.clientWidth) }; })()`);
+      const checkTools = (r, per) => {
+        const w = want(per), plural = (k, one, many) => k + ' ' + (k === 1 ? one : many);
+        let last = [Infinity, Infinity], zeroSeen = false, opened = 0;
+        if (r.rows.length !== ids.length) fail('usage', `${per || 'All'}: ${r.rows.length} tool rows, the console lists ${ids.length} tools`);
+        for (const [label, , who, opens] of r.rows) {
+          const id = idOf[label], e = id && w.out[id];
+          if (!e) { fail('usage', `${per || 'All'}: a row for "${label}", no such tool`); continue; }
+          const whoText = e.who ? plural(e.who, 'student', 'students') + ' of ' + w.n : '0 students';
+          if (who !== whoText || opens !== plural(e.opens, 'open', 'opens')) fail('usage', `${per || 'All'}, ${label}: "${who}" / "${opens}", worked out here "${whoText}" / "${plural(e.opens, 'open', 'opens')}"`);
+          if (e.who > last[0] || (e.who === last[0] && e.opens > last[1])) fail('usage', `${per || 'All'}: "${label}" (${e.who} students, ${e.opens} opens) is below a tool with fewer`);
+          if (e.who && zeroSeen) fail('usage', `${per || 'All'}: "${label}" was opened but is listed after a "0 students" row`);
+          if (!e.who) zeroSeen = true; else opened++;
+          last = [e.who, e.opens];
+        }
+        return opened;
+      };
+      /* Spearman's rho, a second implementation: a value's rank is 1 + the values below it + half the others equal to it
+         (ties share the average place); then the Pearson correlation of the ranks. */
+      const rho = (xs, ys) => {
+        const rk = v => v.map(x => 1 + v.filter(y => y < x).length + (v.filter(y => y === x).length - 1) / 2);
+        const a = rk(xs), b = rk(ys), n = xs.length, ma = a.reduce((p, q) => p + q, 0) / n, mb = b.reduce((p, q) => p + q, 0) / n;
+        let sab = 0, saa = 0, sbb = 0; for (let k = 0; k < n; k++) { sab += (a[k] - ma) * (b[k] - mb); saa += (a[k] - ma) ** 2; sbb += (b[k] - mb) ** 2; }
+        return n < 3 ? 'few' : (!saa || !sbb) ? 'flat' : sab / Math.sqrt(saa * sbb);
+      };
+      await size(1366, 657);
+      await js(`teacherSetPeriodFilter('all')`); await sleep(200);
+      // The Practice minutes view's own read (started by the walk above) has ended before this one is undone.
+      await waitFor(`!teacherPmLoading`);
+      // No minutes read yet this session: the view offers the Practice minutes view's read; its button fills the table.
+      await js(`(() => { teacherPmData = null; setTeacherView('usage'); return true; })()`); await sleep(200);
+      const before = await read();
+      if (!before.button || !/Practice minutes have not been read yet this session\./.test(before.text) || before.mins.length) fail('usage', 'with no minutes read the view must offer the read and draw no minutes table: ' + JSON.stringify({ button: before.button, rows: before.mins.length }));
+      await shot('usage-01-tools-and-minutes-button-1366x657');
+      await js(`document.querySelector('[data-usage-pm-load]').click()`);
+      if (!(await waitFor(`!!document.querySelector('[data-usage-minutes]')`))) fail('usage', 'the "Read practice minutes" button never drew the minutes table');
+      const all = await read();
+      const openedAll = checkTools(all, null);
+      // The minutes table, per period: sorted by minutes, each row's numbers the seed's; and the rho lines.
+      const acts = await js(`JSON.stringify(Object.fromEntries(allStudentsRaw.map(s => [s.uid, Object.values(s.classActivities || {}).filter(v => v === true).length])))`).then(JSON.parse);
+      const rhoText = x => x === 'few' ? 'too few students' : x === 'flat' ? 'no order to compare' : '\u03c1 = ' + x.toFixed(2) + ',';
+      let groups = 0, minRows = 0;
+      for (const per of ['4', '7', 'CAS']) {
+        const r = roster(per).map(i => ({ i, ...USAGE_SEED(i), acts: acts['stub-uid-' + String(i).padStart(2, '0')] }));
+        const at = all.mins.findIndex(x => x[0] === '#' && x[1].startsWith((per === 'CAS' ? 'CAS' : 'Period ' + per) + ' ('));
+        if (at < 0) { fail('usage', 'no minutes group for ' + per); continue; }
+        let end = all.mins.findIndex((x, k) => k > at && x[0] === '#');
+        if (end < 0) end = all.mins.length;
+        const rows = all.mins.slice(at + 1, end);
+        groups++; minRows += rows.length;
+        const got = rows.map(x => [parseInt(x[1], 10), +x[2], +x[3], +x[4]].join()).sort().join(' '), exp = r.map(s => [s.minutes, s.got, s.steps, s.acts].join()).sort().join(' ');
+        if (got !== exp) fail('usage', `Period ${per}: the minutes table holds ${got}, the stub ${exp} (minutes, skills, steps, activities)`);
+        const m = rows.map(x => parseInt(x[1], 10));
+        if (m.some((v, k) => k && v > m[k - 1])) fail('usage', `Period ${per}: the table is not sorted by minutes, most first: ${m.join(', ')}`);
+        const line = (all.rho.find(x => x[0] === per) || [, ''])[1];
+        for (const [label, k] of [['skills got', 'got'], ['steps done', 'steps'], ['activities done', 'acts']]) {
+          const x = rho(r.map(s => s.minutes), r.map(s => s[k]));
+          if (!line.includes(label + ' ' + rhoText(x)) || !line.includes('(' + r.length + ' students)')) fail('usage', `Period ${per}, minutes and ${label}: the line reads "${line}", worked out here ${typeof x === 'number' ? x.toFixed(4) : x} with n = ${r.length}`);
+        }
+      }
+      if (all.sideways > 0 || all.wraps.some(x => x > 0)) fail('usage', 'sideways scroll at 1366x657: page ' + all.sideways + 'px, tables ' + JSON.stringify(all.wraps));
+      await shot('usage-02-tools-all-1366x657');
+      await js(`document.querySelector('[data-usage-minutes] thead').scrollIntoView({ block: 'start' })`); await sleep(150);
+      await shot('usage-03-minutes-table-1366x657');
+      await js(`document.querySelector('.us-t-rho').scrollIntoView({ block: 'start' })`); await sleep(150);
+      await shot('usage-04-rho-lines-1366x657');
+      await xss('usage view');
+      // The period filter at the top: P7's numbers.
+      await js(`teacherSetPeriodFilter('7')`); await sleep(300);
+      const p7 = await read();
+      const openedP7 = checkTools(p7, '7');
+      if (p7.mins.filter(x => x[0] === '#').length !== 1) fail('usage', 'under P7 the minutes table shows ' + p7.mins.filter(x => x[0] === '#').map(x => x[1]).join(', '));
+      await js(`document.getElementById('t-grid-container').scrollIntoView({ block: 'start' }); window.scrollTo(0, 0)`); await sleep(100);
+      await shot('usage-05-tools-p7-1366x657');
+      await js(`teacherSetPeriodFilter('all')`); await sleep(200);
+      const e = errsSince(n0); if (e.length) fail('usage', 'page error: ' + e[0]);
+      stats.usage = { tools: ids.length, openedAll, openedP7, groups, minRows };
+    }
 
     // ── Practice minutes: the "This week's goal (minutes)" box (2026-11-09) ──
     /* Real keys (Input.insertText, Backspace, Enter) in the real console against the stub: type 30 and Enter saves ONE cell of
@@ -1176,9 +1302,9 @@ async function main() {
     await js(`setTeacherView('activities')`); await sleep(400);
     await shot('12-console-390');
     {
-      // The sideways strip has no room for a tree: only the 16 items stay.
+      // The sideways strip has no room for a tree: only the 17 items stay.
       const r = await js(`({ tree: getComputedStyle(document.getElementById('t-side-tree')).display, fold: getComputedStyle(document.querySelector('#t-side [data-side-fold]')).display, items: document.querySelectorAll('#t-side [data-view]').length })`);
-      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 16) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
+      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 17) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
     }
     for (const tab of ['preview', 'students', 'settings']) {
       await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);
@@ -1276,6 +1402,7 @@ async function main() {
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.big) console.log(`  2560x1300: ${stats.big} view switches, the console at factor 1 with no sideways scroll, Live In-Class Games filling (1.874) and the next view back at 1; Student view's student site ${stats.studentView ? 'fills (' + stats.studentView + ') and is 1 at 1366x657' : 'NOT checked'}`);
+  if (stats.usage) console.log(`  Usage at 1366x657: ${stats.usage.tools} tool rows equal to the stub worked out here under All (${stats.usage.openedAll} opened, the rest "0 students" last) and P7 (${stats.usage.openedP7} opened); the minutes read from the view's button; ${stats.usage.minRows} minutes rows in ${stats.usage.groups} periods sorted by minutes, each with the stub's numbers; 9 rho lines equal to a second implementation`);
   if (stats.sheet) console.log(`  Song builder Lyrics sheet row at 1366x657: ${stats.sheet.length} states (${stats.sheet.join(', ')}), no sideways scroll, inside the detail column`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }

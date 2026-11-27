@@ -215,7 +215,11 @@ function coachOpen(btn){
   coachClose();                       // one card at a time
   /* The strum-pattern check on an In-Class Activity (coach-strumcheck.js,
      2026-11-14) is its own card: same evictions above, its own session. */
-  if (btn.dataset.strumcheck && typeof scOpen === 'function'){ scOpen(btn); return; }
+  if (btn.dataset.strumcheck && typeof scOpen === 'function'){
+    if (typeof countToolOpen === 'function') countToolOpen('strum-check', btn);   // usage counts (app/save.js)
+    scOpen(btn);
+    return;
+  }
   let slots, mode, desc, tabNotes = null, tabDerived = false, hideNames = false, chordShapes = null;
   if (btn.dataset.chords){
     let chords;
@@ -322,6 +326,8 @@ function coachOpen(btn){
     smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0, lastMatchT: 0,
     pulseStreak: 0, pulseMuted: false   // visual beat-pulse fade state
   };
+  // Usage counts (app/save.js): a Listening Coach card opened; not from a locked set's read-only preview (btn is passed).
+  if (typeof countToolOpen === 'function') countToolOpen('coach', btn);
   coachRenderReady();
   card.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
 }

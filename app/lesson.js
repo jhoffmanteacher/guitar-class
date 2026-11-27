@@ -1222,7 +1222,7 @@ function songTypeLabel(type, core){
    routes through this so the kind dispatch and subtitles can't drift. */
 function openSongVid(s, kind){
   if(!s) return;
-  if(kind==='journey'){ if(s.journeyUrl) window.open(journeyHref(s.journeyUrl, 0, journeyFromHere()), '_blank', 'noopener'); return; }
+  if(kind==='journey'){ if(s.journeyUrl) openJourneyTab(journeyHref(s.journeyUrl, 0, journeyFromHere())); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
   if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, tf(s, 'name'), t('songs.backingTrackHint')); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, tf(s, 'name'), t('songs.tutorial'));

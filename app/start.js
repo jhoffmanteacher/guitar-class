@@ -213,6 +213,12 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden && acc
 window.addEventListener('online', progressLoadRetryOnline);
 /* Built songs: read their list again when the tab comes back, at most once every 15 minutes (BS_RETURN_MS, app/builtsongs.js). */
 document.addEventListener('visibilitychange', () => { if(!document.hidden) builtSongsSyncSoon(); });
+/* Usage counts (app/save.js countToolOpen): the opens not sent yet go as the tab goes out of sight (a lid shut, another
+   tab, a Song Journey page opened in a new tab, the page closing). Nothing pending, nothing sent. */
+document.addEventListener('visibilitychange', () => { if(document.hidden) flushToolOpens(); });
+/* ...and a Song Journey link in a step's text counts its open (countJourneyLinkClick, app/save.js); capture, so a
+   handler that stops the click on the way cannot hide it. */
+document.addEventListener('click', countJourneyLinkClick, { capture: true, passive: true });
 
 /* ── The practice-card player's keys (KEYS in app/cards.js): one keydown listener, the two that note which
    card the student last touched or tabbed into, and the pointerup and click that let go of the focus a mouse or

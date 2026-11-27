@@ -375,6 +375,8 @@ async function startRec(slot){
   // below and orphan the first stream — mic stays live with nothing left
   // holding a reference to stop it.
   if (recState[slot] && (recState[slot].starting || recState[slot].recording)) return;
+  // Usage counts (app/save.js): a press of Record; not in a locked Module Review (its panel is passed).
+  countToolOpen('mr-record', document.getElementById(`mr${slot}-rec-body`));
   if (recState[slot] && recState[slot].pendingBlobUrl) URL.revokeObjectURL(recState[slot].pendingBlobUrl);
   // One mic owner at a time (the tuner/Coach/games all evict each other the
   // same way): recording alongside the Coach's processing-off stream would

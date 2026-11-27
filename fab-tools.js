@@ -348,6 +348,8 @@ function setFabExpanded(which, isOpen){ fabOpeners(which).forEach(f=>f.setAttrib
 function togglePopup(which){
   const open=document.getElementById(which+'-popup').classList.toggle('open');
   setFabExpanded(which, open);
+  // Usage counts (app/save.js countToolOpen, main site only: a Journey page has no such function and counts nothing).
+  if(open && typeof countToolOpen==='function') countToolOpen({ tuner: 'tuner', metro: 'metronome', timer: 'timer' }[which]);
   // All three rail-tool popups share one absolute box in .rail-tools — opening
   // a second one on top of a still-open one hid the first with no way to
   // close it (click-away bails when the click path contains .fab*). Closing

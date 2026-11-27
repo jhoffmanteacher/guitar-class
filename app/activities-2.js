@@ -610,13 +610,20 @@ function caFullBtnHtml(){
    the TAP that opens it (caCardMarkOpening, songsHubOpenCard, caOpenPin, caOpenLinkedCard): the browser enters full
    screen only inside a tap, so a reload or a deep link still opens in the normal window. Any other kind of card,
    the console preview and a browser that can't do it: nothing. Leaving is as before (the button, Esc, All activities),
-   plus any route off In class, the browser's Back included (syncExploreNav, app/shell.js; 2026-11-23). */
+   plus any route off In class, the browser's Back included (syncExploreNav, app/shell.js; 2026-11-23).
+   The same taps are a practice card's OPEN for the usage counts (caCountCardOpen, 2026-11-27): counted here, so a
+   reload or a deep link, which never comes through here, is never counted. */
 function caSongFullscreen(a){
+  caCountCardOpen(a);
   if(!caIsCard(a) || caFullscreenNow()) return;
   try {
     if(document.fullscreenEnabled && document.documentElement.requestFullscreen)
       document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
   } catch(e) { /* an old browser: the normal window */ }
+}
+/* A practice card opened by a tap (app/save.js countToolOpen): a whole-song play-along, or any other practice card. */
+function caCountCardOpen(a){
+  if(caIsCard(a)) countToolOpen(a.card.wholeSong ? 'card-song' : 'card-practice');
 }
 function caToggleFullscreen(){
   try {

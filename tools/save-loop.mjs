@@ -229,7 +229,9 @@
      L6 the Wi-Fi back during the last automatic save retry (the old R10-online-retry); L7 a retried read that comes back
      after Firebase signed another student in but before the page heard it is not applied; L8 each of the twelve "busy"
      states (progressLoadRetryBusy) holds the load back until it ends. L9-L15 (2026-11-17, the review of fix/load-retry):
-     a partial doc answered from the cache is never applied (L9 a songs row, L10 a place save, queued offline); every
+     a partial doc answered from the cache is never applied (L9 a songs row, L10 a place save, queued offline; L9u,
+     2026-11-27, the usage counts: toolOpens increment()s sent by the hide flush, by the 30 s batch timer and by a hide
+     again, one merge-write each, every one landing on the stored count); every
      kind of change stops the retry at once (L11, one run per field of the change snapshot, and by hand before and
      during the read); A's late answer leaves B's own retry alone (L12); the backoff ends at one read a minute (L13); a
      read that never answers times out (L14); a doc the page cannot apply keeps the failed-read rules (L15); and S13
@@ -2050,10 +2052,18 @@ async function loadRetryChecks(out, fail){
       [{ at: 4000, what: 'opens a More Play Along songs row (songOpens +1)', code: 'try { songsLibraryOpen("pa-test-song"); } catch(e) {}' }]],
     ['L10', [{ phase: 'refused', until: T0 + 3000 }, { phase: 'up', until: T0 + 5000 }, { phase: 'offline', until: T0 + 40000 }],
       [{ at: 3100, what: 'opens set m7w2 (a place save that lands)', code: 'lastModuleNum = 7; lastSetId = "m7w2"; saveProgress();' },
-       { at: 5500, what: 'opens set m7w1 (a place save, queued offline)', code: 'lastModuleNum = 7; lastSetId = "m7w1"; saveProgress();' }]]]){
+       { at: 5500, what: 'opens set m7w1 (a place save, queued offline)', code: 'lastModuleNum = 7; lastSetId = "m7w1"; saveProgress();' }]],
+    /* L9u (2026-11-27): the usage counts (app/save.js countToolOpen). Opens the tuner twice and Change Up once, and the
+       pending counts go as a hidden tab sends them (flushToolOpens, what the visibilitychange listener calls), queued
+       offline before the retried read; a tuner at 12 s goes by the 30 s batch timer (42 s, online again); one at 46 s by
+       the hide at 48 s. The doc starts with toolOpens.tuner 4: 4 + 2 + 1 + 1 = 8, game-cc 1, in three writes. */
+    ['L9u', [{ phase: 'refused', until: T0 + 3000 }, { phase: 'offline', until: T0 + 40000 }],
+      [{ at: 4000, what: 'opens the tuner twice and Change Up once; the counts are sent (queued offline)', code: 'countToolOpen("tuner"); countToolOpen("tuner"); countToolOpen("game-cc"); flushToolOpens();' },
+       { at: 12000, what: 'opens the tuner (sent by the batch timer at 42 s)', code: 'countToolOpen("tuner");' },
+       { at: 46000, what: 'opens the tuner (sent by the hide at 48 s)', code: 'countToolOpen("tuner");' }]]]){
     let mid = null, end = null;
     const label = `${tag} a cache answer while offline`;
-    const { world, tab, stored } = await directedRun(label, START, phases, [
+    const { world, tab, stored } = await directedRun(label, tag === 'L9u' ? Object.assign(clone(START), { toolOpens: { tuner: 4 } }) : START, phases, [
       ...first,
       { at: 20000, what: '(reads the page, offline)', probe: t => { mid = { failed: t.run('progressLoadFailed'), retry: t.run('_loadRetry !== null'), skills: t.run('JSON.stringify(progress)'), streak: t.run('JSON.stringify(streak)') }; } },
       { at: 44000, what: '(reads the page, back online)', probe: t => { end = { failed: t.run('progressLoadFailed'), skills: t.run('JSON.stringify(progress)') }; } },
@@ -2063,6 +2073,12 @@ async function loadRetryChecks(out, fail){
     out.checks += 4;
     const cached = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid && g.cache);
     if (tag === 'L9' && !(stored && stored.songOpens && stored.songOpens['pa-test-song'] === (START.songOpens && START.songOpens['pa-test-song'] || 0) + 1)) fail(`directed ${label}: setup — the songs row's +1 is not stored (songOpens ${JSON.stringify(stored && stored.songOpens)})`);
+    if (tag === 'L9u'){
+      const sent = world.landed.filter(w => w.path === 'progress/' + USER.uid && w.data && w.data.toolOpens);
+      if (!(stored && stored.toolOpens && stored.toolOpens.tuner === 8 && stored.toolOpens['game-cc'] === 1 && Object.keys(stored.toolOpens).length === 2))
+        fail(`directed ${label}: the usage counts must add up on the stored count (tuner 4 + 4 = 8, game-cc 1); stored toolOpens ${JSON.stringify(stored && stored.toolOpens)}`);
+      if (sent.length !== 3) fail(`directed ${label}: the usage counts went in ${sent.length} writes, want 3 (the hide flush, the batch timer, the hide)`);
+    }
     if (tag === 'L10' && !(stored && stored.lastSet === 'm7w1' && world.landed.some(w => w.at < T0 + 5000 && w.data.lastSet === 'm7w2'))) fail(`directed ${label}: setup — the first place save did not land while the Wi-Fi was up, or the second is not stored (lastSet ${JSON.stringify(stored && stored.lastSet)})`);
     if (!mid || mid.failed !== true || mid.skills !== '{}' || mid.retry !== true) fail(`directed ${label}: a partial doc answered from the cache was applied as the student's work, or the retry gave up; at 20 s ${JSON.stringify(mid)} (cache answers to the page: ${cached.length})`);
     if (!end || end.failed !== false || end.skills !== JSON.stringify(START.skills)) fail(`directed ${label}: back online, the real doc should load; at 44 s ${JSON.stringify(end)}`);
@@ -2070,7 +2086,7 @@ async function loadRetryChecks(out, fail){
     if (!rep || rep.reps !== START.practiceLog['m6w1-s1'].reps + 1 || !stored.streak || stored.streak.count !== START.streak.count + 1)
       fail(`directed ${label}: the rep and streak after the load must be sent from the stored values (reps ${START.practiceLog['m6w1-s1'].reps} -> +1, streak ${START.streak.count} -> +1); stored reps ${rep && rep.reps}, streak ${JSON.stringify(stored && stored.streak)}`);
     for (const f of ['skills', 'exitChecks', 'games', 'responses', 'completed', 'caSteps', 'classActivities'])
-      if (canon(stored && stored[f]) !== canon(START[f])) fail(`directed ${label}: ${f} changed: ${JSON.stringify(stored && stored[f]).slice(0, 200)}`);
+      if (canon(stored && stored[f]) !== canon(START[f])) fail(`directed ${label}: ${f} changed: ${String(JSON.stringify(stored && stored[f])).slice(0, 200)}`);
     for (const f of tab.faults) fail(`directed ${label}: site code ${f} (R12)`);
   }
   /* L8 EVERY "BUSY" SOURCE (progressLoadRetryBusy). The read comes back while the page is busy with something the redraw
@@ -3268,7 +3284,7 @@ async function main(){
     const d = await directedChecks();
     directedBad = d.fails.length;
     for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
-    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7-L16 (L8: ${d.busyN} of ${d.busyAll} busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
+    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7-L16 (L8: ${d.busyN} of ${d.busyAll} busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry; L9u the usage counts)`);
   }
   /* The reset cases (Start over / Delete): with every full run, or alone with --reset. */
   let resetBad = 0, resetN = 0;

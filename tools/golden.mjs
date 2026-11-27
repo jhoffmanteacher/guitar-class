@@ -188,7 +188,7 @@
       #week-pills .wpill[data-id], #rail-review-btn, #songs-hub-btn, #my-progress-btn,
       #class-activities-btn, #games-btn, #songs-screen, #class-activities-screen,
       #my-progress-screen, #games-screen, #search-panel, #games-panel, the hub cards
-      [onclick="gamesShow('<key>')"], .main (the scrolling pane), .daily5-overlay,
+      [onclick="gamesOpenGame('<key>')"] (gamesShow before 2026-11-27, still matched for an older checkout), .main (the scrolling pane), .daily5-overlay,
       .tp-close, .ca-card[open], .pc-sheet-paper, .pc-sheet-msg, textarea.step-resp-input, textarea.reflection-ta,
       #period-btn-4, #fab-group, #fab-metro, #fab-timer,
       #metro-popup [id^=meter-], #ladder-toggle, #timer-presets [id^=tp-],
@@ -1261,7 +1261,7 @@ try {
         await untilEq(`${lang}: Games opening from its rail button`, `__goldOpen('games-screen')`, true);
         for (const v of views) {
           await run(`${lang}:game-${v}:hub`, `(gamesShow('hub'), 1)`, 200);
-          await run(`${lang}:game-${v}`, clickExpr(`#games-panel [onclick="gamesShow('${v}')"]`), 350);
+          await run(`${lang}:game-${v}`, clickExpr(`#games-panel [onclick="gamesOpenGame('${v}')"], #games-panel [onclick="gamesShow('${v}')"]`), 350);
           put(`dom/${lang}/game-${safe(v)}.html`, lines(await read(`${lang}:game-${v}:html`, '#games-panel', 10))); count('games');
         }
         await run(`${lang}:games-close`, `(gamesShow('hub'), 1)`, 200);
@@ -1469,7 +1469,7 @@ try {
     for (const key of keysToPlay) {
       await run(`play:${key}:hub`, `(gamesShow('hub'), 1)`, 0);
       await run(`play:${key}:hub-settle`, '__gv.advance(500)', 0);
-      await run(`play:${key}:card`, clickExpr(`#games-panel [onclick="gamesShow('${key}')"]`), 0);
+      await run(`play:${key}:card`, clickExpr(`#games-panel [onclick="gamesOpenGame('${key}')"], #games-panel [onclick="gamesShow('${key}')"]`), 0);
       const res = await playOne(key, '#games-panel');
       await run(`play:${key}:leave`, `(gamesShow('hub'), 1)`, 0);
       await run(`play:${key}:after`, '__gv.advance(3000)', 0);

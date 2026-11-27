@@ -689,7 +689,14 @@ async function teacherFetchStudents(){
       const opensRaw=(data.songOpens&&typeof data.songOpens==='object')?data.songOpens:{};
       const songOpens={};
       Object.keys(opensRaw).forEach(k=>{ const n=Math.floor(Number(opensRaw[k])); if(Number.isFinite(n)&&n>0) songOpens[k]=Math.min(n,1000); });
-      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||'',songOpens,
+      // toolOpens (the usage counts, written by the student's own page, app/save.js; the Usage view, teacher-usage.js): the same rule, per tool.
+      const toolRaw=(data.toolOpens&&typeof data.toolOpens==='object')?data.toolOpens:{};
+      const toolOpens={};
+      Object.keys(toolRaw).forEach(k=>{ const n=Math.floor(Number(toolRaw[k])); if(Number.isFinite(n)&&n>0) toolOpens[k]=Math.min(n,1000); });
+      // Module steps marked done (completed, `${setId}-…` → true), counted only: the Usage view's "steps done".
+      const doneRaw=(data.completed&&typeof data.completed==='object')?data.completed:{};
+      const stepsDone=Object.keys(doneRaw).filter(k=>doneRaw[k]===true).length;
+      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||'',songOpens,toolOpens,stepsDone,
         // Step ticks (caSteps, `<id>:<n>`), only to tell "started" from "not started" on an
         // activity's Students tab — keys are tested with startsWith, never shown.
         caSteps:(data.caSteps&&typeof data.caSteps==='object')?data.caSteps:{},
@@ -1332,6 +1339,7 @@ const TEACHER_NAV_ICON={
   skills:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="m14.5 17.5 2 2 4-4"/>',
   trouble:'<path d="M5 3v18"/><path d="M5 4h11l-3 4 3 4H5"/>',
   minutes:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/>',
+  usage:'<path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V6"/><path d="M17 16v-8"/>',
   responses:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>',
   manage:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
   games:'<rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/>',
@@ -1342,7 +1350,7 @@ const TEACHER_NAV_ICON={
 };
 const TEACHER_NAV=[
   {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['songbuilder','Song builder'],['songrequests','Song requests'],['tsongs','Teacher view songs'],['livequiz','Live In-Class Games']]},
-  {group:'Students', items:[['students','Students'],['skills','Skills grid'],['trouble','Trouble spots'],['minutes','Practice minutes'],['responses','Responses']]},
+  {group:'Students', items:[['students','Students'],['skills','Skills grid'],['trouble','Trouble spots'],['minutes','Practice minutes'],['responses','Responses'],['usage','Usage']]},
   {group:'Set up', items:[['manage','Manage'],['games','Games']]},
   {group:'Tools', items:[['mic','Mic recordings'],['errors','Error log'],['reports','Reports']]},
 ];
@@ -1575,6 +1583,7 @@ function renderTeacherBody(){
   else if(teacherView==='trouble') renderTeacherTrouble();
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
   else if(teacherView==='minutes') renderTeacherMinutes();
+  else if(teacherView==='usage') renderTeacherUsage();
   else if(teacherView==='manage') renderTeacherManage();
   else if(teacherView==='activities') renderTeacherActivities();
   else if(teacherView==='songs') renderTeacherSongs();

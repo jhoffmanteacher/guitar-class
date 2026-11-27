@@ -1734,6 +1734,13 @@ body.rail-collapsed .rail-tools .tool-popup{
 .pm-t-goal-state.ok{color:var(--green-text)}
 .pm-t-goal-state.err{color:var(--red-text)}
 .pm-t-goal-note{flex-basis:100%;margin:0}
+/* Usage view (teacher-usage.js, 2026-11-27): two section heads, a muted "0 students" row, the per-period ρ lines. */
+.us-t-head{font-size:var(--fs-16);font-weight:600;color:var(--text);margin:var(--sp-20) 0 var(--sp-6)}
+.us-t-head:first-child{margin-top:0}
+.us-t-of{color:var(--text2);font-weight:400}
+.us-t-zero td{color:var(--text2)}
+.us-t-rho{margin:0 0 var(--sp-10);padding-left:var(--sp-20);font-size:var(--fs-14);line-height:1.5}
+.us-t-meaning{max-width:880px}
 /* Manage view's Period column + the "set" marker that says the shown value
    is the teacher's correction rather than the student's own answer. */
 .tg-period{white-space:nowrap}

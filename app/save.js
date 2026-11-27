@@ -39,10 +39,11 @@ let classConfigLoadDenied = false;
        student with no doc yet gets it created already marked by that first
        save; loading writes nothing for them. Every save carries the marker
        too, so a page still open after the teacher's Delete re-creates the
-       doc marked (2026-11-26). The two other writes that can create a doc,
-       the Songs row's songOpens +1 (app/explore.js) and Hear It First's
+       doc marked (2026-11-26). The three other writes that can create a doc,
+       the Songs row's songOpens +1 (app/explore.js), the usage counts'
+       toolOpens (flushToolOpens, the end of this file) and Hear It First's
        trainer field, do not: what they create holds no Module 4/5 key, so
-       the next load marks it with nothing to move, and either one can land
+       the next load marks it with nothing to move, and any of them can land
        on an unmarked doc that is still old-numbered.
      - swap45Commit() is a transaction: it re-reads the doc, does nothing if
        another tab already marked it, and otherwise REPLACES each affected
@@ -350,7 +351,7 @@ async function progressLoadRetryNow(){
     await ensureDb();
     if(!db) throw new Error('Firestore not available');
     /* The SERVER's doc only. A plain get() with no server answer resolves from the SDK's cache, and after a failed
-       sign-in read that cache holds only this page's own queued writes (a songOpens +1, a place save): a PARTIAL doc
+       sign-in read that cache holds only this page's own queued writes (a songOpens +1, a toolOpens count, a place save): a PARTIAL doc
        (exists, fromCache, hasPendingWrites) that applied here would empty the work and then save the empty state over
        the stored streak, bests and scores (review of fix/load-retry R1-1, 2026-11-17; tools/save-loop.mjs L9, L10).
        Second net: a snapshot from the cache is never applied, whatever asked for it. */
@@ -1257,5 +1258,100 @@ function setSaveMsg(key, clearAfterMs){
     else { el.textContent = ''; el.removeAttribute('data-i18n'); }
   });
   if(clearAfterMs) _saveMsgT = setTimeout(()=>setSaveMsg(''), clearAfterMs);
+}
+
+/* ── Usage counts: which tools students open (2026-11-27) ──────────────────
+   Jonathan, 2026-11-27 ("build this part", after a review asked which tools
+   students open). A DELIBERATE open of a tool adds 1 to toolOpens[<tool id>]
+   in the student's OWN progress doc, as songOpens does for the Songs page's
+   extra songs (app/explore.js songsLibraryOpen): one whole number per tool,
+   nothing else. No time, no log of events, nothing about the student beyond
+   what the doc already holds. The console's Usage view (teacher-usage.js)
+   shows, per tool, how many students opened it and the total.
+   The ids and who counts them (one call per tap, never per render):
+     tuner, metronome, timer   fab-tools.js togglePopup (a popup opening)
+     coach, strum-check        coach-core.js coachOpen (a Listening Coach card)
+     game-<key>                coach-hub.js gamesOpenGame (an Arcade game from
+                               the hub, or Free play's Riff Roulette)
+     card-song, card-practice  app/activities-2.js caCountCardOpen (an In-Class
+                               practice card opened by a tap: a whole-song
+                               play-along, or any other practice card)
+     mr-record                 app/review.js startRec (Module Review's Record)
+     journey-<slug>            openJourneyTab below (a Song Journey page opened
+                               from this site's buttons) and countJourneyLinkClick
+                               below (a Journey link in a step's text); the
+                               Journey pages have their own save code and count
+                               nothing themselves
+   Not counted: a render or a reload that reopens something (a deep link), the
+   teacher account and the dev bypass (isGatePreviewer), the console
+   (IS_TEACHER_MODE), a signed-out visitor, and a tap inside a locked set's
+   read-only preview (a .set-peek panel) or a locked Module Review.
+   FEWER WRITES: the opens of TOOL_OPENS_FLUSH_MS go out together as ONE
+   merge-write of increment()s (atomic, so two tabs never overwrite each
+   other), and whatever is pending goes when the tab is hidden (app/start.js)
+   or the student signs out (flushBeforeLeaving, app/boot.js). Never part of
+   flushSave()'s payload (a failed progress load cannot touch it, 1bo), never
+   waited on or shown, never throws: a refused or failed write is dropped, and
+   a tab closed first loses its last few counts (light counts, not work).
+   SHARED CHROMEBOOK: the pending counts carry the uid they were made under,
+   and are written only while BOTH this page and Firebase still have that
+   student signed in, so a count can never land in the next student's doc; a
+   switch drops them. Start over keeps toolOpens (it is in no
+   START_OVER_GROUPS group, like songOpens); Delete removes it with the doc;
+   the backup and "Download this student's data" carry the doc as stored. The
+   write can create the doc (name and email ride along, as songsLibraryOpen's
+   do: no nameless row in the console); see the Module 4/5 note at the top of
+   this file. */
+const TOOL_OPENS_FLUSH_MS = 30000;
+const TOOL_OPEN_ID_RE = /^[a-z][a-z0-9-]{0,39}$/;
+let toolOpensPending = null;   // { uid, counts: { id: n }, timer } — this page's opens not sent yet
+function countToolOpen(id, el){
+  try {
+    if(IS_TEACHER_MODE || !currentUser || !currentUser.uid || isGatePreviewer()) return;
+    if(typeof id !== 'string' || !TOOL_OPEN_ID_RE.test(id)) return;
+    // A locked set's read-only preview, or a locked Module Review: looking, not using.
+    if(el && typeof el.closest === 'function' && el.closest('.week-panel.set-peek, .week-panel.mr-locked')) return;
+    const uid = currentUser.uid;
+    if(toolOpensPending && toolOpensPending.uid !== uid){ clearTimeout(toolOpensPending.timer); toolOpensPending = null; }
+    if(!toolOpensPending) toolOpensPending = { uid, counts: Object.create(null), timer: setTimeout(flushToolOpens, TOOL_OPENS_FLUSH_MS) };
+    toolOpensPending.counts[id] = (toolOpensPending.counts[id] || 0) + 1;
+  } catch(e) { /* a count is never worth an error */ }
+}
+function flushToolOpens(){
+  const p = toolOpensPending;
+  toolOpensPending = null;
+  if(!p) return;
+  try {
+    clearTimeout(p.timer);
+    // Still this student, for the page AND for Firebase (a tab frozen across a switch hears of it late).
+    if(!(currentUser && currentUser.uid === p.uid && auth && auth.currentUser && auth.currentUser.uid === p.uid)) return;
+    if(!db || typeof firebase === 'undefined' || !firebase.firestore || !firebase.firestore.FieldValue) return;
+    const inc = {};
+    Object.keys(p.counts).forEach(k => { inc[k] = firebase.firestore.FieldValue.increment(p.counts[k]); });
+    if(!Object.keys(inc).length) return;
+    db.collection('progress').doc(p.uid)
+      .set({ name: currentUser.displayName || '', email: currentUser.email || '', toolOpens: inc }, { merge: true })
+      .catch(() => {});
+  } catch(e) { /* dropped: see above */ }
+}
+/* Every Song Journey link the site opens: the page in a new tab (this one
+   stays, so its count is sent as usual), counted by the page's slug. */
+function openJourneyTab(href){
+  const m = /tabs\/([a-z0-9-]+)\.html/.exec(String(href || ''));
+  if(m) countToolOpen('journey-' + m[1]);
+  window.open(href, '_blank', 'noopener');
+}
+/* A Song Journey link written into a step's text (<a href="tabs/<slug>.html"
+   target="_blank"> in the module files), from the document's click listener
+   (app/start.js): one count per click, not in a locked set's preview (the link
+   is passed). A link with its own onclick goes through openJourneyTab already
+   (a Songs row's song-thread-link) and is left to it, so nothing counts twice. */
+function countJourneyLinkClick(e){
+  try {
+    const a = e && e.target && typeof e.target.closest === 'function' ? e.target.closest('a[href]') : null;
+    if(!a || a.hasAttribute('onclick')) return;
+    const m = /^tabs\/([a-z0-9-]+)\.html(?:[?#]|$)/.exec(a.getAttribute('href') || '');
+    if(m) countToolOpen('journey-' + m[1], a);
+  } catch(e2) { /* a count is never worth an error */ }
 }
 

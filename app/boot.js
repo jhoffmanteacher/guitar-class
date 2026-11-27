@@ -790,7 +790,7 @@ function loadScriptOnce(src){
    into parts on 2026-11-11, tools/split-site.mjs). tools/site-src.mjs reads these two
    lines, so each stays ONE line that starts the line, and neither name may appear in any other comment. */
 const COACH_JS_PARTS = ['coach-core.js', 'coach-score.js', 'coach-recordings.js', 'coach-hub.js', 'coach-chords.js', 'coach-chordcards.js', 'coach-ear.js', 'coach-strum.js', 'coach-runner.js', 'coach-noterunner.js', 'coach-more.js', 'coach-strumcheck.js'];
-const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-activities-2.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-manage-layout.js', 'teacher-mic.js', 'teacher-students.js', 'teacher-backup.js', 'teacher-errors.js', 'teacher-livegames.js', 'teacher-livemusic.js', 'teacher-accounts.js', 'teacher-songrequests.js', 'teacher-songfiles.js', 'teacher-builtsongs.js', 'teacher-remove.js', 'teacher-sb-dsp.js', 'teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js', 'teacher-sb-publish.js', 'teacher-sb-sheet.js'];
+const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-activities-2.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-manage-layout.js', 'teacher-mic.js', 'teacher-students.js', 'teacher-usage.js', 'teacher-backup.js', 'teacher-errors.js', 'teacher-livegames.js', 'teacher-livemusic.js', 'teacher-accounts.js', 'teacher-songrequests.js', 'teacher-songfiles.js', 'teacher-builtsongs.js', 'teacher-remove.js', 'teacher-sb-dsp.js', 'teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js', 'teacher-sb-publish.js', 'teacher-sb-sheet.js'];
 /* One after another, each only when the one before it has run: a later part uses what an earlier part defines.
    Every file keeps its own loadScriptOnce promise, so a part that failed to load is the only one fetched again
    on the next try, and a part that already ran never runs twice (a second run would redeclare its consts). */
@@ -1036,6 +1036,8 @@ function hasUnsavedWrites(){
    held-back categories); this only decides how long to wait. */
 async function flushBeforeLeaving(ms){
   clearTimeout(saveTimer);
+  // The usage counts not sent yet (app/save.js): sent now, under this student, and never waited for: they are not work.
+  flushToolOpens();
   try {
     await withTimeout((async()=>{ if(_flushP) await _flushP; await flushSave(); })(), ms);
   } catch(e){}

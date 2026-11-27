@@ -484,7 +484,7 @@ function openSongLink(slug, layer){
   const a = layer ? songsPlayAlongCard(slug, layer) : null;
   if(a){ songsHubOpenCard(a.id); return; }
   const sg = SONG_JOURNEYS.find(s => s.id === slug);
-  if(sg) window.open(journeyHref(sg.url, layer ? Number(layer) : 0, journeyFromHere()), '_blank', 'noopener');
+  if(sg) openJourneyTab(journeyHref(sg.url, layer ? Number(layer) : 0, journeyFromHere()));
 }
 function songsPlayAlongBtn(slug){
   const a = songsPlayAlongCard(slug);
@@ -733,6 +733,7 @@ async function buildSearchIndex(){
 }
 function searchGoActivity(id){
   const target = '#class-activities/' + id;
+  caCountCardOpen((window.CLASS_ACTIVITIES || []).find(x => x.id === id));   // a practice card opened from a search result (usage counts)
   // Already on that exact hash (a second search for the same card): the
   // router would no-op, so move the page to the card directly.
   if(location.hash === target){ searchClosePanel(); caFocusActivity(id); return; }

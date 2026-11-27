@@ -781,7 +781,7 @@ function gamesRenderHub(p){
   /* Per-game best chips, keyed by game. */
   const chips = { fret:fretChip, cc:ccChip, power:pwChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, fingergym:fgChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
   const card = g => `
-       <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
+       <button type="button" class="games-card ${g.cls}" onclick="gamesOpenGame('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
          <span class="games-card-title">${t(g.titleKey)}</span>
          <span class="games-card-desc">${t(g.descKey)}</span>
@@ -808,6 +808,17 @@ function gamesShow(view){
   gamesSyncTopbar(true);
   p.innerHTML = gamesHeadHtml(g.ico + ' ' + t(g.titleKey)) + `<div id="${g.body}"></div>` + (g.foot ? coachFootHtml(g.records) : '');
   g.setup();
+}
+/* A game opened by the student (a hub card, or Free play's Riff Roulette, app/activities.js caFreePlayGames): one usage
+   count (app/save.js countToolOpen), then the game. Kept apart from gamesShow, which the hub, the language switch and a
+   mic that went away also call. The Tuning Simulator leaves for its own page: what is pending is sent first. */
+function gamesOpenGame(key){
+  const g = GAMES_META.find(x => x.key === key);
+  if (g && typeof countToolOpen === 'function'){
+    countToolOpen('game-' + g.key);
+    if (g.href && typeof flushToolOpens === 'function') flushToolOpens();
+  }
+  gamesShow(key);
 }
 
 /* Language switch while the games screen is open: everything here is built

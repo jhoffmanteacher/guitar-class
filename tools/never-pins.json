@@ -88,6 +88,13 @@
    ],
    "why": "rebased onto main efca304 (2026-11-16): progressStartOverAtSignIn is main's Start over (b39299f, 2026-11-14, Reviewed; its tx.get / tx.update of the student's own doc); the Module 4 and 5 Take It to a Song step text lost its record-yourself line (8852498 / 72539e4, Jonathan 2026-11-14: remove the recording lines), the steps kept",
    "date": "2026-11-16"
+  },
+  "app/save.js|flushToolOpens": {
+   "value": [
+    "44376219bb67"
+   ],
+   "why": "Jonathan 2026-11-27 (build this part): light usage counts, toolOpens increment()s in the student's own progress doc, merged like songOpens (app/save.js flushToolOpens)",
+   "date": "2026-11-27"
   }
  },
  "SWITCH_READS": {

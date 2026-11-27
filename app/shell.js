@@ -636,7 +636,7 @@ function resumeGoModule(setId, tab){
 }
 function resumeGoSong(url){
   dismissResumeCard();
-  window.open(journeyHref(url, 0, journeyFromHere()), '_blank', 'noopener');
+  openJourneyTab(journeyHref(url, 0, journeyFromHere()));
 }
 
 function renderPills(moduleNum){

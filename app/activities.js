@@ -147,10 +147,11 @@ function caFreePlayTimer(){
 // this both call the SAME cached ensureCoachJs() promise (loadScriptsInOrder),
 // so their .then callbacks run in the order they were attached: the hash
 // router's openGamesScreen (which opens on 'hub') always resolves before
-// this one, so gamesShow('roulette') here reliably has the last word.
+// this one, so gamesOpenGame('roulette') here (coach-hub.js: a usage count,
+// then gamesShow) reliably has the last word.
 function caFreePlayGames(){
   goExploreHash('games');
-  ensureCoachJs().then(() => { if(typeof gamesShow === 'function') gamesShow('roulette'); }).catch(() => {});
+  ensureCoachJs().then(() => { if(typeof gamesOpenGame === 'function') gamesOpenGame('roulette'); }).catch(() => {});
 }
 function caMarkRowHtml(a, done, markLabel){
   /* An extra song (the Songs page's "More Play Along songs", caIsLibraryCard)
@@ -923,7 +924,7 @@ function caJourneyLinkHtml(a){
   const url = caJourneyUrl(a);
   if(!url) return '';
   const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
-  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
+  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="openJourneyTab(${jsonAttrArg(url)})">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
 }
 /* A button on card `from` that opens another class activity's card — a
    Level up's `card: '<id>'`. Shown once the target is released or set to

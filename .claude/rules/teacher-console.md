@@ -110,6 +110,13 @@ Moved from CLAUDE.md "Where the code lives" (2026-11-26).
   schedules on the listed faults).
 - **The console is not enlarged** on a big screen (factor 1 at every size); only Live In-Class Games fills
   (`siteFillStage()`, called by `renderTeacherBody`).
+- `teacher-usage.js` (Students → Usage, 2026-11-27, read-only; it writes nothing and reads nothing of its own: the counts
+  come with each progress doc through `teacherFetchStudents()`, the minutes from the Practice minutes view's read,
+  `teacherLoadMinutes()`, run from its button): checks.mjs 1fu (the student-side counting, the console's list against
+  the ids the site counts, `TEACHER_USAGE_GAMES` = `GAMES_META`, the numbers) and `node tools/console-layout-smoke.mjs`
+  (both tables against its stub's made-up roster). The counts' writer is the student's own page (`app/save.js`
+  `flushToolOpens`, a save-path change: `node tools/save-loop.mjs`, directed check L9u). `TEACHER_USAGE_SINCE` is the
+  day counting shipped.
 - `teacher-backup.js` ("Download a backup", read-only): `node tools/backup-proof.mjs`. Never open a downloaded backup
   (CLAUDE.md "Student data").
 - `teacher-errors.js` (Tools → Error log, and "Send a test entry"): `node tools/site-errors-sim.mjs`. No name, uid or

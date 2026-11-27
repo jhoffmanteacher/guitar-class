@@ -14432,6 +14432,340 @@ async function checkSongPopularity(ctx) {
   }
   if (bad === 0) ok(`${rows.rows.length} library songs rendered, ${rows.rows.length} buttons clicked (one per song) \u2014 each writes one songOpens increment(1) merge to the student's own progress doc and opens its card; the teacher, the dev bypass and a signed-out visitor write nothing; ${core.clicks} Core Play Along clicks write nothing; the console keeps 4 of 8 doctored counts (3, "5"\u21925, 2.9\u21922, 1e9\u21921000); the console Songs view draws 3 exact count lines (an archived student left out); the card opens in 4 failure modes`);
 }
+/* 1fu. USAGE COUNTS (Jonathan, 2026-11-27, "build this part"). A deliberate
+   open of a tool adds 1 to toolOpens[<id>] in the student's OWN progress doc
+   (app/save.js "Usage counts": countToolOpen, flushToolOpens, openJourneyTab,
+   countJourneyLinkClick); the console's Usage view (teacher-usage.js) shows
+   the counts per tool. RUNS the real code (that save.js section and
+   isGatePreviewer in a fresh context with a fake clock and a fake Firestore;
+   caCountCardOpen on every class activity; gamesOpenGame; teacherFetchStudents
+   and the whole of teacher-usage.js on made-up rows) and fails when:
+     - a count is made for the console (IS_TEACHER_MODE), the teacher's
+       account, the dev bypass, a signed-out visitor, a tap inside a locked
+       set's preview (.week-panel.set-peek) or a locked Module Review
+       (.week-panel.mr-locked), or for a malformed id;
+     - a student's opens do not go as exactly ONE merge-write of { name, email,
+       toolOpens: { <id>: increment(n) } } to progress/<uid> when the
+       TOOL_OPENS_FLUSH_MS timer fires or flushToolOpens runs, a second flush
+       writes again, or a write that throws escapes;
+     - counts made under one student reach another's doc (a switch drops them;
+       a flush after Firebase switched writes nothing);
+     - a Journey open counts anything but one journey-<slug>, a link with its
+       own onclick counts as well (it is counted by openJourneyTab), or the
+       page fails to open in a new tab;
+     - a practice card counts other than card-song (a whole song) or
+       card-practice once, a non-card activity counts, or a game other than
+       game-<key> once (the Tuning Simulator's counts sent before it leaves);
+     - the ids the site counts and the console's list drift apart: the string
+       literals in the countToolOpen(...) calls of the app parts, the Arcade
+       parts and fab-tools.js (8, pinned) are each a TEACHER_USAGE_FIXED id or
+       one of the families 'game-' / 'journey-', every fixed id is counted
+       somewhere, TEACHER_USAGE_GAMES holds exactly GAMES_META's keys, every
+       SONG_JOURNEYS page and every Journey link in the module text has a row,
+       and every listed id passes TOOL_OPEN_ID_RE;
+     - teacherFetchStudents keeps anything but whole counts 1..1000 in
+       toolOpens, or miscounts stepsDone (completed values === true only);
+     - the view's sums, ranks (ties share the average) or Spearman rho differ
+       from hand-worked answers, or the drawn view counts the teacher's own
+       account, loses the "0 students" group at the bottom, or lets an
+       unescaped student-written name or period through.
+   The view's layout in a real browser: tools/console-layout-smoke.mjs. */
+async function checkUsageCounts(ctx) {
+  head('1fu. Usage counts: one count per deliberate open, students only, one merge-write per batch; the Usage view lists every counted tool and its numbers are right');
+  let bad = 0, cases = 0;
+  const flag = m => { err('1fu: ' + m); problems++; bad++; };
+  const is = (cond, m) => { cases++; if (!cond) flag(m); };
+  if (!ctx) { flag('cannot run \u2014 the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  const pick = (src, name) => { const m = new RegExp(`function\\s+${name}\\s*\\(`).exec(src); const b = m && jsFunctionBody(src, name); return b ? src.slice(m.index, src.indexOf('{', m.index)) + b : null; };
+  let saveSrc, shellSrc, usageSrc, teacherSrc, appSrc, coachSrc, fabSrc;
+  try {
+    saveSrc = readFileSync(join(ROOT, 'app', 'save.js'), 'utf8'); shellSrc = readFileSync(join(ROOT, 'app', 'shell.js'), 'utf8');
+    usageSrc = readFileSync(join(ROOT, 'teacher-usage.js'), 'utf8'); fabSrc = readFileSync(join(ROOT, 'fab-tools.js'), 'utf8');
+    teacherSrc = siteSource('teacher.js', ROOT); appSrc = siteSource('app.js', ROOT); coachSrc = siteSource('coach.js', ROOT);
+  } catch (e) { flag('a source file is unreadable: ' + e.message); return; }
+
+  /* 1. The writer: app/save.js's section and isGatePreviewer, in a fresh context per case. */
+  const a0 = saveSrc.indexOf('const TOOL_OPENS_FLUSH_MS'), a1 = saveSrc.indexOf('function countToolOpen(');
+  const fns = ['countToolOpen', 'flushToolOpens', 'openJourneyTab', 'countJourneyLinkClick'].map(n => pick(saveSrc, n));
+  const gp = pick(shellSrc, 'isGatePreviewer');
+  if (a0 < 0 || a1 < a0 || fns.includes(null) || !gp) { flag('app/save.js "Usage counts" (TOOL_OPENS_FLUSH_MS, countToolOpen, flushToolOpens, openJourneyTab, countJourneyLinkClick) or app/shell.js isGatePreviewer not found (renamed? update 1fu with it)'); return; }
+  const section = saveSrc.slice(a0, a1) + '\n' + fns.join('\n') + '\n' + gp;
+  const STU = { uid: 'stu-1', email: 'stu@x.test', displayName: 'Stu' };
+  const mk = (o = {}) => {
+    const w = { log: [], timers: [], opened: [] };
+    const user = 'user' in o ? o.user : STU;
+    const c = vm.createContext({
+      IS_TEACHER_MODE: !!o.console, TEACHER_EMAIL: 'teach@x.test', isDevBypassUser: () => !!o.bypass,
+      currentUser: user, auth: { currentUser: user },
+      db: { collection: col => ({ doc: id => ({ set: (data, opt) => { if (o.throws) throw new Error('sync'); w.log.push({ col, id, data: JSON.parse(JSON.stringify(data)), merge: !!(opt && opt.merge) }); return Promise.resolve(); } }) }) },
+      firebase: { firestore: { FieldValue: { increment: n => ({ __inc: n }) } } },
+      setTimeout: (fn, ms) => { w.timers.push({ fn, ms, live: true }); return w.timers.length; },
+      clearTimeout: h => { if (w.timers[h - 1]) w.timers[h - 1].live = false; },
+      window: { open: (...a) => { w.opened.push(a); } },
+    });
+    vm.runInContext(section, c);
+    w.c = c;
+    w.run = x => vm.runInContext(x, c);
+    w.fire = () => { for (const t of w.timers.slice()) if (t.live) { t.live = false; t.fn(); } };
+    w.live = () => w.timers.filter(t => t.live).length;
+    return w;
+  };
+  const incs = w => JSON.stringify(w.log.map(x => x.data.toolOpens));
+  let FLUSH_MS = 0, ID_RE = null;
+  try {
+    {
+      const w = mk(), none = { closest: () => null };
+      FLUSH_MS = w.run('TOOL_OPENS_FLUSH_MS'); ID_RE = new RegExp(w.run('TOOL_OPEN_ID_RE.source'));
+      w.c.countToolOpen('tuner'); w.c.countToolOpen('tuner', none); w.c.countToolOpen('game-cc');
+      is(w.log.length === 0 && w.live() === 1 && w.timers[0].ms === FLUSH_MS && FLUSH_MS >= 10000 && FLUSH_MS <= 120000,
+        `three opens: ${w.log.length} write(s) before the timer, ${w.live()} timer(s) of ${w.timers[0] && w.timers[0].ms} ms (want no write yet and one timer of TOOL_OPENS_FLUSH_MS, 10 to 120 s)`);
+      w.fire();
+      const x = w.log[0];
+      is(w.log.length === 1 && x.col === 'progress' && x.id === 'stu-1' && x.merge && Object.keys(x.data).sort().join() === 'email,name,toolOpens' && x.data.email === 'stu@x.test' && x.data.name === 'Stu'
+        && JSON.stringify(x.data.toolOpens) === '{"tuner":{"__inc":2},"game-cc":{"__inc":1}}',
+        `the batch timer wrote ${JSON.stringify(w.log)} (want ONE { name, email, toolOpens: { tuner: increment(2), game-cc: increment(1) } } merge-write to progress/stu-1)`);
+      w.c.flushToolOpens(); w.fire();
+      is(w.log.length === 1, `a flush with nothing pending wrote again (${w.log.length} writes)`);
+      w.c.countToolOpen('timer'); w.c.flushToolOpens(); w.fire();
+      is(w.log.length === 2 && JSON.stringify(w.log[1].data.toolOpens) === '{"timer":{"__inc":1}}' && w.log[1].merge && w.live() === 0,
+        `flushToolOpens (the hide and sign-out flush) after one more open: ${JSON.stringify(w.log.slice(1))}, ${w.live()} timer(s) left (want one merge-write of timer: increment(1), its timer cleared)`);
+    }
+    const inPanel = cls => ({ closest: sel => String(sel).split(',').map(s => s.trim()).includes('.week-panel.' + cls) ? {} : null });
+    for (const [what, o, id, el] of [
+      ['the console (IS_TEACHER_MODE)', { console: true }, 'tuner'],
+      ["the teacher's account", { user: { uid: 't-1', email: 'teach@x.test' } }, 'tuner'],
+      ['the dev bypass', { bypass: true }, 'tuner'],
+      ['a signed-out visitor', { user: null }, 'tuner'],
+      ["a tap inside a locked set's read-only preview", {}, 'coach', inPanel('set-peek')],
+      ['a tap inside a locked Module Review', {}, 'mr-record', inPanel('mr-locked')],
+      ...['', 'Tuner', 'a'.repeat(41), '-x', 'x y', 'journey-../x', 42, undefined, null, {}].map(v => [`the malformed id ${JSON.stringify(v)}`, {}, v]),
+    ]) {
+      const w = mk(o);
+      let threw = null;
+      try { w.c.countToolOpen(id, el); w.c.flushToolOpens(); w.fire(); } catch (e) { threw = e.message; }
+      is(!threw && w.log.length === 0 && w.timers.length === 0, `${what}: ${threw ? 'threw ' + threw : `${w.log.length} write(s), ${w.timers.length} timer(s)`} (want nothing counted)`);
+    }
+    {
+      const w = mk(); w.c.countToolOpen('a'.repeat(40)); w.c.flushToolOpens();
+      is(w.log.length === 1, 'a 40-character id is not counted (TOOL_OPEN_ID_RE allows 40)');
+    }
+    {
+      const B = { uid: 'stu-2', email: 'b@x.test', displayName: 'B' };
+      const w = mk();
+      w.c.countToolOpen('tuner'); w.c.countToolOpen('coach');
+      w.c.currentUser = B; w.c.auth.currentUser = B;
+      w.c.countToolOpen('timer'); w.fire(); w.c.flushToolOpens();
+      is(w.log.length === 1 && w.log[0].id === 'stu-2' && w.log[0].data.email === 'b@x.test' && incs(w) === '[{"timer":{"__inc":1}}]',
+        `another student signs in on the same page: ${JSON.stringify(w.log)} (want only B's open, in B's doc; A's pending counts dropped)`);
+    }
+    {
+      const w = mk();
+      w.c.countToolOpen('tuner');
+      w.c.auth.currentUser = { uid: 'stu-2', email: 'b@x.test' };
+      w.fire(); w.c.flushToolOpens();
+      is(w.log.length === 0, `a flush after Firebase signed another student in (the page not told yet): ${w.log.length} write(s) (want none)`);
+    }
+    {
+      const w = mk({ throws: true });
+      let threw = null;
+      try { w.c.countToolOpen('tuner'); w.fire(); w.c.countToolOpen('tuner'); w.c.flushToolOpens(); } catch (e) { threw = e.message; }
+      is(!threw, `a write that throws escaped: ${threw}`);
+    }
+    {
+      const w = mk();
+      const ev = (href, o = {}) => {
+        const a = { getAttribute: k => k === 'href' ? href : null, hasAttribute: k => k === 'onclick' && !!o.onclick, closest: sel => o.peek && String(sel).includes('.week-panel.set-peek') ? {} : null };
+        return { target: { closest: s => s === 'a[href]' ? a : null } };
+      };
+      w.c.openJourneyTab('tabs/the-cure.html?layer=2&from=songs');
+      w.c.openJourneyTab('https://example.test/x.html');
+      w.c.countJourneyLinkClick(ev('tabs/luna.html#layer-6'));
+      w.c.countJourneyLinkClick(ev('tabs/seven-nation-army.html'));
+      w.c.countJourneyLinkClick(ev('tabs/luna.html', { onclick: true }));
+      w.c.countJourneyLinkClick(ev('tabs/luna.html', { peek: true }));
+      w.c.countJourneyLinkClick(ev('https://www.youtube.com/watch?v=x'));
+      w.c.countJourneyLinkClick(ev('../tabs/luna.html'));
+      w.c.countJourneyLinkClick({ target: { closest: () => null } });
+      w.c.countJourneyLinkClick({ target: {} });
+      w.c.countJourneyLinkClick(null);
+      w.fire();
+      is(w.opened.length === 2 && JSON.stringify(w.opened[0]) === '["tabs/the-cure.html?layer=2&from=songs","_blank","noopener"]' && w.opened[1][0] === 'https://example.test/x.html',
+        `openJourneyTab opened ${JSON.stringify(w.opened)} (want each page in a new tab, noopener, counted or not)`);
+      is(incs(w) === '[{"journey-the-cure":{"__inc":1},"journey-luna":{"__inc":1},"journey-seven-nation-army":{"__inc":1}}]',
+        `Journey opens wrote ${incs(w)} (want one write: the-cure, luna and seven-nation-army once each; nothing for a link with its own onclick, a link in a locked preview, an outside link or a click on no link)`);
+    }
+  } catch (e) { flag('the usage-count writer could not run: ' + e.message); }
+
+  /* 2. The callers: every class activity through caCountCardOpen (the 0b context), and gamesOpenGame. */
+  let cardTally = null, gameLits = [];
+  try {
+    const r = JSON.parse(run(`(() => {
+      const keep = countToolOpen, got = [], out = { song: 0, practice: 0, none: 0, bad: [] };
+      countToolOpen = (...a) => { got.push(a); };
+      try {
+        for (const a of (window.CLASS_ACTIVITIES || [])) {
+          got.length = 0; caCountCardOpen(a);
+          const want = a.view === 'card' && a.card ? (a.card.wholeSong ? 'card-song' : 'card-practice') : null;
+          if (want === 'card-song') out.song++; else if (want) out.practice++; else out.none++;
+          if (JSON.stringify(got) !== JSON.stringify(want ? [[want]] : [])) out.bad.push(a.id + ' counted ' + JSON.stringify(got));
+        }
+        got.length = 0; caCountCardOpen(undefined); caCountCardOpen(null);
+        if (got.length) out.bad.push('no activity counted ' + JSON.stringify(got));
+      } finally { countToolOpen = keep; }
+      return JSON.stringify(out);
+    })()`));
+    is(!r.bad.length && r.song > 0 && r.practice > 0 && r.none > 0, `caCountCardOpen: ${r.bad.slice(0, 4).join('; ') || 'a kind of activity went missing'} (${r.song} whole-song cards, ${r.practice} other cards, ${r.none} not cards: each card counts once, by its kind; the rest never)`);
+    cardTally = r;
+  } catch (e) { flag('caCountCardOpen could not run: ' + e.message); }
+  {
+    const fn = pick(coachSrc, 'gamesOpenGame');
+    if (!fn) flag('coach-hub.js gamesOpenGame() not found (renamed? update 1fu with it)');
+    else {
+      const log = [];
+      const g = vm.createContext({ GAMES_META: [{ key: 'cc' }, { key: 'tuningsim', href: 'tuning-sim.html' }], countToolOpen: id => log.push('count ' + id), flushToolOpens: () => log.push('flush'), gamesShow: k => log.push('show ' + k) });
+      vm.runInContext(fn, g);
+      for (const k of ['cc', 'tuningsim', 'hub', 'nope']) vm.runInContext(`gamesOpenGame(${JSON.stringify(k)})`, g);
+      is(log.join() === 'count game-cc,show cc,count game-tuningsim,flush,show tuningsim,show hub,show nope',
+        `gamesOpenGame did ${JSON.stringify(log)} (want a game counted once then shown, the Tuning Simulator's counts sent before it leaves the page, nothing counted for a key that is no game)`);
+    }
+    gameLits = [...stripJsComments(appSrc + '\n' + coachSrc).matchAll(/\bgamesOpenGame\(\s*'([a-z0-9]+)'\s*\)/g)].map(m => m[1]);
+  }
+
+  /* 3. The console's list and the site's ids. */
+  const uctx = vm.createContext({ teacherView: 'usage', teacherPmLoading: false, teacherPmError: '', teacherPmData: null, allStudents: [] });
+  try {
+    Object.assign(uctx, { escHtml: run('escHtml'), escAttr: run('escAttr'), SONG_JOURNEYS: run('SONG_JOURNEYS') });
+    uctx.window = uctx;
+    vm.runInContext(usageSrc, uctx);
+  } catch (e) { flag('teacher-usage.js could not load: ' + e.message); return; }
+  const U = x => vm.runInContext(x, uctx);
+  const FIXED = JSON.parse(U('JSON.stringify(TEACHER_USAGE_FIXED.map(t => t.id))'));
+  const TOOLS = JSON.parse(U('JSON.stringify(teacherUsageTools())'));
+  const FAMILIES = ['game-', 'journey-'];
+  const callArgs = src => {
+    const out = [], re = /\bcountToolOpen\s*\(/g;
+    let m;
+    while ((m = re.exec(src))) {
+      if (/function\s+$/.test(src.slice(Math.max(0, m.index - 12), m.index))) continue;
+      let i = m.index + m[0].length, depth = 1, q = null;
+      const s0 = i;
+      for (; i < src.length && depth; i++) {
+        const ch = src[i];
+        if (q) { if (ch === '\\') i++; else if (ch === q) q = null; continue; }
+        if (ch === "'" || ch === '"' || ch === '`') q = ch; else if (ch === '(') depth++; else if (ch === ')') depth--;
+      }
+      out.push(src.slice(s0, i - 1));
+    }
+    return out;
+  };
+  const calls = [];
+  for (const [where, s] of [['the app parts', appSrc], ['the Arcade parts', coachSrc], ['fab-tools.js', fabSrc]])
+    for (const a of callArgs(stripJsComments(s))) calls.push({ where, a: a.replace(/\s+/g, ' '), lits: [...a.matchAll(/'([^'\\]*)'|"([^"\\]*)"/g)].map(x => x[1] ?? x[2]) });
+  is(calls.length === 8, `${calls.length} countToolOpen(...) calls in the site (pinned 8 on 2026-11-27: fab-tools.js togglePopup, coach-core.js coachOpen twice, coach-hub.js gamesOpenGame, app/activities-2.js caCountCardOpen, app/review.js startRec, app/save.js openJourneyTab and countJourneyLinkClick); a new one needs its id in TEACHER_USAGE_FIXED (teacher-usage.js) and this pin moved`);
+  const counted = new Set(calls.flatMap(c => c.lits));
+  const blind = calls.filter(c => !c.lits.length), unlisted = calls.flatMap(c => c.lits.filter(l => !FIXED.includes(l) && !FAMILIES.includes(l)).map(l => `${c.where}: countToolOpen(${c.a}) counts '${l}'`));
+  is(!blind.length, `${blind.map(c => `${c.where}: countToolOpen(${c.a})`).join('; ')} names no id this check can read: write the id (or its 'game-' / 'journey-' family) as a string in the call`);
+  is(!unlisted.length, `${unlisted.join('; ')}, which the console's Usage view does not list (add it to TEACHER_USAGE_FIXED in teacher-usage.js)`);
+  const uncounted = [...FIXED, ...FAMILIES].filter(id => !counted.has(id));
+  is(!uncounted.length, `the console lists ${JSON.stringify(uncounted)} but nothing in the site counts it`);
+  const g0 = stripJsComments(coachSrc).indexOf('const GAMES_META = ['), g1 = g0 < 0 ? -1 : stripJsComments(coachSrc).indexOf('\n];', g0);
+  const metaKeys = g1 < 0 ? [] : [...stripJsComments(coachSrc).slice(g0, g1).matchAll(/\{\s*key\s*:\s*'([a-z0-9]+)'/g)].map(x => x[1]);
+  const usageGames = TOOLS.filter(t => t.id.startsWith('game-')).map(t => t.id.slice(5));
+  is(metaKeys.length >= 18 && JSON.stringify([...metaKeys].sort()) === JSON.stringify([...usageGames].sort()) && new Set(usageGames).size === usageGames.length,
+    `TEACHER_USAGE_GAMES (teacher-usage.js) holds ${JSON.stringify(usageGames)}, GAMES_META (coach-hub.js) ${JSON.stringify(metaKeys)}: want one row per game, the same keys`);
+  is(gameLits.length > 0 && gameLits.every(k => metaKeys.includes(k)), `gamesOpenGame(${JSON.stringify(gameLits)}) in the site: each must open a GAMES_META game (Free play's Riff Roulette at least)`);
+  const sj = run('JSON.stringify(SONG_JOURNEYS.map(s => s.url))');
+  const slugs = JSON.parse(sj).map(u => (/tabs\/([a-z0-9-]+)\.html/.exec(u) || [])[1]);
+  const rowsJ = TOOLS.filter(t => t.id.startsWith('journey-')).map(t => t.id.slice(8));
+  is(slugs.length >= 6 && !slugs.includes(undefined) && JSON.stringify(rowsJ) === JSON.stringify(slugs), `Song Journey rows ${JSON.stringify(rowsJ)}, SONG_JOURNEYS pages ${JSON.stringify(slugs)}: want one row per page`);
+  const textSlugs = new Set();
+  for (const f of MODULE_FILES.concat(['class-activities.js'])) {
+    let s = ''; try { s = readFileSync(join(ROOT, f), 'utf8'); } catch { continue; }
+    for (const x of s.matchAll(/href=\\?"tabs\/([a-z0-9-]+)\.html/g)) textSlugs.add(x[1]);
+  }
+  is(textSlugs.size > 0 && [...textSlugs].every(x => rowsJ.includes(x)), `the Journey links in the module text open ${JSON.stringify([...textSlugs])}: each needs its Song Journey row (${JSON.stringify(rowsJ)})`);
+  is(TOOLS.every(t => ID_RE && ID_RE.test(t.id)) && new Set(TOOLS.map(t => t.id)).size === TOOLS.length, `a listed tool id is a duplicate or fails TOOL_OPEN_ID_RE (never counted): ${JSON.stringify(TOOLS.map(t => t.id).filter(id => !(ID_RE && ID_RE.test(id))))}`);
+
+  /* 4. The console's read (teacherFetchStudents keeps sane counts) and the view's numbers. */
+  {
+    const at = teacherSrc.indexOf('async function teacherFetchStudents(');
+    const body = at < 0 ? null : jsFunctionBody(teacherSrc, 'teacherFetchStudents');
+    if (body === null) flag('teacherFetchStudents() not found');
+    else {
+      const DOCS = [
+        ['a', { name: 'A', toolOpens: { tuner: 3, coach: '5', timer: -2, metronome: 'x', 'game-cc': 2.9, 'card-song': 1e9, 'mr-record': NaN, 'journey-luna': 0 },
+          completed: { 'm1w1-b-sec0-0': true, 'm1w1-b-sec0-1': false, 'm1w1-b-sec0-2': true, 'm1w1-b-sec0-3': 'yes', 'm1w1-b-sec0-4': 1 } }],
+        ['b', { name: 'B', toolOpens: 'lots', completed: 'all' }],
+        ['c', { name: 'C' }],
+      ];
+      const vctx = vm.createContext({ ensureDb: async () => {}, swap45Marked: () => true, swap45Remap: d => d, currentUser: null,
+        db: { collection: () => ({ get: async () => ({ forEach: fn => DOCS.forEach(([id, data]) => fn({ id, data: () => data })) }) }) } });
+      try {
+        const got = await vm.runInContext('(' + teacherSrc.slice(at, teacherSrc.indexOf('{', at)) + body + ')()', vctx);
+        const seen = JSON.stringify(got.map(x => [x.uid, x.toolOpens, x.stepsDone]));
+        is(seen === JSON.stringify([['a', { tuner: 3, coach: 5, 'game-cc': 2, 'card-song': 1000 }, 2], ['b', {}, 0], ['c', {}, 0]]),
+          `teacherFetchStudents [uid, toolOpens, stepsDone] = ${seen} (want whole counts 1..1000 only, and the completed values that are true)`);
+      } catch (e) { flag('teacherFetchStudents could not run: ' + e.message); }
+    }
+  }
+  try {
+    const P = JSON.parse(U(`JSON.stringify({
+      ranks: teacherUsageRanks([3, 5, 5, 9]),
+      up: teacherUsageSpearman([1, 2, 3, 4], [10, 20, 30, 40]), down: teacherUsageSpearman([1, 2, 3, 4], [40, 30, 20, 10]),
+      swap: teacherUsageSpearman([1, 2, 3, 4, 5], [2, 1, 4, 3, 5]), tie: teacherUsageSpearman([1, 1, 2, 3], [1, 2, 3, 4]),
+      flat: teacherUsageSpearman([1, 2, 3], [5, 5, 5]), two: teacherUsageSpearman([1, 2], [1, 2]),
+      words: [teacherUsageRhoWords({ n: 20, rho: 0.1 }), teacherUsageRhoWords({ n: 9, rho: -0.55 }), teacherUsageRhoWords({ n: 2, rho: null, flat: false })],
+      rows: teacherUsageRows([{ toolOpens: { a: 2, b: 1 } }, { toolOpens: { a: 1, c: 0 } }, { toolOpens: { b: 5 } }, {}, { toolOpens: { a: -3 } }],
+        [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }, { id: 'c', label: 'C' }, { id: 'd', label: 'D' }]).map(r => [r.id, r.students, r.opens])
+    })`));
+    const near = (x, v) => x && typeof x.rho === 'number' && Math.abs(x.rho - v) < 1e-9;
+    is(JSON.stringify(P.ranks) === '[1,2.5,2.5,4]', `teacherUsageRanks([3,5,5,9]) = ${JSON.stringify(P.ranks)} (want [1,2.5,2.5,4]: ties share the average place)`);
+    is(near(P.up, 1) && near(P.down, -1) && near(P.swap, 0.8) && near(P.tie, 4.5 / Math.sqrt(22.5)) && P.up.n === 4 && P.swap.n === 5,
+      `Spearman: in step ${JSON.stringify(P.up)}, reversed ${JSON.stringify(P.down)}, two pairs swapped ${JSON.stringify(P.swap)}, a tie ${JSON.stringify(P.tie)} (want 1, -1, 0.8 and 0.9487, with n)`);
+    is(P.flat.rho === null && P.flat.flat === true && P.two.rho === null && P.two.flat === false && P.two.n === 2, `Spearman with every value the same ${JSON.stringify(P.flat)}, with 2 students ${JSON.stringify(P.two)} (want no rho, and which reason)`);
+    is(P.words[0] === '\u03c1 = 0.10, n = 20: little or no link' && P.words[1] === '\u03c1 = -0.55, n = 9: a moderate link, more minutes with LESS progress' && P.words[2] === 'too few students (n = 2)',
+      `rho in words: ${JSON.stringify(P.words)}`);
+    is(JSON.stringify(P.rows) === '[["b",2,6],["a",2,3],["c",0,0],["d",0,0]]', `teacherUsageRows = ${JSON.stringify(P.rows)} (want students who opened, then opens, most first; a 0 or a negative count is not an open)`);
+  } catch (e) { flag('the Usage view\'s numbers could not run: ' + e.message); }
+  try {
+    const box = { innerHTML: '', addEventListener() {} };
+    Object.assign(uctx, {
+      document: { getElementById: id => id === 't-grid-container' ? box : null },
+      PM: { calc() {} },
+      teacherPmIsTeacher: s => s.email === 'teach@x.test',
+      teacherSkillUniverse: () => null, teacherStudentTally: s => ({ got: s.got }), teacherStudentPeriod: s => s.period,
+      teacherPmData: { at: Date.UTC(2026, 10, 27, 20), weeks: { 'u-a': { w1: 600, w2: 1200 }, 'u-b': { w1: 300 }, 'u-d': { w1: 900 }, 'u-c': {} } },
+      allStudents: [
+        { uid: 'u-a', name: 'Ana <b>x</b>', email: 'a@x.test', period: '4', got: 5, stepsDone: 10, classActivities: { x: true, y: true }, toolOpens: { tuner: 3, 'game-cc': 1 } },
+        { uid: 'u-b', name: 'Ben', email: 'b@x.test', period: '4', got: 2, stepsDone: 4, classActivities: { x: true, y: false }, toolOpens: { tuner: 1 } },
+        { uid: 'u-d', name: 'Dee', email: 'd@x.test', period: '4', got: 1, stepsDone: 7, classActivities: {}, toolOpens: {} },
+        { uid: 'u-c', name: 'Cy', email: 'c@x.test', period: '<i>7', got: 0, stepsDone: 0, classActivities: {}, toolOpens: {} },
+        { uid: 'u-t', name: 'Teacher', email: 'teach@x.test', period: '', got: 0, stepsDone: 0, classActivities: {}, toolOpens: { tuner: 50, timer: 9 } },
+      ],
+    });
+    U('renderTeacherUsage()');
+    const h = box.innerHTML;
+    const tools = h.slice(0, h.indexOf('Do minutes track progress?'));
+    const zeros = (tools.match(/>0 students</g) || []).length;
+    const rowOf = label => { const i = tools.indexOf('>' + label + '</td>'); return i < 0 ? '' : tools.slice(i, tools.indexOf('</tr>', i)); };
+    is(/data-tview="usage"/.test(h) && rowOf('Tuner').includes('2 students <span class="us-t-of">of 4</span>') && rowOf('Tuner').includes('4 opens')
+      && rowOf('Change Up').includes('1 student <span') && rowOf('Change Up').includes('1 open<') && rowOf('Timer').includes('>0 students<'),
+      `the tools table: Tuner "${rowOf('Tuner').replace(/<[^>]+>/g, ' ')}", Change Up "${rowOf('Change Up').replace(/<[^>]+>/g, ' ')}", Timer "${rowOf('Timer').replace(/<[^>]+>/g, ' ')}" (want 2 of 4 students and 4 opens, 1 student and 1 open, 0 students: the teacher's own 50 left out)`);
+    is(zeros === TOOLS.length - 2 && tools.indexOf('Not opened by anyone yet') > tools.indexOf('>Change Up<') && tools.lastIndexOf('>Change Up<') < tools.indexOf('>0 students<'),
+      `the tools table: ${zeros} "0 students" rows (want ${TOOLS.length - 2}), and the "Not opened by anyone yet" group must come after every opened tool`);
+    const rho = (h.match(/<li data-usage-rho="4">[\s\S]*?<\/li>/) || [''])[0].replace(/<[^>]+>/g, '');
+    is(rho.includes('(3 students)') && rho.includes('skills got \u03c1 = 0.50, n = 3: a moderate link, more minutes with more progress') && rho.includes('steps done \u03c1 = 1.00, n = 3: a strong link') && rho.includes('activities done \u03c1 = 0.50, n = 3'),
+      `Period 4's line: "${rho}" (want minutes 30, 5, 15 against skills 5, 2, 1 -> 0.50, steps 10, 4, 7 -> 1.00, activities 2, 1, 0 -> 0.50, n = 3)`);
+    const order = ['Ana', 'Dee', 'Ben'].map(n => h.indexOf('<td class="tg-name" title="' + (n === 'Ana' ? 'Ana &lt;b&gt;x&lt;/b&gt;' : n) + '"'));
+    is(order.every(i => i > 0) && order[0] < order[1] && order[1] < order[2] && h.includes('>30 min<') && h.includes('>15 min<') && h.includes('>5 min<') && h.includes('>0 min<'),
+      `the minutes table must list Period 4 by minutes, most first (Ana 30, Dee 15, Ben 5), and Cy at 0 min: positions ${JSON.stringify(order)}`);
+    is(!h.includes('<b>x</b>') && !h.includes('<i>7') && h.includes('Ana &lt;b&gt;x&lt;/b&gt;') && h.includes('Period &lt;i&gt;7') && !/data-usage-rho="[^"]*</.test(h) && !h.includes('>Teacher<'),
+      'a student-written name or period reached the view unescaped, or the teacher\'s own row is drawn');
+  } catch (e) { flag('renderTeacherUsage could not run: ' + e.message); }
+  if (cases !== 48) flag(`ran ${cases} cases, pinned 48`);
+  if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
+}
 
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
    STRUMS a power chord and the card is answered by its root fret. The mic used
@@ -23395,8 +23729,8 @@ function checkBuiltSongs(ctx) {
        in English and in Spanish.
    ════════════════════════════════════════════════════════════════════ */
 const PRIVACY_NOTICE_SHA = {
-  en: '1964a281efbd8bd966682a72918363f05ecdc530adb0abbba187e8265942a2ce',
-  es: 'fde4cc32d6e1d74ca8b3ed70ed3f49557afdd2c9ba5cf4f4cfc262cf3c5b9089',
+  en: '1ee3ea8aedf77422eccb5142b451e55f322f59b1f06682924dffad4335d07c5e',
+  es: '08a6dbd0774344e44e760c188974731d6c99b95ba9787323ea93574801c96ce4',
 };
 function privacyNoticeText(html, lang) {
   const m = html.match(new RegExp(`<section data-notice lang="${lang}"[^>]*>([\\s\\S]*?)</section>`));
@@ -24530,6 +24864,7 @@ function checkNeverRules(sets) {
   checkEcho(rcCtx);
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
+  await checkUsageCounts(rcCtx);
   checkSongTiles(rcCtx);
   checkLessonTwoCol(rcSets, rcCtx);
   checkRailDefault(rcCtx);
