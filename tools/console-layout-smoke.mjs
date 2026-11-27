@@ -13,7 +13,7 @@
      node tools/console-layout-smoke.mjs --chrome <path> Chrome binary (or CHROME=…)
 
    What it does, and fails on:
-     - clicks every sidebar item (the 17 are pinned) and checks that view
+     - clicks every sidebar item (the 18 are pinned) and checks that view
        renders its own element with no page error, that exactly that item is
        marked current, and that no view scrolls the page sideways at 1366 px;
      - opens a practice card, a focus-view activity, a paths activity and an
@@ -69,6 +69,14 @@
        read yet the view offers the Practice minutes read, and its button fills the minutes table; per period the
        table sorted by minutes with each student's numbers, and the Spearman lines equal to rho worked out here (a
        second implementation); names drawn as text, no sideways scroll (usage-*.png with --shots);
+     - the Week-later checks view (2026-11-27, teacher-spotcheck.js) at 1366x657: the stub's made-up "last day a skill
+       was marked" (SPOT_AGO: 2, 7, 6 or 20 days ago, none, CAS all yesterday) and made-up earlier results in this
+       browser's store (SPOT_PRIOR), worked out here: under P7 five rows, every one a student whose day is 7 or more
+       days ago with a playable skill marked, no student twice, the one never checked first, each pair the least
+       checked of that student's, the skill's wording, its "You've got it when" line and "N days ago"; the same list
+       in a second tab of the same browser (a reload); Held / Not yet / Skip marks and the summary's checks, held and
+       skipped worked out here, Undo, sizes 3 and 8, Draw again (fewest checks first), P4's one row (the 7-day
+       boundary), CAS's empty state, All's period picker; no sideways scroll (spotcheck-*.png with --shots);
      - measures sideways scroll at 390 px;
      - the Song builder's Lyrics sheet row (2026-11-18, teacher-sb-sheet.js) at 1366x657: two made-up built songs in
        the stub, made-up pdfs (tools/made-pdf.mjs) read by the real pdf.js; the row with no sheet, a sheet that follows
@@ -159,6 +167,10 @@ const USAGE_SEED = (i) => {
   const steps = (i * 7) % 23, got = (i * 5) % 11;
   return { tools, steps, got, minutes: i % 6 === 0 ? 0 : 4 + steps * 2 + ((i * 3) % 7) * 4 };
 };
+/* The Week-later checks view's made-up data: how many days ago stub student i last marked a skill "I've got it" (their
+   streak.lastDay; null = none saved), and earlier results in this browser's store ([student, skill, mark, days ago]). */
+const SPOT_AGO = (i) => i === 9 ? null : i > 24 ? 1 : [2, 7, 6, 20][i % 4];
+const SPOT_PRIOR = [['13', 'w2-s2', 'held', 14], ['15', 'w2-s3', 'notyet', 14], ['17', 'w2-s3', 'notyet', 14], ['19', 'w2-s2', 'held', 21], ['21', 'w2-s3', 'notyet', 21]];
 const USAGE_SKILL_IDS = ['module-1.js', 'module-2.js'].flatMap(f => [...readFileSync(join(ROOT, f), 'utf8').matchAll(/\{ id: '((?:m2)?w\d+-s\d+)'/g)].map(m => m[1]));
 /* The stub: an in-memory Firestore with the calls the console makes (get on a
    doc or a collection, a transaction that merges a patch with FieldValue.delete
@@ -191,6 +203,7 @@ const STUB = String.raw`(() => {
   if (has('ca-49')) dates['ca-49'] = day(5);
   const students = [];
   const usageSeed = ${USAGE_SEED.toString()};
+  const spotAgo = ${SPOT_AGO.toString()};
   // The console fetches the module files on demand (SETS is empty here): Modules 1 and 2's skill ids, read from the files.
   const skillIds = ${JSON.stringify(USAGE_SKILL_IDS)};
   for (let i = 1; i <= 30; i++) {
@@ -214,8 +227,10 @@ const STUB = String.raw`(() => {
     for (let k = 0; k < u.steps; k++) completed['m1w1-b-sec0-' + k] = true;
     skillIds.slice(0, u.got).forEach(id => { skills[id] = 'gotit'; });
     if (u.minutes) store.set('minutes/stub-uid-' + n + '/weeks/2026-W45', { seconds: u.minutes * 60 });
-    students.push({ uid: 'stub-uid-' + n, name: HOSTILE[n] || 'Test Student ' + n, email: 'student' + n + '@example.test', period,
-      classActivities: done, caSteps: steps, exitChecks, skills, responses: {}, migrations: { swap45: true }, toolOpens: u.tools, completed });
+    const stu = { uid: 'stub-uid-' + n, name: HOSTILE[n] || 'Test Student ' + n, email: 'student' + n + '@example.test', period,
+      classActivities: done, caSteps: steps, exitChecks, skills, responses: {}, migrations: { swap45: true }, toolOpens: u.tools, completed };
+    if (spotAgo(i) !== null) stu.streak = { count: 1, lastDay: day(-spotAgo(i)) };
+    students.push(stu);
   }
   students.forEach(s => store.set('progress/' + s.uid, s));
   const who = {};
@@ -310,7 +325,7 @@ async function main() {
       picked: activityDetailId, students: allStudentsRaw.length })`);
     if (boot.err) fail('boot', 'showTeacherApp threw ' + boot.err);
     if (boot.view !== 'activities' || !boot.list) fail('boot', 'the console did not open on the Class activities list (view ' + boot.view + ')');
-    if (boot.side !== 17) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 17');
+    if (boot.side !== 18) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 18');
     if (JSON.stringify(boot.current) !== '["activities"]') fail('boot', 'the current sidebar item is ' + JSON.stringify(boot.current));
     if (boot.students !== nStu) fail('boot', 'the console read ' + boot.students + ' students, the stub has ' + nStu);
     await sleep(300);
@@ -324,7 +339,7 @@ async function main() {
       skills: ['td.nc[data-open-student]'], trouble: ['.tr-meta', /least-mastered skills/], minutes: ['.pm-t-table'], responses: ['.t-loading', /written a response/],
       manage: ['[data-set-open-through]'], games: ['[data-set-games]'], mic: ['.tg-class', /Collect mic recordings/], reports: ['.t-loading', /issue reports/],
       errors: ['.t-loading', /No errors logged/], songrequests: ['.t-loading', /No song requests/], songbuilder: ['[data-sb-root]'],
-      usage: ['[data-tview="usage"]', /Which tools students open/] };
+      usage: ['[data-tview="usage"]', /Which tools students open/], spotcheck: ['[data-tview="spotcheck"]', /Week-later checks/] };
     const views = await js(`[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`);
     if (JSON.stringify(views.slice().sort()) !== JSON.stringify(Object.keys(MARKERS).sort())) fail('sidebar', 'the sidebar views are ' + JSON.stringify(views) + ', expected ' + JSON.stringify(Object.keys(MARKERS)));
     for (const v of views) {
@@ -446,6 +461,171 @@ async function main() {
       await js(`teacherSetPeriodFilter('all')`); await sleep(200);
       const e = errsSince(n0); if (e.length) fail('usage', 'page error: ' + e[0]);
       stats.usage = { tools: ids.length, openedAll, openedP7, groups, minRows };
+    }
+
+    // ── Week-later checks (teacher-spotcheck.js, 2026-11-27): the list, marks, Undo, sizes, Draw again, the summary ──
+    {
+      const n0 = pageErrors.length;
+      const SK = 'gc-teacher-spotcheck-v1', SZ = 'gc-teacher-spotcheck-size';
+      const per = i => (i <= 12 ? '4' : i <= 24 ? '7' : 'CAS');
+      const uidOf = i => 'stub-uid-' + String(i).padStart(2, '0');
+      const today = await js(`teacherSpotDayStr(new Date())`);
+      const minus = n => { const t = new Date(today + 'T12:00:00Z'); t.setUTCDate(t.getUTCDate() - n); return t.toISOString().slice(0, 10); };
+      const playable = await js(`JSON.stringify(Object.fromEntries(Object.entries(teacherSpotSkillInfo(SETS)).map(([k, v]) => [k, v.playable])))`).then(JSON.parse);
+      const gotItWhen = await js(`JSON.stringify(Object.fromEntries(SETS.flatMap(w => w.skills || []).map(s => [s.id, s.gotItWhen || ''])))`).then(JSON.parse);
+      const ticked = i => USAGE_SKILL_IDS.slice(0, USAGE_SEED(i).got).filter(id => playable[id]);
+      // Who can be drawn, worked out here: a saved day 7 or more days ago and a playable skill marked; archived 05 never.
+      const pool = p => Array.from({ length: 30 }, (_, k) => k + 1).filter(i => i !== 5 && per(i) === p && SPOT_AGO(i) !== null && SPOT_AGO(i) >= 7 && ticked(i).length);
+      // The earlier results put in this browser's store first (and one undo step for a markup name, drawn in the Undo button).
+      const prior = SPOT_PRIOR.map(([n, skill, result, ago], k) => ({ uid: 'stub-uid-' + n, skill, result, day: minus(ago), at: k + 1, period: '7', list: minus(ago) + '|7|0', ticked: minus(ago + 7), by: 'teacher' }));
+      const seedState = { v: 1, results: prior, lists: {}, undo: [{ list: minus(21) + '|4|0', uid: 'stub-uid-03', skill: 'w2-s2', result: 'held', prev: null }] };
+      await js(`(() => { localStorage.setItem(${JSON.stringify(SK)}, ${JSON.stringify(JSON.stringify(seedState))}); localStorage.removeItem(${JSON.stringify(SZ)}); return true; })()`);
+      const marks = new Map();
+      // The checks a list was drawn from: the earlier results plus the marks made before that draw (drawn = a copy of them).
+      let drawn = new Map();
+      const checksOf = (uid, mk = drawn) => prior.filter(r => r.uid === uid && r.result !== 'skip').length + [...mk.values()].filter(m => m.uid === uid && m.result !== 'skip').length;
+      const pairOf = (uid, skill, mk = drawn) => prior.filter(r => r.uid === uid && r.skill === skill && r.result !== 'skip').length + [...mk.values()].filter(m => m.uid === uid && m.skill === skill && m.result !== 'skip').length;
+      const readSpot = (ev = js) => ev(`(() => ({
+        rows: [...document.querySelectorAll('#t-grid-container [data-spot-row]')].map(tr => ({ uid: tr.dataset.spotUid, skill: tr.dataset.spotSkill, state: tr.dataset.spotState, text: tr.innerText.replace(/\\s+/g, ' ') })),
+        pool: (document.querySelector('[data-spot-pool]') || {}).dataset ? +document.querySelector('[data-spot-pool]').dataset.spotPool : null,
+        sum: (() => { const e = document.querySelector('[data-spot-summary]'); return e ? { checks: +e.dataset.spotSummary, held: +(e.dataset.spotHeld || 0), skipped: +(e.dataset.spotSkipped || 0) } : null; })(),
+        mods: [...document.querySelectorAll('[data-spot-mod]')].map(tr => [...tr.children].map(td => td.textContent.trim())),
+        failed: [...document.querySelectorAll('[data-spot-fail]')].map(li => li.dataset.spotFail),
+        howto: !!document.querySelector('[data-spot-howto]'), empty: !!document.querySelector('[data-spot-empty]'), pick: [...document.querySelectorAll('[data-spot-period]')].map(b => b.dataset.spotPeriod),
+        undo: (document.querySelector('[data-spot-undo]') || {}).textContent || '', undoOff: !!(document.querySelector('[data-spot-undo]') || {}).disabled,
+        said: (document.querySelector('[data-spot-said]') || {}).textContent || '', text: document.getElementById('t-grid-container').innerText,
+        sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        wraps: [...document.querySelectorAll('#t-grid-container .tg-grid-wrap')].map(w => w.scrollWidth - w.clientWidth) }))()`);
+      const checkRows = (r, p, where, size) => {
+        const ok = pool(p), uids = r.rows.map(x => x.uid);
+        if (r.rows.length !== Math.min(size, ok.length)) fail('spotcheck', `${where}: ${r.rows.length} rows, worked out here min(${size}, ${ok.length})`);
+        if (r.pool !== ok.length) fail('spotcheck', `${where}: the view says ${r.pool} can be drawn, worked out here ${ok.length}`);
+        if (new Set(uids).size !== uids.length) fail('spotcheck', `${where}: a student twice: ${uids.join(', ')}`);
+        for (const x of r.rows) {
+          const i = +x.uid.slice(-2);
+          if (!ok.includes(i)) fail('spotcheck', `${where}: ${x.uid} drawn (last marked ${SPOT_AGO(i)} days ago, ${ticked(i).length} playable skills marked)`);
+          if (!ticked(i).includes(x.skill)) fail('spotcheck', `${where}: ${x.uid} drawn on ${x.skill}, not a playable skill they marked`);
+          const least = Math.min(...ticked(i).map(id => pairOf(x.uid, id)));
+          if (pairOf(x.uid, x.skill) !== least) fail('spotcheck', `${where}: ${x.uid} on ${x.skill} (${pairOf(x.uid, x.skill)} checks) when another of theirs has ${least}`);
+          if (!x.text.includes(gotItWhen[x.skill]) || !/You’ve got it when/.test(x.text)) fail('spotcheck', `${where}: ${x.uid}'s row lacks its "You've got it when" line`);
+          if (!x.text.includes(SPOT_AGO(i) + ' days ago') || !/on or before/.test(x.text)) fail('spotcheck', `${where}: ${x.uid}'s row does not say "on or before … ${SPOT_AGO(i)} days ago": ${x.text.slice(0, 160)}`);
+        }
+        const c = r.rows.map(x => checksOf(x.uid));
+        if (c.some((v, k) => k && v < c[k - 1])) fail('spotcheck', `${where}: not fewest checks first: ${c.join(', ')}`);
+        const left = ok.filter(i => !uids.includes(uidOf(i))).map(i => checksOf(uidOf(i)));
+        if (c.length && left.length && Math.max(...c) > Math.min(...left)) fail('spotcheck', `${where}: a student with ${Math.max(...c)} checks drawn over one with ${Math.min(...left)}`);
+        if (r.sideways > 0 || r.wraps.some(w => w > 0)) fail('spotcheck', `${where}: sideways scroll at 1366x657: page ${r.sideways}px, tables ${JSON.stringify(r.wraps)}`);
+      };
+      const checkSum = (r, where) => {
+        const all = prior.concat([...marks.values()]).filter(x => per(+x.uid.slice(-2)) === '7');
+        const checks = all.filter(x => x.result !== 'skip'), held = checks.filter(x => x.result === 'held').length, skipped = all.filter(x => x.result === 'skip').length;
+        const got = r.sum || {};
+        if (got.checks !== checks.length || got.held !== held || got.skipped !== skipped) fail('spotcheck', `${where}: the summary says ${JSON.stringify(got)}, worked out here ${JSON.stringify({ checks: checks.length, held, skipped })}`);
+        const m1 = r.mods.find(x => /^Module 1\b/.test(x[0]));
+        if (!m1 || m1[1] !== String(held) || m1[2] !== String(checks.length)) fail('spotcheck', `${where}: the Module 1 row is ${JSON.stringify(m1)}, worked out here held ${held} of ${checks.length}`);
+        const fails = {}; checks.filter(x => x.result === 'notyet').forEach(x => { fails[x.skill] = (fails[x.skill] || 0) + 1; });
+        const top = Math.max(0, ...Object.values(fails));
+        if (top && (!r.failed.length || fails[r.failed[0]] !== top)) fail('spotcheck', `${where}: "Failed most" starts with ${r.failed[0]}, worked out here a skill with ${top} Not yet`);
+      };
+      await size(1366, 657);
+      await js(`teacherSetPeriodFilter('7')`); await js(`setTeacherView('spotcheck')`); await sleep(250);
+      await js(`window.scrollTo(0, 0)`);
+      let r = await readSpot();
+      if (!r.howto || !/no backing track, no help/.test(r.text)) fail('spotcheck', 'the one-line instruction (once, no backing track, no help) is not at the top');
+      if (!/A week is counted from the last day the student marked ANY skill/.test(r.text) || !/Not a grade/.test(r.text) || !/this browser on this computer only/.test(r.text)) fail('spotcheck', 'the view does not say what a week is measured from, where results are kept, or that it is not a grade');
+      checkRows(r, '7', 'P7', 5);
+      const firstList = JSON.stringify(r.rows.map(x => [x.uid, x.skill]));
+      const never = pool('7').filter(i => !checksOf(uidOf(i))).map(uidOf);
+      if (never.length && !never.includes(r.rows[0] && r.rows[0].uid)) fail('spotcheck', `P7: the never-checked ${never.join(', ')} is not first (${r.rows[0] && r.rows[0].uid})`);
+      if (!/Undo “Held” for Evil/.test(r.undo)) fail('spotcheck', 'the Undo button does not name the seeded last mark: ' + r.undo);
+      await xss('week-later checks (the Undo button names a markup name)');
+      checkSum(r, 'P7 before any mark');
+      await shot('spotcheck-01-list-1366x657');
+      // The same list again: another view and back, then a second tab of the same browser (a reload).
+      await js(`setTeacherView('usage')`); await sleep(150); await js(`setTeacherView('spotcheck')`); await sleep(200);
+      r = await readSpot();
+      if (JSON.stringify(r.rows.map(x => [x.uid, x.skill])) !== firstList) fail('spotcheck', 'another view and back drew another list');
+      {
+        const p2 = await openPage(cdp);
+        await p2.send('Runtime.enable'); await p2.send('Page.enable');
+        await p2.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+        const js2 = e => p2.evalJs(e);
+        await p2.send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher=true` });
+        for (let i = 0; i < 80; i++) { await sleep(150); if (await js2(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
+        await js2(`ensureTeacherJs()`);
+        for (let i = 0; i < 80; i++) { await sleep(100); if (await js2(`typeof showTeacherApp === 'function'`)) break; }
+        await js2(STUB);
+        await js2(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
+        for (let i = 0; i < 80; i++) { await sleep(100); if (await js2(`!!document.querySelector('#t-grid-container [data-ta-list]')`)) break; }
+        await js2(`setTeacherView('spotcheck')`);
+        for (let i = 0; i < 40; i++) { await sleep(100); if (await js2(`!!document.querySelector('[data-spot-row]')`)) break; }
+        const r2 = await readSpot(js2);
+        const err2 = await js2(`window.__showErr || null`);
+        if (err2) fail('spotcheck', 'the second tab: showTeacherApp threw ' + err2);
+        if (JSON.stringify(r2.rows.map(x => [x.uid, x.skill])) !== firstList) fail('spotcheck', `a second tab (a reload) drew another list: ${JSON.stringify(r2.rows.map(x => [x.uid, x.skill]))} vs ${firstList}`);
+        await p2.close();
+      }
+      // Marks: Held, Not yet, Skip on the first three rows.
+      const markRow = async (k, result) => {
+        const row = r.rows[k];
+        await js(`document.querySelectorAll('#t-grid-container [data-spot-row]')[${k}].querySelector('[data-spot-mark="${result}"]').click()`); await sleep(120);
+        marks.set(row.uid + '|' + row.skill, { uid: row.uid, skill: row.skill, result });
+      };
+      await markRow(0, 'held'); await markRow(1, 'notyet'); await markRow(2, 'skip');
+      r = await readSpot();
+      if (r.rows.slice(0, 3).map(x => x.state).join() !== 'held,notyet,skip' || r.rows.slice(3).some(x => x.state !== 'open')) fail('spotcheck', 'the marks on screen are ' + r.rows.map(x => x.state).join());
+      if (JSON.stringify(r.rows.map(x => [x.uid, x.skill])) !== firstList) fail('spotcheck', 'marking changed the list');
+      checkSum(r, 'after Held, Not yet, Skip');
+      await js(`window.scrollTo(0, 0)`); await sleep(80);
+      await shot('spotcheck-02-marked-1366x657');
+      await js(`document.querySelector('[data-spot-summary]').scrollIntoView({ block: 'start' })`); await sleep(120);
+      await shot('spotcheck-03-summary-1366x657');
+      const sum3 = r.sum;
+      // Undo takes the Skip back (the line says so); Skip again.
+      await js(`document.querySelector('[data-spot-undo]').click()`); await sleep(120);
+      marks.delete(r.rows[2].uid + '|' + r.rows[2].skill);
+      r = await readSpot();
+      if (r.rows[2].state !== 'open' || !/^Undone: “Skip \(absent\)” for /.test(r.said)) fail('spotcheck', `Undo: row 3 is ${r.rows[2].state}, the line "${r.said}"`);
+      checkSum(r, 'after Undo');
+      await markRow(2, 'skip');
+      // Sizes: 3 (marked rows beyond stay; none here), 8, back to 5.
+      await js(`document.querySelector('[data-spot-size="3"]').click()`); await sleep(120);
+      r = await readSpot(); if (r.rows.length !== 3) fail('spotcheck', 'size 3 shows ' + r.rows.length + ' rows');
+      await js(`document.querySelector('[data-spot-size="8"]').click()`); await sleep(120);
+      r = await readSpot(); checkRows(Object.assign({}, r, { rows: r.rows }), '7', 'P7 size 8', 8);
+      if (JSON.stringify(r.rows.slice(0, 5).map(x => [x.uid, x.skill])) !== firstList) fail('spotcheck', 'size 8 is not the same list made longer');
+      const size8 = r.rows.length;
+      await js(`document.querySelector('[data-spot-size="5"]').click()`); await sleep(120);
+      // Draw again: a new list, still fewest checks first.
+      await js(`document.querySelector('[data-spot-again]').click()`); await sleep(150);
+      drawn = new Map(marks);
+      r = await readSpot();
+      checkRows(r, '7', 'P7 after Draw again', 5);
+      checkSum(r, 'after Draw again');
+      if (r.rows.some(x => x.state !== 'open')) fail('spotcheck', 'Draw again kept marks on the new list');
+      // P4: one student can be drawn (01, last marked exactly 7 days ago); the 6-day students never.
+      await js(`teacherSetPeriodFilter('4')`); await sleep(200);
+      r = await readSpot(); checkRows(r, '4', 'P4', 5);
+      const p4 = r.rows.length;
+      // CAS: everyone marked a skill yesterday: the empty state.
+      await js(`teacherSetPeriodFilter('CAS')`); await sleep(200);
+      r = await readSpot();
+      if (!r.empty || r.rows.length || !/No ticks older than a week yet/.test(r.text)) fail('spotcheck', 'CAS: no empty state ("No ticks older than a week yet")');
+      await js(`window.scrollTo(0, 0)`); await sleep(80);
+      await shot('spotcheck-04-empty-1366x657');
+      // All: a period picker; its P7 button sets the filter at the top.
+      await js(`teacherSetPeriodFilter('all')`); await sleep(200);
+      r = await readSpot();
+      if (JSON.stringify(r.pick) !== '["4","7","CAS"]' || r.rows.length) fail('spotcheck', 'All: the period picker offers ' + JSON.stringify(r.pick));
+      await js(`document.querySelector('[data-spot-period="7"]').click()`); await sleep(200);
+      if ((await js(`teacherPeriodFilter`)) !== '7' || !(await readSpot()).rows.length) fail('spotcheck', 'All: the P7 button did not show P7\'s list');
+      // The backup section carries every stored result.
+      const bk = await js(`(() => { const b = teacherSpotBackupSection(); return { n: b && b.count, stored: JSON.parse(localStorage.getItem(${JSON.stringify(SK)})).results.length }; })()`);
+      if (bk.n !== bk.stored || bk.n !== prior.length + marks.size) fail('spotcheck', `the backup section holds ${bk.n} results, the store ${bk.stored}, worked out here ${prior.length + marks.size}`);
+      await js(`teacherSetPeriodFilter('all')`); await sleep(150);
+      await js(`(() => { localStorage.removeItem(${JSON.stringify(SK)}); localStorage.removeItem(${JSON.stringify(SZ)}); return true; })()`);
+      const e = errsSince(n0); if (e.length) fail('spotcheck', 'page error: ' + e[0]);
+      stats.spot = { rows: 5, pool: pool('7').length, marks: 4, checks: sum3 && sum3.checks, held: sum3 && sum3.held, skipped: sum3 && sum3.skipped, size8, p4 };
     }
 
     // ── Practice minutes: the "This week's goal (minutes)" box (2026-11-09) ──
@@ -1302,9 +1482,9 @@ async function main() {
     await js(`setTeacherView('activities')`); await sleep(400);
     await shot('12-console-390');
     {
-      // The sideways strip has no room for a tree: only the 17 items stay.
+      // The sideways strip has no room for a tree: only the 18 items stay.
       const r = await js(`({ tree: getComputedStyle(document.getElementById('t-side-tree')).display, fold: getComputedStyle(document.querySelector('#t-side [data-side-fold]')).display, items: document.querySelectorAll('#t-side [data-view]').length })`);
-      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 17) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
+      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 18) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
     }
     for (const tab of ['preview', 'students', 'settings']) {
       await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);
@@ -1403,6 +1583,7 @@ async function main() {
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.big) console.log(`  2560x1300: ${stats.big} view switches, the console at factor 1 with no sideways scroll, Live In-Class Games filling (1.874) and the next view back at 1; Student view's student site ${stats.studentView ? 'fills (' + stats.studentView + ') and is 1 at 1366x657' : 'NOT checked'}`);
   if (stats.usage) console.log(`  Usage at 1366x657: ${stats.usage.tools} tool rows equal to the stub worked out here under All (${stats.usage.openedAll} opened, the rest "0 students" last) and P7 (${stats.usage.openedP7} opened); the minutes read from the view's button; ${stats.usage.minRows} minutes rows in ${stats.usage.groups} periods sorted by minutes, each with the stub's numbers; 9 rho lines equal to a second implementation`);
+  if (stats.spot) console.log(`  Week-later checks at 1366x657: P7 ${stats.spot.rows} rows of ${stats.spot.pool} who can be drawn (worked out here), the never-checked student first, the same list in a second tab; ${stats.spot.marks} marks and the summary (${stats.spot.checks} checks, ${stats.spot.held} held, ${stats.spot.skipped} skipped) worked out here, Undo, sizes 3 / 8 (${stats.spot.size8} rows), Draw again by fewest checks; P4 ${stats.spot.p4} row (the 7-day boundary); CAS empty; All asks for a period`);
   if (stats.sheet) console.log(`  Song builder Lyrics sheet row at 1366x657: ${stats.sheet.length} states (${stats.sheet.join(', ')}), no sideways scroll, inside the detail column`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }

@@ -80,6 +80,10 @@
        "builtSongsMeta": { "list": fields }, "songDrafts": { id: fields } }
    (builtSongsMeta holds its one doc under the key "list", as config holds "class" and "access"; its count is
    counts.builtSongsMeta, 0 or 1, and a refusal is named "builtSongsMeta/list" in notReadable.)
+   (2026-11-27) When this browser keeps Week-later check marks (teacher-spotcheck.js: they are not in the database
+   yet), the file also holds them, after `collections`: "thisComputer": { "spotChecks": { kept, note, count,
+   results: [ { uid, skill, day, at, result, period, list, ticked, by } ] } }. Not counted in counts; a restore puts
+   them back into that localStorage key by hand (or into the class-database store, once there is one).
    A Firestore doc id never contains "/", so "<uid>/<weekId>" splits back
    unambiguously into minutes/<uid>/weeks/<weekId> (and minutes/<uid>/days/<day>).
    Firestore types are written as tagged objects so they read back exactly
@@ -461,6 +465,10 @@ function teacherBackupFileText(read, now, site){
     leftOut:TEACHER_BACKUP_LEFT_OUT,
     collections:read.collections,
   };
+  /* Not from the database: the Week-later check marks this browser keeps (teacher-spotcheck.js, its STORAGE), when
+     there are any. A plain JSON list (uids, skill ids, days, marks): nothing in it is a Firestore type. */
+  const spot=typeof teacherSpotBackupSection==='function' ? teacherSpotBackupSection() : null;
+  if(spot) file.thisComputer={spotChecks:spot};
   return JSON.stringify(file);
 }
 function teacherBackupSummary(counts, notReadable){
@@ -511,5 +519,6 @@ async function teacherBackupStart(){
     return;
   }
   try{ localStorage.setItem(TEACHER_BACKUP_LAST_KEY, String(now)); }catch(e){}
-  teacherBackupSay(gen, 'saved', `Saved ${name}: ${teacherBackupSummary(read.counts, read.notReadable)}. Look in your Downloads folder.`);
+  const spotN=(typeof teacherSpotBackupSection==='function' && (teacherSpotBackupSection()||{}).count) || 0;
+  teacherBackupSay(gen, 'saved', `Saved ${name}: ${teacherBackupSummary(read.counts, read.notReadable)}${spotN ? `, and ${spotN} week-later check ${spotN===1?'result':'results'} from this computer` : ''}. Look in your Downloads folder.`);
 }

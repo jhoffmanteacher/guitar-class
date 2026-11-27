@@ -49,7 +49,8 @@
      6 console settings  the student's cells in config/class (pause, archive,
                          the period you set, open through, games, activity
                          clears, individual cards)
-     7 saved work        the progressDeleted marker, then progress/{uid} (LAST)
+     7 saved work        the progressDeleted marker, then progress/{uid} (LAST); then the Week-later check
+                         marks this browser keeps for them (teacher-spotcheck.js, teacherSpotForget; 2026-11-27)
    NOT removable here, said in the dialog: problem reports (the rules let
    nobody delete them), the anonymous Top 5 / class-rank entries (a private
    tag, no uid: the tag is deleted with the minutes, so nothing links them
@@ -168,7 +169,8 @@ function trmKindLines(inv, uid){
     const parts = [trmPlural(trmCountMap(p.completed), 'step done', 'steps done'), trmPlural(trmCountMap(p.responses), 'answer'),
       trmPlural(trmCountMap(p.skills), 'rating or got-it', 'ratings and got-its'), trmPlural(trmCountMap(p.classActivities), 'in-class activity', 'in-class activities'),
       trmPlural(trmCountMap(p.exitChecks), 'exit check')];
-    out.progress = {n: 1, text: `their whole saved-work document (${parts.join(', ')}); they leave the roster`};
+    const spot = typeof teacherSpotStudentResults==='function' ? teacherSpotStudentResults(uid).length : 0;
+    out.progress = {n: 1, text: `their whole saved-work document (${parts.join(', ')}); they leave the roster${spot ? `, and the ${trmPlural(spot, 'week-later check result')} this computer keeps for them go too` : ''}`};
   } else out.progress = {n: 0, text: 'no saved-work document'};
   // The tag cannot be read: "if they have one" (a page makes it once the student has a period), and inv.tagLeft (trmChoose).
   const dw = inv.days.length + inv.weeks.length;
@@ -244,6 +246,8 @@ const TRM_STEPS = {
     // The marker first: Manage's status and the student's next sign-in (progressStartOverAtSignIn, app/save.js) read it.
     await trmWriteMarker('progressDeleted', uid);
     await teacherRemoveDeleteProgress(uid);
+    // Their Week-later check marks on this computer go with it (teacher-spotcheck.js keeps them in this browser).
+    if(typeof teacherSpotForget==='function') teacherSpotForget(uid);
   },
 };
 /* Kind 6: the student's own cells in config/class, through teacherWriteConfig(). */
@@ -344,6 +348,9 @@ async function teacherRemoveDownload(uid, inv){
   c.allowListed = inv.allowed;
   if(inv.liveAnswer) c.liveQuizAnswer = trmEnc('liveQuiz', 'answers/' + uid, inv.liveAnswer);
   c.configClassCells = trmEnc('config', 'class', inv.settings);
+  // The Week-later check marks this browser keeps for them (teacher-spotcheck.js), when there are any: plain JSON.
+  const spot = typeof teacherSpotStudentResults==='function' ? teacherSpotStudentResults(uid) : [];
+  if(spot.length) out.thisComputer = {spotChecks: spot};
   const day = teacherBackupDay(Date.now());
   teacherMicSaveFile(`guitar-class-student-${String(uid).slice(0, 8)}-${day}.json`, new Blob([JSON.stringify(out)], {type: 'application/json'}));
 }

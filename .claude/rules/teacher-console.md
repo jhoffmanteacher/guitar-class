@@ -117,6 +117,13 @@ Moved from CLAUDE.md "Where the code lives" (2026-11-26).
   (both tables against its stub's made-up roster). The counts' writer is the student's own page (`app/save.js`
   `flushToolOpens`, a save-path change: `node tools/save-loop.mjs`, directed check L9u). `TEACHER_USAGE_SINCE` is the
   day counting shipped.
+- `teacher-spotcheck.js` (Students → Week-later checks, 2026-11-27; writes nothing to Firestore): a week is counted
+  from `streak.lastDay` (the last day the student marked ANY skill "I've got it"; ticks carry no time), read by
+  `teacherFetchStudents()` as `lastGotItDay`. Results live in this browser only, behind `TEACHER_SPOT_STORE` (the
+  adapter; no rules block fits today: never `config/class`, which students read). The backup file carries them
+  (`thisComputer`) and Delete forgets them (`teacherSpotForget`). After a change: `node tools/console-layout-smoke.mjs`
+  (its Week-later section); a change to the backup or remove hooks also `node tools/backup-proof.mjs` /
+  `node tools/remove-one-sim.mjs`.
 - `teacher-backup.js` ("Download a backup", read-only): `node tools/backup-proof.mjs`. Never open a downloaded backup
   (CLAUDE.md "Student data").
 - `teacher-errors.js` (Tools → Error log, and "Send a test entry"): `node tools/site-errors-sim.mjs`. No name, uid or

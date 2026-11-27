@@ -1741,6 +1741,31 @@ body.rail-collapsed .rail-tools .tool-popup{
 .us-t-zero td{color:var(--text2)}
 .us-t-rho{margin:0 0 var(--sp-10);padding-left:var(--sp-20);font-size:var(--fs-14);line-height:1.5}
 .us-t-meaning{max-width:880px}
+/* Week-later checks (teacher-spotcheck.js, 2026-11-27): the one-line instruction, the list with its three marks per
+   row (a marked row tinted by its mark), the criterion under each skill, the summary. */
+.sc-t-howto{font-size:var(--fs-15);font-weight:600;color:var(--text);background:var(--blue-bg);border-left:3px solid var(--blue-text);padding:var(--sp-8) var(--sp-12);border-radius:4px;margin:0 0 var(--sp-10)}
+.tg-seg-btn.sc-t-btn{border:1px solid var(--border2);border-radius:16px}
+.sc-t-table td{vertical-align:top}
+.sc-t-table .sc-t-n{width:2em;color:var(--text2)}
+.sc-t-who{min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.sc-t-text{font-weight:600;color:var(--text)}
+.sc-t-where{font-size:var(--fs-12);color:var(--text2);margin-top:var(--sp-2)}
+.sc-t-crit{font-size:var(--fs-13);color:var(--text);margin-top:var(--sp-4);max-width:62ch}
+.sc-t-crit span{font-weight:600;color:var(--green-text)}
+.sc-t-when{white-space:nowrap;font-size:var(--fs-13)}
+.sc-t-when .us-t-of{display:block;font-size:var(--fs-12)}
+.sc-t-marks{white-space:nowrap}
+.sc-t-seg .tg-seg-btn + .tg-seg-btn{border-left:1px solid var(--border2)}
+.tg-seg-btn.sc-t-mark-held.on{background:var(--green-text);color:var(--bg)}
+.tg-seg-btn.sc-t-mark-notyet.on{background:var(--red-text);color:var(--bg)}
+.tg-seg-btn.sc-t-mark-skip.on{background:var(--text2);color:var(--bg)}
+.sc-t-is-held td{background:var(--green-bg)}
+.sc-t-is-notyet td{background:var(--red-bg)}
+.sc-t-is-skip td{color:var(--text2)}
+.sc-t-sumline{font-size:var(--fs-15);margin:0 0 var(--sp-10)}
+.sc-t-sum{max-width:640px;margin-bottom:var(--sp-10)}
+.sc-t-subhead{font-size:var(--fs-14);font-weight:600;margin:var(--sp-6) 0 var(--sp-4)}
+.sc-t-foot{margin-top:var(--sp-16);max-width:880px}
 /* Manage view's Period column + the "set" marker that says the shown value
    is the teacher's correction rather than the student's own answer. */
 .tg-period{white-space:nowrap}
