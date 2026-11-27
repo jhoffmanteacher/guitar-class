@@ -11,8 +11,9 @@
 # (and each when its own tool file, or this workflow, or tools/ci/ changed).
 # The full walk in both languages runs on a schedule (Friday evenings, see on:) and as a
 # manual run: Actions -> Browser tests -> Run workflow -> "full".
-# A sixth job runs the accessibility scan (smoke area a11y) in English,
-# report-only, and keeps its findings as an artifact every run (see the job).
+# A sixth job runs the accessibility scan (smoke area a11y) in English, with
+# its ratchet on since 2026-11-27 (a finding the baseline lacks turns it red),
+# and keeps its findings as an artifact every run (see the job).
 #
 # Nothing here blocks a push or the Pages deploy (that is GitHub's separate
 # "pages build and deployment" run); a red run means "look at the last push".
@@ -253,13 +254,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  # The accessibility scan (tools/smoke.mjs area a11y, 2026-11-13), English, REPORT-ONLY: its findings never fail
-  # this job; a setup failure does (the axe file refused, a scan that returned nothing, a screen that is not the
-  # one it claims). Its JSON is kept every run, so a week of Linux runs can be read against tools/a11y-baseline.json
-  # (made on the Mac). The ratchet (A11Y_RATCHET in smoke.mjs) is switched on only after one week of these runs
-  # print no "would fail" line; the planned 2026-11-27 depends on that week.
+  # The accessibility scan (tools/smoke.mjs area a11y, 2026-11-13), English. Its RATCHET is ON since 2026-11-27
+  # (A11Y_RATCHET in smoke.mjs, after a week of these runs with 0 new signatures; W26 in WORKFLOW.md): a finding
+  # whose signature tools/a11y-baseline.json lacks fails this job, as does a setup failure (the axe file refused, a
+  # scan that returned nothing, a screen that is not the one it claims). Its JSON is kept every run.
   a11y:
-    name: a11y scan (English, report-only)
+    name: a11y scan (English, ratchet on)
     if: ${{ github.event_name != 'schedule' && !(github.event_name == 'workflow_dispatch' && inputs.full) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30

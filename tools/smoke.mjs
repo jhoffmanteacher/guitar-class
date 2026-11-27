@@ -34,8 +34,9 @@
      node tools/smoke.mjs --timeout <s>        stop if the whole run passes <s> seconds (default 2400)
      node tools/smoke.mjs --a11y               also run the accessibility scan (area a11y, below); --only a11y
                                                runs it alone. --a11y-out <file> writes every finding as JSON,
-                                               --a11y-ratchet fails on a finding not in tools/a11y-baseline.json
-                                               for this run, --a11y-write-baseline rewrites that file (both
+                                               a finding not in tools/a11y-baseline.json is an error (the ratchet,
+                                               ON since 2026-11-27; --a11y-ratchet is kept and now changes
+                                               nothing), --a11y-write-baseline rewrites that file (both
                                                languages only).
 
    It is a tool, not part of checks.mjs: it needs a browser, takes 3-4
@@ -76,10 +77,10 @@
                        styles.css; class-activities.js, the ca* renderers in app.js)
      practice-minutes  the practice-minutes strip (practice-minutes*.js)
      tuning-sim        the Tuning Simulator
-     a11y              the accessibility scan (axe-core) of the screens a student meets; its findings are
-                       report-only until the ratchet is switched on (after a week of agreeing GitHub runs;
-                       2026-11-27 planned). NOT in a walk without --only unless --a11y is given. Details,
-                       and what it does NOT scan, above a11yWalk().
+     a11y              the accessibility scan (axe-core) of the screens a student meets; a finding the
+                       baseline does not have fails the run (the ratchet, ON since 2026-11-27).
+                       NOT in a walk without --only unless --a11y is given. Details, and what it does
+                       NOT scan, above a11yWalk().
    app.js or styles.css touched broadly, or unsure → no --only.
 
    Proved to be able to fail: against 194696b it reports 60+ dead video-button
@@ -2826,7 +2827,7 @@ async function tuningSimWalk(page, run, events, stats, base) {
    screen readers (aria-hidden-focus), the page language (html-has-lang, html-lang-valid) and heading order.
    A11Y_EXCLUDE lists what is left out on purpose, each with its reason.
 
-   FINDINGS NEVER FAIL THE RUN while the ratchet is off. The run still fails, as any smoke step does, when the axe
+   A finding fails the run only through the ratchet (below; ON since 2026-11-27). The run also fails, as any smoke step does, when the axe
    file is missing or not the pinned one, when a scan returns nothing, when a screen is not the one it claims, or
    when the page logs a console error. It prints one line per rule (its count and first elements), a summary line
    and the list of what is not scanned; --a11y-out <file> writes every finding as JSON.
@@ -2834,13 +2835,16 @@ async function tuningSimWalk(page, run, events, stats, base) {
    tag, id or sorted classes, and a few language-free attribute values; see a11ySig), not where it sits, so the
    same element has the same signature on every screen and in both languages; a page-wide finding (no h1, no main
    landmark) is pinned per screen. A screen whose rule ERRORED is never judged "gone" for that rule. Switched on
-   (A11Y_RATCHET = true below, or --a11y-ratchet for one run), a signature the baseline does not have is ONE error
+   (A11Y_RATCHET = true below; ON since 2026-11-27, so --a11y-ratchet changes nothing now), a signature the baseline does not have is ONE error
    event, however many screens show it, naming those screens and the element's markup. A known signature on more
    screens or more often (a new card with the same markup) is not a failure; a baseline signature no longer seen on
    any of its screens prints "the baseline can be lowered" and never fails. --a11y-write-baseline rewrites the file
    (both languages only: it refuses --en-only) and prints every signature it adds or drops.
-   WHEN THE RATCHET GOES ON: only after one week of GitHub's a11y job (browser.yml, report-only) agreeing with the
-   baseline — no "would fail" lines on Linux. The planned 2026-11-27 depends on that week; until then it stays off.
+   WHEN THE RATCHET WENT ON: 2026-11-27 (Jonathan's call of 2026-11-24, made on the evidence): GitHub's a11y job
+   (browser.yml, then report-only) agreed with the baseline on Linux in every run on main from 2026-11-19 to
+   2026-11-27 — 0 new signatures, 0 gone, no "would fail" line (W26 in WORKFLOW.md: 68 runs to 2026-11-24, 34 more
+   to 2026-11-27) — and the both-language scan on Windows (2026-11-24) found 0 findings on 22 screens. Off again
+   only by setting A11Y_RATCHET = false (a revert), never by loosening the baseline.
    The --baseline <ref> walk does not scan: the pinned file is the a11y baseline. */
 const A11Y_AXE = join(ROOT, 'tools', 'vendor', 'axe-core', 'axe.min.js');
 const A11Y_AXE_VERSION = '4.14.0';
@@ -2855,7 +2859,7 @@ const A11Y_SIGNED_OUT_FIREBASE = `(() => { if (window.firebase) return;
     signInWithPopup() { return Promise.reject(new Error('smoke a11y stub: no sign-in')); }, signOut() { return Promise.resolve(); } };
   const auth = () => a; auth.GoogleAuthProvider = function () {};
   window.firebase = { initializeApp() { return {}; }, auth }; })();`;
-const A11Y_RATCHET = false;   // the switch: on after a week of agreeing GitHub runs (planned 2026-11-27, Jonathan's call)
+const A11Y_RATCHET = true;    // the switch: ON since 2026-11-27 (Jonathan's call; a week of GitHub runs with 0 new signatures, W26)
 const A11Y_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 const A11Y_NOT_SCANNED = 'games mid-play, the tuner, the mic panel, the tool popups and other modals, the narrow-window drawer, Module Review, exit checks, 5 of 6 Song Journey pages, keyboard order and focus (axe does not test those)';
 /* Left out on purpose, each with its reason (R1-15). Matched on the rule and the element's markup. EMPTY on purpose:
@@ -3014,7 +3018,7 @@ async function a11yWalk(page, run, events, stats, base) {
   await page.send('Emulation.clearDeviceMetricsOverride');
 }
 /* After the walk: print the findings, write --a11y-out, compare with the pinned baseline. Returns the ratchet's
-   error events (none while the ratchet is off) and the refusal of an English-only --a11y-write-baseline. */
+   error events (one per new signature) and the refusal of an English-only --a11y-write-baseline. */
 function a11yReport(found) {
   const out = [], screens = Object.keys(found.screens);
   const byRule = new Map();
@@ -3580,7 +3584,7 @@ try {
   if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, level 1, the question up, no naming step), the card (the string to tune and the tuner's letter), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound switch, a wrong way resetting the count, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns clockwise for Up and counterclockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
   if (LANGS.length === 1) say('smoke: --en-only — Spanish not walked (the end-of-day / Friday full walk does it); "EN + ES" below means English only');
   if (ONLY !== null) say(`smoke: --only ${AREAS.filter(a => ON[a]).join(', ')} — not walked: ${AREAS.filter(a => !ON[a]).join(', ')}`);
-  if (now.stats.a11y) report.push(...a11yReport(now.stats.a11y));   // prints the scan; ratchet events (none while it is off)
+  if (now.stats.a11y) report.push(...a11yReport(now.stats.a11y));   // prints the scan; ratchet events (one per new signature)
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

@@ -165,8 +165,8 @@ swap, keyed MCs: `.claude/rules/modules.md`.
   it exists at run time.
 - **Sweep ratchet:** 3+ instances of a mechanically-detectable error class → a permanent `checks.mjs` detector, same
   session; it must render/execute, match UNESCAPED strings (`unescapeJs()`), and be seen failing in a scratch copy.
-- **Accessibility scan** (`node tools/smoke.mjs --only a11y`) is report-only on GitHub. Its ratchet (`--a11y-ratchet`,
-  `tools/a11y-baseline.json`) stays OFF until a week of runs show 0 new signatures and a reviewer passes the switch-on.
+- **Accessibility scan** (`node tools/smoke.mjs --only a11y`): its ratchet is ON since 2026-11-27: a finding whose
+  signature `tools/a11y-baseline.json` lacks fails the run and GitHub's a11y job. Fix the markup; never widen the baseline to get green.
 - **Plant a fault** (weekly, report-only): replay an escape with `node tools/plant-a-fault.mjs --replay <id>`. Harmless
   → a one-line reason in `tools/plant-a-fault-known.json`; a real gap → a test in the tool that should catch it. 1ea
   warns of a renamed function in its table: update it.
