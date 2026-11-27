@@ -170,7 +170,7 @@ function trmKindLines(inv, uid){
       trmPlural(trmCountMap(p.skills), 'rating or got-it', 'ratings and got-its'), trmPlural(trmCountMap(p.classActivities), 'in-class activity', 'in-class activities'),
       trmPlural(trmCountMap(p.exitChecks), 'exit check')];
     const spot = typeof teacherSpotStudentResults==='function' ? teacherSpotStudentResults(uid).length : 0;
-    out.progress = {n: 1, text: `their whole saved-work document (${parts.join(', ')}); they leave the roster${spot ? `, and the ${trmPlural(spot, 'week-later check result')} this computer keeps for them go too` : ''}`};
+    out.progress = {n: 1, text: `their whole saved-work document (${parts.join(', ')}); they leave the roster${spot ? `, and the ${trmPlural(spot, 'week-later check result')} this computer keeps for them ${spot===1 ? 'goes' : 'go'} too` : ''}`};
   } else out.progress = {n: 0, text: 'no saved-work document'};
   // The tag cannot be read: "if they have one" (a page makes it once the student has a period), and inv.tagLeft (trmChoose).
   const dw = inv.days.length + inv.weeks.length;
