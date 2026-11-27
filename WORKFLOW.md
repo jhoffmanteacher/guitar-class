@@ -56,7 +56,8 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   causes already fixed or unrelated (ResizeObserver 1, Chrome install outage 1, song tiles / card keys 7, play-along
   view switch 3, a Spanish card title 2, the practice-minutes strip 1; table in that session's scratchpad). Merge the
   branch (rebase, `node tools/checks.mjs`, Fast) if the symptom comes back; until then leave it.
-- [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
+- [x] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** DONE 2026-11-27: the ratchet
+  is ON (see "Where things stand"); the lines below are the evidence as it was written before the switch. Read GitHub's "a11y scan"
   job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
   Write under this item: runs read, runs with a new signature, and what each one is. Do NOT switch it on:
@@ -85,6 +86,12 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   extends the run count, stops (and writes the finding here) if any run has a new signature or a scan lists a
   finding, otherwise sets `A11Y_RATCHET = true`, runs one fresh `site-reviewer` round (Opus, high), pushes, reads
   GitHub's result and reverts the switch itself if the ratchet turns the run red. The Friday check runs that night as usual.
+  **Result (that routine, 2026-11-27): switched on.** 35 "Browser tests" runs on main from 2026-11-24 00:00 UTC to
+  4d798297 (2026-11-27 00:20 UTC) read through the public API; the a11y job ran in all 35 (5 runs were cancelled by a
+  newer push after it finished) and every one printed "0 new signatures, 0 gone" (34 of 35 new since the 2026-11-24
+  read; 982194ea is in both). Runs with a new signature: 0 of 35. One a11y job was red (1bac1557, 2026-11-26): a
+  setup error, "the screen is not the sign-in screen", fixed by the next push 4d798297; not a finding. With the earlier
+  68, 0 new signatures in 102 runs since 2026-11-19; the both-language scan above lists 0 findings.
 - [ ] **W27 — on or after 2026-12-01: remove the split bridges.** The spec is `todo.md` → "Remove the 2026-11-16
   and 2026-11-18 split bridges" (`grep -n "DELIBERATE BRIDGE" coach-*.js` finds 6; keep the two `typeof` guards it
   names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
@@ -105,9 +112,22 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 
 ---
 
-## Where things stand (updated 2026-11-25)
+## Where things stand (updated 2026-11-27)
 
 Update this block whenever an item opens or closes.
+
+**Done 2026-11-27: the accessibility scan's ratchet is ON** (`A11Y_RATCHET = true`, `tools/smoke.mjs`; Jonathan's
+call of 2026-11-24, run by the scheduled cloud routine). Read: 35 more GitHub a11y runs (0 new signatures; W26 has the
+counts), 102 since 2026-11-19. Proof: a planted unlabeled `<button>` in a scratch copy → `smoke.mjs --en-only --only
+a11y` exit 1, "new button-name: button.gc-planted-fault"; the real tree exit 0. Review: `site-reviewer` (Opus, high);
+round 1 found one latent MAJOR (a missing or unreadable `tools/a11y-baseline.json` passed silently; now an error,
+proved by deleting it: exit 1) and stale wording; round 2: see the commit trailer. From now on a finding whose
+signature the baseline lacks turns GitHub's a11y job red: fix the markup, never widen the baseline to get green.
+Rollback: `A11Y_RATCHET = false`. **Open for Jonathan (coverage, his call):** the Spanish screens are never ratcheted
+on GitHub (the a11y job is `--en-only`; the Friday `full` job has no `--a11y`: adding it there is one flag); the live
+game's question screen is scanned after its 20 s countdown ends, so its 6 disabled answer buttons are never
+contrast-checked (`limitSec: 0` in the made-up session, then a both-language scan). Details:
+the round-1 review notes (session scratchpad, not kept).
 
 **Done 2026-11-25: the whole-site sweep** (Jonathan: "it's time for you to do a full review of the website for code
 and content"). What shipped is in CHANGELOG 2026-11-25 and in git; only what a later session needs is kept here.
@@ -217,7 +237,7 @@ beat; the first build was 3/4 from 1.133 s, which was a fade-in). Things to know
 **Dated** (queue written 2026-11-23, Jonathan's list a-f; any session can pick these up):
 - a. 2026-11-26: W26, the accessibility scan's counts (a cloud routine is already scheduled for it,
   `trig_011u2gbkdE7fC3GsUzfnLyYh`; spec under "For Windows").
-- b. 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new
+- b. DONE 2026-11-27 (see the top of "Where things stand"): switch on the accessibility scan's ratchet after a week of 0 new
   signatures (W26 counts them), then one `site-reviewer` round. The Friday check also runs that night, 11 PM Pacific
   (`trig_016m5HTbmhxb2oEqDaefQurB`).
 - c. On or after 2026-12-01: remove the split bridges (W27).
