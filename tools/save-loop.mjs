@@ -20,7 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
-     --reset            only the reset cases (Start over / Delete, S1-S30, ZJ1-ZJ2, and Z1-Z5: Song Journey ticks; see "the reset
+     --reset            only the reset cases (Start over / Delete, S1-S31, ZJ1-ZJ2, and Z1-Z5: Song Journey ticks; see "the reset
                         cases" below); a full default run runs them too
      --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
      --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
@@ -2356,7 +2356,8 @@ function actionCode(a){
         Chromebook's copy back (a doc that predates the field)
      S19-S21 (2026-11-26, sweep JOURNEY-3) the Module 4/5 marker on a record created after a Delete: S19 the app's save
         from a page open across the Delete, S20 a Song Journey page's, S21 a sign-in after the Delete; the next sign-in
-        keeps Module 4 (Layer 4) as Module 4
+        keeps Module 4 (Layer 4) as Module 4. S31 (2026-11-27, review R1-6) the same page's tool tap (the usage counts'
+        toolOpens) re-creates it before any save, and a Journey page opened after that ticks Layer 4
      S22-S26 (2026-11-26) the per-Chromebook reset marker (gc-resetSeen:<uid>, app/save.js progressDeviceReset): S22 B's
         settings read fails at sign-in (nothing old shown or sent; the tab's next good read clears B), S23 every kind of
         copy a Delete removes goes from B before anything is sent (another student's and site-wide keys stay), S24 two
@@ -2892,6 +2893,31 @@ async function resetCases(){
       ['the record is marked', !!doc && !!doc.migrations && doc.migrations.swap45 === true, JSON.stringify(doc && doc.migrations)],
       ['it holds the one new Module 4 tick, as Module 4', !!doc && Object.keys(doc.completed || {}).join() === M4NEW, JSON.stringify(doc && doc.completed)],
       ['the next sign-in shows it as Module 4', tabs.find(t => t.name === 'A2').s21 === JSON.stringify([M4NEW]), String(tabs.find(t => t.name === 'A2').s21)] ] };
+  });
+  /* S31 (2026-11-27, review R1-6 of the usage counts): a page open across a Delete re-creates the record with a TOOL
+     TAP, before any save of its own (toolOpens, app/save.js flushToolOpens, sent here by the hide). A Song Journey page
+     opened after that reads the record and writes a Layer 4 tick in the numbering its marker says; the open page's
+     next save then merges the marker whatever the record holds (S19). Unmarked, the Journey page wrote the tick as old
+     Layer 5 and that save's marker kept it there. */
+  await scenario('S31', 'Module 4/5: a page open across a Delete re-creates the record with a tool tap; it is marked, and a Layer 4 tick made after it stays Layer 4', c => {
+    seed(c.world, with4());
+    const A = c.dev('A'), J = c.dev('J'), B = c.dev('B');
+    c.boot('A', A, 0);
+    c.teacher(3000, 'del');
+    c.act('A', 4000, 'countToolOpen("tuner")');
+    c.vis('A', 5000, true); c.vis('A', 5500, false);
+    c.at(7500, () => { c.world.s31 = clone(((c.world.docs.get('progress/' + USER.uid) || {}).data) || null); });
+    c.jboot('J', J, 8000);
+    c.jtick('J', 11000, 4);
+    c.act('A', 14000, `onCompleteChange(${JSON.stringify(M4NEW)}, true)`);
+    c.vis('A', 16000, true);
+    c.boot('B', B, 20000);
+    c.at(25000, () => { c.tab('B').s31 = c.tab('B').run(`JSON.stringify([songReady['the-cure'] || null, completed[${JSON.stringify(M4NEW)}] === true])`); });
+    return { endMs: 28000, check: (doc, w, tabs) => [
+      ['the record the tool tap re-created carries migrations.swap45 and the count (read before the Journey page opens)', !!w.s31 && !!w.s31.migrations && w.s31.migrations.swap45 === true && !!w.s31.toolOpens && w.s31.toolOpens.tuner === 1, JSON.stringify(w.s31)],
+      ['Layer 4 ticked after it is still Layer 4 (no Layer 5)', jR(doc)[4] === true && jR(doc)[5] !== true, JSON.stringify(doc && doc.songReady)],
+      ["the open page's saved tick is still Module 4", !!doc && !!doc.completed && doc.completed[M4NEW] === true && no5(doc.completed), JSON.stringify(doc && doc.completed)],
+      ["…and B's page shows Layer 4 and the tick", (() => { try { const [r, t] = JSON.parse(tabs.find(t => t.name === 'B').s31); return !!r && r[4] === true && r[5] !== true && t === true; } catch { return false; } })(), String(tabs.find(t => t.name === 'B').s31)] ] };
   });
   /* S22-S26 (2026-11-26, the per-Chromebook reset marker; APP-CORE-2's other copies, R1-7). Every Chromebook the
      student used keeps its own copies; each remembers, per student, the newest marker it cleared them for

@@ -91,9 +91,9 @@
   },
   "app/save.js|flushToolOpens": {
    "value": [
-    "de4a42392fd4"
+    "07b9a3041770"
    ],
-   "why": "Jonathan 2026-11-27 (build this part): light usage counts, toolOpens increment()s in the student's own progress doc, merged like songOpens (app/save.js flushToolOpens); review R1-3: the write's promise is returned so the Tuning Simulator's open can wait for it (same payload)",
+   "why": "Jonathan 2026-11-27 (build this part): light usage counts, toolOpens increment()s in the student's own progress doc, merged like songOpens (app/save.js flushToolOpens); review R1-3: the write's promise is returned for the Tuning Simulator's wait; review R1-6: the payload carries migrations.swap45 once swap45Done (a record re-created after a Delete is born marked)",
    "date": "2026-11-27"
   }
  },

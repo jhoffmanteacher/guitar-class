@@ -14447,7 +14447,9 @@ async function checkSongPopularity(ctx) {
      - a student's opens do not go as exactly ONE merge-write of { name, email,
        toolOpens: { <id>: increment(n) } } to progress/<uid> when the
        TOOL_OPENS_FLUSH_MS timer fires or flushToolOpens runs, a second flush
-       writes again, or a write that throws escapes;
+       writes again, or a write that throws escapes; with migrations: {
+       swap45: true } added exactly when the page knows the doc is marked
+       (swap45Done; review R1-6);
      - counts made under one student reach another's doc (a switch drops them;
        a flush after Firebase switched writes nothing);
      - a Journey open counts anything but one journey-<slug>, a link with its
@@ -14503,7 +14505,7 @@ async function checkUsageCounts(ctx) {
     const user = 'user' in o ? o.user : STU;
     const c = vm.createContext({
       IS_TEACHER_MODE: !!o.console, TEACHER_EMAIL: 'teach@x.test', isDevBypassUser: () => !!o.bypass,
-      currentUser: user, auth: { currentUser: user },
+      currentUser: user, auth: { currentUser: user }, swap45Done: !!o.marked,
       db: { collection: col => ({ doc: id => ({ set: (data, opt) => { if (o.throws) throw new Error('sync'); w.log.push({ col, id, data: JSON.parse(JSON.stringify(data)), merge: !!(opt && opt.merge) }); return Promise.resolve(); } }) }) },
       firebase: { firestore: { FieldValue: { increment: n => ({ __inc: n }) } } },
       setTimeout: (fn, ms) => { w.timers.push({ fn, ms, live: true }); return w.timers.length; },
@@ -14555,6 +14557,15 @@ async function checkUsageCounts(ctx) {
     {
       const w = mk(); w.c.countToolOpen('a'.repeat(40)); w.c.flushToolOpens();
       is(w.log.length === 1, 'a 40-character id is not counted (TOOL_OPEN_ID_RE allows 40)');
+    }
+    {
+      /* Module 4/5 (review R1-6; save-loop S31): once the page knows the stored doc is marked (swap45Done), the write
+         carries the marker, since after a Delete it re-creates the doc; before that (a new student) it never does
+         (the unmarked case above: name, email and toolOpens only). */
+      const w = mk({ marked: true }); w.c.countToolOpen('tuner'); w.c.flushToolOpens();
+      const x = w.log[0];
+      is(w.log.length === 1 && x.merge && Object.keys(x.data).sort().join() === 'email,migrations,name,toolOpens' && JSON.stringify(x.data.migrations) === '{"swap45":true}',
+        `a page that read the doc marked wrote ${JSON.stringify(w.log)} (want one merge-write that also carries migrations: { swap45: true })`);
     }
     {
       const B = { uid: 'stu-2', email: 'b@x.test', displayName: 'B' };
@@ -14837,7 +14848,7 @@ async function checkUsageCounts(ctx) {
     is(!h.includes('<b>x</b>') && !h.includes('<i>7') && h.includes('Ana &lt;b&gt;x&lt;/b&gt;') && h.includes('Period &lt;i&gt;7') && !/data-usage-rho="[^"]*</.test(h) && !h.includes('>Teacher<'),
       'a student-written name or period reached the view unescaped, or the teacher\'s own row is drawn');
   } catch (e) { flag('renderTeacherUsage could not run: ' + e.message); }
-  if (cases !== 53) flag(`ran ${cases} cases, pinned 53`);
+  if (cases !== 54) flag(`ran ${cases} cases, pinned 54`);
   if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; a floating tool counted on its open, never its close; Sign out sends what is pending; the Tuning Simulator leaves once its write is answered (a cap, at once offline); ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
 }
 

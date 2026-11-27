@@ -39,12 +39,16 @@ let classConfigLoadDenied = false;
        student with no doc yet gets it created already marked by that first
        save; loading writes nothing for them. Every save carries the marker
        too, so a page still open after the teacher's Delete re-creates the
-       doc marked (2026-11-26). The three other writes that can create a doc,
-       the Songs row's songOpens +1 (app/explore.js), the usage counts'
-       toolOpens (flushToolOpens, the end of this file) and Hear It First's
-       trainer field, do not: what they create holds no Module 4/5 key, so
-       the next load marks it with nothing to move, and any of them can land
-       on an unmarked doc that is still old-numbered.
+       doc marked (2026-11-26). So does the usage counts' toolOpens write
+       (flushToolOpens, the end of this file), but only once this page knows
+       the stored doc is marked (swap45Done): a tool tap is the likeliest
+       write after a Delete (review R1-6, 2026-11-27). The two other writes
+       that can create a doc, the Songs row's songOpens +1 (app/explore.js)
+       and Hear It First's trainer field, do not: what they create holds no
+       Module 4/5 key, so the next load marks it with nothing to move, and
+       either can land on an unmarked doc that is still old-numbered (after a
+       Delete, a Journey tick written to the doc one of them re-created goes
+       in as the old layer, and this page's next save marks it as it is).
      - swap45Commit() is a transaction: it re-reads the doc, does nothing if
        another tab already marked it, and otherwise REPLACES each affected
        field with its remapped copy and sets the marker in the same write.
@@ -1334,9 +1338,14 @@ function flushToolOpens(){
     const inc = {};
     Object.keys(p.counts).forEach(k => { inc[k] = firebase.firestore.FieldValue.increment(p.counts[k]); });
     if(!Object.keys(inc).length) return null;
-    return db.collection('progress').doc(p.uid)
-      .set({ name: currentUser.displayName || '', email: currentUser.email || '', toolOpens: inc }, { merge: true })
-      .catch(() => {});
+    const data = { name: currentUser.displayName || '', email: currentUser.email || '', toolOpens: inc };
+    /* Module 4/5 (the note at the top of this file): a page that knows the stored doc is marked (swap45Done) knows it
+       is marked or gone, and after a teacher's Delete this write re-creates it, so it must be born marked as flushSave's
+       is, or a Journey tick written to it next goes in as the old layer and the next save's marker keeps it there
+       (review R1-6; tools/save-loop.mjs S31). Not before that is known: a new student's first save moves a Journey
+       tick written meanwhile (swap45Commit). */
+    if(swap45Done) data.migrations = { swap45: true };
+    return db.collection('progress').doc(p.uid).set(data, { merge: true }).catch(() => {});
   } catch(e) { /* dropped: see above */ return null; }
 }
 /* Every Song Journey link the site opens: the page in a new tab (this one
