@@ -14464,7 +14464,8 @@ async function checkSongPopularity(ctx) {
        one of the families 'game-' / 'journey-', every fixed id is counted
        somewhere, TEACHER_USAGE_GAMES holds exactly GAMES_META's keys, every
        SONG_JOURNEYS page and every Journey link in the module text has a row,
-       and every listed id passes TOOL_OPEN_ID_RE;
+       every listed id passes TOOL_OPEN_ID_RE, and no label names an activity
+       or set id (review R1-4);
      - teacherFetchStudents keeps anything but whole counts 1..1000 in
        toolOpens, or miscounts stepsDone (completed values === true only);
      - the view's sums, ranks (ties share the average) or Spearman rho differ
@@ -14718,6 +14719,10 @@ async function checkUsageCounts(ctx) {
   }
   is(textSlugs.size > 0 && [...textSlugs].every(x => rowsJ.includes(x)), `the Journey links in the module text open ${JSON.stringify([...textSlugs])}: each needs its Song Journey row (${JSON.stringify(rowsJ)})`);
   is(TOOLS.every(t => ID_RE && ID_RE.test(t.id)) && new Set(TOOLS.map(t => t.id)).size === TOOLS.length, `a listed tool id is a duplicate or fails TOOL_OPEN_ID_RE (never counted): ${JSON.stringify(TOOLS.map(t => t.id).filter(id => !(ID_RE && ID_RE.test(id))))}`);
+  /* A label that names an activity or set id (review R1-4: the strum check's said ca-46, the check is ca-52): the
+     console shows titles, so an id there sends the teacher to the wrong card the day it goes stale. */
+  const idLabels = TOOLS.filter(t => /\b(?:ca|mr)-?\d|\bm\d+w\d/i.test(String(t.label)));
+  is(TOOLS.length > 0 && !idLabels.length, `the Usage view's labels name an activity or set id: ${JSON.stringify(idLabels.map(t => t.label))} (name the tool as the teacher sees it, never by id)`);
 
   /* 4. The console's read (teacherFetchStudents keeps sane counts) and the view's numbers. */
   {
@@ -14795,7 +14800,7 @@ async function checkUsageCounts(ctx) {
     is(!h.includes('<b>x</b>') && !h.includes('<i>7') && h.includes('Ana &lt;b&gt;x&lt;/b&gt;') && h.includes('Period &lt;i&gt;7') && !/data-usage-rho="[^"]*</.test(h) && !h.includes('>Teacher<'),
       'a student-written name or period reached the view unescaped, or the teacher\'s own row is drawn');
   } catch (e) { flag('renderTeacherUsage could not run: ' + e.message); }
-  if (cases !== 50) flag(`ran ${cases} cases, pinned 50`);
+  if (cases !== 51) flag(`ran ${cases} cases, pinned 51`);
   if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
 }
 

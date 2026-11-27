@@ -33,12 +33,14 @@
       student's weeks list and one of today's day record).
    Student-written values (names, periods) are escaped where they are drawn. */
 const TEACHER_USAGE_SINCE='2026-11-27';
+/* A label names the tool as the teacher sees it, never an activity id: the console shows activity titles, and an id
+   in a label went stale once already (review R1-4; checks.mjs 1fu). */
 const TEACHER_USAGE_FIXED=[
   {id:'tuner', label:'Tuner', kind:'Floating tools'},
   {id:'metronome', label:'Metronome', kind:'Floating tools'},
   {id:'timer', label:'Timer', kind:'Floating tools'},
   {id:'coach', label:'Listening Coach', kind:'Listening'},
-  {id:'strum-check', label:'Strum pattern check (ca-46)', kind:'Listening'},
+  {id:'strum-check', label:'Strum pattern check (an In-Class activity)', kind:'Listening'},
   {id:'card-song', label:'Play-along card (a whole song)', kind:'In-Class Activities'},
   {id:'card-practice', label:'Practice card (any other card)', kind:'In-Class Activities'},
   {id:'mr-record', label:'Module Review recorder', kind:'Module Review'},
