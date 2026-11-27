@@ -3063,8 +3063,15 @@ function a11yReport(found) {
     say(`a11y: baseline written to ${A11Y_BASELINE} (${screens.length} screens, ${now.size} signatures)`);
     return out;
   }
-  if (!pinnedOk) { say(`a11y: no baseline (version 2) at ${A11Y_BASELINE} — nothing to compare (write one with --a11y-write-baseline, both languages)`); return out; }
   const ratchet = A11Y_RATCHET || args.includes('--a11y-ratchet');
+  // R1-1 (2026-11-27): with the ratchet on, a missing, unreadable (conflict markers) or wrong-version baseline is an
+  // error, never a silent pass.
+  if (!pinnedOk) {
+    const text = `no readable baseline (version 2) at ${A11Y_BASELINE} — nothing to compare (write one with --a11y-write-baseline, both languages)`;
+    if (ratchet) out.push({ step: 'a11y:baseline', kind: 'a11y-setup', text: `${text}; the ratchet is on, so this fails the run` });
+    else say(`a11y: ${text}`);
+    return out;
+  }
   const missing = pinned.screens.filter(k => !screens.includes(k));
   if (missing.length) say(`a11y: ${missing.length} baseline screen${missing.length === 1 ? '' : 's'} not scanned in this run (not compared): ${missing.join(', ')}`);
   let fresh = 0, gone = 0;
