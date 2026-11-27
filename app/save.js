@@ -436,7 +436,11 @@ function progressLoadNoticeHide(){
    Delete it re-creates the record, after a Start over it puts old lesson work
    back). Nothing here engineers that away (review rounds 1 and 2, 2026-11-14:
    each attempt put an ordinary student's save at risk). The teacher presses
-   the button again. */
+   the button again. Two Chromebooks too (review R2-2, accepted 2026-11-27): when
+   another Chromebook re-creates the deleted record unmarked and a Journey page
+   writes an old-numbered tick to it, a marked write from a page open across the
+   Delete (its tool counts, flushToolOpens, or any flushSave) marks the record
+   with that tick in it, so the tick reads as the next layer up. */
 /* What Start over empties, by group. Today only 'lessons' (Jonathan,
    2026-11-14: modules only); adding a group is one word in START_OVER_CLEARS.
    If you add one, change what the student's notice (reset.startedOver,
