@@ -328,7 +328,7 @@ async function unsavedPage(pageSrc, sc, saveCode = SAVE.code) {
     completedDeletes: new Map(), classActivitiesDeletes: new Map(), caStepDeletes: new Map(),
     LOAD_DEPENDENT_SAVE_KEYS: new Set(), LOAD_FAILED_EMPTY_MAPS: [],
     setSaveMsg(k) { if (k === 'save.notSaving') st.told.push(now); },
-    progressLoadRetryNoteChange() {}, isDevBypassUser: () => false, saveLocalPlace() {},
+    progressLoadRetryNoteChange() {}, isDevBypassUser: () => false, saveLocalPlace() {}, flushToolOpens() {},
     closePeriodPicker() {}, refreshOpenClassActivitiesScreen() {}, applyActivityGate() {},
     ensureDb: async () => db, db, firebase: { firestore: { FieldValue: { delete: () => null } } },
     swap45Commit: async () => {
