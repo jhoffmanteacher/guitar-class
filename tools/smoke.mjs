@@ -2846,6 +2846,15 @@ const A11Y_AXE = join(ROOT, 'tools', 'vendor', 'axe-core', 'axe.min.js');
 const A11Y_AXE_VERSION = '4.14.0';
 const A11Y_AXE_SHA256 = '20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d45cc46e878';   // of axe.min.js, LF line ends
 const A11Y_BASELINE = join(ROOT, 'tools', 'a11y-baseline.json');
+/* The sign-in scan's stand-in for the Firebase SDK (2026-11-26), run before the page's own scripts. Only what
+   app/boot.js and app/start.js touch before a sign-in: initializeApp, auth() with onAuthStateChanged answering
+   "signed out" (null) and GoogleAuthProvider. It sends nothing, and it has no apps list, so the wall's Firebase
+   probe sees no app. A sign-in click is refused. */
+const A11Y_SIGNED_OUT_FIREBASE = `(() => { if (window.firebase) return;
+  const a = { currentUser: null, onAuthStateChanged(cb) { setTimeout(() => cb(null), 0); return () => {}; },
+    signInWithPopup() { return Promise.reject(new Error('smoke a11y stub: no sign-in')); }, signOut() { return Promise.resolve(); } };
+  const auth = () => a; auth.GoogleAuthProvider = function () {};
+  window.firebase = { initializeApp() { return {}; }, auth }; })();`;
 const A11Y_RATCHET = false;   // the switch: on after a week of agreeing GitHub runs (planned 2026-11-27, Jonathan's call)
 const A11Y_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 const A11Y_NOT_SCANNED = 'games mid-play, the tuner, the mic panel, the tool popups and other modals, the narrow-window drawer, Module Review, exit checks, 5 of 6 Song Journey pages, keyboard order and focus (axe does not test those)';
@@ -2935,7 +2944,11 @@ async function a11yWalk(page, run, events, stats, base) {
   // A clean start (R1-4): in a full walk the other areas leave storage behind (a picked path, a pinned card, a
   // remembered game choice). Nothing is restored afterwards: this area runs last.
   await run('a11y:clear-storage', `(() => { try { localStorage.clear(); sessionStorage.clear(); } catch (e) { /* none */ } return 1; })()`, 10);
-  // Sign-in: a fresh page, not signed in (the dev bypass signs in below, as the walk's boot does).
+  /* Sign-in: a fresh page, not signed in. Behind the wall the Firebase SDK cannot load, so the page would show its
+     "could not load" screen instead of the sign-in screen (tools/chrome-wall.mjs). For this one page a local stub
+     of the SDK's globals answers "signed out" (A11Y_SIGNED_OUT_FIREBASE); then the stub is taken out and the page
+     reloaded without it, and the dev bypass signs in below as the walk's boot does. */
+  const fbStub = await page.send('Page.addScriptToEvaluateOnNewDocument', { source: A11Y_SIGNED_OUT_FIREBASE });
   await page.send('Page.navigate', { url: base + '/index.html' });
   await sleep(3500); await pageLoaded(page);
   // R2-6: sign-in has its identity check too: the sign-in panel shown, the app not.
@@ -2943,6 +2956,9 @@ async function a11yWalk(page, run, events, stats, base) {
     return { ok: !!p && !p.hidden && p.getClientRects().length > 0 && !!app && getComputedStyle(app).display === 'none', lang: document.documentElement.lang }; })()`, 10);
   if (!si || !si.ok || si.lang !== 'en') fail('en:sign-in', `the screen is not the sign-in screen in en: ${JSON.stringify(si)}`);
   else await scan('en:sign-in', 'the sign-in screen');
+  try { await page.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: fbStub.identifier }); } catch { /* best effort */ }
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500); await pageLoaded(page);
   await run('a11y:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'a11y:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await run('a11y:load-coach', `ensureCoachJs()`, 1500);
