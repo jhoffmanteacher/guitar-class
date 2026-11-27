@@ -1291,8 +1291,11 @@ function setSaveMsg(key, clearAfterMs){
    other), and whatever is pending goes when the tab is hidden (app/start.js)
    or the student signs out (flushBeforeLeaving, app/boot.js). Never part of
    flushSave()'s payload (a failed progress load cannot touch it, 1bo), never
-   waited on or shown, never throws: a refused or failed write is dropped, and
-   a tab closed first loses its last few counts (light counts, not work).
+   shown, never throws: a refused or failed write is dropped, and a tab closed
+   first loses its last few counts (light counts, not work). Waited on in one
+   place only: the Tuning Simulator's open, which leaves this page, waits for
+   its write's answer at most GAMES_LEAVE_WAIT_MS, and not at all offline
+   (gamesOpenGame, coach-hub.js).
    SHARED CHROMEBOOK: the pending counts carry the uid they were made under,
    and are written only while BOTH this page and Firebase still have that
    student signed in, so a count can never land in the next student's doc; a
@@ -1317,22 +1320,24 @@ function countToolOpen(id, el){
     toolOpensPending.counts[id] = (toolOpensPending.counts[id] || 0) + 1;
   } catch(e) { /* a count is never worth an error */ }
 }
+/* Returns the write's promise (settled when Firestore answers, never rejected), or null when nothing was sent. Only
+   the Tuning Simulator's open waits on it, briefly (gamesOpenGame, coach-hub.js); every other caller ignores it. */
 function flushToolOpens(){
   const p = toolOpensPending;
   toolOpensPending = null;
-  if(!p) return;
+  if(!p) return null;
   try {
     clearTimeout(p.timer);
     // Still this student, for the page AND for Firebase (a tab frozen across a switch hears of it late).
-    if(!(currentUser && currentUser.uid === p.uid && auth && auth.currentUser && auth.currentUser.uid === p.uid)) return;
-    if(!db || typeof firebase === 'undefined' || !firebase.firestore || !firebase.firestore.FieldValue) return;
+    if(!(currentUser && currentUser.uid === p.uid && auth && auth.currentUser && auth.currentUser.uid === p.uid)) return null;
+    if(!db || typeof firebase === 'undefined' || !firebase.firestore || !firebase.firestore.FieldValue) return null;
     const inc = {};
     Object.keys(p.counts).forEach(k => { inc[k] = firebase.firestore.FieldValue.increment(p.counts[k]); });
-    if(!Object.keys(inc).length) return;
-    db.collection('progress').doc(p.uid)
+    if(!Object.keys(inc).length) return null;
+    return db.collection('progress').doc(p.uid)
       .set({ name: currentUser.displayName || '', email: currentUser.email || '', toolOpens: inc }, { merge: true })
       .catch(() => {});
-  } catch(e) { /* dropped: see above */ }
+  } catch(e) { /* dropped: see above */ return null; }
 }
 /* Every Song Journey link the site opens: the page in a new tab (this one
    stays, so its count is sent as usual), counted by the page's slug. */

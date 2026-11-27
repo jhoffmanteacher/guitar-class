@@ -811,12 +811,26 @@ function gamesShow(view){
 }
 /* A game opened by the student (a hub card, or Free play's Riff Roulette, app/activities.js caFreePlayGames): one usage
    count (app/save.js countToolOpen), then the game. Kept apart from gamesShow, which the hub, the language switch and a
-   mic that went away also call. The Tuning Simulator leaves for its own page: what is pending is sent first. */
+   mic that went away also call. The Tuning Simulator leaves for its own page (location.href), and the SDK keeps an
+   unanswered write in this page's memory only, so the count would die with the page: what is pending is sent now and
+   the page leaves once Firestore answers, at most GAMES_LEAVE_WAIT_MS later. Offline it leaves at once (that write
+   could never be answered in time). A tap during that moment does nothing: one count, one page load. */
+const GAMES_LEAVE_WAIT_MS = 1000;
+let gamesLeaving = false;   // the Tuning Simulator's wait is on
 function gamesOpenGame(key){
+  if (gamesLeaving) return;
   const g = GAMES_META.find(x => x.key === key);
+  let sent = null;
   if (g && typeof countToolOpen === 'function'){
     countToolOpen('game-' + g.key);
-    if (g.href && typeof flushToolOpens === 'function') flushToolOpens();
+    if (g.href && typeof flushToolOpens === 'function') sent = flushToolOpens();
+  }
+  if (sent && typeof sent.then === 'function' && !(typeof navigator !== 'undefined' && navigator.onLine === false)){
+    gamesLeaving = true;
+    const go = () => { if (!gamesLeaving) return; gamesLeaving = false; gamesShow(key); };
+    sent.then(go, go);
+    setTimeout(go, GAMES_LEAVE_WAIT_MS);
+    return;
   }
   gamesShow(key);
 }

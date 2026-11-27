@@ -14455,7 +14455,9 @@ async function checkSongPopularity(ctx) {
        page fails to open in a new tab;
      - a practice card counts other than card-song (a whole song) or
        card-practice once, a non-card activity counts, or a game other than
-       game-<key> once (the Tuning Simulator's counts sent before it leaves);
+       game-<key> once (the Tuning Simulator's counts sent before it leaves,
+       and the page left once Firestore answers, at most 2 s later, at once
+       offline, and only once for taps meanwhile: review R1-3);
      - the ids the site counts and the console's list drift apart: the string
        literals in the countToolOpen(...) calls of the app parts, the Arcade
        parts and fab-tools.js (8, pinned) are each a TEACHER_USAGE_FIXED id or
@@ -14622,12 +14624,42 @@ async function checkUsageCounts(ctx) {
     const fn = pick(coachSrc, 'gamesOpenGame');
     if (!fn) flag('coach-hub.js gamesOpenGame() not found (renamed? update 1fu with it)');
     else {
-      const log = [];
-      const g = vm.createContext({ GAMES_META: [{ key: 'cc' }, { key: 'tuningsim', href: 'tuning-sim.html' }], countToolOpen: id => log.push('count ' + id), flushToolOpens: () => log.push('flush'), gamesShow: k => log.push('show ' + k) });
-      vm.runInContext(fn, g);
-      for (const k of ['cc', 'tuningsim', 'hub', 'nope']) vm.runInContext(`gamesOpenGame(${JSON.stringify(k)})`, g);
-      is(log.join() === 'count game-cc,show cc,count game-tuningsim,flush,show tuningsim,show hub,show nope',
-        `gamesOpenGame did ${JSON.stringify(log)} (want a game counted once then shown, the Tuning Simulator's counts sent before it leaves the page, nothing counted for a key that is no game)`);
+      /* With its top-level consts and lets (GAMES_LEAVE_WAIT_MS, gamesLeaving): the Tuning Simulator waits for its
+         write's answer, at most that long and not at all offline, before it leaves the page (review R1-3). */
+      const decls = [...coachSrc.matchAll(/^(?:const|let) ([A-Za-z_$][\w$]*)\s*=[^\n]*;[^\n]*$/gm)].filter(m => m[1] !== 'GAMES_META' && new RegExp('\\b' + m[1] + '\\b').test(fn)).map(m => m[0]);
+      const mkG = (sent, onLine = true) => {
+        const log = [], timers = [];
+        const g = vm.createContext({ GAMES_META: [{ key: 'cc' }, { key: 'tuningsim', href: 'tuning-sim.html' }], countToolOpen: id => log.push('count ' + id),
+          flushToolOpens: () => { log.push('flush'); return sent; }, gamesShow: k => log.push('show ' + k), navigator: { onLine },
+          setTimeout: (f, ms) => { timers.push({ f, ms }); return timers.length; } });
+        vm.runInContext(decls.join('\n') + '\n' + fn, g);
+        return { log, timers, open: k => vm.runInContext(`gamesOpenGame(${JSON.stringify(k)})`, g) };
+      };
+      const settle = async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); };
+      {
+        const w = mkG(null);
+        for (const k of ['cc', 'tuningsim', 'hub', 'nope']) w.open(k);
+        is(w.log.join() === 'count game-cc,show cc,count game-tuningsim,flush,show tuningsim,show hub,show nope',
+          `gamesOpenGame did ${JSON.stringify(w.log)} (want a game counted once then shown, the Tuning Simulator's counts sent before it leaves the page, nothing counted for a key that is no game)`);
+      }
+      {
+        let answer; const w = mkG(new Promise(r => { answer = r; }));
+        w.open('tuningsim'); w.open('tuningsim'); w.open('cc');
+        const before = w.log.join(), cap = w.timers.length === 1 ? w.timers[0].ms : null;
+        answer(); await settle(); const answered = w.log.join();
+        for (const t of w.timers) t.f();
+        is(before === 'count game-tuningsim,flush' && cap > 0 && cap <= 2000 && answered === before + ',show tuningsim' && w.log.join() === answered,
+          `the Tuning Simulator with its write on the wire: before the answer ${JSON.stringify(before)}, a cap timer of ${cap} ms; after it ${JSON.stringify(answered)}; after the timer ${JSON.stringify(w.log.join())} (want the page to stay until Firestore answers, at most 2 s, then leave ONCE; taps meanwhile do nothing)`);
+      }
+      {
+        const w = mkG(new Promise(() => {}));
+        w.open('tuningsim'); await settle(); const before = w.log.join();
+        for (const t of w.timers) t.f();
+        const off = mkG(new Promise(() => {}), false);
+        off.open('tuningsim');
+        is(before === 'count game-tuningsim,flush' && w.log.join() === before + ',show tuningsim' && off.log.join() === 'count game-tuningsim,flush,show tuningsim' && !off.timers.length,
+          `a write never answered: ${JSON.stringify(w.log)} (want the page to leave when the cap timer fires); offline: ${JSON.stringify(off.log)}, ${off.timers.length} timer(s) (want it to leave at once)`);
+      }
     }
     gameLits = [...stripJsComments(appSrc + '\n' + coachSrc).matchAll(/\bgamesOpenGame\(\s*'([a-z0-9]+)'\s*\)/g)].map(m => m[1]);
   }
@@ -14763,7 +14795,7 @@ async function checkUsageCounts(ctx) {
     is(!h.includes('<b>x</b>') && !h.includes('<i>7') && h.includes('Ana &lt;b&gt;x&lt;/b&gt;') && h.includes('Period &lt;i&gt;7') && !/data-usage-rho="[^"]*</.test(h) && !h.includes('>Teacher<'),
       'a student-written name or period reached the view unescaped, or the teacher\'s own row is drawn');
   } catch (e) { flag('renderTeacherUsage could not run: ' + e.message); }
-  if (cases !== 48) flag(`ran ${cases} cases, pinned 48`);
+  if (cases !== 50) flag(`ran ${cases} cases, pinned 50`);
   if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
 }
 

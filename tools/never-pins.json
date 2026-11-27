@@ -91,9 +91,9 @@
   },
   "app/save.js|flushToolOpens": {
    "value": [
-    "44376219bb67"
+    "de4a42392fd4"
    ],
-   "why": "Jonathan 2026-11-27 (build this part): light usage counts, toolOpens increment()s in the student's own progress doc, merged like songOpens (app/save.js flushToolOpens)",
+   "why": "Jonathan 2026-11-27 (build this part): light usage counts, toolOpens increment()s in the student's own progress doc, merged like songOpens (app/save.js flushToolOpens); review R1-3: the write's promise is returned so the Tuning Simulator's open can wait for it (same payload)",
    "date": "2026-11-27"
   }
  },
