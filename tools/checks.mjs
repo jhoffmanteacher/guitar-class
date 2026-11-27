@@ -14636,8 +14636,8 @@ async function checkUsageCounts(ctx) {
     cardTally = r;
   } catch (e) { flag('caCountCardOpen could not run: ' + e.message); }
   {
-    const fn = pick(coachSrc, 'gamesOpenGame');
-    if (!fn) flag('coach-hub.js gamesOpenGame() not found (renamed? update 1fu with it)');
+    const fn = pick(coachSrc, 'gamesOpenGame'), restored = pick(coachSrc, 'gamesLeaveRestored');
+    if (!fn || !restored) flag('coach-hub.js gamesOpenGame() / gamesLeaveRestored() not found (renamed? update 1fu with it)');
     else {
       /* With its top-level consts and lets (GAMES_LEAVE_WAIT_MS, gamesLeaving): the Tuning Simulator waits for its
          write's answer, at most that long and not at all offline, before it leaves the page (review R1-3). */
@@ -14647,8 +14647,8 @@ async function checkUsageCounts(ctx) {
         const g = vm.createContext({ GAMES_META: [{ key: 'cc' }, { key: 'tuningsim', href: 'tuning-sim.html' }], countToolOpen: id => log.push('count ' + id),
           flushToolOpens: () => { log.push('flush'); return sent; }, gamesShow: k => log.push('show ' + k), navigator: { onLine },
           setTimeout: (f, ms) => { timers.push({ f, ms }); return timers.length; } });
-        vm.runInContext(decls.join('\n') + '\n' + fn, g);
-        return { log, timers, open: k => vm.runInContext(`gamesOpenGame(${JSON.stringify(k)})`, g) };
+        vm.runInContext(decls.join('\n') + '\n' + fn + '\n' + restored, g);
+        return { log, timers, open: k => vm.runInContext(`gamesOpenGame(${JSON.stringify(k)})`, g), pageshow: persisted => vm.runInContext(`gamesLeaveRestored({ persisted: ${!!persisted} })`, g) };
       };
       const settle = async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); };
       {
@@ -14665,6 +14665,22 @@ async function checkUsageCounts(ctx) {
         for (const t of w.timers) t.f();
         is(before === 'count game-tuningsim,flush' && cap > 0 && cap <= 2000 && answered === before + ',show tuningsim' && w.log.join() === answered,
           `the Tuning Simulator with its write on the wire: before the answer ${JSON.stringify(before)}, a cap timer of ${cap} ms; after it ${JSON.stringify(answered)}; after the timer ${JSON.stringify(w.log.join())} (want the page to stay until Firestore answers, at most 2 s, then leave ONCE; taps meanwhile do nothing)`);
+        /* The wait is over and the page did not leave (here gamesShow navigates nowhere), or it came back from the
+           back-forward cache: a card tap opens its game (review R2-1: a wait that never cleared gamesLeaving passed). */
+        const left = w.log.join(); w.open('cc'); w.pageshow(true); w.open('cc');
+        is(w.log.join() === left + ',count game-cc,show cc,count game-cc,show cc',
+          `after the Tuning Simulator's wait ended, two taps on a game card did ${JSON.stringify(w.log.join().slice(left.length + 1))} (want each to count and open the game: the wait left gamesLeaving set, every card dead until a reload)`);
+      }
+      {
+        /* Back to this page from the back-forward cache while the wait was still on (it left another way): the wait
+           ends, a tap opens its game, and the late answer or timer does not take the student away. A plain pageshow
+           (not from the cache) changes nothing. */
+        let answer; const w = mkG(new Promise(r => { answer = r; }));
+        w.open('tuningsim'); w.pageshow(false); w.open('cc');
+        const held = w.log.join();
+        w.pageshow(true); w.open('cc'); answer(); await settle(); for (const t of w.timers) t.f();
+        is(held === 'count game-tuningsim,flush' && w.log.join() === held + ',count game-cc,show cc' && /window\.addEventListener\(\s*'pageshow',\s*gamesLeaveRestored\s*\)/.test(stripJsComments(coachSrc)),
+          `restored from the back-forward cache mid-wait: ${JSON.stringify(w.log)} (want a plain pageshow to keep the wait, then after the restore one tap counted and shown and no "show tuningsim" from the late answer or timer; and coach-hub.js to register window 'pageshow' → gamesLeaveRestored)`);
       }
       {
         const w = mkG(new Promise(() => {}));
@@ -14848,8 +14864,8 @@ async function checkUsageCounts(ctx) {
     is(!h.includes('<b>x</b>') && !h.includes('<i>7') && h.includes('Ana &lt;b&gt;x&lt;/b&gt;') && h.includes('Period &lt;i&gt;7') && !/data-usage-rho="[^"]*</.test(h) && !h.includes('>Teacher<'),
       'a student-written name or period reached the view unescaped, or the teacher\'s own row is drawn');
   } catch (e) { flag('renderTeacherUsage could not run: ' + e.message); }
-  if (cases !== 54) flag(`ran ${cases} cases, pinned 54`);
-  if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; a floating tool counted on its open, never its close; Sign out sends what is pending; the Tuning Simulator leaves once its write is answered (a cap, at once offline); ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
+  if (cases !== 56) flag(`ran ${cases} cases, pinned 56`);
+  if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; a floating tool counted on its open, never its close; Sign out sends what is pending; the Tuning Simulator leaves once its write is answered (a cap, at once offline), the cards answer after its wait and after a restore from the back-forward cache; ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
 }
 
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student

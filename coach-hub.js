@@ -834,6 +834,11 @@ function gamesOpenGame(key){
   }
   gamesShow(key);
 }
+/* Back on this page from the back-forward cache with that wait still on (the page left some other way within it):
+   the wait ends, so the cards answer again and its late answer or timer does not take the student away (review
+   R2-1). The wait's own leave clears gamesLeaving before it goes, so a page restored after it is already free. */
+function gamesLeaveRestored(e){ if (e && e.persisted) gamesLeaving = false; }
+window.addEventListener('pageshow', gamesLeaveRestored);
 
 /* Language switch while the games screen is open: everything here is built
    at render time through t(), so re-render. Mid-game state can't survive an
