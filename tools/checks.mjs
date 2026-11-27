@@ -14457,7 +14457,10 @@ async function checkSongPopularity(ctx) {
        card-practice once, a non-card activity counts, or a game other than
        game-<key> once (the Tuning Simulator's counts sent before it leaves,
        and the page left once Firestore answers, at most 2 s later, at once
-       offline, and only once for taps meanwhile: review R1-3);
+       offline, and only once for taps meanwhile: review R1-3), a floating
+       tool's close counts or its open does not count once (togglePopup, run),
+       or Sign out stops sending the pending counts (flushBeforeLeaving, run;
+       review R1-5);
      - the ids the site counts and the console's list drift apart: the string
        literals in the countToolOpen(...) calls of the app parts, the Arcade
        parts and fab-tools.js (8, pinned) are each a TEACHER_USAGE_FIXED id or
@@ -14664,6 +14667,40 @@ async function checkUsageCounts(ctx) {
     }
     gameLits = [...stripJsComments(appSrc + '\n' + coachSrc).matchAll(/\bgamesOpenGame\(\s*'([a-z0-9]+)'\s*\)/g)].map(m => m[1]);
   }
+  /* The floating tools (fab-tools.js togglePopup, run): an OPEN counts its tool once, a close counts nothing (review
+     R1-5a: a close counted as an open passed every guard). */
+  {
+    const fns = ['fabOpeners', 'setFabExpanded', 'togglePopup'].map(n => pick(fabSrc, n));
+    if (fns.includes(null)) flag('fab-tools.js togglePopup / fabOpeners / setFabExpanded not found (renamed? update 1fu with it)');
+    else {
+      const got = [], els = {};
+      const el = id => els[id] = els[id] || (() => { const on = new Set(); return { classList: { toggle: c => (on.has(c) ? (on.delete(c), false) : (on.add(c), true)), contains: c => on.has(c), add: c => on.add(c), remove: c => on.delete(c) }, contains: () => false, focus() {} }; })();
+      const t = vm.createContext({ document: { getElementById: el, querySelectorAll: () => [], querySelector: () => null, activeElement: null },
+        countToolOpen: (...a) => got.push(a), closePopup: w => el(w + '-popup').classList.remove('open'),
+        startTuner() {}, stopTuner() {}, stopMetro() {}, syncMetroMutedNote() {}, metroRunning: false, recState: {} });
+      try {
+        vm.runInContext(fns.join('\n'), t);
+        const seq = ['tuner', 'tuner', 'metro', 'metro', 'timer', 'metro', 'timer'].map(w => { got.length = 0; vm.runInContext(`togglePopup(${JSON.stringify(w)})`, t); return got.map(a => a.join('/')).join('+') || '-'; });
+        is(seq.join() === 'tuner,-,metronome,-,timer,metronome,timer',
+          `togglePopup over open tuner, close it, open and close the metronome, open the timer, the metronome over it, the timer again: counted ${JSON.stringify(seq)} (want tuner,-,metronome,-,timer,metronome,timer: each open once, never a close)`);
+      } catch (e) { flag('togglePopup could not run: ' + e.message); }
+    }
+  }
+  /* Sign out and the error banner's Refresh (app/boot.js flushBeforeLeaving, run): the pending counts are sent, once,
+     before the page reloads (review R1-5b: deleting that call passed every guard). */
+  {
+    const fbl = pick(appSrc, 'flushBeforeLeaving');
+    if (!fbl) flag('app/boot.js flushBeforeLeaving() not found (renamed? update 1fu with it)');
+    else {
+      let sent = 0, saved = 0;
+      const b = vm.createContext({ clearTimeout() {}, saveTimer: null, _flushP: null, withTimeout: p => p, flushSave: async () => { saved++; }, hasUnsavedWrites: () => false, flushToolOpens: () => { sent++; return null; } });
+      try {
+        vm.runInContext((/^async\s/.test(fbl) ? '' : 'async ') + fbl, b);
+        const r = await vm.runInContext('flushBeforeLeaving(4000)', b);
+        is(sent === 1 && saved === 1 && r === true, `flushBeforeLeaving (Sign out) sent the usage counts ${sent} time(s) and the work ${saved} time(s), and said ${r} (want the counts sent once beside the save, so they leave under this student before the reload)`);
+      } catch (e) { flag('flushBeforeLeaving could not run: ' + e.message); }
+    }
+  }
 
   /* 3. The console's list and the site's ids. */
   const uctx = vm.createContext({ teacherView: 'usage', teacherPmLoading: false, teacherPmError: '', teacherPmData: null, allStudents: [] });
@@ -14800,8 +14837,8 @@ async function checkUsageCounts(ctx) {
     is(!h.includes('<b>x</b>') && !h.includes('<i>7') && h.includes('Ana &lt;b&gt;x&lt;/b&gt;') && h.includes('Period &lt;i&gt;7') && !/data-usage-rho="[^"]*</.test(h) && !h.includes('>Teacher<'),
       'a student-written name or period reached the view unescaped, or the teacher\'s own row is drawn');
   } catch (e) { flag('renderTeacherUsage could not run: ' + e.message); }
-  if (cases !== 51) flag(`ran ${cases} cases, pinned 51`);
-  if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
+  if (cases !== 53) flag(`ran ${cases} cases, pinned 53`);
+  if (!bad) ok(`1fu: the writer run for real in ${cases} cases: three opens make no write until the ${FLUSH_MS / 1000} s timer, then ONE { name, email, toolOpens: increment()s } merge-write to the student's own doc; nothing for the console, the teacher, the dev bypass, a signed-out visitor, a locked preview or Module Review, or 10 malformed ids; a switch of student drops the pending counts; Journey opens counted once each by slug; a floating tool counted on its open, never its close; Sign out sends what is pending; the Tuning Simulator leaves once its write is answered (a cap, at once offline); ${cardTally ? `${cardTally.song + cardTally.practice} practice cards (${cardTally.song} whole songs) counted once by kind, ${cardTally.none} other activities never` : ''}; ${calls.length} countToolOpen calls, every id on the console's list of ${TOOLS.length} (${usageGames.length} games = GAMES_META, ${rowsJ.length} Journey pages); the console keeps 4 of 8 doctored counts and the true steps; ranks, Spearman and the drawn view (the teacher left out, "0 students" last, names escaped) right`);
 }
 
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
