@@ -50,7 +50,9 @@
    undo: [ { list, uid, skill, result, prev } ] }, a record being { uid, skill, day, at, result, period, list, ticked,
    by: 'teacher' } (`by` so a student's own week-later prompt could add records of the same shape later).
    Two console tabs on this computer stay in step: every action reads the stored copy first and writes it straight
-   back. Names and periods are drawn escaped; nothing student-written is put in an id or a handler. */
+   back, and each button names what it acts on (a mark: the list, the student and the skill, never the row's place;
+   Undo: the mark it takes back), so a click on a row another tab changed or took out does nothing and the view is
+   drawn again. Names and periods are drawn escaped; nothing student-written is put in an id or a handler. */
 const TEACHER_SPOT_MIN_DAYS=7;
 const TEACHER_SPOT_SIZES=[3, 5, 8];
 const TEACHER_SPOT_MAX=8;
@@ -321,7 +323,7 @@ function teacherSpotListHtml(st, per, students, info, today){
   const bar=`<div class="pm-t-bar sc-t-bar"><span class="tg-class-lbl">List size</span><div class="tg-seg" role="group" aria-label="List size">`
     +TEACHER_SPOT_SIZES.map(n=>`<button type="button" class="tg-seg-btn${n===size?' on':''}" data-spot-size="${n}" aria-pressed="${n===size}">${n}</button>`).join('')+`</div>`
     +`<button type="button" class="tg-seg-btn sc-t-btn" data-spot-again${pool.length?'':' disabled'}>Draw again</button>`
-    +`<button type="button" class="tg-seg-btn sc-t-btn" data-spot-undo${last?'':' disabled'}>${escHtml(undoLabel)}</button>`
+    +`<button type="button" class="tg-seg-btn sc-t-btn" data-spot-undo${last ? ` data-spot-list="${escAttr(last.list)}" data-spot-uid="${escAttr(last.uid)}" data-spot-skill="${escAttr(last.skill)}" data-spot-mark="${escAttr(last.result)}"` : ' disabled'}>${escHtml(undoLabel)}</button>`
     +(teacherSpotSaid ? `<span class="pm-t-when" data-spot-said>${escHtml(teacherSpotSaid)}</span>` : '')+`</div>`;
   if(!pool.length){
     return meta+bar+`<div class="t-loading sc-t-empty" data-spot-empty>No ticks older than a week yet in ${escHtml(teacherSpotPeriodLabel(per))}: nobody here has a playable skill marked “I’ve got it” ${TEACHER_SPOT_MIN_DAYS} or more days ago with nothing marked since. Try again on another day.</div>`;
@@ -333,15 +335,15 @@ function teacherSpotListHtml(st, per, students, info, today){
   if(!rows.length) return meta+bar+`<div class="t-loading" data-spot-gone>Nobody on today’s list is in ${escHtml(teacherSpotPeriodLabel(per))} any more (archived, moved to another period or removed). “Draw again” makes a new list.</div>`;
   const stuById={};
   students.forEach(s=>{ stuById[s.uid]=s; });
-  const body=rows.map(({r, i}, n)=>{
+  const body=rows.map(({r}, n)=>{
     const sk=info[r.skill]||{text:r.skill, gotItWhen:'', moduleNum:0, module:'', set:''};
     const mark=marks[r.uid+'|'+r.skill]||'';
     const name=teacherSpotNameOf(r.uid);
     const since=teacherSpotDaysSince(r.day, today);
     const gone=!(stuById[r.uid] && (stuById[r.uid].skills||{})[r.skill]==='gotit');
     const where=`Module ${sk.moduleNum}${sk.module ? ' · '+sk.module : ''}${sk.set ? ' · '+sk.set : ''}`;
-    const btn=k=>`<button type="button" class="tg-seg-btn sc-t-mark sc-t-mark-${k}${mark===k?' on':''}" data-spot-mark="${k}" data-spot-i="${i}" data-spot-list="${escAttr(listId)}" aria-pressed="${mark===k}">${escHtml(TEACHER_SPOT_LABEL[k])}</button>`;
-    return `<tr class="sc-t-row${mark ? ' sc-t-is-'+mark : ''}" data-spot-row="${i}" data-spot-uid="${escAttr(r.uid)}" data-spot-skill="${escAttr(r.skill)}" data-spot-state="${mark||'open'}">`
+    const btn=k=>`<button type="button" class="tg-seg-btn sc-t-mark sc-t-mark-${k}${mark===k?' on':''}" data-spot-mark="${k}" data-spot-uid="${escAttr(r.uid)}" data-spot-skill="${escAttr(r.skill)}" data-spot-list="${escAttr(listId)}" aria-pressed="${mark===k}">${escHtml(TEACHER_SPOT_LABEL[k])}</button>`;
+    return `<tr class="sc-t-row${mark ? ' sc-t-is-'+mark : ''}" data-spot-row data-spot-uid="${escAttr(r.uid)}" data-spot-skill="${escAttr(r.skill)}" data-spot-state="${mark||'open'}">`
       +`<td class="pm-t-num sc-t-n">${n+1}</td>`
       +`<td class="tg-name sc-t-who" title="${escAttr(name)}">${escHtml(name)}</td>`
       +`<td class="sc-t-skill"><div class="sc-t-text">${escHtml(sk.text)}</div><div class="sc-t-where">${escHtml(where)}</div>`
@@ -401,8 +403,10 @@ function renderTeacherSpotcheck(){
 }
 function teacherSpotClick(e){
   if(teacherView!=='spotcheck') return;
+  const u=e.target.closest('[data-spot-undo]');
+  if(u){ teacherSpotDoUndo(u.dataset); return; }
   const m=e.target.closest('[data-spot-mark]');
-  if(m){ teacherSpotDoMark(m.dataset.spotList, Number(m.dataset.spotI), m.dataset.spotMark); return; }
+  if(m){ teacherSpotDoMark(m.dataset.spotList, m.dataset.spotUid, m.dataset.spotSkill, m.dataset.spotMark); return; }
   const sz=e.target.closest('[data-spot-size]');
   if(sz){
     const n=Number(sz.dataset.spotSize);
@@ -410,25 +414,33 @@ function teacherSpotClick(e){
     teacherSpotSaid=''; renderTeacherSpotcheck(); return;
   }
   if(e.target.closest('[data-spot-again]')){ teacherSpotAgain(); return; }
-  if(e.target.closest('[data-spot-undo]')){ teacherSpotDoUndo(); return; }
   const p=e.target.closest('[data-spot-period]');
   if(p && TEACHER_SPOT_PERIODS.includes(p.dataset.spotPeriod)) teacherSetPeriodFilter(p.dataset.spotPeriod);
 }
 /* A mark: only on today's list for this period, the one the button was drawn from (a page left open past midnight
-   draws a new list rather than mark a row of the old one). */
-function teacherSpotDoMark(listId, i, result){
+   draws a new list rather than mark a row of the old one), and only on the row of that student and skill, found by
+   both, never by its place: another tab may have deleted a student since this page was drawn, which takes their row
+   out and moves every row under it up (review R2-3). A row that is gone marks nothing; the view is drawn again. */
+const TEACHER_SPOT_STALE='Nothing marked: today’s list changed since this page was drawn (another tab, or a new day). This is the list as it is now.';
+function teacherSpotDoMark(listId, uid, skill, result){
   const st=TEACHER_SPOT_STORE.read(), per=teacherPeriodFilter, L=st.lists[per];
   const today=teacherSpotDayStr(new Date());
-  if(!L || L.day!==today || teacherSpotListId(per, L)!==listId || !L.rows[i] || !TEACHER_SPOT_RESULTS.includes(result)){ teacherSpotSaid=''; renderTeacherSpotcheck(); return; }
-  const next=teacherSpotMark(st, listId, L.rows[i], result, per, Date.now());
+  const row=L && L.rows.find(r=>r.uid===uid && r.skill===skill);
+  if(!L || L.day!==today || teacherSpotListId(per, L)!==listId || !row || !TEACHER_SPOT_RESULTS.includes(result)){ teacherSpotSaid=TEACHER_SPOT_STALE; renderTeacherSpotcheck(); return; }
+  const next=teacherSpotMark(st, listId, row, result, per, Date.now());
   if(next!==st) TEACHER_SPOT_STORE.write(next);
   teacherSpotSaid='';
   renderTeacherSpotcheck();
 }
-function teacherSpotDoUndo(){
+/* Undo takes back the mark its button names (want: the button's data), and only while that is still the last one:
+   another tab may have marked since this page was drawn. */
+function teacherSpotDoUndo(want){
   const st=TEACHER_SPOT_STORE.read();
-  if(!st.undo.length) return;
-  const u=st.undo[st.undo.length-1];
+  const u=st.undo.length ? st.undo[st.undo.length-1] : null;
+  if(!u || !want || u.list!==want.spotList || u.uid!==want.spotUid || u.skill!==want.spotSkill || u.result!==want.spotMark){
+    teacherSpotSaid='Nothing undone: the last mark changed since this page was drawn (another tab). The Undo button now names the last mark.';
+    renderTeacherSpotcheck(); return;
+  }
   TEACHER_SPOT_STORE.write(teacherSpotUndo(st));
   teacherSpotSaid=`Undone: “${TEACHER_SPOT_LABEL[u.result]}” for ${teacherSpotNameOf(u.uid)}${u.prev ? ` (back to “${TEACHER_SPOT_LABEL[u.prev.result]}”)` : ''}.`;
   renderTeacherSpotcheck();
