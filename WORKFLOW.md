@@ -121,7 +121,7 @@ call of 2026-11-24, run by the scheduled cloud routine). Read: 35 more GitHub a1
 counts), 102 since 2026-11-19. Proof: a planted unlabeled `<button>` in a scratch copy → `smoke.mjs --en-only --only
 a11y` exit 1, "new button-name: button.gc-planted-fault"; the real tree exit 0. Review: `site-reviewer` (Opus, high);
 round 1 found one latent MAJOR (a missing or unreadable `tools/a11y-baseline.json` passed silently; now an error,
-proved by deleting it: exit 1) and stale wording; round 2: see the commit trailer. From now on a finding whose
+proved by deleting it: exit 1) and stale wording; round 2 (fresh reviewer): no BLOCKER or MAJOR, 3 MINORs fixed (a baseline with no screens list crashed the run; the error now says to restore the file from git, not rewrite it; comments list the new failure). Not done: a checks.mjs pin of `A11Y_RATCHET = true` (R2-4, a suggestion). From now on a finding whose
 signature the baseline lacks turns GitHub's a11y job red: fix the markup, never widen the baseline to get green.
 Rollback: `A11Y_RATCHET = false`. **Open for Jonathan (coverage, his call):** the Spanish screens are never ratcheted
 on GitHub (the a11y job is `--en-only`; the Friday `full` job has no `--a11y`: adding it there is one flag); the live

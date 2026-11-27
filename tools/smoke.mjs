@@ -2828,8 +2828,8 @@ async function tuningSimWalk(page, run, events, stats, base) {
    A11Y_EXCLUDE lists what is left out on purpose, each with its reason.
 
    A finding fails the run only through the ratchet (below; ON since 2026-11-27). The run also fails, as any smoke step does, when the axe
-   file is missing or not the pinned one, when a scan returns nothing, when a screen is not the one it claims, or
-   when the page logs a console error. It prints one line per rule (its count and first elements), a summary line
+   file is missing or not the pinned one, when a scan returns nothing, when a screen is not the one it claims, when
+   the page logs a console error, or (ratchet on) when tools/a11y-baseline.json is missing or unreadable. It prints one line per rule (its count and first elements), a summary line
    and the list of what is not scanned; --a11y-out <file> writes every finding as JSON.
    The RATCHET: tools/a11y-baseline.json pins today's findings as SIGNATURES — a rule plus what the element is (its
    tag, id or sorted classes, and a few language-free attribute values; see a11ySig), not where it sits, so the
@@ -3048,7 +3048,7 @@ function a11yReport(found) {
   }
   let pinned = null;
   try { pinned = JSON.parse(readFileSync(A11Y_BASELINE, 'utf8')); } catch { /* none yet */ }
-  const pinnedOk = pinned && pinned.version === 2 && pinned.findings;
+  const pinnedOk = pinned && pinned.version === 2 && pinned.findings && typeof pinned.findings === 'object' && Array.isArray(pinned.screens);   // R2-1: no screens list = unreadable, not a crash
   const flat = h => String(h || '').replace(/\s+/g, ' ').slice(0, 110);
   if (args.includes('--a11y-write-baseline')) {
     // R1-11: a baseline from an English-only run would drop every Spanish screen.
@@ -3067,7 +3067,8 @@ function a11yReport(found) {
   // R1-1 (2026-11-27): with the ratchet on, a missing, unreadable (conflict markers) or wrong-version baseline is an
   // error, never a silent pass.
   if (!pinnedOk) {
-    const text = `no readable baseline (version 2) at ${A11Y_BASELINE} — nothing to compare (write one with --a11y-write-baseline, both languages)`;
+    // R2-2: rewriting it from this tree would pin every new finding, so restore the file first.
+    const text = `no readable baseline (version 2) at ${A11Y_BASELINE} — nothing to compare. Restore it from git (git checkout -- tools/a11y-baseline.json; a merge conflict: keep one side whole); write a new one with --a11y-write-baseline (both languages) only when none was ever pinned, since that records every finding of this tree`;
     if (ratchet) out.push({ step: 'a11y:baseline', kind: 'a11y-setup', text: `${text}; the ratchet is on, so this fails the run` });
     else say(`a11y: ${text}`);
     return out;

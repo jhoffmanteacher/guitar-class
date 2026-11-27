@@ -257,7 +257,8 @@ jobs:
   # The accessibility scan (tools/smoke.mjs area a11y, 2026-11-13), English. Its RATCHET is ON since 2026-11-27
   # (A11Y_RATCHET in smoke.mjs, after a week of these runs with 0 new signatures; W26 in WORKFLOW.md): a finding
   # whose signature tools/a11y-baseline.json lacks fails this job, as does a setup failure (the axe file refused, a
-  # scan that returned nothing, a screen that is not the one it claims). Its JSON is kept every run.
+  # scan that returned nothing, a screen that is not the one it claims, a missing or unreadable baseline file).
+  # Its JSON is kept every run.
   a11y:
     name: a11y scan (English, ratchet on)
     if: ${{ github.event_name != 'schedule' && !(github.event_name == 'workflow_dispatch' && inputs.full) }}
