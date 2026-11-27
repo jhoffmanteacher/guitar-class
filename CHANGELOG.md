@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-27 — The site counts which tools you open
+
+- **The site now keeps a simple count of which tools you open:** the tuner, metronome and timer, the Listening Coach,
+  Arcade games, practice cards and play-alongs, Module Review's Record button, and Song Journey pages. Opening one adds
+  1 to that tool's number in your saved progress. Only the number is kept, never when. Your teacher sees how many
+  students use each tool, so we can keep what helps and fix or drop what doesn't. The Privacy page says this in English
+  and Spanish. Nothing here is graded.
+
 ## 2026-11-26 — A new kind of activity: Memory Fade
 
 - **New activity: Memory Fade.** Play the Sweet Child O' Mine verse and chorus with the band four times while the chord
