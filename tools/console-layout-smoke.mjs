@@ -174,6 +174,8 @@ const USAGE_SEED = (i) => {
 const SPOT_AGO = (i) => i === 9 ? null : i > 24 ? 1 : [2, 7, 6, 20][i % 4];
 const SPOT_PRIOR = [['13', 'w2-s2', 'held', 14], ['15', 'w2-s3', 'notyet', 14], ['17', 'w2-s3', 'notyet', 14], ['19', 'w2-s2', 'held', 21], ['21', 'w2-s3', 'notyet', 21]];
 const USAGE_SKILL_IDS = ['module-1.js', 'module-2.js'].flatMap(f => [...readFileSync(join(ROOT, f), 'utf8').matchAll(/\{ id: '((?:m2)?w\d+-s\d+)'/g)].map(m => m[1]));
+/* The seeds the STUB reads (see the note inside it): set in the page right before the STUB runs. */
+const STUB_SEEDS = `(window.__STUB_SEEDS = { usageSeed: ${USAGE_SEED.toString()}, spotAgo: ${SPOT_AGO.toString()}, skillIds: ${JSON.stringify(USAGE_SKILL_IDS)} }, true)`;
 /* The stub: an in-memory Firestore with the calls the console makes (get on a
    doc or a collection, a transaction that merges a patch with FieldValue.delete
    sentinels), plus the seed. Runs in the page. Every name is fake. */
@@ -204,10 +206,15 @@ const STUB = String.raw`(() => {
   if (has('ca-48')) dates['ca-48'] = day(-1);
   if (has('ca-49')) dates['ca-49'] = day(5);
   const students = [];
-  const usageSeed = ${USAGE_SEED.toString()};
-  const spotAgo = ${SPOT_AGO.toString()};
+  // The Usage and Week-later seeds come in through window.__STUB_SEEDS (STUB_SEEDS below, run before this text). The STUB
+  // itself stays plain text with no dollar-brace: tools/update-reload-loop.mjs and tools/golden.mjs read it out of this file
+  // and run it as it is (2026-11-27: an interpolation here broke both with "Unexpected token"). Without the seeds the
+  // class has no usage counts, no skills marked and no last-marked day, as before those views existed.
+  const seeds = window.__STUB_SEEDS || {};
+  const usageSeed = seeds.usageSeed || (() => ({ tools: {}, steps: 0, got: 0, minutes: 0 }));
+  const spotAgo = seeds.spotAgo || (() => null);
   // The console fetches the module files on demand (SETS is empty here): Modules 1 and 2's skill ids, read from the files.
-  const skillIds = ${JSON.stringify(USAGE_SKILL_IDS)};
+  const skillIds = seeds.skillIds || [];
   for (let i = 1; i <= 30; i++) {
     const n = String(i).padStart(2, '0');
     const period = i <= 12 ? '4' : i <= 24 ? '7' : 'CAS';
@@ -314,6 +321,7 @@ async function main() {
       for (let i = 0; i < 80; i++) { await sleep(150); if (await js(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
       await js(`ensureTeacherJs()`);
       for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`typeof showTeacherApp === 'function'`)) break; }
+      await js(STUB_SEEDS);
       const n = await js(STUB);
       if (keepConfig) await js(`__store.set('config/class', ${keepConfig})`);
       await js(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
@@ -580,6 +588,7 @@ async function main() {
         for (let i = 0; i < 80; i++) { await sleep(150); if (await js2(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
         await js2(`ensureTeacherJs()`);
         for (let i = 0; i < 80; i++) { await sleep(100); if (await js2(`typeof showTeacherApp === 'function'`)) break; }
+        await js2(STUB_SEEDS);
         await js2(STUB);
         await js2(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
         for (let i = 0; i < 80; i++) { await sleep(100); if (await js2(`!!document.querySelector('#t-grid-container [data-ta-list]')`)) break; }
