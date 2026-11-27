@@ -237,23 +237,38 @@ function teacherSpotSummary(results, uids, info){
 }
 
 /* ══ STORAGE ADAPTER: this browser's localStorage on this computer (see STORAGE in the header) ══
-   read() → the state (checked); write(state) → true when kept. When the browser keeps nothing (storage blocked)
-   the state lives in this tab's memory until a reload, and the view says so. */
-let teacherSpotMemory=null, teacherSpotStoreOk=true;
+   read() → the state (checked); write(state, isMark) → true when kept. No way of not keeping is silent; the view says
+   each one (teacherSpotWarnHtml, review R2-4):
+   - storage blocked (getItem throws): the state lives in this tab's memory until a reload;
+   - a write refused (setItem throws: the store is full; the console shares the student site's 5 MB on this
+     computer): from then on this tab's memory is what the view shows, until a write goes through again;
+   - a stored value this code cannot read (not JSON, not v:1, no results list): opening the view never overwrites it.
+     The view's own drawing (the day's list, Draw again) stays in memory, and only the teacher's next mark (isMark)
+     first copies the old text to TEACHER_SPOT_BACKUP_KEY (one generation: it replaces an older copy), then starts a
+     fresh store. When that copy cannot be written, nothing is replaced. */
+const TEACHER_SPOT_BACKUP_KEY=TEACHER_SPOT_KEY+'-unreadable';
+let teacherSpotMemory=null, teacherSpotStoreOk=true, teacherSpotWriteFailed=false, teacherSpotUnreadable=null;
 const TEACHER_SPOT_STORE={
   where:'device',
   read(){
     let raw;
     try{ raw=localStorage.getItem(TEACHER_SPOT_KEY); teacherSpotStoreOk=true; }
     catch(e){ teacherSpotStoreOk=false; return teacherSpotClean(teacherSpotMemory); }
-    let parsed=null;
-    try{ parsed=raw ? JSON.parse(raw) : null; }catch(e){ parsed=null; }
-    return teacherSpotClean(parsed);
+    let parsed=null, bad=false;
+    if(raw){ try{ parsed=JSON.parse(raw); }catch(e){ bad=true; } }
+    if(raw && !bad && !(parsed && typeof parsed==='object' && parsed.v===1 && Array.isArray(parsed.results))) bad=true;
+    teacherSpotUnreadable=bad ? raw : null;
+    return teacherSpotClean(bad || teacherSpotWriteFailed ? teacherSpotMemory : parsed);
   },
-  write(state){
+  write(state, isMark){
     teacherSpotMemory=state;
-    try{ localStorage.setItem(TEACHER_SPOT_KEY, JSON.stringify(state)); teacherSpotStoreOk=true; return true; }
-    catch(e){ teacherSpotStoreOk=false; return false; }
+    if(teacherSpotUnreadable!==null && !isMark) return false;
+    try{
+      if(teacherSpotUnreadable!==null) localStorage.setItem(TEACHER_SPOT_BACKUP_KEY, teacherSpotUnreadable);
+      localStorage.setItem(TEACHER_SPOT_KEY, JSON.stringify(state));
+      teacherSpotStoreOk=true; teacherSpotWriteFailed=false; teacherSpotUnreadable=null;
+      return true;
+    }catch(e){ teacherSpotWriteFailed=true; return false; }
   },
 };
 /* For teacher-remove.js: a deleted student's results go with their saved work, from this computer. */
@@ -373,10 +388,20 @@ function teacherSpotSummaryHtml(st, students, info, per){
     : `<div class="tr-meta">No skill has failed a check yet.</div>`;
   return head+line+modTable+failed;
 }
+// The plain line at the top when this browser is not keeping the marks, or holds results it cannot read (STORAGE ADAPTER).
+function teacherSpotWarnHtml(){
+  const k=!teacherSpotStoreOk ? 'blocked' : teacherSpotWriteFailed ? 'full' : teacherSpotUnreadable!==null ? 'unreadable' : '';
+  if(!k) return '';
+  const say={blocked:'Not saved: this browser is not keeping anything (its storage is turned off). The marks on this page last only until it is reloaded.',
+    full:'Not saved: this browser would not keep the last mark (its storage is full). The marks on this page last only until it is reloaded; each new mark tries again.',
+    unreadable:`The week-later results saved in this browser could not be read, so they are left as they are. Your next mark keeps a copy of them (localStorage ${TEACHER_SPOT_BACKUP_KEY}) and starts a fresh record.`}[k];
+  return `<div class="sc-t-warn" data-spot-warn="${k}" role="status">${escHtml(say)}</div>`;
+}
 function teacherSpotFootHtml(){
-  const kept=teacherSpotStoreOk
-    ? 'Results are kept in this browser on this computer only, not in the class database: another computer or browser does not see them. Manage → “Download a backup” puts them in its file.'
-    : 'This browser is not keeping anything (its storage is blocked): marks last only until this page is reloaded.';
+  const kept=!teacherSpotStoreOk ? 'This browser is not keeping anything (its storage is blocked): marks last only until this page is reloaded.'
+    : teacherSpotWriteFailed ? 'This browser could not keep the last marks (its storage is full): they last only until this page is reloaded.'
+    : teacherSpotUnreadable!==null ? 'Nothing new is kept in this browser until your next mark: the results saved here could not be read (see the top).'
+    : 'Results are kept in this browser on this computer only, not in the class database: another computer or browser does not see them. Manage → “Download a backup” puts them in its file.';
   return `<div class="tr-meta sc-t-foot" data-spot-foot>${kept} Not a grade: nothing here feeds a grade, and students never see these results.</div>`;
 }
 function renderTeacherSpotcheck(){
@@ -399,7 +424,7 @@ function renderTeacherSpotcheck(){
     st=TEACHER_SPOT_STORE.read();
   }
   const sum=Object.keys(info).length && students.length ? teacherSpotSummaryHtml(st, students, info, per) : '';
-  box.innerHTML=`<div data-tview="spotcheck">${teacherSpotHeadHtml(info)}${mid}${sum}${teacherSpotFootHtml()}</div>`;
+  box.innerHTML=`<div data-tview="spotcheck">${teacherSpotHeadHtml(info)}${teacherSpotWarnHtml()}${mid}${sum}${teacherSpotFootHtml()}</div>`;
 }
 function teacherSpotClick(e){
   if(teacherView!=='spotcheck') return;
@@ -428,7 +453,7 @@ function teacherSpotDoMark(listId, uid, skill, result){
   const row=L && L.rows.find(r=>r.uid===uid && r.skill===skill);
   if(!L || L.day!==today || teacherSpotListId(per, L)!==listId || !row || !TEACHER_SPOT_RESULTS.includes(result)){ teacherSpotSaid=TEACHER_SPOT_STALE; renderTeacherSpotcheck(); return; }
   const next=teacherSpotMark(st, listId, row, result, per, Date.now());
-  if(next!==st) TEACHER_SPOT_STORE.write(next);
+  if(next!==st) TEACHER_SPOT_STORE.write(next, true);
   teacherSpotSaid='';
   renderTeacherSpotcheck();
 }

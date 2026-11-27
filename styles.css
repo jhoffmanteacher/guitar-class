@@ -1745,6 +1745,7 @@ body.rail-collapsed .rail-tools .tool-popup{
    row (a marked row tinted by its mark), the criterion under each skill, the summary. */
 .sc-t-howto{font-size:var(--fs-15);font-weight:600;color:var(--text);background:var(--blue-bg);border-left:3px solid var(--blue-text);padding:var(--sp-8) var(--sp-12);border-radius:4px;margin:0 0 var(--sp-10)}
 .tg-seg-btn.sc-t-btn{border:1px solid var(--border2);border-radius:16px}
+.sc-t-warn{font-size:var(--fs-14);font-weight:600;color:var(--red-text);background:var(--red-bg);border-left:3px solid var(--red-text);padding:var(--sp-8) var(--sp-12);border-radius:4px;margin:0 0 var(--sp-10)}
 .sc-t-table td{vertical-align:top}
 .sc-t-table .sc-t-n{width:2em;color:var(--text2)}
 .sc-t-who{min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
