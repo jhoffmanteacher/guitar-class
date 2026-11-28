@@ -22,7 +22,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-11-28-e406633855';
+const CACHE_VERSION = 'guitar-class-2026-11-28-5ab9599409';
 
 /* BACKING-TRACK AUDIO (2026-10-30 rewrite). Every track lives in ONE cache that
    never changes name, AUDIO_CACHE, apart from the shell's CACHE_VERSION: a routine
@@ -207,6 +207,7 @@ const PRECACHE_CRITICAL = [
   './app/fade.js',
   './app/cards-loop.js',
   './app/cards-views.js',
+  './app/cards-rec.js',
   './app/activities-2.js',
   './app/activities-list.js',
   './app/start.js',
@@ -278,6 +279,7 @@ const ASSETS = [
   './app/fade.js',
   './app/cards-loop.js',
   './app/cards-views.js',
+  './app/cards-rec.js',
   './app/activities-2.js',
   './app/activities-list.js',
   './app/start.js',

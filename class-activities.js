@@ -210,6 +210,17 @@
                                            // Every class card has one but ca-54
                                            // (its rounds line) and ca-56 (Memory
                                            // Fade); no library card does.
+       recordCompare: true,                // optional (Jonathan, 2026-11-27; ca-18 and ca-54
+                                           // ONLY, checks.mjs 1ft): a row of three
+                                           // buttons under the player, Record mine /
+                                           // Play mine / Play the model. One passage
+                                           // (the section tapped last, the last
+                                           // section before a tap; a rounds card's
+                                           // round), recorded from the band's first
+                                           // bar to the passage's end, 75 s at most,
+                                           // kept in memory only and gone when the
+                                           // card closes. Nothing saved or sent.
+                                           // RECORD AND COMPARE in app/cards-rec.js.
        slowest: true,                     // optional: a Slowest option beside
                                            // Slower / Slow / Normal — the slow file at
                                            // 0.8x, pitch held (ca-18, ca-10)
@@ -2344,6 +2355,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — Jonathan, 2026-09-29
+      recordCompare: true,   // Record mine / Play mine / Play the model (Jonathan, 2026-11-27): one tapped section, Chorus before a tap
       caption:    'The song in order · 4 plucks per note',
       caption_es: 'La canción en orden · 4 pulsaciones por nota',
       directions:    'Play from the intro to the end of the chorus with the band without stopping, each pluck on the beat.',
@@ -7714,6 +7726,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Sube a la velocidad de la grabación en la estrofa y el coro juntos.',
     card: {
       track: 'sweet-child-o-mine',
+      recordCompare: true,   // Record mine / Play mine / Play the model (Jonathan, 2026-11-27): one time through the round at the stop shown
       slowest: true,       // four-way speed control: Slowest / Slower / Slow / Normal
       slowestRate: 0.9,    // this card's bottom stop: the slow file (100) at 0.9 = 90 (the site's usual is 0.8 = 80)
       startStop: 'slowest',   // opens on the bottom stop, 90 (every other card opens on Normal, but on its release day)

@@ -3979,6 +3979,20 @@ span.tab-count-held{margin-left:var(--sp-4)}
 .pc-ask-got{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
 .pc-ask-got:hover{background:var(--brand-hover)}
 .pc-ask-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+/* RECORD AND COMPARE (card.recordCompare, ca-18 and ca-54; app/cards-rec.js, 2026-11-27): one row of three buttons
+   under the player, the red "Recording" label beside them while a take records, and one small line under them. */
+.pc-rec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-8);margin:var(--sp-8) 0 0}
+.pc-rec-btn{font-family:inherit;font-size:var(--fs-14);font-weight:700;min-height:36px;padding:var(--sp-4) var(--sp-14);border-radius:10px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--text)}
+.pc-rec-btn:hover:not(:disabled){background:var(--bg3)}
+.pc-rec-btn:disabled{opacity:.5;cursor:default}
+.pc-rec-btn.on,.pc-rec-btn.on:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+.pc-rec-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.pc-rec-go::before{content:'';display:inline-block;width:.6em;height:.6em;margin-right:.4em;border-radius:50%;background:var(--red-text);vertical-align:.05em}
+.pc-rec-go.on::before{border-radius:1px}
+.pc-rec-live{display:inline-flex;align-items:center;gap:var(--sp-6);font-size:var(--fs-14);font-weight:700;color:var(--red-text)}
+.pc-rec-live[hidden]{display:none}
+.pc-rec-hint{margin:var(--sp-4) 0 0;font-size:var(--fs-13);color:var(--text2)}
+.pc-rec-hint.pc-rec-say{color:var(--red-text)}
 /* MEMORY FADE (ca-56, app/fade.js, 2026-11-26): the bar under the player (the time counter and Show it), and a
    hidden chord name: the same box, blank, so nothing on the grid moves; its frets go blank with it. */
 .fade-bar{margin:var(--sp-8) 0;display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-8) var(--sp-12)}

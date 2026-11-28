@@ -549,6 +549,7 @@ function caCardBodyHtml(a, opts){
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
     + pcPlayerHtml(a, L, preview) + pcLadderAskHtml(L)
+    + (typeof pcRecRowHtml === 'function' ? pcRecRowHtml(a, L, preview) : '')   /* RECORD AND COMPARE (card.recordCompare, ca-18 and ca-54): app/cards-rec.js, a later part; '' on every other card */
     + (typeof fadeBarHtml === 'function' ? fadeBarHtml(a, preview) : '')   /* MEMORY FADE (ca-56): app/fade.js, a later part; '' on every other card */
     + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
@@ -628,6 +629,8 @@ function pcStop(){
     pcStatus(root, '');
   }
   pcSyncBarStop();
+  // RECORD AND COMPARE (app/cards-rec.js): a Record mine pass stops its recorder with the band, on every way out.
+  if(st.recPass && typeof pcRecPassStopped === 'function') pcRecPassStopped(st);
 }
 /* Stop in the sticky bar while a practice card's song plays (Jonathan,
    2026-09-30). pcFollow scrolls the card's own Play/Stop off the top of a
@@ -694,7 +697,7 @@ function pcSparePark(st){
      dropped, so the song stops at its end (Friday check 2026-11-14: Loop on, then off, left the spare parked and
      the card lapped forever). A speed ladder that stops and asks (pcLadderPause, ROUNDS in app/cards-loop.js) never
      hands a lap to its spare either: none is made. A speed picked by hand ends the ladder, and its pcRetrack parks one. */
-  if((st.wholeSong && !(st.loopSi >= 0)) || pcLadderPause(st)){
+  if((st.wholeSong && !(st.loopSi >= 0)) || pcLadderPause(st) || st.recPass){   // a Record mine / Play the model pass never laps
     if(st.spare){ try { st.spare.pause(); st.spare.removeAttribute('src'); st.spare.load(); } catch(e) {} st.spare = null; }
     return;
   }
@@ -724,6 +727,7 @@ function pcSparePark(st){
 function pcSpareReady(st){
   if(st.wholeSong && !(st.loopSi >= 0)) return false;   // a whole-song card ends at its end unless Loop this part is on
   if(pcLadderPause(st)) return false;  // a ladder stops at the end of each stop: no spare takes the lap over
+  if(st.recPass) return false;         // one time through a passage (RECORD AND COMPARE): it stops at its end
   const sp = st.spare, nx = pcLoopNext(st);
   if(nx) return !!(sp && twinSrcIs(sp, nx.src) && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStartIn(st, nx.win)) < 0.05);
   return !!(sp && sp.src === st.audio.src && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStart(st)) < 0.05);
@@ -750,6 +754,7 @@ function pcToggle(btn){
 }
 function pcFromSection(btn, si){
   const root = btn.closest('.pc');
+  if(root && typeof pcRecPick === 'function') pcRecPick(root, si);   // RECORD AND COMPARE: the section tapped last is what Record mine records
   if(root) pcStart(root, si);
 }
 /* A round button (ROUNDS): Loop and Build up speed on, the round remembered (pcStart reads it), then the round plays
@@ -767,7 +772,11 @@ function pcRoundStart(root, ri, L0, keepBuild){
   pcLoopSet(root, 'hold', false);
   pcStart(root, rd.from, 0, keepBuild);
 }
-function pcStart(root, si, rep, keepBuild){
+/* `recPass` (optional, RECORD AND COMPARE in app/cards-rec.js): this play is one time through a passage, for Record
+   mine or Play the model. It ends at `recPass.endBars` (window bars) and stops there: no lap, no spare (pcFrame,
+   pcSparePark, pcSpareReady, pcLoopEndBars), and a speed or Guitar switch while it plays stops it (pcRetrack).
+   Every other play passes nothing and is unchanged. */
+function pcStart(root, si, rep, keepBuild, recPass){
   if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();   // includes pcStop()
   const a = pcActivity(root);
@@ -781,6 +790,7 @@ function pcStart(root, si, rep, keepBuild){
   const build = pcBuildBegin(root, keepBuild, rd ? rd.startStop : 0);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const src = snippetSrc(L.tr, slow, guitar);
+  if(recPass){ recPass.slow = slow; recPass.rate = pcRate(root); }
   // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
   if(songFileNeedsLoad(src)){ songFileWaitThen(root, src, () => pcStart(root, si, rep), pcWaitUi(root)); return; }
   const audio = new Audio();
@@ -793,7 +803,7 @@ function pcStart(root, si, rep, keepBuild){
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
   const st = { root, L, audio, win: pcWindow(L, slow, guitar), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet && typeof pcSheetHtml === 'function', raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
-               loopSi: root.dataset.loop === '1' ? si : -1, loopTo: rd ? rd.to : si, build, laps: 0,
+               loopSi: root.dataset.loop === '1' ? si : -1, loopTo: rd ? rd.to : si, build, laps: 0, recPass: recPass || null,
                passFrom: L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar };   // where this pass began, in window bars (THE LEAD)
   pcState = st;
   if(typeof fadeStarted === 'function') fadeStarted(st);   // MEMORY FADE (app/fade.js): the loop on, or the last time through ending at its end
@@ -821,6 +831,7 @@ function pcGo(st, si){
   pcLoopStatus(st);                    // "Looping: Chorus" / "Round 1 of 2 at Slowest" instead, with Loop on
   st.audio.play().catch(() => {});
   st.raf = requestAnimationFrame(pcFrame);
+  if(st.recPass && typeof pcRecBandIn === 'function') pcRecBandIn(st);   // RECORD AND COMPARE (app/cards-rec.js): Record mine records from here
   // The other mix loads only once this one is playing, and only where
   // twinWanted (see THE TWIN).
   const el = st.audio;
@@ -950,6 +961,8 @@ function pcFrame(){
     }, Math.max(0, left * 1000 - 4)));
     st.timers.push(...hand);           // pcStop still clears them with the rest
   } else if(!st.leaving && (now >= end - 0.02 || audio.ended)){
+    // Record mine / Play the model (RECORD AND COMPARE, app/cards-rec.js): one time through, then stop.
+    if(st.recPass){ st.recPass.done = true; pcStop(); return; }
     // A ladder (card.rounds, ca-54) plays one time through a stop, then stops and asks: Got it or Practice again.
     if(pcLadderPause(st)){ pcLadderAsk(st); return; }
     // A whole-song card stops at the end of the song (Jonathan, 2026-10-02:
@@ -1272,6 +1285,7 @@ function pcRetrack(root){
   // A speed or Guitar change while this card's song still loads: wait for the file asked for now (SONG FILES).
   if((!st || st.root !== root) && songFileRedoWait(root)) return;
   if(!st || st.root !== root) return;
+  if(st.recPass){ pcStop(); return; }   // a speed or Guitar switch ends a Record mine / Play the model pass (RECORD AND COMPARE)
   if(st.counting){ pcStart(root, st.loopFrom, st.fromRep, st.build); return; }
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   /* The new tier is a private file not loaded yet (SONG FILES): stop, load it,

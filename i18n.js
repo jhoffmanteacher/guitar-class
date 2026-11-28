@@ -662,6 +662,16 @@
                                  es: 'Eso fue a {bpm} BPM. Pulsa «Lo tengo» para tocarlo más rápido o «Practicar otra vez» para tocarlo a la misma velocidad.' },
     'pc.askLast':              { en: 'That was {bpm} BPM, record speed. Click “Got it” to finish or “Practice again” to play it once more.',
                                  es: 'Eso fue a {bpm} BPM, la velocidad de la grabación. Pulsa «Lo tengo» para terminar o «Practicar otra vez» para tocarlo una vez más.' },
+    // Record and compare (card.recordCompare, ca-18 and ca-54, app/cards-rec.js; 2026-11-27): the row under the player.
+    'pc.recGroup':             { en: 'Record yourself and compare', es: 'Grábate y compara' },
+    'pc.recMine':              { en: 'Record mine', es: 'Grabarme' },
+    'pc.recPlayMine':          { en: 'Play mine', es: 'Escucharme' },
+    'pc.recModel':             { en: 'Play the model', es: 'Escuchar el modelo' },
+    'pc.recLive':              { en: 'Recording', es: 'Grabando' },
+    'pc.recHint':              { en: 'Records “{part}” once at the speed shown, then stops.',
+                                 es: 'Graba «{part}» una vez a la velocidad que se ve y se detiene.' },
+    'pc.recHintPick':          { en: 'Records “{part}” once at the speed shown, then stops; tap a section to pick another.',
+                                 es: 'Graba «{part}» una vez a la velocidad que se ve y se detiene; pulsa una sección para elegir otra.' },
     // Memory fade (card.fade, ca-56, app/fade.js; 2026-11-26): the directions line, the pass counter, Show it, the end.
     'ca.fadeDirections':       { en: 'Play with the band {n} times through as the chord names fade, and keep your place on the beat.',
                                  es: 'Toca con la banda {n} veces mientras se borran los acordes y sigue el pulso sin perderte.' },

@@ -33,6 +33,23 @@ The activity is ONE screen:
   its chord / strum / sheet twins). **A new class card gets one.**
 - A Metronome: a click the SITE makes on every counted beat (no metronome
   files; Moises clicked "the cure" at 144, twice the 72 the room counts).
+- **Record and compare** (`card.recordCompare: true`, Jonathan, 2026-11-27,
+  WORK-ORDER-spot-record-wording Part 3; **ca-18 and ca-54 only**, checks.mjs
+  **1ft**): a row under the player, Record mine / Play mine / Play the model,
+  and one hint line naming the passage. The passage is the section tapped
+  last (before any tap the card's last section: ca-18's Chorus) or, on a
+  rounds card, one time through the round at the stop shown. Record mine
+  asks for the mic, plays it from the usual count-in and records from the
+  band's first bar to the passage's end (75 s at most); Play the model plays
+  the same passage with Guitar on and no recording. The take lives in memory
+  only (no save, upload, download, storage) and is gone when the card closes
+  or the page leaves. Nothing listens or grades. Not in the console. This
+  reverses "the Record button is gone" (2026-11-14) for these two cards only:
+  still no Record tool in the dock or the bar, and no step asks for a
+  recording. Code: `app/cards-rec.js` (RECORD AND COMPARE); a play with a
+  `recPass` (pcStart's 5th argument) stops at the passage's end. Walks:
+  `tools/smoke.mjs` `recordCompareWalk`, `tools/stop-loop.mjs` `rec@card` /
+  `model@card`.
 - Then a Mark complete button. **No checklist** since 2026-11-10 (below).
 
 A looping card repeats with no seek: a second `<audio>` on the same file
@@ -40,6 +57,11 @@ waits at the loop start and takes over at the window's end ("THE SPARE" in
 `app/cards.js`, Jonathan 2026-10-07 — a seek left an audible hole every lap).
 Anything new that touches a card's audio must handle `st.spare` and
 `st.leaving` as well as `st.audio`.
+Record mine and Play the model do: they are the card's own `pcStart` with a
+`recPass`, which never makes a spare (`pcSparePark` / `pcSpareReady`), never
+laps (`pcFrame` stops at `recPass.endBars`), and a speed or Guitar switch
+during one stops it (`pcRetrack`); `pcStop` stops the recorder with the band
+(`pcRecPassStopped`).
 
 Level up and links:
 - **A whole-song card's Level up names no other page and renders no Journey

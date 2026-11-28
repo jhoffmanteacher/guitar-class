@@ -20,6 +20,7 @@ access rules on 2026-11-15, so the conditions that waited on them are gone.
 - `drills.js` practice log, tempo ladder, Find-the-Note, Shuffle, rep counter, MC shuffle, Card Deck, Ear Spark
 - `drills-call.js` Note Call, Call the chord, Name the power chord, "Keep it sharp"
 - `drills-spot.js` (2026-11-28) Spot the mistake (`renderSpot`, ca-57): a card's line played with one note or chord wrong, the student taps where; saves nothing
+- `cards-rec.js` (2026-11-28) Record and compare (`card.recordCompare`, ca-18 and ca-54): Record mine / Play mine / Play the model; one passage recorded in memory only and played back on the device, gone when the card closes; saves and sends nothing (checks.mjs 1ft)
 - `audio-ui.js` skill toggles, check-off gates, `playNote()`, BPM, Coach hooks, floating tools, nav drawer, resource viewer
 - `explore.js` navigation, Songs hub, Play Along, search, Keep practicing, Daily Review, My progress, the In-Class Activities page
 - `activities.js` activity deep link, Today hero, Focus view, paths, the practice-card body and its switches (versions, bass notes), (`caStepHtml()`)

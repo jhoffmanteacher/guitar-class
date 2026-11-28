@@ -12176,6 +12176,80 @@ function checkReleaseDay(ctx) {
   if (asserts !== FJ_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FJ_ASSERTS} — a branch stopped running (or update the pin with the change)`);
   if (!bad) ok(`1fj: ${asserts} assertions on the real code — ${on} class cards dated today open with Loop and Build up speed on, on their bottom stop; dated yesterday every card draws byte for byte as undated (Normal); library cards, ca-54, one-section cards and the console preview never change; a closed release-day card opens that way again`);
 }
+/* 1ft. RECORD AND COMPARE (card.recordCompare; Jonathan, 2026-11-27, WORK-ORDER-spot-record-wording Part 3). Record
+   mine / Play mine / Play the model on a practice card: one passage, recorded in memory only, played back on the device.
+   RUN, not read, in the 0b context:
+   - recordCompare is `true` on exactly FT_CARDS (ca-18 and ca-54): a recorder on another card is a decision;
+   - every view:'card' entry drawn EN + ES, student and console preview: the row (three buttons, pcRecRecord /
+     pcRecPlayMine / pcRecModel, Play mine disabled until a take, the red label hidden, one hint line naming the
+     passage) on the pinned cards' student card only; never in the preview; no raw pc.rec* key;
+   - the passage (pcRecPass): ca-18 before any tap is the Chorus (window bars 20..28), a tap picks Intro (..4) or the
+     2 Verses with both reps (..20); ca-54 is one time through its round, Verse + Chorus (..24); the cap is 75 s;
+   - the four files of both cards play with no private-song wait (a recording pass never falls back to a plain play);
+   - app/cards-rec.js (comments left out) has no fetch, XHR, beacon, socket, Firebase / Firestore, localStorage,
+     sessionStorage, IndexedDB, Cache Storage, download attribute or <a> link: nothing of a take is saved or sent.
+   The browser walks: tools/smoke.mjs recordCompareWalk, tools/stop-loop.mjs rec@card / model@card. */
+const FT_CARDS = ['ca-18', 'ca-54'], FT_ASSERTS = 158;
+function checkRecordCompare(ctx, i18nTable) {
+  head('1ft. Record and compare: Record mine / Play mine / Play the model on ca-18 and ca-54 only; one passage; nothing saved or sent');
+  let bad = 0, asserts = 0;
+  const flag = m => { err('1ft: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['pcRecRowHtml', 'pcRecPass', 'pcRecRecord', 'pcRecPlayMine', 'pcRecModel', 'pcRecPassStopped', 'pcRecBandIn', 'pcRecStopAll', 'pcRecReset', 'caCardBodyHtml'])
+    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1ft)'); return; }
+  const is = (cond, msg) => { asserts++; if (!cond) flag(msg); };
+  const J = JSON.stringify;
+  try {
+    const on = JSON.parse(run('JSON.stringify((window.CLASS_ACTIVITIES || []).filter(a => a && a.card && "recordCompare" in a.card).map(a => [a.id, a.card.recordCompare]))'));
+    is(J(on) === J(FT_CARDS.map(id => [id, true])), `card.recordCompare is on ${J(on)}, pinned true on ${J(FT_CARDS)} only — a recorder on another card is Jonathan's decision`);
+    is(run('PC_REC_MAX_SECS') === 75, `PC_REC_MAX_SECS is ${run('PC_REC_MAX_SECS')}, pinned 75 (the work order's hard cap)`);
+    const ids = JSON.parse(run('JSON.stringify((window.CLASS_ACTIVITIES || []).filter(a => a && a.view === "card" && a.card).map(a => a.id))'));
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${J(lang)})`);
+      for (const id of ids) {
+        const pin = FT_CARDS.includes(id);
+        const html = String(run(`caCardBodyHtml(CLASS_ACTIVITIES.find(x => x.id === ${J(id)}))`));
+        const prev = String(run(`caCardBodyHtml(CLASS_ACTIVITIES.find(x => x.id === ${J(id)}), { preview: true })`));
+        is(!/pc-rec/.test(prev), `${id} ${lang}: the console preview must draw no recorder row`);
+        if (!pin) { is(!/pc-rec/.test(html), `${id} ${lang}: a card without recordCompare must draw no recorder row`); continue; }
+        const row = (/<div class="pc-rec"[\s\S]*?<\/div><p class="pc-rec-hint"[^>]*>[^<]*<\/p>/.exec(html) || [''])[0];
+        const btns = [...row.matchAll(/<button\b([^>]*)>([^<]*)<\/button>/g)].map(m => ({ attrs: m[1], text: m[2] }));
+        is(btns.length === 3 && /onclick="pcRecRecord\(this\)"/.test(btns[0].attrs) && /onclick="pcRecPlayMine\(this\)"/.test(btns[1].attrs) && /onclick="pcRecModel\(this\)"/.test(btns[2].attrs),
+          `${id} ${lang}: the row must hold three buttons, Record mine (pcRecRecord), Play mine (pcRecPlayMine), Play the model (pcRecModel): ${row.slice(0, 300)}`);
+        const words = lang === 'en' ? ['Record mine', 'Play mine', 'Play the model'] : ['Grabarme', 'Escucharme', 'Escuchar el modelo'];
+        is(btns.length === 3 && btns.every((b, k) => b.text === words[k]), `${id} ${lang}: the buttons must read ${J(words)}, found ${J(btns.map(b => b.text))}`);
+        is(btns.length === 3 && /\bdisabled\b/.test(btns[1].attrs) && !/\bdisabled\b/.test(btns[0].attrs + btns[2].attrs), `${id} ${lang}: Play mine starts disabled (no take yet), the other two enabled`);
+        is(/<span class="pc-rec-live" hidden>/.test(row), `${id} ${lang}: the red Recording label must be drawn hidden`);
+        const hint = (/<p class="pc-rec-hint"[^>]*>([^<]*)<\/p>/.exec(row) || [])[1] || '';
+        const part = id === 'ca-18' ? (lang === 'en' ? 'Chorus' : 'Coro') : (lang === 'en' ? 'Verse + Chorus' : 'Estrofa + coro');
+        is(hint.includes(part) && !/pc\.rec/.test(hint), `${id} ${lang}: the hint must name the passage "${part}", found "${hint}"`);
+        is(html.indexOf('class="pc-player"') >= 0 && html.indexOf('class="pc-rec"') > html.indexOf('class="pc-player"'), `${id} ${lang}: the row sits under the player`);
+      }
+    }
+    run('setLang("en")');
+    const pass = (id, rec) => JSON.parse(run(`(() => { const a = caView(CLASS_ACTIVITIES.find(x => x.id === ${J(id)})); return JSON.stringify(pcRecPass({ dataset: ${rec === null ? '{}' : J({ recSec: String(rec) })} }, a, pcLayout(a))); })()`));
+    const p18 = pass('ca-18', null), p0 = pass('ca-18', 0), p1 = pass('ca-18', 1), p54 = pass('ca-54', null);
+    is(p18.label === 'Chorus' && p18.from === 2 && p18.to === 2 && p18.endBars === 28, `ca-18 before any tap must record the Chorus to window bar 28: ${J(p18)}`);
+    is(p0.label === 'Intro' && p0.endBars === 4, `ca-18 after a tap on Intro must record the Intro to bar 4: ${J(p0)}`);
+    is(p1.from === 1 && p1.endBars === 20, `ca-18 after a tap on 2 Verses must record both reps, to bar 20: ${J(p1)}`);
+    is(p54.from === 0 && p54.to === 1 && p54.endBars === 24 && p54.label === 'Verse + Chorus', `ca-54 must record one time through its round, verse and chorus, to bar 24: ${J(p54)}`);
+    const priv = JSON.parse(run(`JSON.stringify(${J(FT_CARDS)}.flatMap(id => { const t = SNIPPET_TRACKS[CLASS_ACTIVITIES.find(x => x.id === id).card.track]; return [[1,1],[1,0],[0,1],[0,0]].map(([s, g]) => [id, snippetSrc(t, !!s, !!g), songFileNeedsLoad(snippetSrc(t, !!s, !!g))]); }))`));
+    is(priv.length === 8 && priv.every(r => r[2] === false), `every file of ca-18 and ca-54 must play with no private-song wait (a recording pass is never turned into a plain play): ${J(priv.filter(r => r[2] !== false))}`);
+  } catch (e) { flag('running the recorder code threw: ' + e.message); }
+  finally { try { run('setLang("en")'); } catch { /* the context is gone */ } }
+  // Nothing saved or sent: the part's code, comments left out.
+  let code = '';
+  try { code = stripJsComments(readFileSync(join(ROOT, 'app/cards-rec.js'), 'utf8')); } catch { flag('app/cards-rec.js is missing'); }
+  const SENDS = [['fetch(', /\bfetch\s*\(/], ['XMLHttpRequest', /XMLHttpRequest/], ['sendBeacon', /sendBeacon/], ['WebSocket', /WebSocket/], ['Firebase / Firestore', /firebase|firestore|\bdb\s*\.\s*(collection|doc)|\.set\s*\(|\.update\s*\(|setDoc|addDoc|ensureDb/i],
+    ['localStorage', /localStorage/], ['sessionStorage', /sessionStorage/], ['IndexedDB', /indexedDB|IDB[A-Z]/], ['Cache Storage', /\bcaches\s*\./], ['a download', /\.download\b|\bdownload\s*=|download=/], ['an <a> link', /<a[\s>]|createElement\(\s*['"]a['"]\s*\)/],
+    ['a save or a usage count', /queueSave|flushSave|saveProgress|countToolOpen|markDirty/]];
+  for (const [what, re] of SENDS) is(code.length > 0 && !re.test(code), `app/cards-rec.js uses ${what}: a take is kept in memory and played on the device only (work order Part 3: nothing saved, uploaded or downloaded)`);
+  for (const k of ['pc.recGroup', 'pc.recMine', 'pc.recPlayMine', 'pc.recModel', 'pc.recLive', 'pc.recHint', 'pc.recHintPick'])
+    is(!!(i18nTable && i18nTable[k] && i18nTable[k].en && i18nTable[k].es), `i18n.js ${k} must have English and Spanish`);
+  if (asserts !== FT_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FT_ASSERTS} — a branch stopped running (or update the pin with the change)`);
+  if (!bad) ok(`1ft: ${asserts} assertions on the real code — recordCompare on ${FT_CARDS.join(' and ')} only; the row drawn on their student cards EN + ES and on no other card or preview; ca-18 records the Chorus (bars 20-28) before a tap, the section tapped after; ca-54 one time through verse + chorus (24 bars); cap 75 s; no private-song wait; app/cards-rec.js has none of ${SENDS.length} ways to save or send`);
+}
 /* 1fm. MEMORY FADE (ca-56, app/fade.js; Jonathan, 2026-11-26: "a memory fade activity for sweet child of mine").
    card.fade is on the pinned cards alone (FM_CARDS: a new fade card is a decision). ca-56 plays ca-33's Verse 1 and
    Chorus 1 (the same notes arrays, bars and laps) under captions of its own that names no chord. RUN, not read: the card is drawn
@@ -24076,8 +24150,8 @@ function checkBuiltSongs(ctx) {
        in English and in Spanish.
    ════════════════════════════════════════════════════════════════════ */
 const PRIVACY_NOTICE_SHA = {
-  en: '1ee3ea8aedf77422eccb5142b451e55f322f59b1f06682924dffad4335d07c5e',
-  es: '08a6dbd0774344e44e760c188974731d6c99b95ba9787323ea93574801c96ce4',
+  en: '2b2cefb42b860bfd7833c0dc1e7e8f008e651fb93a914e80f35f88d0450f5708',   // 2026-11-27: the recorder sentence covers the two practice cards (WORK-ORDER-spot-record-wording Part 3)
+  es: '5de6b24e98377be7fa6a5134ff1eb52c0acb2569f3838bccf39e93d0d82d8689',
 };
 function privacyNoticeText(html, lang) {
   const m = html.match(new RegExp(`<section data-notice lang="${lang}"[^>]*>([\\s\\S]*?)</section>`));
@@ -25228,6 +25302,7 @@ function checkNeverRules(sets) {
   checkLoopSpeed(rcCtx, i18nTable);
   checkSpeedLadder(rcCtx, i18nTable);
   checkReleaseDay(rcCtx);
+  checkRecordCompare(rcCtx, i18nTable);
   await checkMemoryFade(rcCtx, i18nTable);
   await checkSongHelp(rcCtx, i18nTable);
   checkOneLineDirections(rcCtx, i18nTable);

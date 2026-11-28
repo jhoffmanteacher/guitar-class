@@ -87,7 +87,7 @@
                           listener the start added and never removed counts)
      late-timer           a timeout the start set fires after the grace and changes the page or starts something
      left-running         a drill or player still in its running state (Shuffle 'play', Deck / Ear 'run', Name the power
-                          chord 'play', ncLive, chcLive, echoLive, spots playing, pcState, snipState, playSeqState, recState, ecRuns, sfWait,
+                          chord 'play', ncLive, chcLive, echoLive, spots playing, pcRecLive, pcRecPlayer, pcState, snipState, playSeqState, recState, ecRuns, sfWait,
                           coachMicLive)
      retry-busy           progressLoadRetryBusy() is still true
      update-waits         a new service worker takes over and the page does not reload within 2.5 s (busyReason)
@@ -1227,6 +1227,10 @@ const STARTS = [
   { id: 'practice-card@card', place: PLACE.card('ca-10'), press: inCard('ca-10', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'whole-song@card', place: PLACE.card('ca-24'), press: inCard('ca-24', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'speed-ladder@card', place: PLACE.card('ca-54'), press: inCard('ca-54', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
+  /* Record and compare (ca-18, app/cards-rec.js, 2026-11-27): Record mine asks for the mic, plays the Chorus from a
+     count-in and records from the band's first bar; Play the model plays the same passage with no recorder. */
+  { id: 'rec@card', place: PLACE.card('ca-18'), press: inCard('ca-18', '[onclick^="pcRecRecord"]'), running: any('!!pcState || !!pcRecLive'), window: [100, 9000] },
+  { id: 'model@card', place: PLACE.card('ca-18'), press: inCard('ca-18', '[onclick^="pcRecModel"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'memory-fade@card', place: PLACE.card('ca-56'), press: inCard('ca-56', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },   // the memory fade (app/fade.js, 2026-11-26)
   /* ca-34's band is a private song file (app/songfiles.js): the snippet start finds every tier already loaded on this page
      (sfUrls, as after an earlier press); song-loading@card presses Play with nothing loaded and a download that never ends. */
@@ -1342,6 +1346,7 @@ const RUNNING_STATE = `(() => { const out = [], each = (o, f) => Object.keys(o |
   if (ncLive) out.push('Note Call (ncLive)'); if (chcLive) out.push('Call the chord (chcLive)');
   if (typeof echoLive !== 'undefined' && echoLive) out.push('Echo (echoLive)');
   if (typeof spots !== 'undefined' && Object.values(spots).some(s => s && s.playing)) out.push('Spot the mistake (a line playing)');
+  if (typeof pcRecLive !== 'undefined' && pcRecLive) out.push('a practice-card take (pcRecLive)'); if (typeof pcRecPlayer !== 'undefined' && pcRecPlayer) out.push('a take playing back (pcRecPlayer)');
   if (pcState) out.push('a practice card (pcState)'); if (snipState) out.push('a snippet (snipState)'); if (playSeqState) out.push('a tab line (playSeqState)');
   each(recState, s => s.starting || s.recording).forEach(k => out.push('the recorder ' + k + ' (recState)'));
   if (Object.keys(ecRuns).length) out.push('an exit check (ecRuns)');

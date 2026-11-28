@@ -106,11 +106,12 @@ function pcBuildBegin(root, keep, start){
 // The section the lap returns to, and where it ends (bars into the window; the card's end without Loop).
 function pcLoopSec(st){ return st.loopSi >= 0 ? st.loopSi : st.loopFrom; }
 function pcLoopEndBars(st){
+  if(st.recPass) return st.recPass.endBars;   // one time through a passage (RECORD AND COMPARE, app/cards-rec.js)
   if(!(st.loopSi >= 0)) return st.L.totalBars;
   const S = st.L.sections[st.loopTo > st.loopSi ? st.loopTo : st.loopSi];   // a round's lap runs to its last section (ROUNDS)
   return S.fromBar + S.bars * S.reps - st.L.firstBar;
 }
-function pcLoopEnd(st){ return st.loopSi >= 0 ? snipTimeAtBars(st.win, pcLoopEndBars(st)) : st.win.end; }
+function pcLoopEnd(st){ return st.loopSi >= 0 || st.recPass ? snipTimeAtBars(st.win, pcLoopEndBars(st)) : st.win.end; }
 /* A position the cursor reads (with its lead) past the end of a looped section that is not the card's
    last stays on the section's last place, as the card's own lap does at the end of the window. Held
    PC_LOOP_CLAMP bars (~0.2 ms) short of the bar line: closer, a lyric sheet's "This bar" rounds into
@@ -268,6 +269,7 @@ function pcLoopReset(scope){
     if(root.dataset.release === '1'){ pcLoopSet(root, 'loop', true); pcLoopSet(root, 'build', true); pcBuildShow(root, 0); }
     pcLadderAskHide(root);
     if(typeof fadeReset === 'function') fadeReset(root);   // MEMORY FADE (app/fade.js): back to time 1
+    if(typeof pcRecReset === 'function') pcRecReset(root);   // RECORD AND COMPARE (app/cards-rec.js): the take is gone when the card closes
     if(root.dataset.round){ root.dataset.round = ''; root.querySelectorAll('.pc-round.cur').forEach(b => b.classList.remove('cur')); }   // ROUNDS: no round is picked when a card opens
   });
 }
