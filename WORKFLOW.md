@@ -360,6 +360,12 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-28 — Record and compare on `ca-18` and `ca-54`** (work order `WORK-ORDER-spot-record-wording.md`, Part 3).
+  New `app/cards-rec.js`: Record mine / Play mine / Play the model under the card's controls (`card.recordCompare`); one passage through
+  the card's own player (ca-18 the tapped section, Chorus before a tap; ca-54 one time through at the stop shown), stops itself, cap 75 s;
+  the take lives in memory only, dropped on close / leave / hidden tab; mic tracks stop at once. Privacy sentence (1ec re-pin). Pinned by 1ft
+  (158; break-it red: ca-10 opted in, a localStorage write); `stop-loop --start=rec,model`; `recordCompareWalk` in smoke. Review: Fast.
+
 - **2026-11-28 — Spot the mistake: a new drill and `ca-57`** (work order `WORK-ORDER-spot-record-wording.md`, Part 2; proposal P3, now shape 15).
   New `app/drills-spot.js` (`step.drill` type `'spot'`): one lap of a card's section at its Slower tempo with one note (1-2 frets, same string) or one
   chord (another chord of the line) wrong; tap the column; 10 rounds, 8 to pass, 2 replays; saves nothing. `ca-57`: ca-10 "The riff", ca-29 "Verse 1".

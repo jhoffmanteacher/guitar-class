@@ -6,6 +6,15 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-28 — Record yourself and compare on two song cards
+
+- **On "the cure" (Intro, Verse and Chorus) and the Sweet Child O' Mine Speed Ladder you can now record yourself and
+  compare.** Press Record mine and play along: it records one part with the band (on "the cure" the section you tapped,
+  the Chorus if you tapped none; on Sweet Child one time through at the speed shown) and stops by itself at the end.
+  Play mine plays it back; Play the model plays the same part with the guitar, so you can hear the difference. Your
+  recording stays on your Chromebook, is never sent anywhere, and is gone when you close the card. Nothing is graded.
+  In English and Spanish.
+
 ## 2026-11-28 — A new kind of activity: Spot the Mistake
 
 - **New activity: Spot the Mistake.** The site plays the Seven Nation Army riff, or the All Along the Watchtower verse
