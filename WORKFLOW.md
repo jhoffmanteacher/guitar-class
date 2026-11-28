@@ -360,6 +360,12 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-28 — Spot the mistake: a new drill and `ca-57`** (work order `WORK-ORDER-spot-record-wording.md`, Part 2; proposal P3, now shape 15).
+  New `app/drills-spot.js` (`step.drill` type `'spot'`): one lap of a card's section at its Slower tempo with one note (1-2 frets, same string) or one
+  chord (another chord of the line) wrong; tap the column; 10 rounds, 8 to pass, 2 replays; saves nothing. `ca-57`: ca-10 "The riff", ca-29 "Verse 1".
+  Pinned by 1fs (break-it red: replays, pass line, same-position rule, rounds); 1cs 46 / 144; `spotWalk` in smoke; `stop-loop --start=spot`.
+  Review: Fast.
+
 - **2026-11-28 — Card direction lines name the finish line; release day starts slow** (work order `WORK-ORDER-spot-record-wording.md`, Part 1).
   `card.directions` / `directions_es` on the 20 class cards (1cs reads them, `CARD_DIRECTIONS` 40; fallback keys unchanged); on a class card's
   release date (`caDate` = `caTodayStr`) a card with the Build up speed switch opens with Loop + Build on at its bottom stop (`pcReleaseDay`,

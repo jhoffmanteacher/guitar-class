@@ -3,7 +3,7 @@
 **For:** listening while reading tab or a chord line (any module; no guitar needed). The site plays one lap of a
 practice card's section with ONE note or chord wrong, and the student taps the column where it went wrong
 (`app/drills-spot.js`; its header is the schema and the rules). Tap-graded, so it gives a real score in a loud room
-with no mic. Built 2026-11-27 from proposal P3 (`proposed.md`), WORK-ORDER-spot-record-wording Part 2.
+with no mic. Built 2026-11-28 from proposal P3 (`proposed.md`), WORK-ORDER-spot-record-wording Part 2.
 
 **Skeleton** (from `ca-57`; per-song values marked):
 ```js

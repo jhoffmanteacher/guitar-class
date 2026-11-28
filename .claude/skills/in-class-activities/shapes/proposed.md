@@ -25,7 +25,7 @@ and a smoke walk; large = a renderer change shared with the modules or the conso
 ### Jonathan's picks
 
 P1 (Echo) and P4 (Memory fade) were built on 2026-11-26: shapes 13 and 14. P3 (Spot the mistake) was built on
-2026-11-27: shape 15 (`15-spot-the-mistake.md`, `ca-57`); its section below is kept as the design it was built from.
+2026-11-28: shape 15 (`15-spot-the-mistake.md`, `ca-57`); its section below is kept as the design it was built from.
 
 #### P2. Fill the gap (one bar left silent)
 
@@ -57,7 +57,7 @@ exactly on the YOU bar and the click is not.
 **Example on a course song:** "the cure" (`ca-18`), Intro and 2 Verses (bars 1–20, a chord change every bar): the
 band drops out on bar 4 of every four, so the student plays the last C of each "A C A C" line alone.
 
-#### P3. Spot the mistake (BUILT 2026-11-27: shape 15, `ca-57`, `app/drills-spot.js`)
+#### P3. Spot the mistake (BUILT 2026-11-28: shape 15, `ca-57`, `app/drills-spot.js`)
 
 **Teaches:** reading tab or a chord chart while listening; hearing a wrong note or chord (any module; no guitar needed,
 so it also works on a day with no guitars or as a warm-up on the projector).
@@ -134,5 +134,5 @@ this only brings it into an activity with the record looping the bars, so it is 
 
 1. **Fill the gap (P2).** A switch on every existing card with no new data; it reuses the Metronome and the lap
    count, and gives each student "their" bar, the most game-like of the proposals in the room.
-2. **Spot the mistake (P3).** Built 2026-11-27 (shape 15). Works with no guitar in hand and is tap-graded, so it is the one proposal that gives a
+2. **Spot the mistake (P3).** Built 2026-11-28 (shape 15). Works with no guitar in hand and is tap-graded, so it is the one proposal that gives a
    real score without the mic; it reads the cards' sections, so every song the class knows is content on day one.

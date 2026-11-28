@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-28 — A new kind of activity: Spot the Mistake
+
+- **New activity: Spot the Mistake.** The site plays the Seven Nation Army riff, or the All Along the Watchtower verse
+  chords, at the slower speed with one note or one chord wrong, and you tap where it went wrong on the tab. Ten rounds;
+  get 8 right to finish the step. You can hear each line up to two more times a round. No guitar or microphone needed,
+  and nothing is saved. In English and Spanish. (It shows up once your teacher posts it.)
+
 ## 2026-11-28 — Song cards say what you're aiming for, and start slow on the first day
 
 - **Each song card now says what you're aiming for and how it should sound**, in one line at the top: for example

@@ -406,7 +406,7 @@
    Speed Ladder" (2026-11-24); `ca-55` is "Echo — Power Chord
    Strums" (2026-11-26); `ca-56` is "Sweet Child O' Mine —
    Memory Fade" (2026-11-26); `ca-57` is "Spot the
-   Mistake" (2026-11-27); the next new activity is `ca-58`.
+   Mistake" (2026-11-28); the next new activity is `ca-58`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },

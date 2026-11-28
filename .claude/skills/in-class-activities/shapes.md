@@ -3,7 +3,7 @@
 A new In-Class Activity starts from one of these shapes: pick the shape with Jonathan, copy its exemplar card from
 `class-activities.js`, change only the per-song values, then run the shape's tools. Every quote below is from
 `class-activities.js`, `i18n.js` or the skill and rule files it names, as of 2026-11-26 (`origin/main` `ecee6ac`); shapes 13 and 14 were added later
-the same day, when Echo (`ca-55`) and Memory Fade (`ca-56`) were built, and shape 15 on 2026-11-27, when Spot the Mistake (`ca-57`) was.
+the same day, when Echo (`ca-55`) and Memory Fade (`ca-56`) were built, and shape 15 on 2026-11-28, when Spot the Mistake (`ca-57`) was.
 
 The file holds **54 activities** (ids `ca-1` to `ca-57`; `ca-9`, `ca-16` and `ca-47` are retired, the file's
 "RETIRED IDS" note). Built songs (`sb-` ids) live in the database, not in the file, and are not counted here: they are

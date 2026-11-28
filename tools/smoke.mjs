@@ -483,7 +483,7 @@ async function chordCallWalk(page, run, events, stats, base) {
   await run('chc:done', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
 }
 
-/* Spot the mistake (ca-57, 2026-11-27; app/drills-spot.js). checks.mjs 1fs runs the engine with no sound; this is the
+/* Spot the mistake (ca-57, 2026-11-28; app/drills-spot.js). checks.mjs 1fs runs the engine with no sound; this is the
    real page: each of ca-57's two steps opens on its setup screen (the tab, Start, no tap target), Start plays a round
    (the count-in, then the line on the AudioContext clock), a real click on a column once the line has started is the
    answer (the round's dot is filled and the feedback shows), Next starts round 2 with a new mistake, Stop puts the

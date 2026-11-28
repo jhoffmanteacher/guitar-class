@@ -1325,7 +1325,7 @@
     'echo.reveal':       { en: 'The phrases with the band were {parts} of “{song}”.', es: 'Las frases con la banda eran {parts} de «{song}».' },
     'echo.and':          { en: ' and ', es: ' y ' },
 
-    // ── Spot the mistake (step.drill 'spot' — app/drills-spot.js renderSpot; ca-57, 2026-11-27) ──
+    // ── Spot the mistake (step.drill 'spot' — app/drills-spot.js renderSpot; ca-57, 2026-11-28) ──
     'spot.head':         { en: '{song} · {section}', es: '{song} · {section}' },
     'spot.meta':         { en: '{total} rounds · {bpm} BPM', es: '{total} rondas · {bpm} BPM' },
     'spot.introNotes':   { en: 'Tap the note that sounds wrong; get {pass} of {total}.', es: 'Toca la nota que suena mal; acierta {pass} de {total}.' },
