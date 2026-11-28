@@ -22,7 +22,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-11-28-f3d25fb0bb';
+const CACHE_VERSION = 'guitar-class-2026-11-28-37b94235dd';
 
 /* BACKING-TRACK AUDIO (2026-10-30 rewrite). Every track lives in ONE cache that
    never changes name, AUDIO_CACHE, apart from the shell's CACHE_VERSION: a routine
@@ -196,6 +196,7 @@ const PRECACHE_CRITICAL = [
   './app/review.js',
   './app/drills.js',
   './app/drills-call.js',
+  './app/drills-spot.js',
   './app/audio-ui.js',
   './app/explore.js',
   './app/songrequests.js',
@@ -266,6 +267,7 @@ const ASSETS = [
   './app/review.js',
   './app/drills.js',
   './app/drills-call.js',
+  './app/drills-spot.js',
   './app/audio-ui.js',
   './app/explore.js',
   './app/songrequests.js',

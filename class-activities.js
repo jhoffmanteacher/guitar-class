@@ -405,7 +405,8 @@
    Pattern — The Chorus" (2026-11-16); `ca-54` is "Sweet Child O' Mine —
    Speed Ladder" (2026-11-24); `ca-55` is "Echo — Power Chord
    Strums" (2026-11-26); `ca-56` is "Sweet Child O' Mine —
-   Memory Fade" (2026-11-26); the next new activity is `ca-57`.
+   Memory Fade" (2026-11-26); `ca-57` is "Spot the
+   Mistake" (2026-11-27); the next new activity is `ca-58`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7778,6 +7779,34 @@ window.CLASS_ACTIVITIES = [
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
+  },
+  /* ca-57 — Spot the Mistake (Jonathan, 2026-11-27, WORK-ORDER-spot-record-wording Part 2; skill in-class-activities
+     shapes/15-spot-the-mistake.md, which was proposal P3). A listening drill with a real score and no mic: the site plays
+     a line from a practice card with ONE thing wrong and the student taps where. It works with no guitar in hand.
+     Step 1 is ca-10's riff (one note moved a fret or two on its own string), step 2 is ca-29's Verse 1 (one chord
+     played as another chord of the line). Both read the cards' own sections by reference (spotModel, app/drills-spot.js),
+     so a change to those cards moves the drill too; the wrong note or chord is made by a rule in the code, never typed
+     here. Ten rounds, 8 to pass, at most two "Play again" a round. Like ca-48 (Call the Chord): Focus view, label +
+     drill on every step, no text and no intro: the widget carries its one direction line (spot.introNotes /
+     spot.introChords) and its pass line. Nothing is stored. Unplaced and undated: BUILT until Jonathan places and
+     dates it on the console board. */
+  {
+    id:    'ca-57',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Spot the Mistake',
+    title_es: 'Encuentra el error',
+    steps: [
+      {
+        label:    'Practice — Seven Nation Army riff',
+        label_es: 'Practica — El riff de Seven Nation Army',
+        drill: { type: 'spot', card: 'ca-10', section: 'The riff', rounds: 10 },
+      },
+      {
+        label:    'Practice — Watchtower verse chords',
+        label_es: 'Practica — Acordes de la estrofa de Watchtower',
+        drill: { type: 'spot', card: 'ca-29', section: 'Verse 1', chords: true, rounds: 10 },
+      },
+    ],
   },
 ];
 

@@ -337,7 +337,7 @@ function printActivity(ev, id){
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 /* Everything a card runs on its own steps ends when that card closes (by its title, "All activities", another card):
    a Shuffle, Card Deck or Ear Spark round goes back to its Start screen (app/drills.js), a Note Call, Call the chord or
-   Name the power chord round ends (app/drills-call.js), an Echo phrase stops (app/echo.js), and a Play tab line stops (stopPlaySeqIn, app/shell.js). Out of
+   Name the power chord round ends (app/drills-call.js), an Echo phrase stops (app/echo.js), a Spot the mistake line stops (app/drills-spot.js), and a Play tab line stops (stopPlaySeqIn, app/shell.js). Out of
    sight, a round left running holds the update reload and the sign-in read's retry, and a Note Call or Call the chord
    round plays on. Only rounds inside `card`: another card's are not this close's to end. */
 function caStopRoundsIn(card){
@@ -346,6 +346,7 @@ function caStopRoundsIn(card){
   if(typeof ncStopAll === 'function') ncStopAll(card);
   if(typeof chcStopAll === 'function') chcStopAll(card);
   if(typeof echoStopAll === 'function') echoStopAll(card);
+  if(typeof spotStopAll === 'function') spotStopAll(card);
   if(typeof pwnStopAll === 'function') pwnStopAll(card);
   stopPlaySeqIn(card);
 }

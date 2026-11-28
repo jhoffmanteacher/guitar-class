@@ -434,6 +434,7 @@ function renderShuffleDrill(drill, key, wid){
   if(drill && drill.type === 'chordcall') return renderChordCall(drill, key);
   if(drill && drill.type === 'pcname') return renderPowerName(drill, key);
   if(drill && drill.type === 'echo') return renderEcho(drill, key);   // app/echo.js (ca-55)
+  if(drill && drill.type === 'spot' && typeof renderSpot === 'function') return renderSpot(drill, key);   // app/drills-spot.js (ca-57)
   if(!drill || drill.type !== 'shuffle') return '';
   const prev = shuffleDrills[key];
   if(prev && prev.tick) clearInterval(prev.tick);

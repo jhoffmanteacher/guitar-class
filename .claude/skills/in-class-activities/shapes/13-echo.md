@@ -7,7 +7,7 @@ phrase. The ladder goes from made-up phrases up to the song's own strum patterns
 **Skeleton** (from `ca-55`; per-song values marked):
 ```js
 {
-  id: 'ca-57', view: 'focus',
+  id: 'ca-58', view: 'focus',
   title: 'Echo — …', title_es: 'Eco — …',            // does NOT name the song: the last screen reveals it
   intro: 'Hear a short power-chord strum, then play it back in time.', intro_es: '…',
   steps: [ {

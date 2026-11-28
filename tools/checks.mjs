@@ -12697,10 +12697,10 @@ const CAP_2A = 105, CAP_2C = 110;
    should sound), is the .pc-dir line, so it takes the card lines' cap (CAP_2C) and is one sentence. CARD_DIRECTIONS pins
    how many are read: 2026-11-27, 40, the 20 class cards (EN + ES). */
 const CARD_DIRECTIONS = 40;
-const ONE_LINE_2A = 432, ONE_LINE_2C = 42, DRILL_SCREENS = 140;   // 2026-11-26: 2A +6, 2C +2, ca-56 (the memory fade): its intro and two check texts, and ca.fadeDirections (EN + ES). 2026-11-26: +2, +2, +2, ca-55 (Echo): its intro, the echo.intro line and its one drill screen (EN + ES). 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
+const ONE_LINE_2A = 432, ONE_LINE_2C = 46, DRILL_SCREENS = 144;   // 2026-11-27: 2C +4, screens +4, ca-57 (Spot the mistake): spot.introNotes and spot.introChords, and its two drill screens (EN + ES). 2026-11-26: 2A +6, 2C +2, ca-56 (the memory fade): its intro and two check texts, and ca.fadeDirections (EN + ES). 2026-11-26: +2, +2, +2, ca-55 (Echo): its intro, the echo.intro line and its one drill screen (EN + ES). 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
-  'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth', 'echo.intro',
+  'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth', 'echo.intro', 'spot.introNotes', 'spot.introChords',
   'ca.cardDirections', 'ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.sheetDirections', 'ca.fadeDirections'];
 const DRILL_DIRECTIONS_GONE = ['nc.descAnswer', 'nc.howCoachAnswer', 'nc.howCoach', 'nc.howTap', 'ncp.descAnswer', 'ncp.howCoachAnswer',
   'ncp.howCoach', 'ncp.howTap', 'pwn.howAnswer', 'pwn.howScored'];
@@ -12781,7 +12781,7 @@ function checkOneLineDirections(ctx, i18nTable) {
           .replace(/<div class="(?:sdr-intro|sdr-best|nc-desc|sdr-head)[^"]*"[^>]*>[\s\S]*?<\/div>/g, ' ')
           .replace(/<div class="coach-note nc-msg">[\s\S]*?<\/div>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
         if (/[A-Za-zÁÉÍÓÚáéíóúñ]{2,}[^.]{8,}\.(\s|$)/.test(rest)) flag(`${where} (${lang}): a second sentence of directions before Start: "${rest.slice(0, 120)}"`);
-        const raw = /<div class="sdr-intro">((?:nc|ncp|pwn|chc|deck|drill|ear)\.[A-Za-z]+)<\/div>/.exec(html);
+        const raw = /<div class="sdr-intro">((?:nc|ncp|pwn|chc|deck|drill|ear|echo|spot)\.[A-Za-z]+)<\/div>/.exec(html);
         if (raw) flag(`${where} (${lang}): the direction line shows the raw key ${raw[1]}`);
       };
       for (const a of acts) {
@@ -15803,6 +15803,168 @@ function checkEcho(ctx) {
   for (const k of defined) if (!used.has(k)) flag('i18n ' + k + ' is defined but no Echo screen shows it');
   if (defined.length !== EXPECT.keys) flag(defined.length + ' echo.* keys, pinned at ' + EXPECT.keys);
   if (bad === 0) ok(`1fi: ca-55's ${stats.phrases} phrases pass echoModel (${EXPECT.made} made-up, ${EXPECT.record.length} on the record, chords = the card's); ${stats.refused} of ${bads.length} bad phrases refused; ${stats.screens} screens rendered EN + ES with every strum on the board; the cue, the reveal and the stop hold; ${EXPECT.keys} echo.* strings`);
+}
+
+/* 1fs. SPOT THE MISTAKE (step.drill 'spot', ca-57; Jonathan, 2026-11-27, WORK-ORDER-spot-record-wording Part 2). The site
+   plays one lap of a practice card's section with ONE note or chord wrong and the student taps where; nothing listens,
+   nothing is saved. EXECUTES the real app/drills-spot.js in the 0b context:
+   - the data: exactly two spot drills, ca-57's two steps, pinned field for field (ca-10's riff, notes; ca-29's Verse 1,
+     chords), Focus view, no intro, no step text; spotModel draws both (7 notes, 4 chords; the Slower tempo, 100 / 105);
+   - spotModel REFUSES (the guard runs): a notes drill on a chord section, a chords drill on a single-note section, a
+     section the card does not have, 0 rounds;
+   - the pass line is 8 of 10 (SPOT_PASS_SHARE of 10, shown under Start and in the direction line) and a round allows
+     exactly 2 "Play again" (SPOT_REPLAYS: the third press plays nothing and the button is disabled);
+   - spotPick, 300 seeded rounds a step: exactly one position changes, never the one the round before changed; a note
+     moves 1 or 2 frets on its own string, never to its own pitch; a chord becomes another chord of the line;
+   - a tap before the line's first note is not an answer; a right tap and a wrong tap draw .spot-hit / .spot-miss +
+     .spot-ans and their feedback; the last round's Next ends on the score (pass and not);
+   - every screen EN + ES (setup, count-in, listening, the question, right, wrong, the score): no raw spot.* key; the
+     setup screen has the tab and no tap targets, a waiting round one tap target a position;
+   - stopCardAudio() stops a playing line (spotStopAll reached);
+   - every spot.* string a screen shows exists in English and Spanish and none defined is unused (pinned count). */
+function checkSpot(ctx) {
+  head('1fs. Spot the mistake (ca-57): the two drills, the rule for the mistake, 8 of 10, two replays, every screen');
+  let bad = 0;
+  const flag = m => { err('1fs: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const J = JSON.stringify;
+  const run = x => vm.runInContext(x, ctx);
+  const EXPECT = { keys: 26, pass: 8, rounds: 10, replays: 2,
+    drills: [{ type: 'spot', card: 'ca-10', section: 'The riff', rounds: 10 }, { type: 'spot', card: 'ca-29', section: 'Verse 1', chords: true, rounds: 10 }],
+    items: [7, 4], bpm: [100, 105] };
+  const stats = { screens: 0, refused: 0, picks: 0, asserts: 0 };
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const all = [];
+  for (const a of acts) (a.steps || []).forEach((st, i) => { if (st && st.drill && st.drill.type === 'spot') all.push({ id: a.id, i, d: st.drill }); });
+  if (J(all.map(x => x.id + ':' + x.i)) !== J(['ca-57:0', 'ca-57:1'])) flag('spot drills on ' + J(all.map(x => x.id + ' step ' + (x.i + 1))) + ', pinned at ca-57 steps 1 and 2 — give a new one its pin on purpose');
+  if (!all.length) return;
+  all.forEach((x, k) => { if (J(x.d) !== J(EXPECT.drills[k])) flag(`ca-57 step ${k + 1} drill is ${J(x.d)}, pinned ${J(EXPECT.drills[k])}`); });
+  const c57 = acts.find(a => a.id === 'ca-57');
+  if (!c57 || c57.view !== 'focus' || c57.intro || c57.intro_es || (c57.steps || []).some(st => st.text || st.text_es)) flag('ca-57 must be a Focus-view activity with no intro and no step text (the widget carries its one direction line)');
+  const C = JSON.parse(run('JSON.stringify({ share: SPOT_PASS_SHARE, replays: SPOT_REPLAYS, rounds: SPOT_ROUNDS })'));
+  const used = new Set();
+  const origT = ctx.t, origGet = ctx.document.getElementById;
+  const recs = {};
+  const mkEl = id => ({ id, textContent: '', innerHTML: '', className: '', isConnected: true });
+  try {
+    ctx.t = (k, p) => { used.add(k); return origT(k, p); };
+    ctx.document.getElementById = id => recs[id] || (recs[id] = mkEl(id));
+    run('window.__spotPlays = 0; window.__spotClock = 0');
+    // The guard runs: each of these must be refused.
+    const bads = [['a notes drill on a chord section', { type: 'spot', card: 'ca-29', section: 'Verse 1', rounds: 10 }],
+      ['a chords drill on a single-note section', { type: 'spot', card: 'ca-10', section: 'The riff', chords: true, rounds: 10 }],
+      ['a section the card does not have', { type: 'spot', card: 'ca-10', section: 'The Riff', rounds: 10 }],
+      ['0 rounds', { type: 'spot', card: 'ca-10', section: 'The riff', rounds: 0 }]];
+    for (const [what, d] of bads) { if (run(`spotModel(${J(d)}) === null`)) stats.refused++; else flag('spotModel accepts ' + what); }
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${J(lang)})`);
+      all.forEach((x, k) => {
+        const r = JSON.parse(run(`(function(){
+          const R = { bad: [], screens: 0 };
+          const key = 'chk-spot-${k}';
+          /* No sound in Node: spotPlay counts the plays, spotReveal does nothing, and the audio clock is a number the
+             early-tap case sets. All three are put back before the stop is tested. */
+          const realPlay = spotPlay, realReveal = spotReveal, realCtx = getAudioCtx;
+          spotPlay = s => { window.__spotPlays++; s.playing = false; s.part = ''; };
+          spotReveal = () => {};
+          getAudioCtx = () => ({ currentTime: window.__spotClock, resume(){} });
+          try {
+          const html0 = renderSpot(${J(x.d)}, key);
+          if(!html0){ R.bad.push('renderSpot drew nothing'); return JSON.stringify(R); }
+          const st = spots[key], M = st.M;
+          R.items = M.items.length; R.bpm = M.bpm; R.passAt = M.passAt; R.rounds = M.rounds;
+          const scr = (what, h) => { R.screens++; if(/>[^<]*\\bspot\\.[A-Za-z]+/.test(h)) R.bad.push(what + ': a raw spot.* key on screen'); return h; };
+          const taps = h => (h.match(/data-spot-pick="/g) || []).length;
+          const setup = scr('setup', spotScreenHtml(key));
+          R.intro = (/<div class="sdr-intro">([^<]*)<\\/div>/.exec(setup) || [])[1] || '';
+          R.passLine = (/<div class="sdr-best">([^<]*)<\\/div>/.exec(setup) || [])[1] || '';
+          if(!/tab-grid/.test(setup) || taps(setup) !== 0 || !/data-spot-start/.test(setup)) R.bad.push('the setup screen must show the tab, Start and no tap target');
+          // Start: round 1 plays once; Play again plays twice more, then nothing.
+          window.__spotPlays = 0;
+          spotBegin(key);
+          for(let i = 0; i < 5; i++) spotReplay(key);
+          R.plays = window.__spotPlays; R.left = st.left;
+          const wait = scr('question', spotScreenHtml(key));
+          if(taps(wait) !== M.items.length) R.bad.push('a waiting round shows ' + taps(wait) + ' tap targets for ' + M.items.length + ' positions');
+          if(!/data-spot-replay="1" disabled/.test(wait)) R.bad.push('Play again is not disabled after ' + R.plays + ' plays');
+          st.playing = true; st.part = 'count'; scr('count-in', spotScreenHtml(key)); st.part = 'listen'; scr('listening', spotScreenHtml(key));
+          // A tap before the line's first note is not an answer.
+          st.lineAt = 5; window.__spotClock = 1;
+          spotTap(key, 0);
+          R.early = st.answer === null;
+          st.playing = false; st.part = '';
+          // A wrong tap, then (next round) a right one.
+          const wrongI = (st.wrong.pos + 1) % M.items.length;
+          spotTap(key, wrongI);
+          const miss = scr('wrong', spotScreenHtml(key));
+          R.miss = st.res[0] === 'miss' && /spot-col spot-miss/.test(miss) && /spot-col spot-ans/.test(miss) && /sdr-fb nc-fb spot-fb miss/.test(miss) && taps(miss) === 0;
+          spotNext(key);
+          if(st.idx !== 1 || st.answer !== null || st.left !== ${EXPECT.replays}) R.bad.push('Next did not start round 2 with ' + ${EXPECT.replays} + ' replays: ' + JSON.stringify({ idx: st.idx, left: st.left }));
+          spotTap(key, st.wrong.pos);
+          const hit = scr('right', spotScreenHtml(key));
+          R.hit = st.res[1] === 'hit' && /spot-col spot-hit/.test(hit) && /sdr-fb nc-fb spot-fb hit/.test(hit) && st.streak === 1;
+          // To the last round, every answer right: the last Next is "See your score", then the score.
+          while(st.idx < M.rounds - 1){ spotNext(key); spotTap(key, st.wrong.pos); }
+          scr('last', spotScreenHtml(key));
+          spotNext(key);
+          const done = scr('score', spotScreenHtml(key));
+          R.donePass = st.phase === 'done' && /sdr-verdict good/.test(done);
+          st.res = st.res.map((x, i) => i < M.passAt - 1 ? 'hit' : 'miss');
+          R.doneAgain = /sdr-verdict mid/.test(scr('score, not passed', spotScreenHtml(key)));
+          // The rule for the mistake, 300 seeded rounds.
+          let seed = 7 + ${k}; const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+          const base = spotLine(M, null);
+          let prev = -1; R.picks = 0;
+          for(let r = 0; r < 300; r++){
+            const w = spotPick(M, prev, rnd), line = spotLine(M, w), it = M.items[w.pos];
+            const changed = M.items.map((x, i) => { for(let q = x.from; q <= x.to; q++) if(JSON.stringify(line[q].midi) !== JSON.stringify(base[q].midi)) return i; return -1; }).filter(i => i >= 0);
+            if(changed.length !== 1 || changed[0] !== w.pos) { R.bad.push('round ' + r + ' changed ' + JSON.stringify(changed)); break; }
+            if(w.pos === prev) { R.bad.push('round ' + r + ' changed the same position as the round before'); break; }
+            if(spotSameNotes(w.midi, it.midi)) { R.bad.push('round ' + r + ' played the written pitch'); break; }
+            if(M.chords){ if(w.name === it.name || !M.choices.some(c => c.name === w.name && spotSameNotes(c.midi, w.midi))) { R.bad.push('round ' + r + ' played a chord that is not another chord of the line: ' + w.name); break; } }
+            else { const d = w.fret - it.fret; if(!(Math.abs(d) >= 1 && Math.abs(d) <= 2) || w.midi.length !== 1 || w.midi[0] !== it.midi[0] + d || w.fret < 0) { R.bad.push('round ' + r + ' moved note ' + (w.pos + 1) + ' from fret ' + it.fret + ' to ' + w.fret + ' (midi ' + w.midi + ')'); break; } }
+            prev = w.pos; R.picks++;
+          }
+          spotPlay = realPlay; spotReveal = realReveal; getAudioCtx = realCtx;
+          // The stop: a playing line, then stopCardAudio().
+          st.phase = 'round'; st.answer = null; st.playing = true;
+          stopCardAudio();
+          R.stopped = st.playing === false;
+          delete spots[key];
+          return JSON.stringify(R);
+          } finally { spotPlay = realPlay; spotReveal = realReveal; getAudioCtx = realCtx; }
+        })()`));
+        const w = `${lang} step ${k + 1}`;
+        r.bad.forEach(m => flag(w + ': ' + m));
+        stats.screens += r.screens; stats.picks += r.picks || 0; stats.asserts += 12;
+        if (r.items !== EXPECT.items[k]) flag(`${w}: ${r.items} positions, pinned ${EXPECT.items[k]}`);
+        if (r.bpm !== EXPECT.bpm[k]) flag(`${w}: plays at ${r.bpm} BPM, pinned the card's Slower tempo ${EXPECT.bpm[k]}`);
+        if (r.passAt !== EXPECT.pass || r.rounds !== EXPECT.rounds) flag(`${w}: the pass line is ${r.passAt} of ${r.rounds}, pinned ${EXPECT.pass} of ${EXPECT.rounds}`);
+        const wantIntro = run(`t(${J(k ? 'spot.introChords' : 'spot.introNotes')}, { pass: ${EXPECT.pass}, total: ${EXPECT.rounds} })`);
+        if (String(r.intro).replace(/&#39;/g, "'") !== wantIntro || !/\b8\b/.test(r.intro) || !/\b10\b/.test(r.intro)) flag(`${w}: the line before Start reads "${r.intro}", want "${wantIntro}" (8 of 10)`);
+        if (!/^8 \S+ 10 /.test(r.passLine)) flag(`${w}: the pass line under Start reads "${r.passLine}", want 8 of 10`);
+        if (r.plays !== 1 + EXPECT.replays || r.left !== 0) flag(`${w}: Start and five Play again presses played the line ${r.plays} times (left ${r.left}), want ${1 + EXPECT.replays}: replays are capped at ${EXPECT.replays}`);
+        if (!r.early) flag(`${w}: a tap before the line's first note was taken as an answer`);
+        if (!r.miss) flag(`${w}: a wrong tap does not draw the red column, the right one outlined and the miss line`);
+        if (!r.hit) flag(`${w}: a right tap does not draw the green column, the hit line and a streak of 1`);
+        if (!r.donePass || !r.doneAgain) flag(`${w}: the score screen does not tell a pass (${EXPECT.pass}+) from a miss`);
+        if (!r.stopped) flag(`${w}: stopCardAudio() left the line playing (spotStopAll not reached)`);
+      });
+    }
+    if (C.share * EXPECT.rounds !== EXPECT.pass || C.replays !== EXPECT.replays || C.rounds !== EXPECT.rounds) flag(`SPOT_PASS_SHARE ${C.share}, SPOT_REPLAYS ${C.replays}, SPOT_ROUNDS ${C.rounds}: pinned 8 of 10 and 2 replays (Jonathan, 2026-11-27)`);
+  } catch (e) { flag('threw: ' + (e && e.message)); }
+  finally { ctx.t = origT; ctx.document.getElementById = origGet; try { run('setLang("en"); delete window.__spotPlays; delete window.__spotClock'); } catch { /* best effort */ } }
+  const I18N = loadI18nTable();
+  const defined = Object.keys(I18N).filter(k => k.startsWith('spot.'));
+  const SAME_OK = new Set(['spot.head']);   // two names and a dot: the same in both languages on purpose
+  for (const k of used) {
+    if (!k.startsWith('spot.')) continue;
+    if (!I18N[k] || !I18N[k].en || !I18N[k].es) flag('i18n ' + k + ' is missing its English or Spanish');
+    else if (I18N[k].es === I18N[k].en && !SAME_OK.has(k)) flag('i18n ' + k + ': the Spanish is just the English');
+  }
+  for (const k of defined) if (!used.has(k)) flag('i18n ' + k + ' is defined but no Spot the mistake screen shows it');
+  if (defined.length !== EXPECT.keys) flag(defined.length + ' spot.* keys, pinned at ' + EXPECT.keys);
+  if (bad === 0) ok(`1fs: ca-57's two spot drills as pinned (${EXPECT.items.join(' and ')} positions at ${EXPECT.bpm.join(' / ')} BPM); ${stats.refused} of 4 bad drills refused; pass line ${EXPECT.pass} of ${EXPECT.rounds}, ${EXPECT.replays} replays a round; ${stats.picks} seeded rounds change exactly one position by the rule; ${stats.screens} screens rendered EN + ES; the early tap, the right and wrong taps, the score and the stop hold; ${EXPECT.keys} spot.* strings`);
 }
 
 /* 1co. NAME THE POWER CHORD (step.drill 'pcname', ca-49, work order 2026-11-05).
@@ -25047,6 +25209,7 @@ function checkNeverRules(sets) {
   checkChordCall(rcCtx);
   checkPowerName(rcCtx);
   checkEcho(rcCtx);
+  checkSpot(rcCtx);
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
   await checkUsageCounts(rcCtx);

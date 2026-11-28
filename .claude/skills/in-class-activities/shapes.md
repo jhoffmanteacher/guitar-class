@@ -3,11 +3,11 @@
 A new In-Class Activity starts from one of these shapes: pick the shape with Jonathan, copy its exemplar card from
 `class-activities.js`, change only the per-song values, then run the shape's tools. Every quote below is from
 `class-activities.js`, `i18n.js` or the skill and rule files it names, as of 2026-11-26 (`origin/main` `ecee6ac`); shapes 13 and 14 were added later
-the same day, when Echo (`ca-55`) and Memory Fade (`ca-56`) were built.
+the same day, when Echo (`ca-55`) and Memory Fade (`ca-56`) were built, and shape 15 on 2026-11-27, when Spot the Mistake (`ca-57`) was.
 
-The file holds **53 activities** (ids `ca-1` to `ca-56`; `ca-9`, `ca-16` and `ca-47` are retired, the file's
+The file holds **54 activities** (ids `ca-1` to `ca-57`; `ca-9`, `ca-16` and `ca-47` are retired, the file's
 "RETIRED IDS" note). Built songs (`sb-` ids) live in the database, not in the file, and are not counted here: they are
-made in the console's Song builder or by skill `new-playalong` `--built`. The next new id is `ca-57` (the file's
+made in the console's Song builder or by skill `new-playalong` `--built`. The next new id is `ca-58` (the file's
 RETIRED IDS note names it; read it again before you use it).
 
 | # | Shape | Use it for | Copy this card | Count |
@@ -26,15 +26,16 @@ RETIRED IDS note names it; read it again before you use it).
 | 12 | Exit check | the end-of-period five-question quiz, one try | `ca-15` Notes on the Low E String (next-note: `ca-14`) | 2 |
 | 13 | Echo (call and response) | hear a short strum, play it back in time, up a ladder to two parts of a song | `ca-55` Echo — Power Chord Strums | 1 |
 | 14 | Memory fade | a verse and chorus with the record while the chord names leave, until it is from memory | `ca-56` Sweet Child O' Mine — Memory Fade | 1 |
+| 15 | Spot the mistake | listening while reading tab or a chord line: the site plays a card's line with one note or chord wrong, the student taps where; no guitar needed | `ca-57` Spot the Mistake | 1 |
 | — | Fits no shape | `ca-12` Sub Day Circuit | — | 1 |
-| | | | **Total** | **53** |
+| | | | **Total** | **54** |
 
-Fourteen shapes, more than a rough first guess: shapes 1 to 5 are all `view: 'card'` practice cards, but each
+Fifteen shapes, more than a rough first guess: shapes 1 to 5 are all `view: 'card'` practice cards, but each
 carries different fields and is held by different checks (named in its file), so a copy from the wrong one breaks a check or
 the board.
 
-`shapes/proposed.md` lists six formats the bank does not use yet (P2, P3 and P5 to P8;
-P1 and P4 are built, shapes 13 and 14), Jonathan's picks first; most need new site code (P5 and P8 also have a rough version buildable today). SKILL.md's "Building a new activity" says how
+`shapes/proposed.md` lists five formats the bank does not use yet (P2 and P5 to P8;
+P1, P4 and P3 are built, shapes 13, 14 and 15), Jonathan's picks first; most need new site code (P5 and P8 also have a rough version buildable today). SKILL.md's "Building a new activity" says how
 to offer all of these to Jonathan as a menu.
 
 **Rules every shape shares** (each is stated in CLAUDE.md or the files in `guide/`; follow the citation for the detail):
@@ -69,4 +70,4 @@ to offer all of these to Jonathan as a menu.
 screenshot of every state at 1366×657 and a script over the data for any pattern a sentence claims (step 4). The
 shape sections add their own.
 
-**Each shape has its own file in `shapes/`** (read only the one you are building): `01-song-part-card.md`, `02-whole-song-play-along.md`, `03-lyric-sheet-card.md`, `04-library-play-along.md`, `05-speed-ladder.md`, `06-tab-ladder.md`, `07-finger-gym.md`, `08-note-names-ladder.md`, `09-strum-pattern-ladder.md`, `10-strum-pattern-check.md`, `11-drill-ladder.md`, `12-exit-check.md`, `13-echo.md`, `14-memory-fade.md`. Also `shapes/inventory.md` (every card and its shape; the one that fits none) and `shapes/proposed.md`.
+**Each shape has its own file in `shapes/`** (read only the one you are building): `01-song-part-card.md`, `02-whole-song-play-along.md`, `03-lyric-sheet-card.md`, `04-library-play-along.md`, `05-speed-ladder.md`, `06-tab-ladder.md`, `07-finger-gym.md`, `08-note-names-ladder.md`, `09-strum-pattern-ladder.md`, `10-strum-pattern-check.md`, `11-drill-ladder.md`, `12-exit-check.md`, `13-echo.md`, `14-memory-fade.md`, `15-spot-the-mistake.md`. Also `shapes/inventory.md` (every card and its shape; the one that fits none) and `shapes/proposed.md`.

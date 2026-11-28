@@ -7,7 +7,7 @@ sections with the record on a loop; each time through more chord names go blank 
 **Skeleton** (from `ca-56`):
 ```js
 {
-  id: 'ca-57', view: 'card',
+  id: 'ca-58', view: 'card',
   title: '… — Memory Fade', title_es: '… — De memoria',
   intro: 'Play the verse and chorus four times as the chord names fade, until you know them by heart.', intro_es: '…',
   card: {

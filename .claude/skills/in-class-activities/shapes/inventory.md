@@ -7,7 +7,7 @@ in order: you have done all of them before." A new review circuit copies the ste
 
 ---
 
-## Inventory: all 53, by id
+## Inventory: all 54, by id
 
 | id | Title | Shape |
 |---|---|---|
@@ -64,5 +64,6 @@ in order: you have done all of them before." A new review circuit copies the ste
 | ca-54 | Sweet Child O' Mine — Speed Ladder | 5 Speed ladder |
 | ca-55 | Echo — Power Chord Strums | 13 Echo |
 | ca-56 | Sweet Child O' Mine — Memory Fade | 14 Memory fade |
+| ca-57 | Spot the Mistake | 15 Spot the mistake |
 
-Counts: shape 1: 5 · 2: 11 · 3: 3 · 4: 7 · 5: 1 · 6: 4 · 7: 6 · 8: 3 · 9: 2 · 10: 1 · 11: 5 · 12: 2 · 13: 1 · 14: 1 · none: 1 = 53.
+Counts: shape 1: 5 · 2: 11 · 3: 3 · 4: 7 · 5: 1 · 6: 4 · 7: 6 · 8: 3 · 9: 2 · 10: 1 · 11: 5 · 12: 2 · 13: 1 · 14: 1 · 15: 1 · none: 1 = 54.

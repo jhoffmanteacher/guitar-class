@@ -148,6 +148,7 @@ document.addEventListener('visibilitychange', () => {
     if(typeof ncStopAll === 'function') ncStopAll();
     if(typeof chcStopAll === 'function') chcStopAll();
     if(typeof echoStopAll === 'function') echoStopAll();
+    if(typeof spotStopAll === 'function') spotStopAll();
     /* Name the power chord is not stopped here (Jonathan, 2026-11-09): it has no
        clock, no sound and no mic, so a student who looks something up in another
        tab comes back to the same card and score. A hit's move-on timer just fires.

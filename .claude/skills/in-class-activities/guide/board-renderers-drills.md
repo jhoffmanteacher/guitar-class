@@ -97,6 +97,10 @@ same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)` in
   taps on the drill's own strings (ca-49 step 1 only, pinned by 1co; Jonathan, 2026-11-11).
 - **`pcname`** (ca-49, Name the Power Chord) draws all six strings and the whole three-finger
   shape; roots are on the low E and A, and a step's `maxFret` is 10 at most so the shape fits.
+- **`spot`** (ca-57, Spot the mistake, 2026-11-27; `app/drills-spot.js`, shape 15) plays one lap of a practice
+  card's section (`card`, `section`; `chords: true` for a chord line) with ONE note or chord wrong, made by a rule in
+  the code, and the student taps the column. Tap-graded, no mic, nothing saved; 8 of 10 passes, two replays a round.
+  checks.mjs **1fs** pins the data, the rule, the pass line and the replay cap.
 - **`deck`** design calls (Jonathan, 2026-07-26), kept as they are:
   - Self-report, not auto-grading: the app cannot hear whether the chord was
     played, and a 4-choice deck turns recall into recognition.

@@ -87,7 +87,7 @@
                           listener the start added and never removed counts)
      late-timer           a timeout the start set fires after the grace and changes the page or starts something
      left-running         a drill or player still in its running state (Shuffle 'play', Deck / Ear 'run', Name the power
-                          chord 'play', ncLive, chcLive, echoLive, pcState, snipState, playSeqState, recState, ecRuns, sfWait,
+                          chord 'play', ncLive, chcLive, echoLive, spots playing, pcState, snipState, playSeqState, recState, ecRuns, sfWait,
                           coachMicLive)
      retry-busy           progressLoadRetryBusy() is still true
      update-waits         a new service worker takes over and the page does not reload within 2.5 s (busyReason)
@@ -1220,6 +1220,9 @@ const STARTS = [
      phrase (two <audio> elements: the full mix, then the rhythm-down mix), reached by its phrase dot first. */
   { id: 'echo@card', place: PLACE.card('ca-55'), press: inCard('ca-55', '[data-echo-start]'), running: any('!!echoLive'), window: [300, 4000] },
   { id: 'echo-record@card', place: PLACE.card('ca-55'), press: page => { const c = openCard(page, 'ca-55'); const go = c && c.querySelector('[data-echo-go="11"]'); if (go) go.click(); return c ? c.querySelector('[data-echo-start]') : null; }, running: any('!!echoLive'), window: [300, 4000] },
+  /* Spot the mistake (ca-57, app/drills-spot.js): a bar of count-in and the line, every note scheduled up front on the
+     AudioContext clock, and two timers (the cue, the end of the line). */
+  { id: 'spot@card', place: PLACE.card('ca-57'), press: inCard('ca-57', '[data-spot-start]'), running: any("Object.values(spots).some(s => s && s.playing)"), window: [300, 4000] },
   { id: 'power-name@card', place: PLACE.card('ca-49'), press: inCard('ca-49', '[data-pwn-start]'), running: any("Object.values(powerNames).some(s => s && s.phase === 'play')"), window: [200, 3000] },
   { id: 'practice-card@card', place: PLACE.card('ca-10'), press: inCard('ca-10', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
   { id: 'whole-song@card', place: PLACE.card('ca-24'), press: inCard('ca-24', '[onclick^="pcToggle"]'), running: any('!!pcState'), window: [100, 4000] },
@@ -1338,6 +1341,7 @@ const RUNNING_STATE = `(() => { const out = [], each = (o, f) => Object.keys(o |
   if (typeof powerNames !== 'undefined') each(powerNames, s => s.phase === 'play').forEach(k => out.push('Name the power chord ' + k + " in 'play'"));
   if (ncLive) out.push('Note Call (ncLive)'); if (chcLive) out.push('Call the chord (chcLive)');
   if (typeof echoLive !== 'undefined' && echoLive) out.push('Echo (echoLive)');
+  if (typeof spots !== 'undefined' && Object.values(spots).some(s => s && s.playing)) out.push('Spot the mistake (a line playing)');
   if (pcState) out.push('a practice card (pcState)'); if (snipState) out.push('a snippet (snipState)'); if (playSeqState) out.push('a tab line (playSeqState)');
   each(recState, s => s.starting || s.recording).forEach(k => out.push('the recorder ' + k + ' (recState)'));
   if (Object.keys(ecRuns).length) out.push('an exit check (ecRuns)');
