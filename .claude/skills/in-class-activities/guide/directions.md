@@ -29,10 +29,19 @@ line before Start.
   out. Note Call's scored line has a mic-on twin (`nc.introCoach` /
   `ncp.introCoach`, picked by `st.coach`): with the mic on no tap is asked
   for. The header strip, switches, scores and pass lines are not directions.
-- A practice card's own directions line (`.pc-dir`: `ca.cardDirections`,
-  `ca.cardChordDirections`, `ca.cardStrumDirections`,
-  `ca.cardChordMixedDirections`, `ca.sheetDirections`) is one line too
-  (Jonathan, 2026-11-10). The chord/strum distinction stays: a chord card says
+- A practice card's own directions line (`.pc-dir`) is one line too
+  (Jonathan, 2026-11-10). Since 2026-11-27 it is the card's own
+  `card.directions` / `directions_es` (Jonathan: the one line should "name
+  the finish line and what it should sound like"): the main numbered check
+  (the last non-Level-up one) in its own count and words, then a few words
+  about the sound or the band, never fingers or hands, e.g. ca-10 "Play the
+  riff four times with the band without stopping, each note landing with the
+  drums." No button names unless the step needs one (Spanish in «», 1bc).
+  1cs reads it (`CAP_2C`, one sentence, verb first; `CARD_DIRECTIONS` pins
+  40 strings). A card without it falls back to the generic keys
+  (`ca.cardDirections`, `ca.cardChordDirections`, `ca.cardStrumDirections`,
+  `ca.cardChordMixedDirections`, `ca.sheetDirections`); ca-54 keeps
+  `ca.roundDirections`, ca-56 `fadeDirections`. The chord/strum distinction stays: a chord card says
   "where each chord name starts", an every-strum card "every strum shows its
   chord name" (1cc / 1bv pin both). With Bass on (ca-35) `bassDirections`
   follows it as a second sentence, by his choice.

@@ -12110,6 +12110,72 @@ function checkSpeedLadder(ctx, i18nTable) {
   if (asserts !== FC_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FC_ASSERTS} — a branch stopped running (or update the pin with the change)`);
   if (!bad) ok(`1fc: ${asserts} assertions on the real code — rounds, slowestRate, startStop and buildLaps are on ${FC_CARD} alone; its card draws in EN + ES (student and preview) on 90 · 100 · 112 · 125 (0.7× 0.8× 0.9× 1×), opens on the first stop, no round buttons or switches, a hidden prompt with Got it and Practice again; one lap a stop; the lap ends at bar 24 (verse + chorus); with the prompt on the card it pauses at every stop and never climbs by itself; the status line names the BPM; ca-33 still opens on Normal at 0.8 with two laps`);
 }
+/* 1fj. RELEASE DAY (Jonathan, 2026-11-27: on the day a card is released "it starts slow and climbs"). On the day a class
+   card's release date (caDate) is the device's today (caTodayStr), a card that shows the Build up speed switch is drawn
+   with Loop and Build up speed ON, on its bottom stop (pcReleaseDay, app/cards.js); a closed card opens that way again
+   (pcLoopReset, app/cards-loop.js). Every other day it is drawn byte for byte as with no date at all (Normal, switches
+   off), and never on a library card, ca-54's rounds or the console preview. RUN, not read: every view:'card' entry is
+   drawn with its date set to today, to yesterday and to nothing. The real browser walk is tools/smoke.mjs. */
+const FJ_RELEASE_CARDS = 18, FJ_ASSERTS = 140;
+function checkReleaseDay(ctx) {
+  head('1fj. Release day: a class card dated today opens with Build up speed on, on its bottom stop; every other day as before');
+  let bad = 0, asserts = 0, on = 0;
+  const flag = m => { err('1fj: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['pcReleaseDay', 'pcShowsBuild', 'pcBottomStopAttrs', 'pcLoopReset', 'caCardBodyHtml', 'caDate', 'caTodayStr'])
+    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1fj)'); return; }
+  const is = (cond, msg) => { asserts++; if (!cond) flag(msg); };
+  const TODAY = '2026-11-27', YESTERDAY = '2026-11-26';
+  run('window.__fjDates = activityDates; window.__fjToday = caTodayStr; activityDates = {}; caTodayStr = () => ' + JSON.stringify(TODAY));
+  try {
+    const cards = run('(window.CLASS_ACTIVITIES || []).filter(a => a && a.view === "card" && a.card)');
+    const draw = (id, date, preview) => {
+      run('activityDates = ' + (date ? JSON.stringify({ [id]: date }) : '{}'));
+      return String(run('caCardBodyHtml(CLASS_ACTIVITIES.find(x => x.id === ' + JSON.stringify(id) + ')' + (preview ? ', { preview: true }' : '') + ')'));
+    };
+    const rootOf = h => (/<div class="pc"[^>]*>/.exec(h) || [''])[0];
+    for (const a of cards) {
+      const none = draw(a.id, null), yest = draw(a.id, YESTERDAY), today = draw(a.id, TODAY);
+      is(yest === none, `${a.id}: dated yesterday it must draw byte for byte as with no date (Normal, switches off)`);
+      is(draw(a.id, TODAY, true) === draw(a.id, null, true), `${a.id}: the console preview must not change on its release day`);
+      const lib = a.library === true || !!run('caIsLibraryCard(CLASS_ACTIVITIES.find(x => x.id === ' + JSON.stringify(a.id) + '))');
+      const hasBuild = /data-loop-sw="build"/.test(none) && !/data-loop-sw="build"[^>]* hidden/.test(none);
+      if (lib || !hasBuild || a.card.rounds) { is(today === none, `${a.id}: ${lib ? 'a library card' : a.card.rounds ? 'a rounds card (its own startStop)' : 'a card with no Build up speed switch'} must not change on its release day`); continue; }
+      on++;
+      const r = rootOf(today);
+      const four = /class="pc-speed4"/.test(today), one = /data-one-file="1"/.test(today);
+      const want = four ? (one ? ' data-slow="" data-rate="0.65"' : ` data-slow="1" data-rate="${a.card.slowestRate || 0.8}"`) : ' data-slow="1" data-rate="1"';
+      is(r.includes(want + ' data-loop="1" data-build="1" data-release="1"'), `${a.id}: dated today the card must open on its bottom stop with Loop and Build on (${want.trim()} data-loop="1" data-build="1" data-release="1"): ${r}`);
+      is(four ? /<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="0"/.test(today) && /pc-speed-tick on" style="--i:0"/.test(today) : /class="pc-speed" role="switch" aria-checked="false"/.test(today), `${a.id}: dated today the speed control must show the bottom stop`);
+      is(/aria-checked="true" data-loop-sw="loop"/.test(today) && /aria-checked="true" data-loop-sw="build"/.test(today) && /aria-checked="false" data-loop-sw="hold"[^>]*onclick/.test(today) && !/data-loop-sw="hold"[^>]* hidden/.test(today), `${a.id}: dated today Loop and Build up speed must be drawn on, Stay at this speed shown and off`);
+      is(/ data-slow="" data-rate="1"/.test(rootOf(none)) && !/data-release|data-loop="1"/.test(rootOf(none)) && /value="3"/.test(none), `${a.id}: with no date (and so every other day) it must still open on Normal with the switches off: ${rootOf(none)}`);
+    }
+    // A card that closes is drawn again in its release-day state when it opens (pcLoopReset), on a fake card element.
+    const reset = run(`(() => {
+      const ticks = ['slowest', 'slower', 'slow', 'normal'].map((sp, i) => ({ dataset: { speed: sp, rate: ['0.8', '1', '0.9', '1'][i] } }));
+      const sw = {}; ['loop', 'build', 'hold'].forEach(n => { sw[n] = { hidden: n === 'hold', attrs: {}, setAttribute(k, v){ this.attrs[k] = v; } }; });
+      const range = { value: '3', setAttribute(){}, closest(){ return wrap; } };
+      const wrap = { querySelectorAll(sel){ return sel === '.pc-speed-tick' ? ticks.map(t => Object.assign(t, { classList: { toggle(){} } })) : []; } };
+      const mk = rel => ({ dataset: { loop: '', build: '', hold: '', release: rel ? '1' : '', slow: '', rate: '1' },
+        querySelector(sel){ const m = /data-loop-sw="(\\w+)"/.exec(sel); if(m) return sw[m[1]]; return sel === '.pc-speed-range' ? range : null; },
+        querySelectorAll(sel){ return sel === '.pc-speed4 .pc-speed-tick' ? ticks : []; } });
+      const out = [];
+      for (const rel of [true, false]) {
+        const root = mk(rel);
+        pcLoopReset({ querySelectorAll(){ return [root]; } });
+        out.push([root.dataset.loop, root.dataset.build, root.dataset.slow, root.dataset.rate, range.value, sw.build.attrs['aria-checked'] || 'unset']);
+        range.value = '3'; sw.build.attrs = {};
+      }
+      return JSON.stringify(out);
+    })()`);
+    is(reset === JSON.stringify([['1', '1', '1', '0.8', '0', 'true'], ['', '', '', '1', '3', 'unset']]), `pcLoopReset: a closed release-day card must come back with Loop and Build on at the bottom stop, any other card untouched; got ${reset}`);
+    is(on === FJ_RELEASE_CARDS, `${on} cards start slow on their release day, pinned ${FJ_RELEASE_CARDS} (the class cards with a Build up speed switch) — update the pin with the change`);
+  } catch (e) { flag('drawing the cards threw: ' + e.message); }
+  finally { run('activityDates = window.__fjDates; caTodayStr = window.__fjToday; delete window.__fjDates; delete window.__fjToday'); }
+  if (asserts !== FJ_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FJ_ASSERTS} — a branch stopped running (or update the pin with the change)`);
+  if (!bad) ok(`1fj: ${asserts} assertions on the real code — ${on} class cards dated today open with Loop and Build up speed on, on their bottom stop; dated yesterday every card draws byte for byte as undated (Normal); library cards, ca-54, one-section cards and the console preview never change; a closed release-day card opens that way again`);
+}
 /* 1fm. MEMORY FADE (ca-56, app/fade.js; Jonathan, 2026-11-26: "a memory fade activity for sweet child of mine").
    card.fade is on the pinned cards alone (FM_CARDS: a new fade card is a decision). ca-56 plays ca-33's Verse 1 and
    Chorus 1 (the same notes arrays, bars and laps) under captions of its own that names no chord. RUN, not read: the card is drawn
@@ -12627,6 +12693,10 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
+/* A practice card's own direction line, card.directions / directions_es (Jonathan, 2026-11-27: the finish line and how it
+   should sound), is the .pc-dir line, so it takes the card lines' cap (CAP_2C) and is one sentence. CARD_DIRECTIONS pins
+   how many are read: 2026-11-27, 40, the 20 class cards (EN + ES). */
+const CARD_DIRECTIONS = 40;
 const ONE_LINE_2A = 432, ONE_LINE_2C = 42, DRILL_SCREENS = 140;   // 2026-11-26: 2A +6, 2C +2, ca-56 (the memory fade): its intro and two check texts, and ca.fadeDirections (EN + ES). 2026-11-26: +2, +2, +2, ca-55 (Echo): its intro, the echo.intro line and its one drill screen (EN + ES). 2026-11-24: +6, ca-54's intro and two check texts (EN + ES; it had three checks until the same day). 2026-11-17: -2, ca-53's A5 step removed (EN + ES). 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
@@ -12636,7 +12706,7 @@ const DRILL_DIRECTIONS_GONE = ['nc.descAnswer', 'nc.howCoachAnswer', 'nc.howCoac
   'ncp.howCoach', 'ncp.howTap', 'pwn.howAnswer', 'pwn.howScored'];
 function checkOneLineDirections(ctx, i18nTable) {
   head('1cs. In-Class Activity directions are one short line (EN + ES)');
-  let bad = 0, n2a = 0, n2c = 0, longest = 0;
+  let bad = 0, n2a = 0, n2c = 0, nDir = 0, longest = 0;
   const flag = m => { err('1cs: ' + m); problems++; bad++; };
   if (!ctx || !i18nTable) { flag('cannot run — the 0b render context or the i18n table is unavailable'); return; }
   const gotItRe = vm.runInContext('typeof GOT_IT_RE !== "undefined" ? GOT_IT_RE : null', ctx);
@@ -12655,6 +12725,13 @@ function checkOneLineDirections(ctx, i18nTable) {
     for (const f of ['intro', 'intro_power', 'bassDirections']) both('', a, f);
     (a.steps || []).forEach((st, si) => { both(`.steps[${si}]`, st, 'text'); both(`.steps[${si}]`, st, 'text_power'); });
     ((a.card || {}).checks || []).forEach((c, ci) => { both(`.card.checks[${ci}]`, c, 'text'); both(`.card.checks[${ci}]`, c, 'text_power'); });
+    for (const k of ['directions', 'directions_es']) {
+      const v = (a.card || {})[k];
+      if (typeof v !== 'string') continue;
+      nDir++;
+      one(`${a.id}.card.${k}`, v, CAP_2C);
+      if (/[.!?;:]\s+\S/.test(v) || !/^[A-ZÁÉÍÓÚ][a-záéíóúñ]+ /.test(v) || !/\.$/.test(v)) flag(`${a.id}.card.${k} must be ONE sentence, verb first, ending in a period: "${v}"`);
+    }
     for (const [k, rv] of Object.entries(a.recordingVersions || {})) {
       both(`.recordingVersions.${k}`, rv, 'intro'); both(`.recordingVersions.${k}`, rv, 'intro_power');
       ((rv.card || {}).checks || []).forEach((c, ci) => both(`.recordingVersions.${k}.card.checks[${ci}]`, c, 'text'));
@@ -12738,7 +12815,8 @@ function checkOneLineDirections(ctx, i18nTable) {
   if (screens !== DRILL_SCREENS) flag(`rendered ${screens} drill screens before Start (EN + ES), pinned ${DRILL_SCREENS} — a drill was added or removed, or a branch stopped rendering; update the pin on purpose`);
   if (n2a !== ONE_LINE_2A) flag(`read ${n2a} activity direction strings (EN + ES), pinned ${ONE_LINE_2A} — a field stopped being read or a string was added; update the pin on purpose`);
   if (n2c !== ONE_LINE_2C) flag(`read ${n2c} drill direction strings (EN + ES), pinned ${ONE_LINE_2C}`);
-  if (!bad) ok(`1cs: ${n2a} activity direction strings (cap ${CAP_2A}) and ${n2c} drill and card direction lines (cap ${CAP_2C}), EN + ES: one short line each, no list, no got-it label; ${screens} drill screens rendered before Start show one direction line each, no second paragraph`);
+  if (nDir !== CARD_DIRECTIONS) flag(`read ${nDir} card.directions strings (EN + ES), pinned ${CARD_DIRECTIONS} — a card gained or lost its own direction line; update the pin on purpose`);
+  if (!bad) ok(`1cs: ${n2a} activity direction strings (cap ${CAP_2A}), ${nDir} card.directions lines and ${n2c} drill and card direction lines (cap ${CAP_2C}), EN + ES: one short line each, no list, no got-it label; ${screens} drill screens rendered before Start show one direction line each, no second paragraph`);
 }
 function checkTodayByDate(ctx) {
   head('1cq. Today\'s activities: every card dated today or yesterday (pending first, then finished), everything else in the folds by board order');
@@ -13591,7 +13669,8 @@ function checkRecordingVersions(ctx) {
           const I18N = loadI18nTable();
           for (const lang of ['en', 'es']) {
             readbacks++;
-            if (!text[lang].dir || text[lang].dir !== I18N[dirKey][lang]) flag(w + ': the ' + lang + ' directions read \'' + text[lang].dir + '\', expected ' + dirKey + ' (' + (allGrid ? (vcard.everyStrum ? 'every strum is named' : 'each chord once') : 'chords and single notes') + ')');
+            const own = vcard[lang === 'es' ? 'directions_es' : 'directions'];   // the card's own line (card.directions, 2026-11-27) replaces the key; 1bv pins the key on a copy without it
+            if (own ? text[lang].dir !== own || (vcard.everyStrum && /once|una vez/i.test(own)) : (!text[lang].dir || text[lang].dir !== I18N[dirKey][lang])) flag(w + ': the ' + lang + ' directions read \'' + text[lang].dir + '\', expected ' + (own ? 'its card.directions' : dirKey) + ' (' + (allGrid ? (vcard.everyStrum ? 'every strum is named' : 'each chord once') : 'chords and single notes') + ')');
           }
         }
         // The title and intro follow the recording (a version-level title / intro), else they are the card's own.
@@ -16255,7 +16334,10 @@ function checkChordGridCards(ctx) {
     const attrs = (html.match(/data-beat="/g) || []).length;
     if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
     if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
-    if (!/every strum shows its chord name/.test(html) || /where each chord name starts/.test(html)) flag('ca-29 does not show the every-strum directions (ca.cardStrumDirections) \u2014 every strum has its chord name, so the each-chord-once line would be false');
+    /* Its own line (card.directions, 2026-11-27) on the card; the every-strum key on a copy without one. Neither may say each chord is shown once. */
+    const dir29 = (/<p class="pc-dir">([^<]*)<\/p>/.exec(html) || [])[1] || '';
+    const html29k = String(caCardBodyHtml({ ...c29, card: { ...c29.card, directions: undefined, directions_es: undefined } }));
+    if (dir29 !== c29.card.directions || /once|where each chord name starts/.test(dir29) || !/every strum shows its chord name/.test(html29k) || /where each chord name starts/.test(html29k)) flag('ca-29 does not show its own directions line, or (without one) the every-strum directions (ca.cardStrumDirections) \u2014 every strum has its chord name, so the each-chord-once line would be false');
     if (c29.card.restWord !== false) flag('ca-29 lost card.restWord:false — the bar-2 rest would draw the word "Stop" again');
     if (/class="tab-rest-lab"/.test(html)) flag('ca-29 draws a rest word — the bar-2 rest is left empty (card.restWord:false)');
     if (!c29.card.everyStrum) flag("ca-29 lost card.everyStrum — the grid would fold A5 x4 into one name again");
@@ -16465,8 +16547,10 @@ function checkChordGridCards(ctx) {
   for (const k of ['ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.cardCountsAriaGrid', 'tab.restStop', 'ca.sheetDirections', 'ca.bassVersion', 'ca.bassOff', 'ca.bassOn']) {
     if (!I18N[k] || !I18N[k].es || I18N[k].es === I18N[k].en) flag(`i18n ${k}: the Spanish is missing or just the English`);
   }
-  // Directions: all-grid, mixed and single-note cards each say their own thing.
-  const dirOf = id => { const a = acts.find(x => x.id === id); return a ? (/<p class="pc-dir">([^<]*)<\/p>/.exec(String(caCardBodyHtml(a))) || [])[1] : null; };
+  /* Directions: all-grid, mixed and single-note cards each say their own thing. These cards carry their own line now
+     (card.directions, 2026-11-27), so the fallback key is read on a copy without it; the real card shows its own. */
+  const dirOf = (id, own) => { const a0 = acts.find(x => x.id === id); const a = a0 && (own ? a0 : { ...a0, card: { ...a0.card, directions: undefined, directions_es: undefined } }); return a ? (/<p class="pc-dir">([^<]*)<\/p>/.exec(String(caCardBodyHtml(a))) || [])[1] : null; };
+  for (const id of ['ca-41', 'ca-29', 'ca-40', 'ca-10']) { const a = acts.find(x => x.id === id); if (!a || !a.card.directions || dirOf(id, true) !== a.card.directions) flag(`${id}: the directions line is not its own card.directions`); }
   if (!/single notes/.test(dirOf('ca-41') || '')) flag('ca-41 (grid + single-note sections) does not say what to do in a section of single notes');
   if (/single notes/.test(dirOf('ca-29') || '')) flag('ca-29 (all grid) shows the mixed-card directions');
   if (!/where each chord name starts/.test(dirOf('ca-40') || '')) flag('ca-40 on Jimi (one strum per chord, each chord shown once) does not show the each-chord-once directions (ca.cardChordDirections)');
@@ -16486,7 +16570,7 @@ function checkChordGridCards(ctx) {
     let html = '';
     try { html = String(caCardBodyHtml(c10)); } catch (e) { flag(`caCardBodyHtml(ca-10) threw: ${e.message}`); }
     if (/data-beat|chord-grid/.test(html)) flag('ca-10 (a single-note card) renders chord-grid markup — single-note cards keep the note-by-note highlight');
-    if (!/Press Play song and play along until/.test(html)) flag('ca-10 lost its own directions line');
+    if (!c10.card.directions || !html.includes('<p class="pc-dir">' + c10.card.directions + '</p>')) flag('ca-10 lost its own directions line (card.directions)');
     const L = pcLayout(c10);
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
@@ -24980,6 +25064,7 @@ function checkNeverRules(sets) {
   checkCardKeysAndTickPop(rcCtx, rcSets, i18nTable);
   checkLoopSpeed(rcCtx, i18nTable);
   checkSpeedLadder(rcCtx, i18nTable);
+  checkReleaseDay(rcCtx);
   await checkMemoryFade(rcCtx, i18nTable);
   await checkSongHelp(rcCtx, i18nTable);
   checkOneLineDirections(rcCtx, i18nTable);

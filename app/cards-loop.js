@@ -1,7 +1,8 @@
 /* ══ LOOP THIS PART / BUILD UP SPEED — two switches on a practice card (Jonathan, 2026-11-14) ══════
    Only on a card with section buttons (the .pc-secs row, more than one section): pcLoopHtml sits at
    the end of that row, so a card with one section renders exactly what it did before. Both switches
-   are OFF every time a card is drawn or opened (pcLoopReset on close), and NOTHING is stored: no
+   are OFF every time a card is drawn or opened (pcLoopReset on close) — except on a card's RELEASE DAY (app/cards.js),
+   when Loop and Build up speed are ON every time it is drawn or opened, on the bottom stop — and NOTHING is stored: no
    progress write, no localStorage / sessionStorage key. The state is the card element's data-loop /
    data-build / data-hold and, while it plays, pcState (loopSi, build, laps).
      Loop this part   the section being played (the one tapped, or the one playing when the switch is
@@ -51,7 +52,8 @@ const PC_SPEED_KEYS = { slowest: 'ca.cardSlowest', slower: 'ca.cardSlower', slow
 function pcLoopHtml(L, preview){
   /* Classes of their own (not .pc-speed / .pc-guitar, which the player, the keys and the tools look up as the speed
      and Guitar switches); the look is the Guitar switch's chip and green track (styles.css). */
-  const sw = (name, label, title, extra) => `<button type="button" class="pc-loop-sw" role="switch" aria-checked="false" data-loop-sw="${name}"${title}${extra || ''} onclick="pcSetLoopSw(this)">`
+  const on = !!(L && L.release);   // RELEASE DAY (app/cards.js): Loop and Build drawn on, Stay at this speed shown
+  const sw = (name, label, title, extra) => `<button type="button" class="pc-loop-sw" role="switch" aria-checked="${on && name !== 'hold'}" data-loop-sw="${name}"${title}${extra || ''} onclick="pcSetLoopSw(this)">`
     + `<span class="pc-loop-lab">${escHtml(t(label))}</span>`
     + `<span class="pc-loop-track" aria-hidden="true"><span class="pc-loop-knob"></span></span></button>`;
   const tr = L && L.tr;
@@ -60,7 +62,7 @@ function pcLoopHtml(L, preview){
   return `<span class="pc-loop">`
     + sw('loop', 'pc.loop', pcKeyTitle('pc.keys.loop', preview), hide)
     + (canBuild ? sw('build', 'pc.build', ` title="${escAttr(t('pc.buildTitle'))}"`, hide)
-      + sw('hold', 'pc.hold', ` title="${escAttr(t('pc.holdTitle'))}"`, ' hidden') : '')
+      + sw('hold', 'pc.hold', ` title="${escAttr(t('pc.holdTitle'))}"`, on ? '' : ' hidden') : '')
     + `</span>`;
 }
 function pcLoopFlag(root, name){ return !!root && root.dataset[name] === '1'; }
@@ -257,11 +259,13 @@ function pcBuildTakeover(root){
   st.build = null;
   pcLoopStatus(st);
 }
-/* Both switches off when a card closes (caOnToggle), so every opening starts with them off. */
+/* Both switches off when a card closes (caOnToggle), so every opening starts with them off; a RELEASE DAY card
+   (data-release, app/cards.js) gets them back on, on its bottom stop, as it was drawn. */
 function pcLoopReset(scope){
   if(!scope) return;
   scope.querySelectorAll('.pc').forEach(root => {
     if(root.dataset.loop || root.dataset.build){ pcLoopSet(root, 'loop', false); pcLoopSet(root, 'build', false); }
+    if(root.dataset.release === '1'){ pcLoopSet(root, 'loop', true); pcLoopSet(root, 'build', true); pcBuildShow(root, 0); }
     pcLadderAskHide(root);
     if(typeof fadeReset === 'function') fadeReset(root);   // MEMORY FADE (app/fade.js): back to time 1
     if(root.dataset.round){ root.dataset.round = ''; root.querySelectorAll('.pc-round.cur').forEach(b => b.classList.remove('cur')); }   // ROUNDS: no round is picked when a card opens

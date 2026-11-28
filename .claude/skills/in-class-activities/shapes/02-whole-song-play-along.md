@@ -18,6 +18,8 @@ chords (`ca-29`–`ca-33`) (`guide/songs-links.md` "Layer matching"). `ca-40` is
     chordGrid: true,                   // power-chord cards except ca-31 (a riff played as chords is not one)
     slowest: true,
     caption: 'The whole song in power chords', caption_es: '…',
+    directions: 'Strum the whole song with the band without stopping, changing chords right when the band does.',
+    directions_es: 'Rasguea toda la canción con la banda sin detenerte y cambia de acorde justo cuando cambia la banda.',
     sections: [                        // per song: the whole record, in order
       { label: 'Intro', label_es: 'Intro', caption: 'Intro — A5 C5 A5 C5', caption_es: '…', fromBar: 1, bars: 4,
         notes: [ { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45] }, … ] },  // a roots card: { string, fret, note, midi }
@@ -43,6 +45,12 @@ chords (`ca-29`–`ca-33`) (`guide/songs-links.md` "Layer matching"). `ca-40` is
 
 Pattern: "Play the whole song …, start to finish". The two checks are the same two lines on all 11 cards of this
 shape; no tap dots.
+
+**The card's own direction line** (`card.directions` / `directions_es`, 2026-11-27; `guide/directions.md`): the first
+check, then how it should sound. `ca-24`: "Play the whole song with the band without stopping, your notes in time with
+the drums." / "Toca toda la canción con la banda sin detenerte, tus notas a tiempo con la batería." `ca-29`–`ca-33`
+(grid): "Strum the whole song with the band without stopping, changing chords right when the band does." Raise 1cs's
+`CARD_DIRECTIONS` by 2 and 1fj's `FJ_RELEASE_CARDS` by 1 (every whole-song card has section buttons).
 
 **Ask Jonathan:** which Core song and which layer. All five songs with a card already have both layers (`ca-24`–`ca-28`
 roots, `ca-29`–`ca-33` power). Chords, keys and section bars: skill `song-facts` ("Don't re-flag settled facts").

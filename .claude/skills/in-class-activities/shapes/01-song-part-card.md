@@ -14,6 +14,8 @@ looping, then move on to the song's whole-song card. "ca-18 is the model to matc
     track: 'the-cure',                 // per song: a SNIPPET_TRACKS key
     slowest: true,                     // every card has it
     caption: 'The song in order · 4 plucks per note', caption_es: '…',  // per song
+    directions: 'Play from the intro to the end of the chorus with the band without stopping, each pluck on the beat.',
+    directions_es: 'Toca desde la intro hasta el final del coro con la banda sin detenerte, cada pulsación en el tiempo.',  // per card: the main check, then how it sounds
     sections: [                        // per song, back to back, in song order
       { label: 'Intro', label_es: 'Intro', caption: 'Intro — A C A C', caption_es: '…',
         fromBar: 1, bars: 4,           // bars of the RECORD, felt pulse
@@ -38,6 +40,13 @@ looping, then move on to the song's whole-song card. "ca-18 is the model to matc
 
 Pattern: "Play <the part> with the band/song", the notes named when they are new. No count: a practice card shows no
 tap dots (`caTickKeys(card)` is `[]`, `guide/practice-cards.md` "Checks").
+
+**The card's own direction line** (`card.directions` / `directions_es`, 2026-11-27; `guide/directions.md`): the main
+numbered check (the last non-Level-up one) in its own count and words, then how it should sound, never about fingers.
+`ca-18`: "Play from the intro to the end of the chorus with the band without stopping, each pluck on the beat." / "Toca
+desde la intro hasta el final del coro con la banda sin detenerte, cada pulsación en el tiempo." `ca-10`: "Play the riff
+four times with the band without stopping, each note landing with the drums." Raise 1cs's `CARD_DIRECTIONS` pin by 2,
+and 1fj's `FJ_RELEASE_CARDS` by 1 if the card has section buttons (it then starts slow on its release day).
 
 **Ask Jonathan:** which song and which parts; the string and frets of each note, and how many plucks per bar (the
 captions say it: "4 plucks per note", "1 pluck per bar, let it ring"). The song's settled chords and section bars come

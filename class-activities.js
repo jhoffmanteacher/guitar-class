@@ -181,7 +181,9 @@
    only visible words are "Slower" at the left end and "Normal" at the
    right; without it, a Slower / Normal switch; every card opens on Normal
    since 2026-11-20, PC_START_NORMAL in app/cards.js, but ca-54's ladder,
-   which opens on its bottom stop), the Metronome (a click on every counted beat, made by the
+   which opens on its bottom stop, and a card on its release day, which
+   opens on its bottom stop with Build up speed on: RELEASE DAY in
+   app/cards.js), the Metronome (a click on every counted beat, made by the
    site), a Guitar switch where the track has a full mix, and a Mark
    complete button (no checklist since 2026-11-10 — Jonathan: "get rid of the
    checklists on the activities"; an extra song, `library`, has no Mark
@@ -195,7 +197,20 @@
      card: {
        track: 'the-cure',                  // a SNIPPET_TRACKS key
        caption, caption_es,                // the tab's heading
-       slowest: true,                      // optional: a Slowest option beside
+       directions, directions_es,          // optional (Jonathan, 2026-11-27): the
+                                           // card's own direction line (.pc-dir):
+                                           // its finish line, the main numbered
+                                           // check in its own count and words,
+                                           // then how it should sound ("each
+                                           // pluck on the beat"). One sentence,
+                                           // verb first, one rendered line at
+                                           // 1366x657 (1cs). Left out = the
+                                           // generic line (ca.cardDirections and
+                                           // its chord / strum / sheet twins).
+                                           // Every class card has one but ca-54
+                                           // (its rounds line) and ca-56 (Memory
+                                           // Fade); no library card does.
+       slowest: true,                     // optional: a Slowest option beside
                                            // Slower / Slow / Normal — the slow file at
                                            // 0.8x, pitch held (ca-18, ca-10)
        wholeSong: true,                    // optional: stop at the end of the
@@ -1442,6 +1457,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Slow (~112) / Normal (123) — Jonathan, 2026-09-29
       caption:    'The riff · A string · 2 bars',
       caption_es: 'El riff · cuerda La · 2 compases',
+      directions:    'Play the riff four times with the band without stopping, each note landing with the drums.',
+      directions_es: 'Toca el riff cuatro veces con la banda sin detenerte, cada nota junto con la batería.',
       sections: [
         {
           label: 'The riff', label_es: 'El riff',
@@ -2040,6 +2057,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
       caption:    'Intro and verse · low E string · 4 plucks per note',
       caption_es: 'Intro y estrofa · cuerda Mi grave · 4 pulsaciones por nota',
+      directions:    'Play the intro and 2 verses with the band without stopping, each pluck on the beat.',
+      directions_es: 'Toca la intro y las 2 estrofas con la banda sin detenerte, cada pulsación en el tiempo.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -2149,6 +2168,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
       caption:    'Intro and verse · two strings · 4 plucks per note',
       caption_es: 'Intro y estrofa · dos cuerdas · 4 pulsaciones por nota',
+      directions:    'Play the intro and 2 verses with the band without stopping, each pluck on the beat.',
+      directions_es: 'Toca la intro y las 2 estrofas con la banda sin detenerte, cada pulsación en el tiempo.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -2257,6 +2278,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
       caption:    'The loop · F F A A · 1 pluck per bar, let it ring',
       caption_es: 'El bucle · F F A A · 1 pulsación por compás, déjala sonar',
+      directions:    'Play four laps with the band without stopping, each note ringing through its bar.',
+      directions_es: 'Toca cuatro vueltas con la banda sin detenerte, cada nota sonando todo su compás.',
       sections: [
         {
           label: 'The loop', label_es: 'El bucle',
@@ -2322,6 +2345,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — Jonathan, 2026-09-29
       caption:    'The song in order · 4 plucks per note',
       caption_es: 'La canción en orden · 4 pulsaciones por nota',
+      directions:    'Play from the intro to the end of the chorus with the band without stopping, each pluck on the beat.',
+      directions_es: 'Toca desde la intro hasta el final del coro con la banda sin detenerte, cada pulsación en el tiempo.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -2472,6 +2497,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       caption:    'The whole song in order · 4 plucks per bar (2 per chord where two chords share a bar)',
       caption_es: 'La canción completa en orden · 4 pulsaciones por compás (2 por acorde donde dos acordes comparten un compás)',
+      directions:    'Play the whole song with the band without stopping, your notes in time with the drums.',
+      directions_es: 'Toca toda la canción con la banda sin detenerte, tus notas a tiempo con la batería.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3116,6 +3143,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // Slowest (80) / Slower (100) / Slow (~112) / Normal (123)
       caption:    'The whole song in order · the riff and G – A',
       caption_es: 'La canción completa en orden · el riff y G – A',
+      directions:    'Play the whole song with the band without stopping, each note landing with the drums.',
+      directions_es: 'Toca toda la canción con la banda sin detenerte, cada nota junto con la batería.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3387,6 +3416,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (84) / Slower (105) / Slow (110) / Normal (115) — the student picks
       caption:    'The whole song in order · 2 plucks per note',
       caption_es: 'La canción completa en orden · 2 pulsaciones por nota',
+      directions:    'Play the whole song with the band without stopping, each pluck on the beat.',
+      directions_es: 'Toca toda la canción con la banda sin detenerte, cada pulsación en el tiempo.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3543,6 +3574,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in order · 1 pluck per bar, let it ring',
       caption_es: 'La canción completa en orden · 1 pulsación por compás, déjala sonar',
+      directions:    'Play the whole song with the band without stopping, each note ringing through its bar.',
+      directions_es: 'Toca toda la canción con la banda sin detenerte, cada nota sonando todo su compás.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3657,6 +3690,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Slow (112) / Normal (125) — the student picks
       caption:    'The whole song in order · 1 pluck per bar (3 in the C D G bar of Solo 2 and the Outro, 2 in the G A bar of the Ending), let it ring',
       caption_es: 'La canción completa en orden · 1 pulsación por compás (3 en el compás de C D G del Solo 2 y del Final, 2 en el compás de G A del Cierre), déjala sonar',
+      directions:    'Play the whole song with the band without stopping, each root ringing until the band changes chord.',
+      directions_es: 'Toca toda la canción con la banda sin detenerte, cada raíz sonando hasta que la banda cambia de acorde.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3896,6 +3931,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords',   // the count row is always on: this card is a chord grid (2026-10-26)
       caption_es: 'La canción completa con acordes de potencia',
+      directions:    'Strum the whole song with the band without stopping, changing chords right when the band does.',
+      directions_es: 'Rasguea toda la canción con la banda sin detenerte y cambia de acorde justo cuando cambia la banda.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4092,6 +4129,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords',
       caption_es: 'La canción completa con acordes de potencia',
+      directions:    'Strum the whole song with the band without stopping, changing chords right when the band does.',
+      directions_es: 'Rasguea toda la canción con la banda sin detenerte y cambia de acorde justo cuando cambia la banda.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4421,6 +4460,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · the riff and G5 – A5',
       caption_es: 'La canción completa con acordes de potencia · el riff y G5 – A5',
+      directions:    'Play the whole song with the band without stopping, each chord landing with the drums.',
+      directions_es: 'Toca toda la canción con la banda sin detenerte, cada acorde junto con la batería.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4671,6 +4712,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords',
       caption_es: 'La canción completa con acordes de potencia',
+      directions:    'Strum the whole song with the band without stopping, changing chords right when the band does.',
+      directions_es: 'Rasguea toda la canción con la banda sin detenerte y cambia de acorde justo cuando cambia la banda.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4799,6 +4842,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords',
       caption_es: 'La canción completa con acordes de potencia',
+      directions:    'Strum the whole song with the band without stopping, changing chords right when the band does.',
+      directions_es: 'Rasguea toda la canción con la banda sin detenerte y cambia de acorde justo cuando cambia la banda.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6160,6 +6205,8 @@ window.CLASS_ACTIVITIES = [
       sheetChords: 224, // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
       caption:    'Lyrics and chords · bar 1: G on 3 · bar 2: G on the + after 3',
       caption_es: 'Letra y acordes · compás 1: G en el 3 · compás 2: G en el + después del 3',
+      directions:    'Play the whole song from the sheet with the band without stopping, changing on the word under each chord.',
+      directions_es: 'Toca toda la canción con la hoja y la banda sin detenerte, cambiando de acorde en la palabra bajo cada nombre.',
       sections: null,   // ca-29's — joined after the array, below
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
@@ -6198,6 +6245,8 @@ window.CLASS_ACTIVITIES = [
       sheetChords: 94,  // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
       caption:    'Lyrics and chords · 4 big beats per chord, 2 for C5 and G5 in the refrains and bridge',
       caption_es: 'Letra y acordes · 4 tiempos lentos por acorde, 2 para C5 y G5 en los estribillos y el puente',
+      directions:    'Play the whole song from the sheet with the band without stopping, changing on the word under each chord.',
+      directions_es: 'Toca toda la canción con la hoja y la banda sin detenerte, cambiando de acorde en la palabra bajo cada nombre.',
       sections: null,   // ca-30's — joined after the array, below
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
@@ -6241,6 +6290,8 @@ window.CLASS_ACTIVITIES = [
       sheetChords: 152, // chord names on the sheet = 143 chord changes + 9 D5s named again (checks.mjs 1bf2)
       caption:    'Lyrics and chords · each verse chord lasts 2 bars',
       caption_es: 'Letra y acordes · cada acorde de la estrofa dura 2 compases',
+      directions:    'Play the whole song from the sheet with the band without stopping, changing on the word under each chord.',
+      directions_es: 'Toca toda la canción con la hoja y la banda sin detenerte, cambiando de acorde en la palabra bajo cada nombre.',
       sections: null,   // ca-33's — joined after the array, below
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
@@ -6458,6 +6509,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · 2 beats per chord',
       caption_es: 'La canción completa con acordes de potencia · 2 tiempos por acorde',
+      directions:    'Strum the whole song with the band without stopping, changing chords right when the band does.',
+      directions_es: 'Rasguea toda la canción con la banda sin detenerte y cambia de acorde justo cuando cambia la banda.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6612,6 +6665,8 @@ window.CLASS_ACTIVITIES = [
       counts: true,     // Counts switch: for the tab sections (verses, pre-choruses, interludes) — the chord-grid sections always show their count row
       caption:    'The song in order',
       caption_es: 'La canción en orden',
+      directions:    'Play with the band from the intro to the last chord without stopping, changing right when the band does.',
+      directions_es: 'Toca con la banda desde la intro hasta el último acorde sin detenerte, cambiando justo cuando cambia la banda.',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -7643,7 +7698,7 @@ window.CLASS_ACTIVITIES = [
      names = 13 chord changes + the verse's second lap, which opens on a D5 still ringing and is named again). It opens
      on the sheet, with the Chords and Tab views of ca-33's switch.
      THE LADDER: four stops, 90 · 100 · 112 · 125 BPM. The bottom stop is the slow file (100) at 0.9 (`slowestRate`),
-     not the site's usual 0.8; the card opens on it (`startStop`, the one card that does not open on Normal 1x).
+     not the site's usual 0.8; the card opens on it (`startStop`, the one card that does not open on Normal 1x, release day aside: RELEASE DAY in app/cards.js).
      ONE ROUND (`rounds`, app/cards.js; app/cards-loop.js; Jonathan, 2026-11-24: "it should play once through verse at
      each speed ... remove the separate verse and chorus parts"): the verse and chorus as one lap, Play starts it at 90 and
      climbs 90 -> 100 -> 112 -> 125 (`buildLaps`: 1). After each time through the song STOPS and asks (pcLadderAsk):
@@ -7660,7 +7715,7 @@ window.CLASS_ACTIVITIES = [
       track: 'sweet-child-o-mine',
       slowest: true,       // four-way speed control: Slowest / Slower / Slow / Normal
       slowestRate: 0.9,    // this card's bottom stop: the slow file (100) at 0.9 = 90 (the site's usual is 0.8 = 80)
-      startStop: 'slowest',   // opens on the bottom stop, 90 (every other card opens on Normal)
+      startStop: 'slowest',   // opens on the bottom stop, 90 (every other card opens on Normal, but on its release day)
       buildLaps: 1,        // a round climbs one stop after ONE time through (Build up speed's usual is two)
       sheet: 'sheets/sweet-child-o-mine-verse-chorus.pdf',
       sheetColumns: 1,     // one column, read line by line

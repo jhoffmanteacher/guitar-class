@@ -10,8 +10,27 @@ The activity is ONE screen:
 - One page per section, tap-a-section-to-start: a four-click count-in, then
   the loop returns to that section. A `card.wholeSong` card (ca-24 to ca-33)
   stops at the end of the song instead (Jonathan 2026-10-02).
-- A speed control over the slow / fast files, starting on Slower (see
-  Slowest), and the Guitar toggle where a full mix exists.
+- A speed control over the slow / fast files, opening on Normal (1×,
+  `PC_START_NORMAL`, since 2026-11-20; see Slowest), and the Guitar toggle
+  where a full mix exists. **Release day** (Jonathan, 2026-11-27: "it starts
+  slow and climbs"): on the day a class card's release date (`caDate`) is
+  the student's local today (`caTodayStr`), a card that shows the Build up
+  speed switch opens with Loop this part and Build up speed ON, on its
+  bottom stop (`pcReleaseDay`, `pcBottomStopAttrs` in `app/cards.js`; a
+  closed card opens that way again through `pcLoopReset`). A speed picked
+  by hand turns Build off as on any day; nothing is stored. Never a library
+  card, ca-54 (its own `startStop`), a one-section card (no switch: ca-10,
+  ca-20) or the console preview; every other day the card is drawn byte for
+  byte as before. checks.mjs **1fj**; `tools/smoke.mjs` `releaseDayWalk`.
+- **The direction line names the finish line** (`card.directions` /
+  `directions_es`, Jonathan, 2026-11-27): the card's main numbered check in
+  its own count and words, then how it should sound, about the sound or the
+  band, never fingers or hands ("each pluck on the beat", "changing chords
+  right when the band does"). One sentence, verb first, one rendered line
+  (1cs reads it, cap `CAP_2C`, pinned `CARD_DIRECTIONS`). All 20 class cards
+  but ca-54 (rounds) and ca-56 (Memory Fade) carry one; no library card
+  does. A card without one shows the generic key (`ca.cardDirections` and
+  its chord / strum / sheet twins). **A new class card gets one.**
 - A Metronome: a click the SITE makes on every counted beat (no metronome
   files; Moises clicked "the cure" at 144, twice the 72 the room counts).
 - Then a Mark complete button. **No checklist** since 2026-11-10 (below).

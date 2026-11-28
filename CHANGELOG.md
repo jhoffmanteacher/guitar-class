@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-28 — Song cards say what you're aiming for, and start slow on the first day
+
+- **Each song card now says what you're aiming for and how it should sound**, in one line at the top: for example
+  "Play the riff four times with the band without stopping, each note landing with the drums." In English and Spanish.
+- **On the day your teacher opens a new song card, it starts slow and speeds up as you go:** Build up speed is already
+  on, at the slowest speed. Pick a speed yourself and it turns off, as always. On every other day the card opens at
+  Normal, as before.
+
 ## 2026-11-27 — The site counts which tools you open
 
 - **The site now keeps a simple count of which tools you open:** the tuner, metronome and timer, the Listening Coach,

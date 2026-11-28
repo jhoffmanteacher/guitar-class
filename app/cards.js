@@ -286,7 +286,7 @@ function pcPlayBtnHtml(playing){
    data-rate; the card's data-rate is what pcRate() reads. */
 function pcSlowRate(tr){ return (1 + tr.trackBpmSlow / tr.trackBpm) / 2; }
 /* ONE-FILE SPEEDS (2026-11-14, Jonathan: "the browser slows the one file"): a track with no slow file (a built song,
-   app/builtsongs.js) gets the same four stops on its ONE file, at these rates, pitch held. Every card opens on Normal (1×, PC_START_NORMAL).
+   app/builtsongs.js) gets the same four stops on its ONE file, at these rates, pitch held. Every card opens on Normal (1×, PC_START_NORMAL), but on its release day (RELEASE DAY, below).
    The bars never move (the same file at another rate), so data-slow stays '' at every stop and only data-rate
    changes. A track that has a srcSlow keeps the two-file stops above, unchanged. */
 const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];
@@ -294,8 +294,33 @@ const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];
    they are opened" — every play-along, In-Class Activities and the Songs page). Was Slower (the slow file, or 0.85
    on one file). The card's data-slow / data-rate (pcCardHtml), the slider's START and the two-way switch all
    start here; full screen is caSongFullscreen (app/activities-2.js). ONE card is the exception: ca-54, the speed
-   ladder, opens on its bottom stop, 90 (`startStop`, below; checks.mjs 1fc pins it to that card alone). */
+   ladder, opens on its bottom stop, 90 (`startStop`, below; checks.mjs 1fc pins it to that card alone). On every day
+   but a card's RELEASE DAY (below): that day it opens with Build up speed on, on its bottom stop. */
 const PC_START_NORMAL = true;
+/* RELEASE DAY (Jonathan, 2026-11-27: on the day a card is released "it starts slow and climbs"). On the day a class
+   card's release date (caDate, app/activities-2.js) is this device's today (caTodayStr), the card is drawn with Loop
+   this part and Build up speed ON and its speed control on the bottom stop (Slowest; Slower on a two-way switch), so
+   Play climbs from there (app/cards-loop.js); a closed card opens that way again (pcLoopReset). The take-over rule is
+   unchanged: a speed picked by hand turns Build off. Only a card that shows the Build up speed switch (pcShowsBuild:
+   section buttons, a slow file or the one-file stops); never a library card (caIsLibraryCard), never ca-54's rounds
+   (its own startStop), never the console preview. Every other day the card opens exactly as above (checks.mjs 1fr).
+   Nothing is stored. */
+function pcShowsBuild(a, L){
+  const c = a && a.card;
+  if(!c || !L || L.sections.length < 2 || L.rounds || !(L.tr && (L.tr.srcSlow || pcOneFile(L.tr)))) return false;
+  return (!!c.sheet && typeof pcSheetHtml === 'function') || !c.fade;   // pcTabHtml / pcSheetHtml draw the switches on these
+}
+function pcReleaseDay(a, L, preview){
+  if(preview || !a || a.library === true || typeof caDate !== 'function' || typeof caTodayStr !== 'function') return false;
+  if(typeof caIsLibraryCard === 'function' && caIsLibraryCard(a)) return false;
+  const d = caDate(a);
+  return !!d && d === caTodayStr() && pcShowsBuild(a, L);
+}
+// The card's data-slow / data-rate on its bottom stop (RELEASE DAY), as pcBuildShow(root, 0) would set them.
+function pcBottomStopAttrs(c, tr){
+  if(c.slowest || pcOneFile(tr)) return pcOneFile(tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[0]}"` : ` data-slow="1" data-rate="${pcSlowestRate(c)}"`;
+  return ' data-slow="1" data-rate="1"';
+}
 /* The one exception to both rules above and to "the Slowest stop is the slow file at SLOWEST_RATE" (Jonathan, 2026-11-24,
    ca-54, the speed ladder): a card with `startStop: 'slowest'` opens on its bottom stop, and `slowestRate` (0.9 there:
    the slow file, 100, at 0.9 = 90) replaces SLOWEST_RATE for that card's bottom stop. Every other card, and
@@ -306,8 +331,8 @@ function pcStartsSlowest(c, tr){ return !!c && c.startStop === 'slowest' && !!c.
 /* A control's tooltip naming its key (KEYS, below). None in the console's
    preview (`preview`), where the keys are off. */
 function pcKeyTitle(key, preview){ return preview ? '' : ` title="${escAttr(t(key))}"`; }
-function pcSpeedSwitchHtml(preview){
-  const n = PC_START_NORMAL;   // checked = Normal (pcSetSpeed)
+function pcSpeedSwitchHtml(preview, release){
+  const n = release ? false : PC_START_NORMAL;   // checked = Normal (pcSetSpeed); RELEASE DAY: Slower
   return `<button type="button" class="pc-speed" role="switch" aria-checked="${n}" aria-label="${escAttr(t('ca.cardSpeedAria'))}"${pcKeyTitle('pc.keys.speed', preview)} onclick="pcSetSpeed(this)">`
     +   `<span class="pc-speed-lab${n ? '' : ' on'}">${escHtml(t('ca.cardSlower'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
@@ -328,7 +353,7 @@ function pcGuitarSwitchHtml(){
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardGuitarOn'))}</span></button>`;
 }
-function pcSpeed3Html(tr, preview, c){
+function pcSpeed3Html(tr, preview, c, release){
   /* A stepped slider (2026-10-08): the dot-row version left students unsure
      the middle dots were options at all. The ends read "Slower" and
      "Normal" (Jonathan, 2026-10-09) as directions, not stop names; every
@@ -352,7 +377,7 @@ function pcSpeed3Html(tr, preview, c){
     ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4),   pcSlowRate(tr)],
     ['normal',  'ca.cardNormal',  1,                           1],
   ];
-  const START = pcStartsSlowest(c, tr) ? 0 : PC_START_NORMAL ? 3 : 1;   // Normal (1×), or a startStop card's bottom stop — matches the card's data-slow / data-rate (caCardBodyHtml)
+  const START = release || pcStartsSlowest(c, tr) ? 0 : PC_START_NORMAL ? 3 : 1;   // Normal (1×), or a startStop card's bottom stop — matches the card's data-slow / data-rate (caCardBodyHtml)
   const ticks = stops.map(([speed, key, rate, factor], i) => {
     const x = pcSpeedFactor(factor);
     return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
@@ -373,7 +398,7 @@ function pcPlayerHtml(a, L, preview){
   return `<div class="pc-player">`
     + `<button type="button" class="pc-play"${pcKeyTitle('pc.keys.play', preview)} onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
-    + ((a.card.slowest || pcOneFile(L.tr)) ? pcSpeed3Html(L.tr, preview, a.card) : pcSpeedSwitchHtml(preview))   // one file: always the four stops
+    + ((a.card.slowest || pcOneFile(L.tr)) ? pcSpeed3Html(L.tr, preview, a.card, L.release) : pcSpeedSwitchHtml(preview, L.release))   // one file: always the four stops; L.release: RELEASE DAY
     /* The Guitar switch: only where a full mix exists, ON by default. */
     + (hasFull ? pcGuitarSwitchHtml() : '')
     + `</div>`;
@@ -517,9 +542,10 @@ function caCardBodyHtml(a, opts){
      card, the hero card, the console preview) gets it the same way. */
   const sheet = !!a.card.sheet && typeof pcSheetHtml === 'function';   /* the sheet is app/cards-sheet.js, a later part: a page with the new cards.js without it draws the tab (W24 review R1-1) */
   if(sheet) setTimeout(pcSheetScan, 0);
-  return `<div class="pc" data-id="${escAttr(a.id)}"${pcStartsSlowest(a.card, L.tr) ? ` data-slow="1" data-rate="${pcSlowestRate(a.card)}"` : PC_START_NORMAL ? ' data-slow="" data-rate="1"' : pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${a.card.buildLaps >= 1 ? ` data-build-laps="${Math.floor(a.card.buildLaps)}"` : ''}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
+  L.release = pcReleaseDay(a, L, preview);   // RELEASE DAY: Build up speed on, the bottom stop (pcLoopHtml, pcPlayerHtml read it)
+  return `<div class="pc" data-id="${escAttr(a.id)}"${L.release ? pcBottomStopAttrs(a.card, L.tr) + ' data-loop="1" data-build="1" data-release="1"' : pcStartsSlowest(a.card, L.tr) ? ` data-slow="1" data-rate="${pcSlowestRate(a.card)}"` : PC_START_NORMAL ? ' data-slow="" data-rate="1"' : pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${a.card.buildLaps >= 1 ? ` data-build-laps="${Math.floor(a.card.buildLaps)}"` : ''}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a) + (typeof caViewSwitchHtml === 'function' ? caViewSwitchHtml(a) : '')   /* Chords / Tab / Lyrics: app/cards-views.js, a later part; guarded so a page that has the new cards.js without it still draws the card (W23 review R1-1) */
-    + `<p class="pc-dir">${escHtml((typeof fadeDirections === 'function' && fadeDirections(a)) || t(L.rounds ? 'ca.roundDirections' : sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
+    + `<p class="pc-dir">${escHtml((typeof fadeDirections === 'function' && fadeDirections(a)) || tf(a.card, 'directions') || t(L.rounds ? 'ca.roundDirections' : sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
     + pcPlayerHtml(a, L, preview) + pcLadderAskHtml(L)

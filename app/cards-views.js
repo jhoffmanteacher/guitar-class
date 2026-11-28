@@ -174,8 +174,8 @@ function caCardViewSwap(root, raw, name, refocus){
   oldBody.replaceWith(newBody);
   const ns = newBody.querySelector('.pc-status');
   if(ns) ns.innerHTML = status;
-  // Loop this part / Build up speed / Stay: the flags live on the card, the switches were just drawn off.
-  ['loop', 'build', 'hold'].forEach(f => { if(pcLoopFlag(root, f)) pcLoopSet(root, f, true); });
+  // Loop this part / Build up speed / Stay: the flags live on the card; the switches were just drawn off (on, on a RELEASE DAY card, app/cards.js), so each follows its flag.
+  ['loop', 'build', 'hold'].forEach(f => pcLoopSet(root, f, pcLoopFlag(root, f)));
   const st = pcState && pcState.root === root ? pcState : null;
   if(st){
     st.L = L;

@@ -34,6 +34,11 @@ with no board slot or date. Never a Core song (**1bq**). Six of the seven are `l
 - `ca-37`: "Play Arsenal Efectivo with the band using B5, E5, A5 and Bb5, all between frets 5 and 9." / "Toca Arsenal
   Efectivo con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9."
 
+No `card.directions` on a library card (2026-11-27: the finish-line line went on the 20 class cards only; a library
+card keeps the generic line). `ca-41` (`library: false`, a class card) has one: "Play with the band from the intro to
+the last chord without stopping, changing right when the band does." If a library card moves to Class activities for
+good, give it one the same way (`guide/directions.md`).
+
 Pattern: "Play <song> with the band: <the chords>". A `chordVersions` card has an `intro_power` twin naming the
 power chords (the file's CHORD VERSIONS note). No tap dots.
 

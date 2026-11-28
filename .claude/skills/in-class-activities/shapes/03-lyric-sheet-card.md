@@ -14,6 +14,8 @@
     sheetColumns: 1,                   // one column of chords over lyrics; left out = two columns (ca-38, ca-45)
     sheetChords: 94,                   // per song: names on the sheet = chord changes in the notes (1bf2)
     caption: 'Lyrics and chords · …', caption_es: '…',
+    directions: 'Play the whole song from the sheet with the band without stopping, changing on the word under each chord.',
+    directions_es: 'Toca toda la canción con la hoja y la banda sin detenerte, cambiando de acorde en la palabra bajo cada nombre.',
     sections: null,                    // the play-along card's — joined after the array
     checks: [ { label, label_es, text, text_es }, { levelUp: true, text, text_es } ]
   },
@@ -25,7 +27,10 @@
 **Direction lines:** `ca-38`, `ca-44` and `ca-45` share the intro "Play the whole song in power chords from the chord
 sheet, following the dot." / "Toca la canción completa con acordes de potencia desde la hoja de acordes, siguiendo el
 punto." and the check "Play the whole song with the band from the sheet without stopping." / "Toca la canción
-completa con la banda desde la hoja, sin detenerte." Pattern: "Play … from the sheet". No tap dots.
+completa con la banda desde la hoja, sin detenerte." Pattern: "Play … from the sheet". No tap dots. The card's own
+direction line (`card.directions`, 2026-11-27) is the same on all three: "Play the whole song from the sheet with the
+band without stopping, changing on the word under each chord." / "Toca toda la canción con la hoja y la banda sin
+detenerte, cambiando de acorde en la palabra bajo cada nombre." (1cs `CARD_DIRECTIONS` +2, 1fj `FJ_RELEASE_CARDS` +1.)
 
 **Ask Jonathan:** the PDF ("The PDF in `sheets/` is his own Word doc; the lyrics come from his file, never typed into
 code"); one column or two; which play-along card's sections it reads.
